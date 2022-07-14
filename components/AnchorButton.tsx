@@ -34,3 +34,5 @@ export const AnchorButton = (props: AnchorButtonProps) => {
     </Anchor>
   )
 }
+
+export default AnchorButton

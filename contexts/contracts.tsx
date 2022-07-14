@@ -1,22 +1,30 @@
-import type { UseCW721BaseContractProps } from 'contracts/cw721/base'
-import { useCW721BaseContract } from 'contracts/cw721/base'
-import type { ReactNode } from 'react'
-import { useEffect } from 'react'
-import type { State } from 'zustand'
-import create from 'zustand'
+import { useMinterContract, UseMinterContractProps } from 'contracts/minter'
+import { useSG721Contract, UseSG721ContractProps } from 'contracts/sg721'
+import {
+  useWhiteListContract,
+  useWhiteListContractProps,
+} from 'contracts/whitelist'
+
+import { Fragment, ReactNode, useEffect, VFC } from 'react'
+import create, { State } from 'zustand'
+
 
 /**
  * Contracts store type definitions
  */
 export interface ContractsStore extends State {
-  cw721Base: UseCW721BaseContractProps | null
+  sg721: UseSG721ContractProps | null
+  minter: UseMinterContractProps | null
+  whitelist: useWhiteListContractProps | null
 }
 
 /**
  * Contracts store default values as a separate variable for reusability
  */
 export const defaultValues: ContractsStore = {
- cw721Base: null,
+  sg721: null,
+  minter: null,
+  whitelist: null,
 }
 
 /**
@@ -32,28 +40,34 @@ export const useContracts = create<ContractsStore>(() => ({
  */
 export const ContractsProvider = ({ children }: { children: ReactNode }) => {
   return (
-    <>
+    <Fragment>
       {children}
       <ContractsSubscription />
-    </>
+    </Fragment>
   )
 }
 
 /**
  * Contracts store subscriptions (side effects)
  *
- * TODO: refactor all contract logics to zustand store
+ * @todo refactor all contract logics to zustand store
  */
-const ContractsSubscription = () => {
-  const cw721Base = useCW721BaseContract()
+const ContractsSubscription: VFC = () => {
+  const sg721 = useSG721Contract()
+  const minter = useMinterContract()
+  const whitelist = useWhiteListContract()
+
 
   useEffect(() => {
     useContracts.setState({
-      cw721Base,
+      sg721,
+      minter,
+      whitelist,
     })
   }, [
-    cw721Base,
-    //
+    sg721,
+    minter,
+    whitelist,
   ])
 
   return null

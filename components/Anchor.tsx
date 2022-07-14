@@ -33,3 +33,5 @@ export function Anchor({ children, external, href = '', rel = '', ...rest }: Anc
 function trimHttp(str: string) {
   return str.replace(/https?:\/\//, '')
 }
+
+export default Anchor
