@@ -14,7 +14,7 @@ declare namespace NodeJS {
   declare interface ProcessEnv {
     readonly APP_VERSION: string
 
-    readonly NEXT_PUBLIC_CW721_BASE_CODE_ID: string
+    readonly NEXT_PUBLIC_SG721_CODE_ID: string
 
     readonly NEXT_PUBLIC_API_URL: string
     readonly NEXT_PUBLIC_BLOCK_EXPLORER_URL: string

@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        stargaze: { DEFAULT: '#FDC06D' },
+        stargaze: { DEFAULT: '#FFA900' },
         dark: { DEFAULT: '#06090B' },
         gray: { DEFAULT: '#F3F6F8' },
         'dark-gray': { DEFAULT: '#191D20' },
@@ -16,16 +16,16 @@ module.exports = {
 
         neutral: colors.neutral,
         plumbus: {
-          DEFAULT: '#FFC27D',
-          light: '#FFC27D',
-          matte: '#FFC27D',
-          dark: '#FFC27D',
+          DEFAULT: '#FFA900',
+          light: '#FFC922',
+          matte: '#5D89E9',
+          dark: '#FFC900',
           10: '#FFF0ED',
-          20: '#FACBC8',
+          20: '#5D89E9',
           30: '#F5A7A2',
-          40: '#F0827D',
-          50: '#D9726F',
-          60: '#C26261',
+          40: '#FFA900',
+          50: '#FFA900',
+          60: '#FFA900',
           70: '#AB5152',
           80: '#944144',
           90: '#7D3136',
@@ -54,10 +54,10 @@ module.exports = {
     plugin(({ addUtilities }) => {
       addUtilities({
         '.stargaze-gradient-bg': {
-          background: `linear-gradient(64.38deg, #00027D 15.06%, #FFC27D 100.6%), #252020`,
+          background: `linear-gradient(64.38deg, #00027D 15.06%, #7F97D2 100.6%), #252020`,
         },
         '.stargaze-gradient-brand': {
-          background: `linear-gradient(102.33deg, #FFC27D 10.96%, #FFC27D 93.51%)`,
+          background: `linear-gradient(102.33deg, #FFC27D 10.96%, #7F97D2 93.51%)`,
         },
       })
     }),

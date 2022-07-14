@@ -26,7 +26,7 @@ const HomePage: NextPage = () => {
       <div className="grid gap-8 md:grid-cols-2">
         <HomeCard
           title="Create"
-          link="/collection/minter"
+          link="/collection/"
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
         >
           Lorem ipsum dolor sit amet, consectetur adipiscing elit.
