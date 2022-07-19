@@ -1,13 +1,13 @@
-import { useMinterContract, UseMinterContractProps } from 'contracts/minter'
-import { useSG721Contract, UseSG721ContractProps } from 'contracts/sg721'
-import {
-  useWhiteListContract,
-  useWhiteListContractProps,
-} from 'contracts/whitelist'
-
-import { Fragment, ReactNode, useEffect, VFC } from 'react'
-import create, { State } from 'zustand'
-
+import type { UseMinterContractProps } from 'contracts/minter'
+import { useMinterContract } from 'contracts/minter'
+import type { UseSG721ContractProps } from 'contracts/sg721'
+import { useSG721Contract } from 'contracts/sg721'
+import type { UseWhiteListContractProps } from 'contracts/whitelist'
+import { useWhiteListContract } from 'contracts/whitelist'
+import type { ReactNode, VFC } from 'react'
+import { Fragment, useEffect } from 'react'
+import type { State } from 'zustand'
+import create from 'zustand'
 
 /**
  * Contracts store type definitions
@@ -15,7 +15,7 @@ import create, { State } from 'zustand'
 export interface ContractsStore extends State {
   sg721: UseSG721ContractProps | null
   minter: UseMinterContractProps | null
-  whitelist: useWhiteListContractProps | null
+  whitelist: UseWhiteListContractProps | null
 }
 
 /**
@@ -40,23 +40,17 @@ export const useContracts = create<ContractsStore>(() => ({
  */
 export const ContractsProvider = ({ children }: { children: ReactNode }) => {
   return (
-    <Fragment>
+    <>
       {children}
       <ContractsSubscription />
-    </Fragment>
+    </>
   )
 }
 
-/**
- * Contracts store subscriptions (side effects)
- *
- * @todo refactor all contract logics to zustand store
- */
 const ContractsSubscription: VFC = () => {
   const sg721 = useSG721Contract()
   const minter = useMinterContract()
   const whitelist = useWhiteListContract()
-
 
   useEffect(() => {
     useContracts.setState({
@@ -64,11 +58,7 @@ const ContractsSubscription: VFC = () => {
       minter,
       whitelist,
     })
-  }, [
-    sg721,
-    minter,
-    whitelist,
-  ])
+  }, [sg721, minter, whitelist])
 
   return null
 }

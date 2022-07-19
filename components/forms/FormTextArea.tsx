@@ -11,6 +11,7 @@ interface BaseProps {
   name: string
   title: string
   subtitle?: string
+  isRequired?: boolean
 }
 
 type SlicedInputProps = Omit<ComponentPropsWithRef<'textarea'>, keyof BaseProps>
@@ -19,10 +20,10 @@ export type FormTextAreaProps = BaseProps & SlicedInputProps
 
 export const FormTextArea = forwardRef<HTMLTextAreaElement, FormTextAreaProps>(
   function FormTextArea(props, ref) {
-    const { id, name, title, subtitle, ...rest } = props
+    const { id, name, title, subtitle, isRequired, ...rest } = props
 
     return (
-      <FormControl htmlId={id} subtitle={subtitle} title={title}>
+      <FormControl htmlId={id} isRequired={isRequired} subtitle={subtitle} title={title}>
         <StyledTextArea id={id} name={name} ref={ref} {...rest} />
       </FormControl>
     )

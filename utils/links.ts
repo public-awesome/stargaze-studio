@@ -13,16 +13,13 @@ export const links = {
   Telegram: `https://t.me/joinchat/ZQ95YmIn3AI0ODFh`,
   Twitter: `https://twitter.com/stargazezone`,
   Explorer: BLOCK_EXPLORER_URL,
-
-  // reference links
-  'Docs Create Collection': ``,
-  'Docs CW721 Base': ``,
+  Documentation: 'https://docs.stargaze.zone/guides/readme',
 }
 
 export const footerLinks = [
   { text: 'Block Explorer', href: links.Explorer },
   { text: 'Documentation', href: links.Docs },
-  { text: 'Submit an issue', href: `${links.GitHub}/issues/new/choose` },
+  { text: 'Submit an issue', href: `${links.GitHub}/issues/new` },
   { text: 'Powered by Stargaze', href: links.Stargaze },
 ]
 

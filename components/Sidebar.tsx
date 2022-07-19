@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
 import { useWallet } from 'contexts/wallet'
 import { useRouter } from 'next/router'
-import BrandText from 'public/brand/brand-text.svg'
+// import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, links, socialsLinks } from 'utils/links'
 
 import { SidebarLayout } from './SidebarLayout'
@@ -10,6 +10,7 @@ import { WalletLoader } from './WalletLoader'
 
 const routes = [
   { text: 'Create Collection', href: `/collection/` },
+  { text: 'Contract Dashboards', href: `/contracts/` },
 ]
 
 export const Sidebar = () => {
@@ -20,14 +21,14 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-          <div
-            className={clsx(
-              'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-1/2 h-16',
-              'rounded border-2 border-white/20 border-dashed'
-            )}
-          >
-            Home{/* <BrandText className="text-plumbus hover:text-plumbus-light transition" /> */}
-          </div>
+        <div
+          className={clsx(
+            'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-1/2 h-16',
+            'rounded border-2 border-white/20 border-dashed',
+          )}
+        >
+          Home{/* <BrandText className="text-plumbus hover:text-plumbus-light transition" /> */}
+        </div>
       </Anchor>
 
       {/* wallet button */}

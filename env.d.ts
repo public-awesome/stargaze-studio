@@ -15,17 +15,13 @@ declare namespace NodeJS {
     readonly APP_VERSION: string
 
     readonly NEXT_PUBLIC_SG721_CODE_ID: string
+    readonly NEXT_PUBLIC_MINTER_CODE_ID: string
+    readonly NEXT_PUBLIC_WHITELIST_CODE_ID: string
 
     readonly NEXT_PUBLIC_API_URL: string
     readonly NEXT_PUBLIC_BLOCK_EXPLORER_URL: string
     readonly NEXT_PUBLIC_NETWORK: string
     readonly NEXT_PUBLIC_WEBSITE_URL: string
-
-    readonly NEXT_PUBLIC_S3_BUCKET: string
-    readonly NEXT_PUBLIC_S3_ENDPOINT: string
-    readonly NEXT_PUBLIC_S3_KEY: string
-    readonly NEXT_PUBLIC_S3_REGION: string
-    readonly NEXT_PUBLIC_S3_SECRET: string
   }
 }
 

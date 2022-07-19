@@ -1,33 +1,29 @@
-import { Coin } from '@cosmjs/proto-signing'
 import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
 
-import { WhiteList } from './contract'
-import {
-  InstantiateResponse,
-  WhiteList as initContract,
-  WhiteListContract,
-  WhiteListInstance,
-} from './contract'
+import type { InstantiateResponse, WhiteListContract, WhiteListInstance, WhitelistMessages } from './contract'
+import { WhiteList as initContract } from './contract'
 
-export interface useWhiteListContractProps {
+export interface UseWhiteListContractProps {
   instantiate: (
     codeId: number,
     initMsg: Record<string, unknown>,
     label: string,
     admin?: string,
-    funds?: Coin[]
   ) => Promise<InstantiateResponse>
 
-  use: (customAddress: string) => WhiteListInstance | undefined
+  use: (customAddress?: string) => WhiteListInstance | undefined
+
   updateContractAddress: (contractAddress: string) => void
+
+  messages: (contractAddress: string) => WhitelistMessages | undefined
 }
 
-export function useWhiteListContract(): useWhiteListContractProps {
+export function useWhiteListContract(): UseWhiteListContractProps {
   const wallet = useWallet()
 
   const [address, setAddress] = useState<string>('')
-  const [WhiteList, setWhiteList] = useState<WhiteListContract>()
+  const [whiteList, setWhiteList] = useState<WhiteListContract>()
 
   useEffect(() => {
     setAddress(localStorage.getItem('contract_address') || '')
@@ -35,13 +31,9 @@ export function useWhiteListContract(): useWhiteListContractProps {
 
   useEffect(() => {
     if (wallet.initialized) {
-      const getWhiteListInstance = async (): Promise<void> => {
-        const client = wallet.getClient()
-        const whiteListContract = initContract(client, wallet.address)
-        setWhiteList(whiteListContract)
-      }
-
-      getWhiteListInstance()
+      const client = wallet.getClient()
+      const whiteListContract = initContract(client, wallet.address)
+      setWhiteList(whiteListContract)
     }
   }, [wallet])
 
@@ -50,34 +42,33 @@ export function useWhiteListContract(): useWhiteListContractProps {
   }
 
   const instantiate = useCallback(
-    (codeId, initMsg, label, admin?, funds?): Promise<InstantiateResponse> => {
+    (codeId: number, initMsg: Record<string, unknown>, label: string, admin?: string): Promise<InstantiateResponse> => {
       return new Promise((resolve, reject) => {
-        if (!WhiteList) return reject('Contract is not initialized.')
-        WhiteList.instantiate(
-          wallet.address,
-          codeId,
-          initMsg,
-          label,
-          admin,
-          funds
-        )
-          .then(resolve)
-          .catch(reject)
+        if (!whiteList) {
+          reject(new Error('Contract is not initialized.'))
+          return
+        }
+        whiteList.instantiate(codeId, initMsg, label, admin).then(resolve).catch(reject)
       })
     },
-    [WhiteList, wallet]
+    [whiteList],
   )
 
   const use = useCallback(
     (customAddress = ''): WhiteListInstance | undefined => {
-      return WhiteList?.use(address || customAddress)
+      return whiteList?.use(address || customAddress)
     },
-    [WhiteList]
+    [whiteList, address],
   )
+
+  const messages = useCallback((): WhitelistMessages | undefined => {
+    return whiteList?.messages(address)
+  }, [whiteList, address])
 
   return {
     instantiate,
     use,
     updateContractAddress,
+    messages,
   }
 }

@@ -1,13 +1,10 @@
-import { Coin } from '@cosmjs/proto-signing'
-import { logs } from '@cosmjs/stargate'
+import type { Coin } from '@cosmjs/proto-signing'
+import type { logs } from '@cosmjs/stargate'
 import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
 
-import {
-  minter as initContract,
-  MinterContract,
-  MinterInstance,
-} from './contract'
+import type { MinterContract, MinterInstance, MinterMessages } from './contract'
+import { minter as initContract } from './contract'
 
 /*export interface InstantiateResponse {
   /** The address of the newly instantiated contract *-/
@@ -33,11 +30,12 @@ export interface UseMinterContractProps {
     initMsg: Record<string, unknown>,
     label: string,
     admin?: string,
-    funds?: Coin[]
+    funds?: Coin[],
   ) => Promise<InstantiateResponse>
   use: (customAddress: string) => MinterInstance | undefined
   updateContractAddress: (contractAddress: string) => void
   getContractAddress: () => string | undefined
+  messages: () => MinterMessages | undefined
 }
 
 export function useMinterContract(): UseMinterContractProps {
@@ -52,12 +50,8 @@ export function useMinterContract(): UseMinterContractProps {
 
   useEffect(() => {
     if (wallet.initialized) {
-      const getMinterBaseInstance = async (): Promise<void> => {
-        const MinterBaseContract = initContract(wallet.getClient())
-        setMinter(MinterBaseContract)
-      }
-
-      getMinterBaseInstance()
+      const MinterBaseContract = initContract(wallet.getClient(), wallet.address)
+      setMinter(MinterBaseContract)
     }
   }, [wallet])
 
@@ -66,33 +60,38 @@ export function useMinterContract(): UseMinterContractProps {
   }
 
   const instantiate = useCallback(
-    (codeId, initMsg, label, admin?, funds?): Promise<InstantiateResponse> => {
+    (codeId: number, initMsg: Record<string, unknown>, label: string, admin?: string): Promise<InstantiateResponse> => {
       return new Promise((resolve, reject) => {
-        if (!minter) return reject('Contract is not initialized.')
-        minter
-          .instantiate(wallet.address, codeId, initMsg, label, admin, funds)
-          .then(resolve)
-          .catch(reject)
+        if (!minter) {
+          reject(new Error('Contract is not initialized.'))
+          return
+        }
+        minter.instantiate(wallet.address, codeId, initMsg, label, admin).then(resolve).catch(reject)
       })
     },
-    [minter, wallet]
+    [minter, wallet],
   )
 
   const use = useCallback(
     (customAddress = ''): MinterInstance | undefined => {
       return minter?.use(address || customAddress)
     },
-    [minter, address]
+    [minter, address],
   )
 
   const getContractAddress = (): string | undefined => {
     return address
   }
 
+  const messages = useCallback((): MinterMessages | undefined => {
+    return minter?.messages()
+  }, [minter])
+
   return {
     instantiate,
     use,
     updateContractAddress,
     getContractAddress,
+    messages,
   }
 }
