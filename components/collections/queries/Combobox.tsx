@@ -5,28 +5,27 @@ import { matchSorter } from 'match-sorter'
 import { Fragment, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
-import type { ActionListItem } from './actions'
-import { ACTION_LIST } from './actions'
+import type { QueryListItem } from './query'
+import { QUERY_LIST } from './query'
 
-export interface ActionsComboboxProps {
-  value: ActionListItem | null
-  onChange: (item: ActionListItem) => void
+export interface QueryComboboxProps {
+  value: QueryListItem | null
+  onChange: (item: QueryListItem) => void
 }
 
-export const ActionsCombobox = ({ value, onChange }: ActionsComboboxProps) => {
+export const QueryCombobox = ({ value, onChange }: QueryComboboxProps) => {
   const [search, setSearch] = useState('')
 
-  const filtered =
-    search === '' ? ACTION_LIST : matchSorter(ACTION_LIST, search, { keys: ['id', 'name', 'description'] })
+  const filtered = search === '' ? QUERY_LIST : matchSorter(QUERY_LIST, search, { keys: ['id', 'name', 'description'] })
 
   return (
     <Combobox
       as={FormControl}
-      htmlId="action"
+      htmlId="query"
       labelAs={Combobox.Label}
       onChange={onChange}
-      subtitle="Collection actions"
-      title="Action"
+      subtitle="Collection queries"
+      title="Query"
       value={value}
     >
       <div className="relative">
@@ -36,10 +35,10 @@ export const ActionsCombobox = ({ value, onChange }: ActionsComboboxProps) => {
             'placeholder:text-white/50',
             'focus:ring focus:ring-plumbus-20',
           )}
-          displayValue={(val?: ActionListItem) => val?.name ?? ''}
+          displayValue={(val?: QueryListItem) => val?.name ?? ''}
           id="message-type"
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Select action"
+          placeholder="Select query"
         />
 
         <Combobox.Button
@@ -61,7 +60,7 @@ export const ActionsCombobox = ({ value, onChange }: ActionsComboboxProps) => {
           >
             {filtered.length < 1 && (
               <span className="flex flex-col justify-center items-center p-4 text-sm text-center text-white/50">
-                Action not found
+                Query not found
               </span>
             )}
             {filtered.map((entry) => (
