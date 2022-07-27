@@ -22,14 +22,7 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <div
-          className={clsx(
-            'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-1/2 h-16',
-            'rounded border-2 border-white/20 border-dashed',
-          )}
-        >
-          Home{/* <BrandText className="text-plumbus hover:text-plumbus-light transition" /> */}
-        </div>
+        <img alt="Brand Text" className="w-full" src="/stargaze-text.png" />
       </Anchor>
 
       {/* wallet button */}

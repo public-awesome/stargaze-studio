@@ -16,7 +16,7 @@ export const SidebarLayout = ({ children }: SidebarLayoutProps) => {
       <div
         className={clsx(
           'overflow-auto fixed top-0 left-0 min-w-[250px] max-w-[250px] no-scrollbar',
-          'bg-black/50 border-r-[1px] border-r-plumbus-light',
+          'border-r-[1px] border-r-plumbus-light',
           { 'translate-x-[-230px]': !isOpen },
         )}
       >

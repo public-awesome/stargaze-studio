@@ -1,22 +1,20 @@
 import { HomeCard } from 'components/HomeCard'
 import type { NextPage } from 'next'
-import Brand from 'public/brand/brand.svg'
 import { withMetadata } from 'utils/layout'
 
 const HomePage: NextPage = () => {
   return (
     <section className="px-8 pt-4 pb-16 mx-auto space-y-8 max-w-4xl">
       <div className="flex justify-center items-center py-8 max-w-xl">
-        {/* <Brand className="w-full text-plumbus" /> */}
+        <img alt="Brand Text" className="w-full" src="/stargaze-text.png" />
       </div>
       <h1 className="font-heading text-4xl font-bold">Welcome!</h1>
       <p className="text-xl">
-        Looking for a fast and efficient way to build an NFT collection?
-        Stargaze Tools is the solution.
+        Looking for a fast and efficient way to build an NFT collection? Stargaze Tools is the solution.
         <br />
         <br />
-        Stargaze Tools is built to provide useful smart contract interfaces that
-        helps you build and deploy your own NFT collection in no time.
+        Stargaze Tools is built to provide useful smart contract interfaces that helps you build and deploy your own NFT
+        collection in no time.
       </p>
 
       <br />
@@ -24,18 +22,10 @@ const HomePage: NextPage = () => {
       <br />
 
       <div className="grid gap-8 md:grid-cols-2">
-        <HomeCard
-          title="Create"
-          link="/collection/"
-          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
-        >
+        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/collection/" title="Create">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit.
         </HomeCard>
-        <HomeCard
-          title="My Collections"
-          link="/collections"
-          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
-        >
+        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/collections" title="My Collections">
           Lorem ipsum dolor sit amet, consectetur adipiscing elit.
         </HomeCard>
         {/*
@@ -69,7 +59,7 @@ const HomePage: NextPage = () => {
         */}
       </div>
     </section>
-    )
+  )
 }
 
 export default withMetadata(HomePage, { center: false })

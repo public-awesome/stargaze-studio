@@ -23,9 +23,9 @@ export const Layout = ({ children, metadata = {} }: LayoutProps) => {
       <DefaultAppSeo />
 
       {/* plumbus confetti */}
-      <div className="fixed inset-0 -z-10 pointer-events-none stargaze-gradient-bg opacity-50">
+      {/* <div className="fixed inset-0 -z-10 pointer-events-none stargaze-gradient-bg opacity-50">
         <img alt="plumbus carina-nebula" className="fixed top-0 right-0 w-full h-[calc(100vh+180px)]" src="/carina-nebula.png" />
-      </div>
+      </div> */}
 
       {/* actual layout container */}
       <div className="hidden sm:flex">
@@ -47,7 +47,7 @@ export const Layout = ({ children, metadata = {} }: LayoutProps) => {
         <FaDesktop size={48} />
         <h1 className="text-2xl font-bold">Unsupported Viewport</h1>
         <p>
-        StargazeTools is best viewed on the big screen.
+          StargazeTools is best viewed on the big screen.
           <br />
           Please open StargazeTools on your tablet or desktop browser.
         </p>

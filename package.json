@@ -29,6 +29,7 @@
     "axios": "^0",
     "clsx": "^1",
     "compare-versions": "^4",
+    "daisyui": "^2.19.0",
     "match-sorter": "^6",
     "next": "^12",
     "next-seo": "^4",
@@ -42,10 +43,12 @@
     "react-popper": "^2",
     "react-query": "^3",
     "react-tracked": "^1",
+    "react-collapsed": "^3",
     "scheduler": "^0",
     "zustand": "^3"
   },
   "devDependencies": {
+    "@stargazezone/types": "^0.7.2",
     "@types/node": "^14",
     "@types/react": "^18",
     "@types/react-datetime-picker": "^3",
