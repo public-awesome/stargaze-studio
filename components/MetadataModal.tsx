@@ -108,7 +108,7 @@ export const MetadataModal = (props: MetadataModalProps) => {
     <div>
       <input className="modal-toggle" id="my-modal-4" type="checkbox" />
       <label className="cursor-pointer modal" htmlFor="my-modal-4">
-        <label className="absolute top-5 bottom-5 w-full max-w-5xl max-h-full modal-box" htmlFor="my-modal-4">
+        <label className="absolute top-5 bottom-5 w-full max-w-5xl max-h-full modal-box" htmlFor="temp">
           <FormGroup subtitle="" title="Metadata">
             <TextInput {...nameState} onChange={(e) => nameState.onChange(e.target.value)} />
             <TextInput {...descriptionState} onChange={(e) => descriptionState.onChange(e.target.value)} />
