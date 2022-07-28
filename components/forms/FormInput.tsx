@@ -75,3 +75,31 @@ export const UrlInput = forwardRef<HTMLInputElement, FormInputProps>(
   },
   //
 )
+
+export const TraitTypeInput = forwardRef<HTMLInputElement, FormInputProps>(
+  function TraitTypeInput(props, ref) {
+    return (
+      <FormInput
+        {...props}
+        placeholder={props.placeholder || 'Trait Type'}
+        ref={ref}
+        type="text"
+      />
+    )
+  },
+  //
+)
+
+export const TraitValueInput = forwardRef<HTMLInputElement, FormInputProps>(
+  function TraitValueInput(props, ref) {
+    return (
+      <FormInput
+        {...props}
+        placeholder={props.placeholder || 'Trait Value'}
+        ref={ref}
+        type="text"
+      />
+    )
+  },
+  //
+)

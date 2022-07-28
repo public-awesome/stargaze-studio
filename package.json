@@ -34,6 +34,7 @@
     "next": "^12",
     "next-seo": "^4",
     "nft.storage": "^6.3.0",
+    "@pinata/sdk": "^1.1.26",
     "react": "^18",
     "react-datetime-picker": "^3",
     "react-dom": "^18",
