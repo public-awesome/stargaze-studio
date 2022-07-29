@@ -23,6 +23,7 @@ export const testnetConfig: AppConfig = {
   chainName: 'elgafar-1',
   addressPrefix: 'stars',
   rpcUrl: 'https://rpc.elgafar-1.stargaze-apis.com/',
+  httpUrl: 'https://rest.elgarfar-1.stargaze-apis.com/',
   feeToken: 'ustars',
   stakingToken: 'ustars',
   coinMap: {
