@@ -19,10 +19,10 @@ export const mainnetConfig: AppConfig = {
 }
 
 export const testnetConfig: AppConfig = {
-  chainId: 'stargaze',
+  chainId: 'elgafar-1',
   chainName: 'elgafar-1',
   addressPrefix: 'stars',
-  rpcUrl: "https://rpc.elgafar-1.stargaze-apis.com/",
+  rpcUrl: 'https://rpc.elgafar-1.stargaze-apis.com/',
   feeToken: 'ustars',
   stakingToken: 'ustars',
   coinMap: {

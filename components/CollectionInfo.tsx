@@ -1,15 +1,16 @@
 import { Button } from 'components/Button'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
-import { AddressList } from 'components/forms/AddressList'
-import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import React, { useState } from 'react'
 import useCollapse from 'react-collapsed'
 import { useMutation } from 'react-query'
 
+import { Conditional } from './Conditional'
 import { NumberInput, TextInput } from './forms/FormInput'
+import { JsonPreview } from './JsonPreview'
+import { WhitelistUpload } from './WhitelistUpload'
 
 export const CollectionInfo = () => {
   const { getCollapseProps, getToggleProps } = useCollapse()
@@ -17,6 +18,10 @@ export const CollectionInfo = () => {
 
   const toggleProps = getToggleProps()
   const collapseProps = getCollapseProps()
+
+  const [wlstartDate, setwlStartDate] = useState<Date | undefined>(undefined)
+  const [wlendDate, setwlEndDate] = useState<Date | undefined>(undefined)
+  const [whitelistArray, setWhitelistArray] = useState<string[]>([])
 
   const nameState = useInputState({
     id: 'name',
@@ -86,11 +91,6 @@ export const CollectionInfo = () => {
     placeholder: '8',
   })
 
-  const [wlstartDate, setwlStartDate] = useState<Date | undefined>(undefined)
-  const [wlendDate, setwlEndDate] = useState<Date | undefined>(undefined)
-
-  const wladdressListState = useAddressListState()
-
   const wlunitPriceState = useNumberInputState({
     id: 'unit-price',
     name: 'unitPrice',
@@ -126,6 +126,10 @@ export const CollectionInfo = () => {
     },
   )
 
+  const whitelistFileOnChange = (data: string[]) => {
+    setWhitelistArray(data)
+  }
+
   return (
     <div>
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
@@ -148,16 +152,11 @@ export const CollectionInfo = () => {
             Advanced
           </button>
           <section {...collapseProps}>
-            <FormGroup subtitle="Information about your whitelisted addresses" title="Whitelist Details">
-              <AddressList
-                entries={wladdressListState.entries}
-                isRequired
-                onAdd={wladdressListState.add}
-                onChange={wladdressListState.update}
-                onRemove={wladdressListState.remove}
-                subtitle="Enter the members you want in your contract"
-                title="Members"
-              />
+            <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File">
+              <WhitelistUpload onChange={whitelistFileOnChange} />
+              <Conditional test={whitelistArray.length > 0}>
+                <JsonPreview content={whitelistArray} initialState={false} title="File Contents" />
+              </Conditional>
             </FormGroup>
 
             <FormGroup subtitle="Information about your minting settings" title="Minting Details">

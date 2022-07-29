@@ -5,14 +5,13 @@ import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
-import { AddressList } from 'components/forms/AddressList'
-import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { NumberInput } from 'components/forms/FormInput'
 import { useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { whitelistLinkTabs } from 'components/LinkTabs.data'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { InstantiateResponse } from 'contracts/sg721'
@@ -33,7 +32,7 @@ const Sg721InstantiatePage: NextPage = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
 
-  const addressListState = useAddressListState()
+  const [whitelistArray, setWhitelistArray] = useState<string[]>([])
 
   const unitPriceState = useNumberInputState({
     id: 'unit-price',
@@ -74,7 +73,7 @@ const Sg721InstantiatePage: NextPage = () => {
       }
 
       const msg = {
-        members: addressListState.values.map((a) => a.address),
+        members: whitelistArray,
         start_time: (startDate.getTime() * 1_000_000).toString(),
         end_time: (endDate.getTime() * 1_000_000).toString(),
         unit_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
@@ -97,6 +96,10 @@ const Sg721InstantiatePage: NextPage = () => {
     },
   )
 
+  const whitelistFileOnChange = (whitelistData: string[]) => {
+    setWhitelistArray(whitelistData)
+  }
+
   return (
     <form className="py-6 px-12 space-y-4" onSubmit={mutate}>
       <NextSeo title="Instantiate Whitelist Contract" />
@@ -116,16 +119,11 @@ const Sg721InstantiatePage: NextPage = () => {
         <br />
       </Conditional>
 
-      <FormGroup subtitle="Information about your whitelisted addresses" title="Whitelist Details">
-        <AddressList
-          entries={addressListState.entries}
-          isRequired
-          onAdd={addressListState.add}
-          onChange={addressListState.update}
-          onRemove={addressListState.remove}
-          subtitle="Enter the members you want in your contract"
-          title="Members"
-        />
+      <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File">
+        <WhitelistUpload onChange={whitelistFileOnChange} />
+        <Conditional test={whitelistArray.length > 0}>
+          <JsonPreview content={whitelistArray} initialState={false} title="File Contents" />
+        </Conditional>
       </FormGroup>
 
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
