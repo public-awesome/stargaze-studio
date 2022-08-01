@@ -5,12 +5,13 @@ import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.
 import { useEffect, useState } from 'react'
 
 import Button from './Button'
-import { FormGroup } from './FormGroup'
 import { TextInput } from './forms/FormInput'
 import { useInputState } from './forms/FormInput.hooks'
 import { MetadataAttributes } from './forms/MetadataAttributes'
+import { MetadataFormGroup } from './MetadataFormGroup'
 
 export interface MetadataModalProps {
+  imageFile: File
   metadataFile: File
   updateMetadata: (metadataFile: File) => void
   updatedMetadataFile: File
@@ -75,7 +76,7 @@ export const MetadataModal = (props: MetadataModalProps) => {
     id: 'image',
     name: 'image',
     title: 'Image',
-    placeholder: 'ipfs://',
+    placeholder: 'Not uploaded yet.',
     defaultValue: imageURL,
   })
 
@@ -108,8 +109,15 @@ export const MetadataModal = (props: MetadataModalProps) => {
     <div>
       <input className="modal-toggle" id="my-modal-4" type="checkbox" />
       <label className="cursor-pointer modal" htmlFor="my-modal-4">
-        <label className="absolute top-5 bottom-5 w-full max-w-5xl max-h-full modal-box" htmlFor="temp">
-          <FormGroup subtitle="" title="Metadata">
+        <label
+          className="absolute top-5 bottom-5 w-full max-w-5xl max-h-full border-2 no-scrollbar modal-box"
+          htmlFor="temp"
+        >
+          <MetadataFormGroup
+            relatedAsset={props.imageFile}
+            subtitle={`Asset name: ${props.imageFile?.name}`}
+            title="Update Metadata"
+          >
             <TextInput {...nameState} onChange={(e) => nameState.onChange(e.target.value)} />
             <TextInput {...descriptionState} onChange={(e) => descriptionState.onChange(e.target.value)} />
             <TextInput {...externalUrlState} onChange={(e) => externalUrlState.onChange(e.target.value)} />
@@ -125,7 +133,8 @@ export const MetadataModal = (props: MetadataModalProps) => {
             <Button isDisabled={!props.metadataFile} onClick={generateUpdatedMetadata}>
               Update Metadata
             </Button>
-          </FormGroup>
+          </MetadataFormGroup>
+
         </label>
       </label>
     </div>

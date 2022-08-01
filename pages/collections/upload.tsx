@@ -417,6 +417,7 @@ const UploadPage: NextPage = () => {
                   </Button>
                 </div>
                 <MetadataModal
+                  imageFile={imageFilesArray[metadataFileArrayIndex]}
                   metadataFile={metadataFilesArray[metadataFileArrayIndex]}
                   refresher={refreshMetadata}
                   updateMetadata={updateMetadataFileArray}
