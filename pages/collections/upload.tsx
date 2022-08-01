@@ -84,7 +84,7 @@ const UploadPage: NextPage = () => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
         if (!JSON.parse(await event.target.files[i].text()).attributes)
-          return toast.error(`The file with name '${event.target.files[i].name}' doesn't have attributes list!`)
+          return toast.error(`The file with name '${event.target.files[i].name}' doesn't have an attributes list!`)
         const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
         setMetadataFilesArray((prev) => [...prev, metadataFile])
       }
@@ -424,7 +424,7 @@ const UploadPage: NextPage = () => {
                   metadataFile={metadataFilesArray[metadataFileArrayIndex]}
                   refresher={refreshMetadata}
                   updateMetadata={updateMetadataFileArray}
-                  updatedMetadataFile={updatedMetadataFilesArray[0]}
+                  updatedMetadataFile={updatedMetadataFilesArray[metadataFileArrayIndex]}
                 />
               </div>
               {imageFilesArray.length > 0 && (
