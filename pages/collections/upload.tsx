@@ -138,6 +138,7 @@ const UploadPage: NextPage = () => {
     }
   }
   const uploadUpdatedMetadata = async () => {
+    setUpdatedMetadataFilesArray(updatedMetadataFilesArray)
     const result = await upload(
       updatedMetadataFilesArray,
       uploadService,
