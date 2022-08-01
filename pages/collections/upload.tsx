@@ -83,7 +83,7 @@ const UploadPage: NextPage = () => {
       reader.onload = function (e) {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
-        const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'image/jpg' })
+        const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
         setMetadataFilesArray((prev) => [...prev, metadataFile])
       }
       if (!event.target.files) return toast.error('No file selected.')
@@ -95,6 +95,16 @@ const UploadPage: NextPage = () => {
     }
   }
   const updateMetadata = async () => {
+    const metadataFileNames = metadataFilesArray.map((file) => file.name)
+    console.log(metadataFileNames)
+    const imageFileNames = imageFilesArray.map((file) => file.name.substring(0, file.name.lastIndexOf('.')))
+    console.log(imageFileNames)
+    //compare the two arrays to make sure they are the same
+    const areArraysEqual = metadataFileNames.every((val, index) => val === imageFileNames[index])
+    if (!areArraysEqual) {
+      return toast.error('Asset and metadata file names do not match.')
+    }
+
     console.log(imageFilesArray)
     const imageURI = await upload(
       imageFilesArray,
@@ -326,60 +336,83 @@ const UploadPage: NextPage = () => {
           <div>
             <div className="grid grid-cols-2">
               <div className="w-full">
-                <label
-                  className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
-                  htmlFor="imageFiles"
-                >
-                  Image File Selection
-                </label>
-                <div
-                  className={clsx(
-                    'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
-                    'rounded border-2 border-white/20 border-dashed',
-                  )}
-                >
-                  <input
-                    accept="image/*"
+                <div>
+                  <label
+                    className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
+                    htmlFor="imageFiles"
+                  >
+                    Image File Selection
+                  </label>
+                  <div
                     className={clsx(
-                      'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                      'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                      'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
+                      'rounded border-2 border-white/20 border-dashed',
                     )}
-                    id="imageFiles"
-                    multiple
-                    onChange={selectImages}
-                    ref={imageFilesRef}
-                    type="file"
-                  />
+                  >
+                    <input
+                      accept="image/*"
+                      className={clsx(
+                        'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                        'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                      )}
+                      id="imageFiles"
+                      multiple
+                      onChange={selectImages}
+                      ref={imageFilesRef}
+                      type="file"
+                    />
+                  </div>
                 </div>
 
-                <label
-                  className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
-                  htmlFor="metadataFiles"
+                {imageFilesArray.length > 0 && (
+                  <div>
+                    <label
+                      className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
+                      htmlFor="metadataFiles"
+                    >
+                      Metadata Selection
+                    </label>
+                    <div
+                      className={clsx(
+                        'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
+                        'rounded border-2 border-white/20 border-dashed',
+                      )}
+                    >
+                      <input
+                        accept=""
+                        className={clsx(
+                          'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                          'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                        )}
+                        id="metadataFiles"
+                        multiple
+                        onChange={selectMetadata}
+                        ref={metadataFilesRef}
+                        type="file"
+                      />
+                    </div>
+                  </div>
+                )}
+                <Conditional
+                  test={
+                    imageFilesArray.length > 0 &&
+                    metadataFilesArray.length > 0 &&
+                    imageFilesArray.length !== metadataFilesArray.length
+                  }
                 >
-                  Metadata Selection
-                </label>
-                <div
-                  className={clsx(
-                    'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
-                    'rounded border-2 border-white/20 border-dashed',
-                  )}
-                >
-                  <input
-                    accept=""
-                    className={clsx(
-                      'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                      'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
-                    )}
-                    id="metadataFiles"
-                    multiple
-                    onChange={selectMetadata}
-                    ref={metadataFilesRef}
-                    type="file"
-                  />
-                </div>
+                  <Alert className="mt-4 ml-8 w-3/4" type="warning">
+                    The number of assets and metadata files should match.
+                  </Alert>
+                </Conditional>
 
                 <div className="mt-5 ml-8">
-                  <Button className="w-[120px]" isWide onClick={updateMetadata} variant="solid">
+                  <Button
+                    className="mb-8 w-[120px]"
+                    isDisabled={imageFilesArray.length === 0 || imageFilesArray.length !== metadataFilesArray.length}
+                    isWide
+                    onClick={updateMetadata}
+                    variant="solid"
+                  >
                     Upload
                   </Button>
                 </div>
@@ -390,10 +423,9 @@ const UploadPage: NextPage = () => {
                   updatedMetadataFile={updatedMetadataFilesArray[metadataFileArrayIndex]}
                 />
               </div>
-
-              <div className="mt-2 mr-10 ml-20 w-4/5 h-96 border-2 border-dashed carousel carousel-vertical rounded-box">
-                {imageFilesArray.length > 0 &&
-                  imageFilesArray.map((imageSource, index) => (
+              {imageFilesArray.length > 0 && (
+                <div className="mt-2 mr-10 ml-20 w-4/5 h-96 border-2 border-dashed carousel carousel-vertical rounded-box">
+                  {imageFilesArray.map((imageSource, index) => (
                     <div key={`carousel-item-${index}`} className="w-full carousel-item h-1/8">
                       <div className="grid grid-cols-4 col-auto">
                         <Conditional test={imageFilesArray.length > 4 * index}>
@@ -499,7 +531,8 @@ const UploadPage: NextPage = () => {
                       </div>
                     </div>
                   ))}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

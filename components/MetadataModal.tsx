@@ -122,7 +122,9 @@ export const MetadataModal = (props: MetadataModalProps) => {
               subtitle="Enter trait types and values"
               title="Attributes"
             />
-            <Button onClick={generateUpdatedMetadata}>Update Metadata</Button>
+            <Button isDisabled={!props.metadataFile} onClick={generateUpdatedMetadata}>
+              Update Metadata
+            </Button>
           </FormGroup>
         </label>
       </label>
