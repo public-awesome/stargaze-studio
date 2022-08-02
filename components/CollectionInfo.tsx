@@ -1,10 +1,13 @@
+import clsx from 'clsx'
 import { Button } from 'components/Button'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
+import type { ChangeEvent } from 'react'
 import React, { useState } from 'react'
 import useCollapse from 'react-collapsed'
+import { toast } from 'react-hot-toast'
 import { useMutation } from 'react-query'
 
 import { Conditional } from './Conditional'
@@ -23,6 +26,8 @@ export const CollectionInfo = () => {
   const [wlendDate, setwlEndDate] = useState<Date | undefined>(undefined)
   const [whitelistArray, setWhitelistArray] = useState<string[]>([])
 
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+
   const nameState = useInputState({
     id: 'name',
     name: 'name',
@@ -34,13 +39,6 @@ export const CollectionInfo = () => {
     id: 'description',
     name: 'description',
     title: 'Description',
-    subtitle: '',
-  })
-
-  const imageState = useInputState({
-    id: 'image',
-    name: 'image',
-    title: 'Image',
     subtitle: '',
   })
 
@@ -130,6 +128,22 @@ export const CollectionInfo = () => {
     setWhitelistArray(data)
   }
 
+  const selectCoverImage = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files === null) return toast.error('Error selecting cover image')
+    if (event.target.files.length === 0) {
+      setCoverImage(null)
+      return toast.error('No files selected.')
+    }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (!e.target?.result) return toast.error('Error parsing file.')
+      if (!event.target.files) return toast.error('No files selected.')
+      const imageFile = new File([e.target.result], event.target.files[0].name, { type: 'image/jpg' })
+      setCoverImage(imageFile)
+    }
+    reader.readAsArrayBuffer(event.target.files[0])
+  }
+
   return (
     <div>
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
@@ -137,7 +151,29 @@ export const CollectionInfo = () => {
           <FormGroup subtitle="Information about your collection" title="Collection Info">
             <TextInput {...nameState} />
             <TextInput {...descriptionState} />
-            <TextInput {...imageState} />
+            <div>
+              <label
+                className="block mt-5 mr-1 mb-1 w-full font-bold text-white dark:text-gray-300"
+                htmlFor="imageFiles"
+              >
+                Cover Image
+              </label>
+              <input
+                accept="image/*"
+                className={clsx(
+                  'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                  'before:hover:bg-white/5 before:transition',
+                )}
+                id="cover-image"
+                onChange={selectCoverImage}
+                type="file"
+              />
+              {coverImage !== null && (
+                <div className="flex flex-row items-center mt-2 mr-4 border-2 border-dashed">
+                  <img alt="cover-preview" src={URL.createObjectURL(coverImage)} />
+                </div>
+              )}
+            </div>
             <TextInput {...externalImageState} />
           </FormGroup>
           <FormGroup subtitle="Information about your minting settings" title="Minting Details">
