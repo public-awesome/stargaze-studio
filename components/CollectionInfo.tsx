@@ -146,78 +146,85 @@ export const CollectionInfo = () => {
 
   return (
     <div>
-      <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
+      <form className="p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
-          <FormGroup subtitle="Information about your collection" title="Collection Info">
-            <TextInput {...nameState} />
-            <TextInput {...descriptionState} />
+          <div className="rounded border-[1px] border-white/20" />
+          <div className="grid grid-cols-2">
             <div>
-              <label
-                className="block mt-5 mr-1 mb-1 w-full font-bold text-white dark:text-gray-300"
-                htmlFor="imageFiles"
-              >
-                Cover Image
-              </label>
-              <input
-                accept="image/*"
-                className={clsx(
-                  'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                  'before:hover:bg-white/5 before:transition',
-                )}
-                id="cover-image"
-                onChange={selectCoverImage}
-                type="file"
-              />
-              {coverImage !== null && (
-                <div className="flex flex-row items-center mt-2 mr-4 border-2 border-dashed">
-                  <img alt="cover-preview" src={URL.createObjectURL(coverImage)} />
+              <FormGroup subtitle="Information about your collection" title="Collection Info">
+                <TextInput {...nameState} />
+                <TextInput {...descriptionState} />
+                <div>
+                  <label
+                    className="block mt-5 mr-1 mb-1 w-full font-bold text-white dark:text-gray-300"
+                    htmlFor="imageFiles"
+                  >
+                    Cover Image
+                  </label>
+                  <input
+                    accept="image/*"
+                    className={clsx(
+                      'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                      'before:hover:bg-white/5 before:transition',
+                    )}
+                    id="cover-image"
+                    onChange={selectCoverImage}
+                    type="file"
+                  />
+                  {coverImage !== null && (
+                    <div className="flex flex-row items-center mt-2 mr-4 border-2 border-dashed">
+                      <img alt="cover-preview" src={URL.createObjectURL(coverImage)} />
+                    </div>
+                  )}
                 </div>
-              )}
+                <TextInput {...externalImageState} />
+              </FormGroup>
             </div>
-            <TextInput {...externalImageState} />
-          </FormGroup>
-          <FormGroup subtitle="Information about your minting settings" title="Minting Details">
-            <NumberInput {...numberOfTokensState} />
-            <NumberInput {...unitPriceState} />
-            <NumberInput {...perAddressLimitState} />
-            <FormControl htmlId="timestamp" isRequired subtitle="Start time for the minting" title="Start Time">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-            </FormControl>
-          </FormGroup>
-          <button {...toggleProps} type="button">
-            Advanced
-          </button>
-          <section {...collapseProps}>
-            <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File">
-              <WhitelistUpload onChange={whitelistFileOnChange} />
-              <Conditional test={whitelistArray.length > 0}>
-                <JsonPreview content={whitelistArray} initialState={false} title="File Contents" />
-              </Conditional>
-            </FormGroup>
-
-            <FormGroup subtitle="Information about your minting settings" title="Minting Details">
-              <NumberInput isRequired {...wlunitPriceState} />
-              <NumberInput isRequired {...wlmemberLimitState} />
-              <NumberInput isRequired {...wlperAddressLimitState} />
-              <FormControl htmlId="start-date" isRequired subtitle="Start time for the minting" title="Start Time">
-                <InputDateTime minDate={new Date()} onChange={(date) => setwlStartDate(date)} value={wlstartDate} />
-              </FormControl>
-              <FormControl htmlId="end-date" isRequired subtitle="End time for the minting" title="End Time">
-                <InputDateTime minDate={new Date()} onChange={(date) => setwlEndDate(date)} value={wlendDate} />
-              </FormControl>
-            </FormGroup>
-            <FormGroup subtitle="Information about royalty" title="Royalty Details">
-              <TextInput {...royaltyPaymentAddressState} />
-              <NumberInput {...royaltyShareState} />
-            </FormGroup>
-          </section>
-        </div>
-        <div className="space-y-8">
-          <div className="relative">
-            <Button className="absolute top-0 right-0" isLoading={isLoading} type="submit">
-              Upload
+            <div>
+              <FormGroup subtitle="Information about your minting settings" title="Minting Details">
+                <NumberInput {...numberOfTokensState} />
+                <NumberInput {...unitPriceState} />
+                <NumberInput {...perAddressLimitState} />
+                <FormControl htmlId="timestamp" isRequired subtitle="Start time for the minting" title="Start Time">
+                  <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+                </FormControl>
+              </FormGroup>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button {...toggleProps} isWide type="button" variant="outline">
+              Advanced Options
             </Button>
           </div>
+          <section {...collapseProps}>
+            <div>
+              <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File" />
+
+              <div className="grid grid-cols-2">
+                <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
+                  <NumberInput isRequired {...wlunitPriceState} />
+                  <NumberInput isRequired {...wlmemberLimitState} />
+                  <NumberInput isRequired {...wlperAddressLimitState} />
+                </FormGroup>
+                <FormGroup subtitle="" title="">
+                  <FormControl htmlId="start-date" isRequired subtitle="Start time for the minting" title="Start Time">
+                    <InputDateTime minDate={new Date()} onChange={(date) => setwlStartDate(date)} value={wlstartDate} />
+                  </FormControl>
+                  <FormControl htmlId="end-date" isRequired subtitle="End time for the minting" title="End Time">
+                    <InputDateTime minDate={new Date()} onChange={(date) => setwlEndDate(date)} value={wlendDate} />
+                  </FormControl>
+                  <WhitelistUpload onChange={whitelistFileOnChange} />
+                  <Conditional test={whitelistArray.length > 0}>
+                    <JsonPreview content={whitelistArray} initialState={false} title="File Contents" />
+                  </Conditional>
+                </FormGroup>
+              </div>
+              <FormGroup subtitle="Information about royalty" title="Royalty Details">
+                <TextInput {...royaltyPaymentAddressState} />
+                <NumberInput {...royaltyShareState} />
+              </FormGroup>
+            </div>
+          </section>
         </div>
       </form>
     </div>
