@@ -11,6 +11,7 @@ import { LinkTabs } from 'components/LinkTabs'
 import { sg721LinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
+import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/sg721/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/sg721/messages/execute'
 import type { NextPage } from 'next'
@@ -26,6 +27,8 @@ import { links } from 'utils/links'
 
 const Sg721ExecutePage: NextPage = () => {
   const { sg721: contract } = useContracts()
+  const wallet = useWallet()
+
   const [lastTx, setLastTx] = useState('')
 
   const comboboxState = useExecuteComboboxState()
@@ -98,6 +101,9 @@ const Sg721ExecutePage: NextPage = () => {
       event.preventDefault()
       if (!type) {
         throw new Error('Please select message type!')
+      }
+      if (!wallet.initialized) {
+        throw new Error('Please connect your wallet.')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,

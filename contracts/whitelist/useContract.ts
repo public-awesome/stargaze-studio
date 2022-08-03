@@ -30,11 +30,8 @@ export function useWhiteListContract(): UseWhiteListContractProps {
   }, [])
 
   useEffect(() => {
-    if (wallet.initialized) {
-      const client = wallet.getClient()
-      const whiteListContract = initContract(client, wallet.address)
-      setWhiteList(whiteListContract)
-    }
+    const whiteListContract = initContract(wallet.getClient(), wallet.address)
+    setWhiteList(whiteListContract)
   }, [wallet])
 
   const updateContractAddress = (contractAddress: string) => {

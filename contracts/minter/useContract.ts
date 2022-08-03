@@ -49,10 +49,8 @@ export function useMinterContract(): UseMinterContractProps {
   }, [])
 
   useEffect(() => {
-    if (wallet.initialized) {
-      const MinterBaseContract = initContract(wallet.getClient(), wallet.address)
-      setMinter(MinterBaseContract)
-    }
+    const MinterBaseContract = initContract(wallet.getClient(), wallet.address)
+    setMinter(MinterBaseContract)
   }, [wallet])
 
   const updateContractAddress = (contractAddress: string) => {

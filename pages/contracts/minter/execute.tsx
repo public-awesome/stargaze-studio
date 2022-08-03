@@ -103,6 +103,9 @@ const MinterExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
+      if (!wallet.initialized) {
+        throw new Error('Please connect your wallet.')
+      }
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',

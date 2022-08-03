@@ -14,6 +14,7 @@ import { LinkTabs } from 'components/LinkTabs'
 import { whitelistLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
+import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/whitelist/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/whitelist/messages/execute'
 import type { NextPage } from 'next'
@@ -29,6 +30,8 @@ import { links } from 'utils/links'
 
 const WhitelistExecutePage: NextPage = () => {
   const { whitelist: contract } = useContracts()
+  const wallet = useWallet()
+
   const [lastTx, setLastTx] = useState('')
 
   const comboboxState = useExecuteComboboxState()
@@ -72,6 +75,9 @@ const WhitelistExecutePage: NextPage = () => {
       event.preventDefault()
       if (!type) {
         throw new Error('Please select message type!')
+      }
+      if (!wallet.initialized) {
+        throw new Error('Please connect your wallet.')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
