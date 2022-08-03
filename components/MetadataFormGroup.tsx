@@ -1,4 +1,7 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable jsx-a11y/media-has-caption */
 import type { ReactNode } from 'react'
+import { getAssetType } from 'utils/getAssetType'
 
 export interface MetadataFormGroupProps {
   title: string
@@ -19,7 +22,27 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
           <div>
             {relatedAsset && (
               <div className="flex flex-row items-center mt-2 mr-4 border-2 border-dashed">
-                <img alt="preview" src={URL.createObjectURL(relatedAsset)} />
+                {getAssetType(relatedAsset.name) === 'audio' && (
+                  <audio
+                    controls
+                    id="audio"
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => e.currentTarget.pause()}
+                    src={URL.createObjectURL(relatedAsset)}
+                  />
+                )}
+                {getAssetType(relatedAsset.name) === 'video' && (
+                  <video
+                    controls
+                    id="video"
+                    onMouseEnter={(e) => e.currentTarget.play()}
+                    onMouseLeave={(e) => e.currentTarget.pause()}
+                    src={URL.createObjectURL(relatedAsset)}
+                  />
+                )}
+                {getAssetType(relatedAsset.name) === 'image' && (
+                  <img alt="preview" src={URL.createObjectURL(relatedAsset)} />
+                )}
               </div>
             )}
           </div>
