@@ -247,8 +247,8 @@ const CollectionCreationPage: NextPage = () => {
     <div>
       <NextSeo title="Create Collection" />
 
-      <div className="mt-5 space-y-8 text-center">
-        <h1 className="font-heading text-4xl font-bold">Upload Assets & Metadata</h1>
+      <div className="mt-5 space-y-5 text-center">
+        <h1 className="font-heading text-4xl font-bold">Create Collection</h1>
 
         <p>
           Make sure you check our{' '}
@@ -258,8 +258,6 @@ const CollectionCreationPage: NextPage = () => {
           on how to create your collection
         </p>
       </div>
-
-      <hr className="border-white/20" />
 
       <UploadDetails onChange={setUploadDetails} />
 

@@ -17,9 +17,9 @@ export type FormInputProps = BaseProps & SlicedInputProps
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   function FormInput(props, ref) {
-    const { id, name, title, subtitle, isRequired, ...rest } = props
+    const { id, name, title, subtitle, isRequired, className, ...rest } = props
     return (
-      <FormControl htmlId={id} isRequired={isRequired} subtitle={subtitle} title={title}>
+      <FormControl className={className} htmlId={id} isRequired={isRequired} subtitle={subtitle} title={title}>
         <StyledInput id={id} name={name} ref={ref} {...rest} />
       </FormControl>
     )
@@ -78,28 +78,14 @@ export const UrlInput = forwardRef<HTMLInputElement, FormInputProps>(
 
 export const TraitTypeInput = forwardRef<HTMLInputElement, FormInputProps>(
   function TraitTypeInput(props, ref) {
-    return (
-      <FormInput
-        {...props}
-        placeholder={props.placeholder || 'Trait Type'}
-        ref={ref}
-        type="text"
-      />
-    )
+    return <FormInput {...props} placeholder={props.placeholder || 'Trait Type'} ref={ref} type="text" />
   },
   //
 )
 
 export const TraitValueInput = forwardRef<HTMLInputElement, FormInputProps>(
   function TraitValueInput(props, ref) {
-    return (
-      <FormInput
-        {...props}
-        placeholder={props.placeholder || 'Trait Value'}
-        ref={ref}
-        type="text"
-      />
-    )
+    return <FormInput {...props} placeholder={props.placeholder || 'Trait Value'} ref={ref} type="text" />
   },
   //
 )
