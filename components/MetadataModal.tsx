@@ -31,15 +31,44 @@ export const MetadataModal = (props: MetadataModalProps) => {
       attributesState.reset()
       parsedMetadata = JSON.parse(await metadataFile.text())
 
-      for (let i = 0; i < parsedMetadata.attributes.length; i++) {
+      if (!parsedMetadata.attributes || parsedMetadata.attributes.length === 0) {
         attributesState.add({
-          trait_type: parsedMetadata.attributes[i].trait_type,
-          value: parsedMetadata.attributes[i].value,
+          trait_type: '',
+          value: '',
         })
+      } else {
+        for (let i = 0; i < parsedMetadata.attributes.length; i++) {
+          attributesState.add({
+            trait_type: parsedMetadata.attributes[i].trait_type,
+            value: parsedMetadata.attributes[i].value,
+          })
+        }
       }
-      nameState.onChange(parsedMetadata.name)
-      descriptionState.onChange(parsedMetadata.description)
-      externalUrlState.onChange(parsedMetadata.external_url)
+      if (!parsedMetadata.name) {
+        nameState.onChange('')
+      } else {
+        nameState.onChange(parsedMetadata.name)
+      }
+      if (!parsedMetadata.description) {
+        descriptionState.onChange('')
+      } else {
+        descriptionState.onChange(parsedMetadata.description)
+      }
+      if (!parsedMetadata.external_url) {
+        externalUrlState.onChange('')
+      } else {
+        externalUrlState.onChange(parsedMetadata.external_url)
+      }
+      if (!parsedMetadata.animation_url) {
+        animationUrlState.onChange('')
+      } else {
+        animationUrlState.onChange(parsedMetadata.animation_url)
+      }
+      if (!parsedMetadata.youtube_url) {
+        youtubeUrlState.onChange('')
+      } else {
+        youtubeUrlState.onChange(parsedMetadata.youtube_url)
+      }
 
       setMetadata(parsedMetadata)
     }
@@ -73,6 +102,22 @@ export const MetadataModal = (props: MetadataModalProps) => {
     defaultValue: metadata?.external_url,
   })
 
+  const animationUrlState = useInputState({
+    id: 'animationUrl',
+    name: 'animationlUrl',
+    title: 'Animation URL',
+    placeholder: 'https://',
+    defaultValue: metadata?.animation_url,
+  })
+
+  const youtubeUrlState = useInputState({
+    id: 'youtubeUrl',
+    name: 'youtubeUrl',
+    title: 'Youtube URL',
+    placeholder: 'https://',
+    defaultValue: metadata?.youtube_url,
+  })
+
   const imageState = useInputState({
     id: 'image',
     name: 'image',
@@ -93,6 +138,8 @@ export const MetadataModal = (props: MetadataModalProps) => {
     metadata.name = nameState.value
     metadata.description = descriptionState.value
     metadata.external_url = externalUrlState.value
+    metadata.animation_url = animationUrlState.value
+    metadata.youtube_url = youtubeUrlState.value
 
     const metadataFileBlob = new Blob([JSON.stringify(metadata)], {
       type: 'application/json',
@@ -122,6 +169,8 @@ export const MetadataModal = (props: MetadataModalProps) => {
             <TextInput {...nameState} onChange={(e) => nameState.onChange(e.target.value)} />
             <TextInput {...descriptionState} onChange={(e) => descriptionState.onChange(e.target.value)} />
             <TextInput {...externalUrlState} onChange={(e) => externalUrlState.onChange(e.target.value)} />
+            <TextInput {...animationUrlState} onChange={(e) => animationUrlState.onChange(e.target.value)} />
+            <TextInput {...youtubeUrlState} onChange={(e) => youtubeUrlState.onChange(e.target.value)} />
             <TextInput {...imageState} disabled value={imageURL} />
             <MetadataAttributes
               attributes={attributesState.entries}

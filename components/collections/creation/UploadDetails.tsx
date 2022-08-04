@@ -156,6 +156,11 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     }
   }, [assetFilesArray, metadataFilesArray])
 
+  useEffect(() => {
+    setAssetFilesArray([])
+    setMetadataFilesArray([])
+  }, [uploadMethod])
+
   return (
     <div>
       <div className="justify-items-start mt-5 mb-3 rounded border border-2 border-white/20 flex-column">
