@@ -4,7 +4,7 @@
 import axios from 'axios'
 import { PINATA_ENDPOINT_URL } from 'utils/constants'
 
-export type UploadFileType = 'assets' | 'metadata'
+export type UploadFileType = 'assets' | 'metadata' | 'cover'
 
 export const uploadToPinata = async (
   fileArray: File[],
@@ -12,7 +12,6 @@ export const uploadToPinata = async (
   pinataSecretKey: string,
   fileType: UploadFileType,
 ): Promise<string> => {
-  console.log('Uploading to Pinata...')
   const data = new FormData()
   fileArray.forEach((file) => {
     data.append('file', file, `${fileType}/${file.name}`)

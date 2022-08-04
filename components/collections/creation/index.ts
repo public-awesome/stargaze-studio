@@ -1,0 +1,5 @@
+export { CollectionDetails } from './CollectionDetails'
+export { MintingDetails } from './MintingDetails'
+export { RoyaltyDetails } from './RoyaltyDetails'
+export { UploadDetails } from './UploadDetails'
+export { WhitelistDetails } from './WhitelistDetails'

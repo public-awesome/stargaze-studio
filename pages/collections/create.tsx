@@ -1,169 +1,246 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable func-names */
-
-import clsx from 'clsx'
-import { Alert } from 'components/Alert'
+import { coin } from '@cosmjs/proto-signing'
 import Anchor from 'components/Anchor'
 import Button from 'components/Button'
-import { CollectionInfo } from 'components/CollectionInfo'
-import { Conditional } from 'components/Conditional'
-import { StyledInput } from 'components/forms/StyledInput'
-import { MetadataModal } from 'components/MetadataModal'
-import { setBaseTokenUri, setImage, useCollectionStore } from 'contexts/collection'
+import {
+  CollectionDetails,
+  MintingDetails,
+  RoyaltyDetails,
+  UploadDetails,
+  WhitelistDetails,
+} from 'components/collections/creation'
+import type { CollectionDetailsDataProps } from 'components/collections/creation/CollectionDetails'
+import type { MintingDetailsDataProps } from 'components/collections/creation/MintingDetails'
+import type { RoyaltyDetailsDataProps } from 'components/collections/creation/RoyaltyDetails'
+import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
+import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
+import { useContracts } from 'contexts/contracts'
+import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import type { ChangeEvent } from 'react'
 import { useState } from 'react'
+import useCollapse from 'react-collapsed'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
 import { upload } from 'services/upload'
+import { MINTER_CODE_ID, SG721_CODE_ID, WHITELIST_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
-import { naturalCompare } from 'utils/sort'
 
-import { getAssetType } from '../../utils/getAssetType'
+const CollectionCreationPage: NextPage = () => {
+  const wallet = useWallet()
+  const { minter: minterContract, whitelist: whitelistContract } = useContracts()
 
-type UploadMethod = 'new' | 'existing'
+  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse()
+  const toggleProps = getToggleProps()
+  const collapseProps = getCollapseProps()
 
-const UploadPage: NextPage = () => {
-  const baseTokenURI = useCollectionStore().base_token_uri
-  const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
-  const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
-  const [updatedMetadataFilesArray, setUpdatedMetadataFilesArray] = useState<File[]>([])
-  const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
-  const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
-  const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
-  const [refreshMetadata, setRefreshMetadata] = useState(false)
-  const [nftStorageApiKey, setNftStorageApiKey] = useState(
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDJBODk5OGI4ZkE2YTM1NzMyYmMxQTRDQzNhOUU2M0Y2NUM3ZjA1RWIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1NTE5MTcwNDQ2MiwibmFtZSI6IlRlc3QifQ.IbdV_26bkPHSdd81sxox5AoG-5a4CCEY4aCrdbCXwAE',
-  )
-  const [pinataApiKey, setPinataApiKey] = useState('c8c2ea440c09ee8fa639')
-  const [pinataSecretKey, setPinataSecretKey] = useState(
-    '9d6f42dc01eaab15f52eac8f36cc4f0ee4184944cb3cdbcda229d06ecf877ee7',
-  )
+  const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
+  const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
+  const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
+  const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
+  const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
 
-  const handleChangeBaseTokenUri = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setBaseTokenUri(event.target.value.toString())
-  }
+  const [contractAddress, setContractAddress] = useState<string | null>(null)
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
-  const handleChangeImage = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setImage(event.target.value.toString())
-  }
+  const createCollection = async () => {
+    try {
+      checkUploadDetails()
+      checkCollectionDetails()
+      checkMintingDetails()
+      checkWhitelistDetails()
+      checkRoyaltyDetails()
 
-  const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
-    setAssetFilesArray([])
-    console.log(event.target.files)
-    let reader: FileReader
-    if (event.target.files === null) return
-    for (let i = 0; i < event.target.files.length; i++) {
-      reader = new FileReader()
-      reader.onload = function (e) {
-        if (!e.target?.result) return toast.error('Error parsing file.')
-        if (!event.target.files) return toast.error('No files selected.')
-        const assetFile = new File([e.target.result], event.target.files[i].name, { type: 'image/jpg' })
-        setAssetFilesArray((prev) => [...prev, assetFile])
-      }
-      if (!event.target.files) return toast.error('No file selected.')
-      reader.readAsArrayBuffer(event.target.files[i])
-      reader.onloadend = function (e) {
-        setAssetFilesArray((prev) => prev.sort((a, b) => naturalCompare(a.name, b.name)))
-      }
+      const baseUri = await uploadFiles()
+      const coverImageUri = await upload(
+        collectionDetails?.imageFile as File[],
+        uploadDetails?.uploadService as UploadServiceType,
+        'cover',
+        uploadDetails?.nftStorageApiKey as string,
+        uploadDetails?.pinataApiKey as string,
+        uploadDetails?.pinataSecretKey as string,
+      )
+
+      const whitelist = whitelistDetails?.isContractAddress
+        ? whitelistDetails.contractAddress
+        : await instantiateWhitelist()
+
+      await instantate(baseUri, coverImageUri, whitelist)
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message)
     }
   }
 
-  const selectMetadata = (event: ChangeEvent<HTMLInputElement>) => {
-    setMetadataFilesArray([])
-    setUpdatedMetadataFilesArray([])
-    console.log(assetFilesArray)
-    console.log(event.target.files)
-    let reader: FileReader
-    if (event.target.files === null) return toast.error('No files selected.')
-    for (let i = 0; i < event.target.files.length; i++) {
-      reader = new FileReader()
-      reader.onload = async function (e) {
-        if (!e.target?.result) return toast.error('Error parsing file.')
-        if (!event.target.files) return toast.error('No files selected.')
-        if (!JSON.parse(await event.target.files[i].text()).attributes)
-          return toast.error(`The file with name '${event.target.files[i].name}' doesn't have an attributes list!`)
-        const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
-        setMetadataFilesArray((prev) => [...prev, metadataFile])
-      }
-      if (!event.target.files) return toast.error('No file selected.')
-      reader.readAsText(event.target.files[i], 'utf8')
-      reader.onloadend = function (e) {
-        setMetadataFilesArray((prev) => prev.sort((a, b) => naturalCompare(a.name, b.name)))
-        console.log(metadataFilesArray)
-      }
-    }
-  }
-  const updateMetadata = async () => {
-    const metadataFileNames = metadataFilesArray.map((file) => file.name)
-    console.log(metadataFileNames)
-    const assetFileNames = assetFilesArray.map((file) => file.name.substring(0, file.name.lastIndexOf('.')))
-    console.log(assetFileNames)
-    //compare the two arrays to make sure they are the same
-    const areArraysEqual = metadataFileNames.every((val, index) => val === assetFileNames[index])
-    if (!areArraysEqual) {
-      return toast.error('Asset and metadata file names do not match.')
+  const instantiateWhitelist = async () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!whitelistContract) throw new Error('Contract not found')
+
+    const msg = {
+      members: whitelistDetails?.members,
+      start_time: whitelistDetails?.startTime,
+      end_time: whitelistDetails?.endTime,
+      unit_price: coin(String(Number(whitelistDetails?.unitPrice) * 1000000), 'ustars'),
+      per_address_limit: whitelistDetails?.perAddressLimit,
+      member_limit: whitelistDetails?.memberLimit,
     }
 
-    console.log(assetFilesArray)
-    const assetURI = await upload(
-      assetFilesArray,
-      uploadService,
-      'assets',
-      nftStorageApiKey,
-      pinataApiKey,
-      pinataSecretKey,
+    const data = await whitelistContract.instantiate(
+      WHITELIST_CODE_ID,
+      msg,
+      'Stargaze Whitelist Contract',
+      wallet.address,
     )
-    console.log(assetURI)
-    setUpdatedMetadataFilesArray([])
-    let reader: FileReader
-    for (let i = 0; i < metadataFilesArray.length; i++) {
-      reader = new FileReader()
-      reader.onload = function (e) {
-        const metadataJSON = JSON.parse(e.target?.result as string)
-        metadataJSON.image = `ipfs://${assetURI}/${assetFilesArray[i].name}`
-        const metadataFileBlob = new Blob([JSON.stringify(metadataJSON)], {
-          type: 'application/json',
-        })
-        const updatedMetadataFile = new File([metadataFileBlob], metadataFilesArray[i].name, {
-          type: 'application/json',
-        })
-        updatedMetadataFilesArray.push(updatedMetadataFile)
-        console.log(`${updatedMetadataFile.name} => ${metadataJSON.image}`)
-        if (i === metadataFilesArray.length - 1) {
-          void uploadUpdatedMetadata()
-        }
+
+    return data.contractAddress
+  }
+
+  const instantate = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
+    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!minterContract) throw new Error('Contract not found')
+
+    let royaltyInfo = null
+    if (royaltyDetails?.paymentAddress && royaltyDetails.share) {
+      royaltyInfo = {
+        paymentAddress: royaltyDetails.paymentAddress,
+        share: royaltyDetails.share,
       }
-      reader.readAsText(metadataFilesArray[i], 'utf8')
+    }
+
+    const msg = {
+      base_token_uri: baseUri,
+      num_tokens: mintingDetails?.numTokens,
+      sg721_code_id: SG721_CODE_ID,
+      sg721_instantiate_msg: {
+        name: collectionDetails?.name,
+        symbol: 'SYMBOL',
+        minter: wallet.address,
+        collection_info: {
+          creator: wallet.address,
+          description: collectionDetails?.description,
+          image: coverImageUri,
+          external_link: collectionDetails?.externalLink,
+          royalty_info: royaltyInfo,
+        },
+      },
+      per_address_limit: mintingDetails?.perAddressLimit,
+      unit_price: coin(String(Number(mintingDetails?.unitPrice) * 1000000), 'ustars'),
+      whitelist_address: whitelist,
+      start_time: mintingDetails?.startTime,
+    }
+
+    const data = await minterContract.instantiate(MINTER_CODE_ID, msg, 'Stargaze Minter Contract', wallet.address)
+
+    setTransactionHash(data.transactionHash)
+    setContractAddress(data.contractAddress)
+  }
+
+  const uploadFiles = async (): Promise<string> => {
+    if (!uploadDetails) throw new Error('Please upload asset and metadata')
+    return new Promise((resolve, reject) => {
+      upload(
+        uploadDetails.assetFiles,
+        uploadDetails.uploadService,
+        'assets',
+        uploadDetails.nftStorageApiKey as string,
+        uploadDetails.pinataApiKey as string,
+        uploadDetails.pinataSecretKey as string,
+      )
+        .then((assetUri: string) => {
+          const fileArray: File[] = []
+          let reader: FileReader
+          for (let i = 0; i < uploadDetails.metadataFiles.length; i++) {
+            reader = new FileReader()
+            reader.onload = (e) => {
+              const data: any = JSON.parse(e.target?.result as string)
+              data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+              const metadataFileBlob = new Blob([JSON.stringify(data)], {
+                type: 'application/json',
+              })
+              const updatedMetadataFile = new File([metadataFileBlob], uploadDetails.metadataFiles[i].name, {
+                type: 'application/json',
+              })
+              fileArray.push(updatedMetadataFile)
+            }
+            reader.onloadend = () => {
+              if (i === uploadDetails.metadataFiles.length - 1) {
+                upload(
+                  fileArray,
+                  uploadDetails.uploadService,
+                  'metadata',
+                  uploadDetails.nftStorageApiKey as string,
+                  uploadDetails.pinataApiKey as string,
+                  uploadDetails.pinataSecretKey as string,
+                )
+                  .then(resolve)
+                  .catch(reject)
+              }
+            }
+            reader.readAsText(uploadDetails.metadataFiles[i], 'utf8')
+          }
+        })
+        .catch(reject)
+    })
+  }
+
+  const checkUploadDetails = () => {
+    if (!uploadDetails) {
+      throw new Error('Please upload asset and metadata')
+    }
+    if (uploadDetails.assetFiles.length === 0) {
+      throw new Error('Please upload assets')
+    }
+    if (uploadDetails.metadataFiles.length === 0) {
+      throw new Error('Please upload metadatas')
+    }
+    if (uploadDetails.uploadService === 'nft-storage') {
+      if (uploadDetails.nftStorageApiKey === '') {
+        throw new Error('Please enter NFT Storage api key')
+      }
+    } else if (uploadDetails.pinataApiKey === '' || uploadDetails.pinataSecretKey === '') {
+      throw new Error('Please enter Pinata api key and secret key')
     }
   }
-  const uploadUpdatedMetadata = async () => {
-    setUpdatedMetadataFilesArray(updatedMetadataFilesArray)
-    const result = await upload(
-      updatedMetadataFilesArray,
-      uploadService,
-      'metadata',
-      nftStorageApiKey,
-      pinataApiKey,
-      pinataSecretKey,
-    )
-    setBaseTokenUri(`ipfs://${result}`)
-    console.log(`ipfs://${result}`)
+
+  const checkCollectionDetails = () => {
+    if (!collectionDetails) throw new Error('Please fill out the collection details')
+    if (collectionDetails.name === '') throw new Error('Name is required')
+    if (collectionDetails.description === '') throw new Error('Description is required')
+    if (collectionDetails.imageFile.length === 0) throw new Error('Cover image is required')
   }
 
-  const updateMetadataFileIndex = (index: number) => {
-    setMetadataFileArrayIndex(index)
-    setRefreshMetadata((prev) => !prev)
+  const checkMintingDetails = () => {
+    if (!mintingDetails) throw new Error('Please fill out the minting details')
+    if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
+    if (Number(mintingDetails.unitPrice) < 500) throw new Error('Invalid unit price')
+    if (mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
+      throw new Error('Per address limit is required')
+    if (mintingDetails.startTime === '') throw new Error('Start time is required')
   }
 
-  const updateMetadataFileArray = async (updatedMetadataFile: File) => {
-    metadataFilesArray[metadataFileArrayIndex] = updatedMetadataFile
-    console.log('Updated Metadata File:')
-    console.log(JSON.parse(await metadataFilesArray[metadataFileArrayIndex]?.text()))
+  const checkWhitelistDetails = () => {
+    if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
+    if (whitelistDetails.isContractAddress) {
+      if (whitelistDetails.contractAddress === '') throw new Error('Contract address is required')
+    } else {
+      if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
+      if (whitelistDetails.unitPrice === '') throw new Error('Whitelist unit price is required')
+      if (whitelistDetails.startTime === '') throw new Error('Start time is required')
+      if (whitelistDetails.endTime === '') throw new Error('End time is required')
+      if (whitelistDetails.perAddressLimit === 0) throw new Error('Per address limit is required')
+      if (whitelistDetails.memberLimit === 0) throw new Error('Member limit is required')
+    }
+  }
+
+  const checkRoyaltyDetails = () => {
+    if (!royaltyDetails) throw new Error('Please fill out the royalty details')
+    if (royaltyDetails.share === 0) throw new Error('Royalty share is required')
+    if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
   }
 
   return (
@@ -184,460 +261,31 @@ const UploadPage: NextPage = () => {
 
       <hr className="border-white/20" />
 
-      <div className="justify-items-start mt-5 mb-3 ml-3 flex-column">
-        <div className="mt-3 ml-4 form-check form-check-inline">
-          <input
-            checked={uploadMethod === 'existing'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
-            id="inlineRadio1"
-            name="inlineRadioOptions1"
-            onClick={() => {
-              setUploadMethod('existing')
-            }}
-            type="radio"
-            value="Existing"
-          />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio1">
-            Use an existing URI
-          </label>
-        </div>
+      <UploadDetails onChange={setUploadDetails} />
 
-        <div className="mt-3 ml-4 form-check form-check-inline">
-          <input
-            checked={uploadMethod === 'new'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
-            id="inlineRadio2"
-            name="inlineRadioOptions2"
-            onClick={() => {
-              setUploadMethod('new')
-            }}
-            type="radio"
-            value="New"
-          />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio2">
-            Upload assets & metadata
-          </label>
-        </div>
-        {baseTokenURI && (
-          <Alert className="mt-5" type="info">
-            <a href={baseTokenURI} rel="noreferrer" target="_blank">
-              Base Token URI: {baseTokenURI}
-            </a>
-          </Alert>
-        )}
+      <div className="flex justify-evenly grid-col-2">
+        <CollectionDetails onChange={setCollectionDetails} />
+        <MintingDetails onChange={setMintingDetails} />
       </div>
 
-      <hr className="border-white/20" />
+      <div className="flex justify-end">
+        <Button {...toggleProps} isWide type="button" variant="outline">
+          {isExpanded ? 'Hide' : 'Show'} Advanced Details
+        </Button>
+      </div>
 
-      {uploadMethod === 'existing' && (
-        <div className="ml-3 flex-column">
-          <p className="my-3 ml-5">
-            Though Stargaze&apos;s sg721 contract allows for off-chain metadata storage, it is recommended to use a
-            decentralized storage solution, such as IPFS. <br /> You may head over to{' '}
-            <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
-              NFT Storage
-            </Anchor>{' '}
-            or{' '}
-            <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
-              Pinata
-            </Anchor>{' '}
-            and upload your assets & metadata manually to get a base URI for your collection.
-          </p>
-          <div>
-            <label className="block mr-1 mb-1 ml-5 font-bold text-white dark:text-gray-300" htmlFor="coverImage">
-              Collection Cover Image
-            </label>
-            <input
-              className="py-2 px-1 mx-5 mt-2 mb-2 w-1/2 bg-white/10 rounded border-2 border-white/20 focus:ring
-          focus:ring-plumbus-20
-          form-input, placeholder:text-white/50,"
-              id="coverImage"
-              onChange={handleChangeImage}
-              placeholder="ipfs://bafybeigi3bwpvyvsmnbj46ra4hyffcxdeaj6ntfk5jpic5mx27x6ih2qvq/images/1.png"
-            />
-          </div>
-          <div>
-            <label className="block mt-3 mr-1 mb-1 ml-5 font-bold text-white dark:text-gray-300" htmlFor="baseTokenURI">
-              Base Token URI
-            </label>
-            <input
-              className="py-2 px-1 mx-5 mt-2 mb-2 w-1/2 bg-white/10 rounded border-2 border-white/20 focus:ring
-          focus:ring-plumbus-20
-          form-input, placeholder:text-white/50,"
-              id="baseTokenURI"
-              onChange={handleChangeBaseTokenUri}
-              placeholder="ipfs://..."
-            />
-          </div>
-        </div>
-      )}
-      {uploadMethod === 'new' && (
-        <div>
-          <div className="justify-items-start mt-5 mb-3 ml-3 flex-column">
-            <div className="mt-3 ml-4 form-check form-check-inline">
-              <input
-                checked={uploadService === 'nft-storage'}
-                className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
-                id="inlineRadio3"
-                name="inlineRadioOptions3"
-                onClick={() => {
-                  setUploadService('nft-storage')
-                }}
-                type="radio"
-                value="nft-storage"
-              />
-              <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio3">
-                Upload using NFT.Storage
-              </label>
-            </div>
+      <section {...collapseProps}>
+        <WhitelistDetails onChange={setWhitelistDetails} />
+        <RoyaltyDetails onChange={setRoyaltyDetails} />
+      </section>
 
-            <div className="mt-3 ml-4 form-check form-check-inline">
-              <input
-                checked={uploadService === 'pinata'}
-                className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
-                id="inlineRadio4"
-                name="inlineRadioOptions4"
-                onClick={() => {
-                  setUploadService('pinata')
-                }}
-                type="radio"
-                value="pinata"
-              />
-              <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio4">
-                Upload using Pinata
-              </label>
-            </div>
-          </div>
-
-          <div className="flex flex-col ml-8 w-1/2">
-            <Conditional test={uploadService === 'nft-storage'}>
-              <label htmlFor="nft_storage_api_key">NFT.Storage API Key</label>
-              <StyledInput
-                id="nft_storage_api_key"
-                onChange={(e) => setNftStorageApiKey(e.target.value)}
-                value={nftStorageApiKey}
-              />
-            </Conditional>
-          </div>
-          <div className="flex flex-col ml-8 w-1/2">
-            <Conditional test={uploadService === 'pinata'}>
-              <label htmlFor="pinata-api_key">Pinata API Key</label>
-              <StyledInput
-                className="flex mb-2 w-1/2"
-                id="pinata_api_key"
-                onChange={(e) => setPinataApiKey(e.target.value)}
-                value={pinataApiKey}
-              />
-              <label htmlFor="pinata_secret_key">Pinata Secret Key</label>
-              <StyledInput
-                className="flex"
-                id="pinata_secret_key"
-                onChange={(e) => setPinataSecretKey(e.target.value)}
-                value={pinataSecretKey}
-              />
-            </Conditional>
-          </div>
-
-          <div>
-            <div className="grid grid-cols-2">
-              <div className="w-full">
-                <div>
-                  <label
-                    className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
-                    htmlFor="assetFiles"
-                  >
-                    Asset Selection
-                  </label>
-                  <div
-                    className={clsx(
-                      'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
-                      'rounded border-2 border-white/20 border-dashed',
-                    )}
-                  >
-                    <input
-                      accept="image/*, audio/*, video/*"
-                      className={clsx(
-                        'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                        'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
-                      )}
-                      id="assetFiles"
-                      multiple
-                      onChange={selectAssets}
-                      type="file"
-                    />
-                  </div>
-                </div>
-
-                {assetFilesArray.length > 0 && (
-                  <div>
-                    <label
-                      className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
-                      htmlFor="metadataFiles"
-                    >
-                      Metadata Selection
-                    </label>
-                    <div
-                      className={clsx(
-                        'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
-                        'rounded border-2 border-white/20 border-dashed',
-                      )}
-                    >
-                      <input
-                        accept=""
-                        className={clsx(
-                          'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                          'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
-                        )}
-                        id="metadataFiles"
-                        multiple
-                        onChange={selectMetadata}
-                        type="file"
-                      />
-                    </div>
-                  </div>
-                )}
-                <Conditional
-                  test={
-                    assetFilesArray.length > 0 &&
-                    metadataFilesArray.length > 0 &&
-                    assetFilesArray.length !== metadataFilesArray.length
-                  }
-                >
-                  <Alert className="mt-4 ml-8 w-3/4" type="warning">
-                    The number of assets and metadata files should match.
-                  </Alert>
-                </Conditional>
-
-                <MetadataModal
-                  assetFile={assetFilesArray[metadataFileArrayIndex]}
-                  metadataFile={metadataFilesArray[metadataFileArrayIndex]}
-                  refresher={refreshMetadata}
-                  updateMetadata={updateMetadataFileArray}
-                  updatedMetadataFile={updatedMetadataFilesArray[metadataFileArrayIndex]}
-                />
-              </div>
-              {assetFilesArray.length > 0 && (
-                <div className="mt-2 mr-10 ml-20 w-4/5 h-96 border-2 border-dashed carousel carousel-vertical rounded-box">
-                  {assetFilesArray.map((assetSource, index) => (
-                    <div key={`carousel-item-${index}`} className="w-full carousel-item h-1/8">
-                      <div className="grid grid-cols-4 col-auto">
-                        <Conditional test={assetFilesArray.length > 4 * index}>
-                          <button
-                            key={4 * index}
-                            className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                            onClick={() => {
-                              updateMetadataFileIndex(4 * index)
-                            }}
-                            type="button"
-                          >
-                            <label
-                              className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                              htmlFor="my-modal-4"
-                            >
-                              {getAssetType(assetFilesArray[4 * index]?.name) === 'audio' && (
-                                <div className="flex relative flex-col items-center mt-2 ml-2">
-                                  <img
-                                    key={`audio-${4 * index}`}
-                                    alt="audio_icon"
-                                    className="relative mb-2 ml-1 w-6 h-6 thumbnail"
-                                    src="/audio.png"
-                                  />
-                                  <span className="relative self-center">{assetFilesArray[4 * index]?.name}</span>
-                                </div>
-                              )}
-                              {getAssetType(assetFilesArray[4 * index]?.name) === 'video' && (
-                                <video
-                                  id="video"
-                                  muted
-                                  onMouseEnter={(e) => e.currentTarget.play()}
-                                  onMouseLeave={(e) => e.currentTarget.pause()}
-                                  src={URL.createObjectURL(assetFilesArray[4 * index])}
-                                />
-                              )}
-
-                              {getAssetType(assetFilesArray[4 * index]?.name) === 'image' && (
-                                <img
-                                  key={`image-${4 * index}`}
-                                  alt="asset"
-                                  className="px-1 my-1 thumbnail"
-                                  src={
-                                    assetFilesArray[4 * index] ? URL.createObjectURL(assetFilesArray[4 * index]) : ''
-                                  }
-                                />
-                              )}
-                            </label>
-                          </button>
-                        </Conditional>
-                        <Conditional test={assetFilesArray.length > 4 * index + 1}>
-                          <button
-                            key={4 * index + 1}
-                            className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                            onClick={() => {
-                              updateMetadataFileIndex(4 * index + 1)
-                            }}
-                            type="button"
-                          >
-                            <label
-                              className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                              htmlFor="my-modal-4"
-                            >
-                              {getAssetType(assetFilesArray[4 * index + 1]?.name) === 'audio' && (
-                                <div className="flex relative flex-col items-center mt-2 ml-2">
-                                  <img
-                                    key={`audio-${4 * index + 1}`}
-                                    alt="audio_icon"
-                                    className="relative mb-2 ml-1 w-6 h-6 thumbnail"
-                                    src="/audio.png"
-                                  />
-                                  <span className="relative self-center">{assetFilesArray[4 * index + 1]?.name}</span>
-                                </div>
-                              )}
-                              {getAssetType(assetFilesArray[4 * index + 1]?.name) === 'video' && (
-                                <video
-                                  id="video"
-                                  muted
-                                  onMouseEnter={(e) => e.currentTarget.play()}
-                                  onMouseLeave={(e) => e.currentTarget.pause()}
-                                  src={URL.createObjectURL(assetFilesArray[4 * index + 1])}
-                                />
-                              )}
-
-                              {getAssetType(assetFilesArray[4 * index + 1]?.name) === 'image' && (
-                                <img
-                                  key={`image-${4 * index + 1}`}
-                                  alt="asset"
-                                  className="px-1 my-1 thumbnail"
-                                  src={
-                                    assetFilesArray[4 * index + 1]
-                                      ? URL.createObjectURL(assetFilesArray[4 * index + 1])
-                                      : ''
-                                  }
-                                />
-                              )}
-                            </label>
-                          </button>
-                        </Conditional>
-                        <Conditional test={assetFilesArray.length > 4 * index + 2}>
-                          <button
-                            key={4 * index + 2}
-                            className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                            onClick={() => {
-                              updateMetadataFileIndex(4 * index + 2)
-                            }}
-                            type="button"
-                          >
-                            <label
-                              className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                              htmlFor="my-modal-4"
-                            >
-                              {getAssetType(assetFilesArray[4 * index + 2]?.name) === 'audio' && (
-                                <div className="flex relative flex-col items-center mt-2 ml-2">
-                                  <img
-                                    key={`audio-${4 * index + 2}`}
-                                    alt="audio_icon"
-                                    className="relative mb-2 ml-1 w-6 h-6 thumbnail"
-                                    src="/audio.png"
-                                  />
-                                  <span className="relative self-center">{assetFilesArray[4 * index + 2]?.name}</span>
-                                </div>
-                              )}
-                              {getAssetType(assetFilesArray[4 * index + 2]?.name) === 'video' && (
-                                <video
-                                  id="video"
-                                  muted
-                                  onMouseEnter={(e) => e.currentTarget.play()}
-                                  onMouseLeave={(e) => e.currentTarget.pause()}
-                                  src={URL.createObjectURL(assetFilesArray[4 * index + 2])}
-                                />
-                              )}
-
-                              {getAssetType(assetFilesArray[4 * index + 2]?.name) === 'image' && (
-                                <img
-                                  key={`image-${4 * index + 2}`}
-                                  alt="asset"
-                                  className="px-1 my-1 thumbnail"
-                                  src={
-                                    assetFilesArray[4 * index + 2]
-                                      ? URL.createObjectURL(assetFilesArray[4 * index + 2])
-                                      : ''
-                                  }
-                                />
-                              )}
-                            </label>
-                          </button>
-                        </Conditional>
-                        <Conditional test={assetFilesArray.length > 4 * index + 3}>
-                          <button
-                            key={4 * index + 3}
-                            className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                            onClick={() => {
-                              updateMetadataFileIndex(4 * index + 3)
-                            }}
-                            type="button"
-                          >
-                            <label
-                              className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                              htmlFor="my-modal-4"
-                            >
-                              {getAssetType(assetFilesArray[4 * index + 3]?.name) === 'audio' && (
-                                <div className="flex relative flex-col items-center mt-2 ml-2">
-                                  <img
-                                    key={`audio-${4 * index + 3}`}
-                                    alt="audio_icon"
-                                    className="relative mb-2 ml-1 w-6 h-6 thumbnail"
-                                    src="/audio.png"
-                                  />
-                                  <span className="relative self-center">{assetFilesArray[4 * index + 3]?.name}</span>
-                                </div>
-                              )}
-                              {getAssetType(assetFilesArray[4 * index + 3]?.name) === 'video' && (
-                                <video
-                                  id="video"
-                                  muted
-                                  onMouseEnter={(e) => e.currentTarget.play()}
-                                  onMouseLeave={(e) => e.currentTarget.pause()}
-                                  src={URL.createObjectURL(assetFilesArray[4 * index + 3])}
-                                />
-                              )}
-
-                              {getAssetType(assetFilesArray[4 * index + 3]?.name) === 'image' && (
-                                <img
-                                  key={`image-${4 * index + 3}`}
-                                  alt="asset"
-                                  className="px-1 my-1 thumbnail"
-                                  src={
-                                    assetFilesArray[4 * index + 3]
-                                      ? URL.createObjectURL(assetFilesArray[4 * index + 3])
-                                      : ''
-                                  }
-                                />
-                              )}
-                            </label>
-                          </button>
-                        </Conditional>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      <CollectionInfo />
       <div className="mt-5 ml-8">
-        <Button
-          className="mb-8"
-          isDisabled={assetFilesArray.length === 0 || assetFilesArray.length !== metadataFilesArray.length}
-          isWide
-          onClick={updateMetadata}
-          variant="solid"
-        >
-          Upload
+        <Button className="mb-8" isWide onClick={() => void createCollection} variant="solid">
+          Create Collection
         </Button>
       </div>
     </div>
   )
 }
 
-export default withMetadata(UploadPage, { center: false })
+export default withMetadata(CollectionCreationPage, { center: false })
