@@ -1,6 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable jsx-a11y/media-has-caption */
 import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { getAssetType } from 'utils/getAssetType'
 
 export interface MetadataFormGroupProps {
@@ -13,6 +14,32 @@ export interface MetadataFormGroupProps {
 export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
   const { title, subtitle, relatedAsset, children } = props
 
+  const videoPreview = useMemo(
+    () => (
+      <video
+        controls
+        id="video"
+        onMouseEnter={(e) => e.currentTarget.play()}
+        onMouseLeave={(e) => e.currentTarget.pause()}
+        src={relatedAsset ? URL.createObjectURL(relatedAsset) : ''}
+      />
+    ),
+    [relatedAsset],
+  )
+
+  const audioPreview = useMemo(
+    () => (
+      <audio
+        controls
+        id="audio"
+        onMouseEnter={(e) => e.currentTarget.play()}
+        onMouseLeave={(e) => e.currentTarget.pause()}
+        src={relatedAsset ? URL.createObjectURL(relatedAsset) : ''}
+      />
+    ),
+    [relatedAsset],
+  )
+
   return (
     <div className="flex p-4 pt-0 space-x-4 w-full">
       <div className="flex flex-col w-1/3">
@@ -22,24 +49,8 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
           <div>
             {relatedAsset && (
               <div className="flex flex-row items-center mt-2 mr-4 border-2 border-dashed">
-                {getAssetType(relatedAsset.name) === 'audio' && (
-                  <audio
-                    controls
-                    id="audio"
-                    onMouseEnter={(e) => e.currentTarget.play()}
-                    onMouseLeave={(e) => e.currentTarget.pause()}
-                    src={URL.createObjectURL(relatedAsset)}
-                  />
-                )}
-                {getAssetType(relatedAsset.name) === 'video' && (
-                  <video
-                    controls
-                    id="video"
-                    onMouseEnter={(e) => e.currentTarget.play()}
-                    onMouseLeave={(e) => e.currentTarget.pause()}
-                    src={URL.createObjectURL(relatedAsset)}
-                  />
-                )}
+                {getAssetType(relatedAsset.name) === 'audio' && audioPreview}
+                {getAssetType(relatedAsset.name) === 'video' && videoPreview}
                 {getAssetType(relatedAsset.name) === 'image' && (
                   <img alt="preview" src={URL.createObjectURL(relatedAsset)} />
                 )}
