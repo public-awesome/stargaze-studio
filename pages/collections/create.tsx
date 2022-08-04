@@ -280,7 +280,7 @@ const CollectionCreationPage: NextPage = () => {
       </section>
 
       <div className="mt-5 ml-8">
-        <Button className="mb-8" isWide onClick={() => void createCollection} variant="solid">
+        <Button className="mb-8" isWide onClick={createCollection} variant="solid">
           Create Collection
         </Button>
       </div>
