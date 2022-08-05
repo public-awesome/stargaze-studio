@@ -7,7 +7,7 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataModal } from 'components/MetadataModal'
 import { setBaseTokenUri, setImage, useCollectionStore } from 'contexts/collection'
 import type { ChangeEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
 import { getAssetType } from 'utils/getAssetType'
@@ -138,6 +138,31 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
       throw new Error('Asset and metadata file names do not match.')
     }
   }
+
+  const videoPreviewElements = useMemo(() => {
+    const tempArray: JSX.Element[] = []
+    assetFilesArray.forEach((assetFile) => {
+      if (getAssetType(assetFile.name) === 'video') {
+        tempArray.push(
+          <video
+            key={assetFile.name}
+            className="absolute px-1 my-1 thumbnail"
+            id="video"
+            muted
+            onMouseEnter={(e) => {
+              void e.currentTarget.play()
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.pause()
+              e.currentTarget.currentTime = 0
+            }}
+            src={URL.createObjectURL(assetFile)}
+          />,
+        )
+      }
+    })
+    return tempArray
+  }, [assetFilesArray])
 
   useEffect(() => {
     try {
@@ -400,25 +425,20 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                           htmlFor="my-modal-4"
                         >
                           {getAssetType(assetSource.name) === 'audio' && (
-                            <div className="flex relative flex-col items-center mt-2 ml-2">
+                            <div className="flex absolute flex-col items-center mt-4 ml-2">
                               <img
                                 key={`audio-${index}`}
                                 alt="audio_icon"
-                                className="relative mb-2 ml-1 w-6 h-6 thumbnail"
+                                className="mb-2 ml-1 w-6 h-6 thumbnail"
                                 src="/audio.png"
                               />
-                              <span className="relative self-center">{assetSource.name}</span>
+                              <span className="flex self-center ">{assetSource.name}</span>
                             </div>
                           )}
-                          {getAssetType(assetSource.name) === 'video' && (
-                            <video
-                              id="video"
-                              muted
-                              onMouseEnter={(e) => e.currentTarget.play()}
-                              onMouseLeave={(e) => e.currentTarget.pause()}
-                              src={URL.createObjectURL(assetSource)}
-                            />
-                          )}
+                          {getAssetType(assetSource.name) === 'video' &&
+                            videoPreviewElements.filter(
+                              (videoPreviewElement) => videoPreviewElement.key === assetSource.name,
+                            )}
 
                           {getAssetType(assetSource.name) === 'image' && (
                             <img
