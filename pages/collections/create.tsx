@@ -65,9 +65,9 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails?.pinataSecretKey as string,
       )
 
-      const whitelist = whitelistDetails?.isContractAddress
-        ? whitelistDetails.contractAddress
-        : await instantiateWhitelist()
+      let whitelist: string | undefined
+      if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
+      else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
 
       await instantate(baseUri, coverImageUri, whitelist)
 
@@ -105,7 +105,7 @@ const CollectionCreationPage: NextPage = () => {
     if (!minterContract) throw new Error('Contract not found')
 
     let royaltyInfo = null
-    if (royaltyDetails?.paymentAddress && royaltyDetails.share) {
+    if (royaltyDetails?.royaltyType === 'new') {
       royaltyInfo = {
         paymentAddress: royaltyDetails.paymentAddress,
         share: royaltyDetails.share,
@@ -225,8 +225,8 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkWhitelistDetails = () => {
     if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
-    if (whitelistDetails.isContractAddress) {
-      if (whitelistDetails.contractAddress === '') throw new Error('Contract address is required')
+    if (whitelistDetails.whitelistType === 'existing') {
+      if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
     } else {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
       if (whitelistDetails.unitPrice === '') throw new Error('Whitelist unit price is required')
@@ -239,8 +239,10 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkRoyaltyDetails = () => {
     if (!royaltyDetails) throw new Error('Please fill out the royalty details')
-    if (royaltyDetails.share === 0) throw new Error('Royalty share is required')
-    if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
+    if (royaltyDetails.royaltyType === 'new') {
+      if (royaltyDetails.share === 0) throw new Error('Royalty share is required')
+      if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
+    }
   }
 
   return (
@@ -259,28 +261,28 @@ const CollectionCreationPage: NextPage = () => {
         </p>
       </div>
 
-      <UploadDetails onChange={setUploadDetails} />
+      <div className="mx-10">
+        <UploadDetails onChange={setUploadDetails} />
 
-      <div className="flex justify-evenly grid-col-2">
-        <CollectionDetails onChange={setCollectionDetails} />
-        <MintingDetails onChange={setMintingDetails} />
-      </div>
+        <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
+          <CollectionDetails onChange={setCollectionDetails} />
+          <MintingDetails onChange={setMintingDetails} />
+        </div>
 
-      <div className="flex justify-end">
-        <Button {...toggleProps} isWide type="button" variant="outline">
-          {isExpanded ? 'Hide' : 'Show'} Advanced Details
-        </Button>
-      </div>
+        <div className="flex justify-between my-6">
+          <Button {...toggleProps} isWide type="button" variant="outline">
+            {isExpanded ? 'Hide' : 'Show'} Advanced Details
+          </Button>
+          <Button isWide onClick={createCollection} variant="solid">
+            Create Collection
+          </Button>
+        </div>
 
-      <section {...collapseProps}>
-        <WhitelistDetails onChange={setWhitelistDetails} />
-        <RoyaltyDetails onChange={setRoyaltyDetails} />
-      </section>
-
-      <div className="mt-5 ml-8">
-        <Button className="mb-8" isWide onClick={createCollection} variant="solid">
-          Create Collection
-        </Button>
+        <section {...collapseProps} className="mb-10">
+          <WhitelistDetails onChange={setWhitelistDetails} />
+          <div className="my-6" />
+          <RoyaltyDetails onChange={setRoyaltyDetails} />
+        </section>
       </div>
     </div>
   )
