@@ -146,7 +146,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         tempArray.push(
           <video
             key={assetFile.name}
-            className="relative px-1 my-1 thumbnail"
+            className="absolute px-1 my-1 thumbnail"
             id="video"
             muted
             onMouseEnter={(e) => {
@@ -426,14 +426,14 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                             htmlFor="my-modal-4"
                           >
                             {getAssetType(assetSource.name) === 'audio' && (
-                              <div className="flex relative flex-col items-center ml-2">
+                              <div className="flex absolute flex-col items-center mt-4 ml-2">
                                 <img
                                   key={`audio-${index}`}
                                   alt="audio_icon"
-                                  className="relative mb-2 ml-1 w-6 h-6 thumbnail"
+                                  className="mb-2 ml-1 w-6 h-6 thumbnail"
                                   src="/audio.png"
                                 />
-                                <span className="relative self-center">{assetSource.name}</span>
+                                <span className="flex self-center ">{assetSource.name}</span>
                               </div>
                             )}
                             {getAssetType(assetSource.name) === 'video' &&
