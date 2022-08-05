@@ -409,53 +409,50 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                   />
                 </div>
 
-                  <Conditional test={assetFilesArray.length > 0}>
-                    <div className="overflow-auto mt-2 mr-10 ml-20 w-4/5 h-96">
-                      {assetFilesArray.map((assetSource, index) => (
-                        <button
-                          key={assetSource.name}
-                          className="relative p-0 w-[100px] h-[100px] bg-transparent hover:bg-transparent border-0 btn modal-button"
-                          onClick={() => {
-                            updateMetadataFileIndex(index)
-                          }}
-                          type="button"
+                <Conditional test={assetFilesArray.length > 0}>
+                  <div className="overflow-auto mt-2 mr-10 ml-20 w-4/5 h-96">
+                    {assetFilesArray.map((assetSource, index) => (
+                      <button
+                        key={assetSource.name}
+                        className="relative p-0 w-[100px] h-[100px] bg-transparent hover:bg-transparent border-0 btn modal-button"
+                        onClick={() => {
+                          updateMetadataFileIndex(index)
+                        }}
+                        type="button"
+                      >
+                        <label
+                          className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
+                          htmlFor="my-modal-4"
                         >
-                          <label
-                            className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                            htmlFor="my-modal-4"
-                          >
-                            {getAssetType(assetSource.name) === 'audio' && (
-                              <div className="flex absolute flex-col items-center mt-4 ml-2">
-                                <img
-                                  key={`audio-${index}`}
-                                  alt="audio_icon"
-                                  className="mb-2 ml-1 w-6 h-6 thumbnail"
-                                  src="/audio.png"
-                                />
-                                <span className="flex self-center ">{assetSource.name}</span>
-                              </div>
-                            )}
-                            {getAssetType(assetSource.name) === 'video' &&
-                              videoPreviewElements.filter(
-                                (videoPreviewElement) => videoPreviewElement.key === assetSource.name,
-                              )}
-
-                            {getAssetType(assetSource.name) === 'image' && (
+                          {getAssetType(assetSource.name) === 'audio' && (
+                            <div className="flex absolute flex-col items-center mt-4 ml-2">
                               <img
-                                key={`image-${index}`}
-                                alt="asset"
-                                className="px-1 my-1 thumbnail"
-                                src={URL.createObjectURL(assetSource)}
+                                key={`audio-${index}`}
+                                alt="audio_icon"
+                                className="mb-2 ml-1 w-6 h-6 thumbnail"
+                                src="/audio.png"
                               />
+                              <span className="flex self-center ">{assetSource.name}</span>
+                            </div>
+                          )}
+                          {getAssetType(assetSource.name) === 'video' &&
+                            videoPreviewElements.filter(
+                              (videoPreviewElement) => videoPreviewElement.key === assetSource.name,
                             )}
-                          </label>
-                        </button>
-                      ))}
-                    </div>
-                  </Conditional>
-                </div>
-                </Conditional>
 
+                          {getAssetType(assetSource.name) === 'image' && (
+                            <img
+                              key={`image-${index}`}
+                              alt="asset"
+                              className="px-1 my-1 thumbnail"
+                              src={URL.createObjectURL(assetSource)}
+                            />
+                          )}
+                        </label>
+                      </button>
+                    ))}
+                  </div>
+                </Conditional>
               </div>
             </div>
           </div>
