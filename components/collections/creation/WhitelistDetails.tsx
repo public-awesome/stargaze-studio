@@ -36,6 +36,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     id: 'whitelist-address',
     name: 'whitelistAddress',
     title: 'Whitelist Address',
+    defaultValue: '',
   })
 
   const uniPriceState = useNumberInputState({
@@ -79,7 +80,16 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uniPriceState.value, memberLimitState.value, perAddressLimitState.value, startDate, endDate, whitelistArray])
+  }, [
+    whitelistAddressState.value,
+    uniPriceState.value,
+    memberLimitState.value,
+    perAddressLimitState.value,
+    startDate,
+    endDate,
+    whitelistArray,
+    whitelistState,
+  ])
 
   return (
     <div className="py-3 px-8 rounded border-2 border-white/20">
@@ -135,7 +145,11 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
       </div>
 
       <Conditional test={whitelistState === 'existing'}>
-        <AddressInput {...whitelistAddressState} className="pb-5" />
+        <AddressInput
+          {...whitelistAddressState}
+          className="pb-5"
+          onChange={(e) => whitelistAddressState.onChange(e.target.value)}
+        />
       </Conditional>
 
       <Conditional test={whitelistState === 'new'}>

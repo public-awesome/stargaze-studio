@@ -44,7 +44,7 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [royaltyPaymentAddressState.value, royaltyShareState.value])
+  }, [royaltyState, royaltyPaymentAddressState.value, royaltyShareState.value])
 
   return (
     <div className="py-3 px-8 rounded border-2 border-white/20">
@@ -78,7 +78,7 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
             value="Existing"
           />
           <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="royaltyRadio2">
-            New royalty
+            Configure royalty details
           </label>
         </div>
       </div>

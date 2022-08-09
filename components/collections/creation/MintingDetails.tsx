@@ -8,6 +8,7 @@ import { NumberInput } from '../../forms/FormInput'
 
 interface MintingDetailsProps {
   onChange: (data: MintingDetailsDataProps) => void
+  numberOfTokens: number | undefined
 }
 
 export interface MintingDetailsDataProps {
@@ -17,7 +18,7 @@ export interface MintingDetailsDataProps {
   startTime: string
 }
 
-export const MintingDetails = ({ onChange }: MintingDetailsProps) => {
+export const MintingDetails = ({ onChange, numberOfTokens }: MintingDetailsProps) => {
   const [timestamp, setTimestamp] = useState<Date | undefined>()
 
   const numberOfTokensState = useNumberInputState({
@@ -45,6 +46,7 @@ export const MintingDetails = ({ onChange }: MintingDetailsProps) => {
   })
 
   useEffect(() => {
+    if (numberOfTokens) numberOfTokensState.onChange(numberOfTokens)
     const data: MintingDetailsDataProps = {
       numTokens: numberOfTokensState.value,
       unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
@@ -53,14 +55,14 @@ export const MintingDetails = ({ onChange }: MintingDetailsProps) => {
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numberOfTokensState.value, unitPriceState.value, perAddressLimitState.value, timestamp])
+  }, [numberOfTokens, numberOfTokensState.value, unitPriceState.value, perAddressLimitState.value, timestamp])
 
   return (
     <div>
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
-        <NumberInput {...numberOfTokensState} />
-        <NumberInput {...unitPriceState} />
-        <NumberInput {...perAddressLimitState} />
+        <NumberInput {...numberOfTokensState} disabled isRequired value={numberOfTokens} />
+        <NumberInput {...unitPriceState} isRequired />
+        <NumberInput {...perAddressLimitState} isRequired />
         <FormControl htmlId="timestamp" isRequired subtitle="Start time for the minting" title="Start Time">
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
         </FormControl>

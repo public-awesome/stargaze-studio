@@ -26,6 +26,7 @@ import useCollapse from 'react-collapsed'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
 import { upload } from 'services/upload'
+import { compareFileArrays } from 'utils/compareFileArrays'
 import { MINTER_CODE_ID, SG721_CODE_ID, WHITELIST_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -58,6 +59,7 @@ const CollectionCreationPage: NextPage = () => {
       checkRoyaltyDetails()
 
       const baseUri = await uploadFiles()
+      //upload coverImageUri and append the file name
       const coverImageUri = await upload(
         collectionDetails?.imageFile as File[],
         uploadDetails?.uploadService as UploadServiceType,
@@ -71,7 +73,7 @@ const CollectionCreationPage: NextPage = () => {
       if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
       else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
 
-      await instantate(baseUri, coverImageUri, whitelist)
+      await instantiate(baseUri, coverImageUri, whitelist)
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -87,7 +89,7 @@ const CollectionCreationPage: NextPage = () => {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
-      unit_price: coin(String(Number(whitelistDetails?.unitPrice) * 1000000), 'ustars'),
+      unit_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
     }
@@ -102,20 +104,20 @@ const CollectionCreationPage: NextPage = () => {
     return data.contractAddress
   }
 
-  const instantate = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
+  const instantiate = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
     if (!minterContract) throw new Error('Contract not found')
 
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
       royaltyInfo = {
-        paymentAddress: royaltyDetails.paymentAddress,
-        share: royaltyDetails.share,
+        payment_address: royaltyDetails.paymentAddress,
+        share: (Number(royaltyDetails.share) / 100).toString(),
       }
     }
 
     const msg = {
-      base_token_uri: baseUri,
+      base_token_uri: `ipfs://${baseUri}/`,
       num_tokens: mintingDetails?.numTokens,
       sg721_code_id: SG721_CODE_ID,
       sg721_instantiate_msg: {
@@ -125,19 +127,18 @@ const CollectionCreationPage: NextPage = () => {
         collection_info: {
           creator: wallet.address,
           description: collectionDetails?.description,
-          image: coverImageUri,
-          external_link: collectionDetails?.externalLink,
+          image: `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`,
+          external_link: collectionDetails?.externalLink === '' ? null : collectionDetails?.externalLink,
           royalty_info: royaltyInfo,
         },
       },
       per_address_limit: mintingDetails?.perAddressLimit,
-      unit_price: coin(String(Number(mintingDetails?.unitPrice) * 1000000), 'ustars'),
-      whitelist_address: whitelist,
+      unit_price: coin(String(Number(mintingDetails?.unitPrice)), 'ustars'),
+      whitelist,
       start_time: mintingDetails?.startTime,
     }
 
     const data = await minterContract.instantiate(MINTER_CODE_ID, msg, 'Stargaze Minter Contract', wallet.address)
-
     setTransactionHash(data.transactionHash)
     setContractAddress(data.contractAddress)
   }
@@ -206,6 +207,7 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.metadataFiles.length === 0) {
       throw new Error('Please upload metadatas')
     }
+    compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
     if (uploadDetails.uploadService === 'nft-storage') {
       if (uploadDetails.nftStorageApiKey === '') {
         throw new Error('Please enter NFT Storage api key')
@@ -217,17 +219,22 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkCollectionDetails = () => {
     if (!collectionDetails) throw new Error('Please fill out the collection details')
-    if (collectionDetails.name === '') throw new Error('Name is required')
-    if (collectionDetails.description === '') throw new Error('Description is required')
-    if (collectionDetails.imageFile.length === 0) throw new Error('Cover image is required')
+    if (collectionDetails.name === '') throw new Error('Collection name is required')
+    if (collectionDetails.description === '') throw new Error('Collection description is required')
+    if (collectionDetails.imageFile.length === 0) throw new Error('Collection cover image is required')
   }
 
   const checkMintingDetails = () => {
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
-    if (Number(mintingDetails.unitPrice) < 500) throw new Error('Invalid unit price')
-    if (mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
-      throw new Error('Per address limit is required')
+    if (Number(mintingDetails.unitPrice) < 50000000)
+      throw new Error('Invalid unit price: The minimum unit price is 50 STARS')
+    if (
+      mintingDetails.perAddressLimit < 1 ||
+      mintingDetails.perAddressLimit > 50 ||
+      mintingDetails.perAddressLimit > mintingDetails.numTokens
+    )
+      throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
   }
 
@@ -235,9 +242,11 @@ const CollectionCreationPage: NextPage = () => {
     if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
     if (whitelistDetails.whitelistType === 'existing') {
       if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
-    } else {
+    } else if (whitelistDetails.whitelistType === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
       if (whitelistDetails.unitPrice === '') throw new Error('Whitelist unit price is required')
+      if (Number(whitelistDetails.unitPrice) < 25000000)
+        throw new Error('Invalid unit price: The minimum unit price for whitelisted addresses is 25 STARS')
       if (whitelistDetails.startTime === '') throw new Error('Start time is required')
       if (whitelistDetails.endTime === '') throw new Error('End time is required')
       if (whitelistDetails.perAddressLimit === 0) throw new Error('Per address limit is required')
@@ -249,6 +258,7 @@ const CollectionCreationPage: NextPage = () => {
     if (!royaltyDetails) throw new Error('Please fill out the royalty details')
     if (royaltyDetails.royaltyType === 'new') {
       if (royaltyDetails.share === 0) throw new Error('Royalty share is required')
+      if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share')
       if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
     }
   }
@@ -274,7 +284,7 @@ const CollectionCreationPage: NextPage = () => {
 
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
           <CollectionDetails onChange={setCollectionDetails} />
-          <MintingDetails onChange={setMintingDetails} />
+          <MintingDetails numberOfTokens={uploadDetails?.assetFiles.length} onChange={setMintingDetails} />
         </div>
 
         <div className="flex justify-between my-6">
