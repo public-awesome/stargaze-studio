@@ -1,16 +1,16 @@
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import Anchor from 'components/Anchor'
+import { AssetsPreview } from 'components/AssetsPreview'
 import { Conditional } from 'components/Conditional'
 import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataModal } from 'components/MetadataModal'
 import { setBaseTokenUri, setImage, useCollectionStore } from 'contexts/collection'
 import type { ChangeEvent } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
-import { getAssetType } from 'utils/getAssetType'
 import { naturalCompare } from 'utils/sort'
 
 type UploadMethod = 'new' | 'existing'
@@ -69,46 +69,48 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   }
 
   const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
-    setAssetFilesArray([])
-    setMetadataFilesArray([])
-    console.log(event.target.files)
+    const files: File[] = []
     let reader: FileReader
     if (event.target.files === null) return
+    setAssetFilesArray([])
+    setMetadataFilesArray([])
     for (let i = 0; i < event.target.files.length; i++) {
       reader = new FileReader()
       reader.onload = (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
         const assetFile = new File([e.target.result], event.target.files[i].name, { type: 'image/jpg' })
-        setAssetFilesArray((prev) => [...prev, assetFile])
+        files.push(assetFile)
       }
-      if (!event.target.files) return toast.error('No file selected.')
       reader.readAsArrayBuffer(event.target.files[i])
       reader.onloadend = (e) => {
-        setAssetFilesArray((prev) => prev.sort((a, b) => naturalCompare(a.name, b.name)))
+        if (!event.target.files) return toast.error('No file selected.')
+        if (i === event.target.files.length - 1) {
+          setAssetFilesArray(files.sort((a, b) => naturalCompare(a.name, b.name)))
+        }
       }
     }
   }
 
   const selectMetadata = (event: ChangeEvent<HTMLInputElement>) => {
-    setMetadataFilesArray([])
-    console.log(assetFilesArray)
-    console.log(event.target.files)
+    const files: File[] = []
     let reader: FileReader
     if (event.target.files === null) return toast.error('No files selected.')
+    setMetadataFilesArray([])
     for (let i = 0; i < event.target.files.length; i++) {
       reader = new FileReader()
       reader.onload = (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
         const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
-        setMetadataFilesArray((prev) => [...prev, metadataFile])
+        files.push(metadataFile)
       }
-      if (!event.target.files) return toast.error('No file selected.')
       reader.readAsText(event.target.files[i], 'utf8')
       reader.onloadend = (e) => {
-        setMetadataFilesArray((prev) => prev.sort((a, b) => naturalCompare(a.name, b.name)))
-        console.log(metadataFilesArray)
+        if (!event.target.files) return toast.error('No file selected.')
+        if (i === event.target.files.length - 1) {
+          setMetadataFilesArray(files.sort((a, b) => naturalCompare(a.name, b.name)))
+        }
       }
     }
   }
@@ -123,31 +125,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     console.log('Updated Metadata File:')
     console.log(JSON.parse(await metadataFilesArray[metadataFileArrayIndex]?.text()))
   }
-
-  const videoPreviewElements = useMemo(() => {
-    const tempArray: JSX.Element[] = []
-    assetFilesArray.forEach((assetFile) => {
-      if (getAssetType(assetFile.name) === 'video') {
-        tempArray.push(
-          <video
-            key={assetFile.name}
-            className="absolute px-1 my-1 thumbnail"
-            id="video"
-            muted
-            onMouseEnter={(e) => {
-              void e.currentTarget.play()
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.pause()
-              e.currentTarget.currentTime = 0
-            }}
-            src={URL.createObjectURL(assetFile)}
-          />,
-        )
-      }
-    })
-    return tempArray
-  }, [assetFilesArray])
 
   useEffect(() => {
     try {
@@ -400,48 +377,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                 </div>
 
                 <Conditional test={assetFilesArray.length > 0}>
-                  <div className="overflow-auto mt-2 mr-10 ml-20 w-4/5 h-96">
-                    {assetFilesArray.map((assetSource, index) => (
-                      <button
-                        key={assetSource.name}
-                        className="relative p-0 w-[100px] h-[100px] bg-transparent hover:bg-transparent border-0 btn modal-button"
-                        onClick={() => {
-                          updateMetadataFileIndex(index)
-                        }}
-                        type="button"
-                      >
-                        <label
-                          className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
-                          htmlFor="my-modal-4"
-                        >
-                          {getAssetType(assetSource.name) === 'audio' && (
-                            <div className="flex absolute flex-col items-center mt-4 ml-2">
-                              <img
-                                key={`audio-${index}`}
-                                alt="audio_icon"
-                                className="mb-2 ml-1 w-6 h-6 thumbnail"
-                                src="/audio.png"
-                              />
-                              <span className="flex self-center ">{assetSource.name}</span>
-                            </div>
-                          )}
-                          {getAssetType(assetSource.name) === 'video' &&
-                            videoPreviewElements.filter(
-                              (videoPreviewElement) => videoPreviewElement.key === assetSource.name,
-                            )}
-
-                          {getAssetType(assetSource.name) === 'image' && (
-                            <img
-                              key={`image-${index}`}
-                              alt="asset"
-                              className="px-1 my-1 thumbnail"
-                              src={URL.createObjectURL(assetSource)}
-                            />
-                          )}
-                        </label>
-                      </button>
-                    ))}
-                  </div>
+                  <AssetsPreview assetFilesArray={assetFilesArray} updateMetadataFileIndex={updateMetadataFileIndex} />
                 </Conditional>
               </div>
             </div>
