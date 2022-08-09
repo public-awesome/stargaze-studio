@@ -32,7 +32,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   const baseTokenURI = useCollectionStore().base_token_uri
   const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
   const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
-  const [updatedMetadataFilesArray, setUpdatedMetadataFilesArray] = useState<File[]>([])
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
@@ -72,7 +71,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
     setAssetFilesArray([])
     setMetadataFilesArray([])
-    setUpdatedMetadataFilesArray([])
     console.log(event.target.files)
     let reader: FileReader
     if (event.target.files === null) return
@@ -94,7 +92,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
 
   const selectMetadata = (event: ChangeEvent<HTMLInputElement>) => {
     setMetadataFilesArray([])
-    setUpdatedMetadataFilesArray([])
     console.log(assetFilesArray)
     console.log(event.target.files)
     let reader: FileReader
@@ -405,7 +402,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     metadataFile={metadataFilesArray[metadataFileArrayIndex]}
                     refresher={refreshMetadata}
                     updateMetadata={updateMetadataFileArray}
-                    updatedMetadataFile={updatedMetadataFilesArray[metadataFileArrayIndex]}
                   />
                 </div>
 

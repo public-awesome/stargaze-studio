@@ -30,6 +30,8 @@ import { MINTER_CODE_ID, SG721_CODE_ID, WHITELIST_CODE_ID } from 'utils/constant
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { getAssetType } from '../../utils/getAssetType'
+
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
   const { minter: minterContract, whitelist: whitelistContract } = useContracts()
@@ -158,6 +160,12 @@ const CollectionCreationPage: NextPage = () => {
             reader = new FileReader()
             reader.onload = (e) => {
               const data: any = JSON.parse(e.target?.result as string)
+              if (
+                getAssetType(uploadDetails.assetFiles[i].name) === 'audio' ||
+                getAssetType(uploadDetails.assetFiles[i].name) === 'video'
+              ) {
+                data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+              }
               data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
               const metadataFileBlob = new Blob([JSON.stringify(data)], {
                 type: 'application/json',

@@ -15,13 +15,11 @@ export interface MetadataModalProps {
   assetFile: File
   metadataFile: File
   updateMetadata: (metadataFile: File) => void
-  updatedMetadataFile: File
   refresher: boolean
 }
 
 export const MetadataModal = (props: MetadataModalProps) => {
   const metadataFile: File = props.metadataFile
-  const updatedMetadataFile: File = props.updatedMetadataFile
   const [metadata, setMetadata] = useState<any>(null)
   const [imageURL, setImageURL] = useState<string>('')
 
@@ -59,11 +57,6 @@ export const MetadataModal = (props: MetadataModalProps) => {
       } else {
         externalUrlState.onChange(parsedMetadata.external_url)
       }
-      if (!parsedMetadata.animation_url) {
-        animationUrlState.onChange('')
-      } else {
-        animationUrlState.onChange(parsedMetadata.animation_url)
-      }
       if (!parsedMetadata.youtube_url) {
         youtubeUrlState.onChange('')
       } else {
@@ -71,10 +64,6 @@ export const MetadataModal = (props: MetadataModalProps) => {
       }
 
       setMetadata(parsedMetadata)
-    }
-    if (updatedMetadataFile) {
-      const parsedUpdatedMetadata = JSON.parse(await updatedMetadataFile.text())
-      setImageURL(parsedUpdatedMetadata.image)
     }
   }
 
@@ -102,28 +91,12 @@ export const MetadataModal = (props: MetadataModalProps) => {
     defaultValue: metadata?.external_url,
   })
 
-  const animationUrlState = useInputState({
-    id: 'animationUrl',
-    name: 'animationlUrl',
-    title: 'Animation URL',
-    placeholder: 'https://',
-    defaultValue: metadata?.animation_url,
-  })
-
   const youtubeUrlState = useInputState({
     id: 'youtubeUrl',
     name: 'youtubeUrl',
     title: 'Youtube URL',
     placeholder: 'https://',
     defaultValue: metadata?.youtube_url,
-  })
-
-  const imageState = useInputState({
-    id: 'image',
-    name: 'image',
-    title: 'Image',
-    placeholder: 'Not uploaded yet.',
-    defaultValue: imageURL,
   })
 
   const attributesState = useMetadataAttributesState()
@@ -135,11 +108,14 @@ export const MetadataModal = (props: MetadataModalProps) => {
     metadata.attributes = Object.values(attributesState)[1]
     metadata.attributes = metadata.attributes.filter((attribute: { trait_type: string }) => attribute.trait_type !== '')
 
-    metadata.name = nameState.value
-    metadata.description = descriptionState.value
-    metadata.external_url = externalUrlState.value
-    metadata.animation_url = animationUrlState.value
-    metadata.youtube_url = youtubeUrlState.value
+    if (nameState.value === '') delete metadata.name
+    else metadata.name = nameState.value
+    if (descriptionState.value === '') delete metadata.description
+    else metadata.description = descriptionState.value
+    if (externalUrlState.value === '') delete metadata.external_url
+    else metadata.externalUrl = externalUrlState.value
+    if (youtubeUrlState.value === '') delete metadata.youtube_url
+    else metadata.youtube_url = youtubeUrlState.value
 
     const metadataFileBlob = new Blob([JSON.stringify(metadata)], {
       type: 'application/json',
@@ -147,6 +123,7 @@ export const MetadataModal = (props: MetadataModalProps) => {
 
     const editedMetadataFile = new File([metadataFileBlob], metadataFile.name, { type: 'application/json' })
     props.updateMetadata(editedMetadataFile)
+    console.log(editedMetadataFile)
   }
 
   useEffect(() => {
@@ -169,9 +146,7 @@ export const MetadataModal = (props: MetadataModalProps) => {
             <TextInput {...nameState} onChange={(e) => nameState.onChange(e.target.value)} />
             <TextInput {...descriptionState} onChange={(e) => descriptionState.onChange(e.target.value)} />
             <TextInput {...externalUrlState} onChange={(e) => externalUrlState.onChange(e.target.value)} />
-            <TextInput {...animationUrlState} onChange={(e) => animationUrlState.onChange(e.target.value)} />
             <TextInput {...youtubeUrlState} onChange={(e) => youtubeUrlState.onChange(e.target.value)} />
-            <TextInput {...imageState} disabled value={imageURL} />
             <MetadataAttributes
               attributes={attributesState.entries}
               onAdd={attributesState.add}
