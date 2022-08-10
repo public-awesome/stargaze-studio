@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import { coin } from '@cosmjs/proto-signing'
-import Anchor from 'components/Anchor'
+import { Anchor } from 'components/Anchor'
 import Button from 'components/Button'
 import {
   CollectionDetails,

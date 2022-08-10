@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
-import Anchor from 'components/Anchor'
+import { Anchor } from 'components/Anchor'
 import { AssetsPreview } from 'components/AssetsPreview'
 import { Conditional } from 'components/Conditional'
 import { TextInput } from 'components/forms/FormInput'
