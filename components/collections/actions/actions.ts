@@ -8,6 +8,7 @@ export type ActionType = typeof ACTION_TYPES[number]
 export const ACTION_TYPES = [
   'mint_to',
   'mint_for',
+  'batch_mint',
   'set_whitelist',
   'update_start_time',
   'update_per_address_limit',
@@ -32,6 +33,11 @@ export const ACTION_LIST: ActionListItem[] = [
     id: 'mint_for',
     name: 'Mint For',
     description: `Mint a token for a user with given token ID`,
+  },
+  {
+    id: 'batch_mint',
+    name: 'Batch Mint',
+    description: `Mint multiple tokens to a user with given token amount`,
   },
   {
     id: 'set_whitelist',
@@ -83,6 +89,7 @@ export type DispatchExecuteArgs = {
   | { type: undefined }
   | { type: Select<'mint_to'>; recipient: string }
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
+  | { type: Select<'batch_mint'>; recipient: string; batchNumber: number }
   | { type: Select<'set_whitelist'>; whitelist: string }
   | { type: Select<'update_start_time'>; startTime: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
@@ -102,6 +109,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'mint_for': {
       return minterMessages.mintFor(txSigner, args.recipient, args.tokenId)
+    }
+    case 'batch_mint': {
+      return minterMessages.batchMint(txSigner, args.recipient, args.batchNumber)
     }
     case 'set_whitelist': {
       return minterMessages.setWhitelist(txSigner, args.whitelist)
@@ -139,6 +149,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'mint_for': {
       return minterMessages()?.mintFor(minterContract, args.recipient, args.tokenId)
+    }
+    case 'batch_mint': {
+      return minterMessages()?.batchMint(minterContract, args.recipient, args.batchNumber)
     }
     case 'set_whitelist': {
       return minterMessages()?.setWhitelist(minterContract, args.whitelist)
