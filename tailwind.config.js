@@ -6,7 +6,7 @@ module.exports = {
   content: ['./{components,contexts,hooks,pages,utils}/**/*.{js,cjs,mjs,ts,tsx}'],
 
   daisyui: {
-    themes: ["dracula"]
+    themes: ['dracula'],
   },
 
   theme: {
@@ -44,6 +44,9 @@ module.exports = {
         sans: ['Roboto', ...defaultTheme.fontFamily.sans],
         mono: ['"JetBrains Mono"', ...defaultTheme.fontFamily.mono],
       },
+      animation: {
+        'spin-slow': 'spin 3s linear infinite',
+      },
     },
   },
 
@@ -65,6 +68,6 @@ module.exports = {
         },
       })
     }),
-    require("daisyui"),
+    require('daisyui'),
   ],
 }

@@ -17,6 +17,8 @@ import type { MintingDetailsDataProps } from 'components/collections/creation/Mi
 import type { RoyaltyDetailsDataProps } from 'components/collections/creation/RoyaltyDetails'
 import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
 import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
+import { Conditional } from 'components/Conditional'
+import { LoadingModal } from 'components/LoadingModal'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
@@ -47,6 +49,7 @@ const CollectionCreationPage: NextPage = () => {
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
 
+  const [uploading, setUploading] = useState(false)
   const [contractAddress, setContractAddress] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
@@ -57,6 +60,8 @@ const CollectionCreationPage: NextPage = () => {
       checkMintingDetails()
       checkWhitelistDetails()
       checkRoyaltyDetails()
+
+      setUploading(true)
 
       const baseUri = await uploadFiles()
       //upload coverImageUri and append the file name
@@ -69,6 +74,8 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails?.pinataSecretKey as string,
       )
 
+      setUploading(false)
+
       let whitelist: string | undefined
       if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
       else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
@@ -78,6 +85,7 @@ const CollectionCreationPage: NextPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message)
+      setUploading(false)
     }
   }
 
@@ -273,6 +281,10 @@ const CollectionCreationPage: NextPage = () => {
 
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">Create Collection</h1>
+
+        <Conditional test={uploading}>
+          <LoadingModal />
+        </Conditional>
 
         <p>
           Make sure you check our{' '}
