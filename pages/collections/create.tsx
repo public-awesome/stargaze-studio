@@ -171,9 +171,13 @@ const CollectionCreationPage: NextPage = () => {
               const metadataFileBlob = new Blob([JSON.stringify(data)], {
                 type: 'application/json',
               })
-              const updatedMetadataFile = new File([metadataFileBlob], uploadDetails.metadataFiles[i].name, {
-                type: 'application/json',
-              })
+              const updatedMetadataFile = new File(
+                [metadataFileBlob],
+                uploadDetails.metadataFiles[i].name.substring(0, uploadDetails.metadataFiles[i].name.lastIndexOf('.')),
+                {
+                  type: 'application/json',
+                },
+              )
               fileArray.push(updatedMetadataFile)
             }
             reader.onloadend = () => {
@@ -199,21 +203,21 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkUploadDetails = () => {
     if (!uploadDetails) {
-      throw new Error('Please upload asset and metadata')
+      throw new Error('Please select assets and metadata')
     }
     if (uploadDetails.assetFiles.length === 0) {
-      throw new Error('Please upload assets')
+      throw new Error('Please select the assets')
     }
     if (uploadDetails.metadataFiles.length === 0) {
-      throw new Error('Please upload metadatas')
+      throw new Error('Please select the metadata files')
     }
     compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
     if (uploadDetails.uploadService === 'nft-storage') {
       if (uploadDetails.nftStorageApiKey === '') {
-        throw new Error('Please enter NFT Storage api key')
+        throw new Error('Please enter a valid NFT Storage API key')
       }
     } else if (uploadDetails.pinataApiKey === '' || uploadDetails.pinataSecretKey === '') {
-      throw new Error('Please enter Pinata api key and secret key')
+      throw new Error('Please enter Pinata API and secret keys')
     }
   }
 

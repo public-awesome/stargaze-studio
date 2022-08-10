@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 
 import Button from './Button'
 import { TextInput } from './forms/FormInput'
@@ -123,6 +124,7 @@ export const MetadataModal = (props: MetadataModalProps) => {
 
     const editedMetadataFile = new File([metadataFileBlob], metadataFile.name, { type: 'application/json' })
     props.updateMetadata(editedMetadataFile)
+    toast.success('Metadata updated successfully.')
     console.log(editedMetadataFile)
   }
 
