@@ -1,5 +1,5 @@
 {
-  "name": "stargaze-tools",
+  "name": "stargaze-studio",
   "version": "0.1.0",
   "workspaces": [
     "packages/*"
@@ -62,7 +62,7 @@
   },
   "eslintConfig": {
     "extends": [
-      "@stargaze-tools/eslint-config"
+      "@stargaze-studio/eslint-config"
     ],
     "ignorePatterns": [
       ".next",
@@ -80,6 +80,6 @@
       "eslint --fix"
     ]
   },
-  "prettier": "@stargaze-tools/prettier-config",
+  "prettier": "@stargaze-studio/prettier-config",
   "private": true
 }

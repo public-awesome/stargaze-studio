@@ -1,5 +1,5 @@
 {
-  "name": "@stargaze-tools/eslint-config",
+  "name": "@stargaze-studio/eslint-config",
   "version": "0.0.0",
   "dependencies": {
     "@babel/core": "^7",
@@ -26,6 +26,6 @@
       "prettier --write"
     ]
   },
-  "prettier": "@stargaze-tools/prettier-config",
+  "prettier": "@stargaze-studio/prettier-config",
   "license": "MIT"
 }

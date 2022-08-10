@@ -21,17 +21,17 @@ const HomePage: NextPage = () => {
 
       <div className="grid gap-8 md:grid-cols-2">
         <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/minter" title="Minter contract">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Execute messages and run queries on Stargaze&apos;s minter contract.
         </HomeCard>
         <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/sg721" title="Sg721 Contract">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Execute messages and run queries on Stargaze&apos;s sg721 contract.
         </HomeCard>
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/contracts/whitelist"
           title="Whitelist Contract"
         >
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Execute messages and run queries on Stargaze&apos;s whitelist contract.
         </HomeCard>
       </div>
     </section>

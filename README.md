@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD033 MD034 MD036 MD041 -->
 
-![stargaze-tools](./public/social.png)
+![stargaze-studio](./public/social.png)
 
-# stargaze-tools
+# stargaze-studio
 
 - Mainnet website: https://
 - Testnet website: https://
@@ -24,8 +24,8 @@
 
 ```sh
 # clone repository
-git clone https://github.com/deus-labs/stargaze-tools.git
-cd stargaze-tools
+git clone https://github.com/deus-labs/stargaze-studio.git
+cd stargaze-studio
 
 # install dependencies
 yarn install

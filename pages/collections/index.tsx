@@ -25,21 +25,21 @@ const HomePage: NextPage = () => {
           link="/collections/create"
           title="Create a Collection"
         >
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Upload your assets, enter collection metadata and deploy your collection.
         </HomeCard>
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/collections/actions"
           title="Collection Actions"
         >
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Execute messages on a collection.
         </HomeCard>
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/collections/queries"
           title="Collection Queries"
         >
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Query data from a collection.
         </HomeCard>
       </div>
     </section>

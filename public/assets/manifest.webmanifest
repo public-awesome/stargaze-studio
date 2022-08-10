@@ -1,7 +1,7 @@
 {
-  "name": "StargazeTools",
-  "short_name": "StargazeTools",
-  "description": "StargazeTools is a swiss army knife that helps you build on Stargaze by providing smart contract front ends",
+  "name": "StargazeStudio",
+  "short_name": "StargazeStudio",
+  "description": "Stargaze Studio is a dApp that helps you create and manage your collections on Stargaze by providing smart contract front ends",
   "dir": "auto",
   "lang": "en-US",
   "display": "standalone",

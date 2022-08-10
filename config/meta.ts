@@ -6,6 +6,6 @@ export const meta = {
   domain: 'stargaze.tools',
   url: faviconsJson.developerURL,
   twitter: {
-    username: '@stargazetools',
+    username: '@stargazestudio',
   },
 }

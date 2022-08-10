@@ -1,9 +1,9 @@
 {
   "path": "/assets/",
-  "appName": "StargazeTools",
-  "appShortName": "StargazeTools",
-  "appDescription": "Stargaze Tools is built to provide useful smart contract interfaces that helps you build and deploy your own NFT collection in no time.",
-  "developerName": "StargazeTools",
+  "appName": "StargazeStudio",
+  "appShortName": "StargazeStudio",
+  "appDescription": "Stargaze Studio is built to provide useful smart contract interfaces that helps you build and deploy your own NFT collection in no time.",
+  "developerName": "StargazeStudio",
   "developerURL": "https://",
   "background": "#FFC27D",
   "theme_color": "#FFC27D",
