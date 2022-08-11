@@ -83,7 +83,7 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
               <img
                 key={`image-${index}`}
                 alt="asset"
-                className="px-1 my-1 thumbnail"
+                className="px-1 my-1 max-h-24 thumbnail"
                 src={URL.createObjectURL(assetSource)}
               />
             </div>
