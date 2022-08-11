@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { useCallback, useMemo, useState } from 'react'
 import { getAssetType } from 'utils/getAssetType'
 
@@ -38,6 +39,13 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
     return tempArray
   }, [assetFilesArray])
 
+  const getOverlaySize = () => {
+    if (assetFilesArray.length < 100) return 'w-[22px] h-[22px]'
+    if (assetFilesArray.length > 100 && assetFilesArray.length <= 1000 && page < 9) return 'w-[22px] h-[22px]'
+    else if (page < 84) return 'w-[27px] h-[27px]'
+    return 'w-[35px] h-[35px]'
+  }
+
   const renderImages = useCallback(() => {
     return assetFilesArray.slice((page - 1) * ITEM_NUMBER, page * ITEM_NUMBER).map((assetSource, index) => (
       <button
@@ -52,6 +60,15 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
           className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
           htmlFor="my-modal-4"
         >
+          <div
+            className={clsx(
+              'flex absolute right-20 bottom-20 justify-center items-center',
+              'text-sm  text-white bg-stargaze rounded-full',
+              getOverlaySize(),
+            )}
+          >
+            {(page - 1) * 12 + (index + 1)}
+          </div>
           {getAssetType(assetSource.name) === 'audio' && (
             <div className="flex absolute flex-col items-center mt-4 ml-2">
               <img key={`audio-${index}`} alt="audio_icon" className="mb-2 ml-1 w-6 h-6 thumbnail" src="/audio.png" />
@@ -62,12 +79,14 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
             videoPreviewElements.filter((videoPreviewElement) => videoPreviewElement.key === assetSource.name)}
 
           {getAssetType(assetSource.name) === 'image' && (
-            <img
-              key={`image-${index}`}
-              alt="asset"
-              className="px-1 my-1 thumbnail"
-              src={URL.createObjectURL(assetSource)}
-            />
+            <div>
+              <img
+                key={`image-${index}`}
+                alt="asset"
+                className="px-1 my-1 thumbnail"
+                src={URL.createObjectURL(assetSource)}
+              />
+            </div>
           )}
         </label>
       </button>
@@ -84,10 +103,23 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
     setPage(page - 1)
   }
 
+  const multiplePrevPage = () => {
+    if (page - 10 <= 1) return setPage(1)
+    setPage(page - 10)
+  }
+
+  const multipleNextPage = () => {
+    if (page + 10 >= totalPages) return setPage(totalPages)
+    setPage(page + 10)
+  }
+
   return (
     <div className="flex flex-col items-center">
       <div className="mt-2 w-[400px] h-[300px]">{renderImages()}</div>
       <div className="mt-5 btn-group">
+        <button className="text-white bg-plumbus-light btn" onClick={multiplePrevPage} type="button">
+          ««
+        </button>
         <button className="text-white bg-plumbus-light btn" onClick={prevPage} type="button">
           «
         </button>
@@ -96,6 +128,9 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
         </button>
         <button className="text-white bg-plumbus-light btn" onClick={nextPage} type="button">
           »
+        </button>
+        <button className="text-white bg-plumbus-light btn" onClick={multipleNextPage} type="button">
+          »»
         </button>
       </div>
     </div>
