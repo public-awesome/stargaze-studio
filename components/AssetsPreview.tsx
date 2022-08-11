@@ -21,7 +21,7 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
         tempArray.push(
           <video
             key={assetFile.name}
-            className="absolute px-1 my-1 thumbnail"
+            className="absolute px-1 my-1 max-h-24 thumbnail"
             id="video"
             muted
             onMouseEnter={(e) => {
