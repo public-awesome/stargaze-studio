@@ -6,7 +6,7 @@ import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
-import Button from './Button'
+import { Button } from './Button'
 import { TextInput } from './forms/FormInput'
 import { useInputState } from './forms/FormInput.hooks'
 import { MetadataAttributes } from './forms/MetadataAttributes'
@@ -22,7 +22,6 @@ export interface MetadataModalProps {
 export const MetadataModal = (props: MetadataModalProps) => {
   const metadataFile: File = props.metadataFile
   const [metadata, setMetadata] = useState<any>(null)
-  const [imageURL, setImageURL] = useState<string>('')
 
   let parsedMetadata: any
   const parseMetadata = async () => {
