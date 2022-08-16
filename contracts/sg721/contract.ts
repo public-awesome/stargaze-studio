@@ -69,6 +69,7 @@ export interface SG721Instance {
   /// Burn an NFT the sender has access to
   burn: (tokenId: string) => Promise<string>
   batchBurn: (tokenIds: string) => Promise<string>
+  batchTransfer: (recipient: string, tokenIds: string) => Promise<string>
 }
 
 export interface Sg721Messages {
@@ -81,6 +82,7 @@ export interface Sg721Messages {
   mint: (tokenId: string, owner: string, tokenURI?: string) => MintMessage
   burn: (tokenId: string) => BurnMessage
   batchBurn: (tokenIds: string) => BatchBurnMessage
+  batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
 }
 
 export interface TransferNFTMessage {
@@ -182,6 +184,13 @@ export interface BurnMessage {
 }
 
 export interface BatchBurnMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
+  funds: Coin[]
+}
+
+export interface BatchTransferMessage {
   sender: string
   contract: string
   msg: Record<string, unknown>[]
@@ -461,6 +470,49 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    const batchTransfer = async (recipient: string, tokenIds: string): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          const msg = {
+            transfer_nft: { recipient, token_id: i.toString() },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          const msg = {
+            transfer_nft: { recipient, token_id: tokenNumbers[i].toString() },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      }
+
+      const res = await client.signAndBroadcast(txSigner, executeContractMsgs, 'auto', 'batch transfer')
+
+      return res.transactionHash
+    }
+
     return {
       contractAddress,
       ownerOf,
@@ -484,6 +536,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       mint,
       burn,
       batchBurn,
+      batchTransfer,
     }
   }
 
@@ -643,6 +696,30 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
+    const batchTransfer = (recipient: string, tokenIds: string): BatchTransferMessage => {
+      const msg: Record<string, unknown>[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          msg.push({
+            trasnfer_nft: { recipient, token_id: i.toString() },
+          })
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          msg.push({ trasnfer_nft: { recipient, token_id: tokenNumbers[i].toString() } })
+        }
+      }
+
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
     return {
       transferNft,
       sendNft,
@@ -653,6 +730,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       mint,
       burn,
       batchBurn,
+      batchTransfer,
     }
   }
 

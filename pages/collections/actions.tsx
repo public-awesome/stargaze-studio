@@ -73,9 +73,9 @@ const CollectionActionsPage: NextPage = () => {
   const tokenIdListState = useInputState({
     id: 'token-id-list',
     name: 'tokenIdList',
-    title: 'The list of token IDs',
+    title: 'List of token IDs',
     subtitle:
-      'Specify individual token IDs separated by commas (e.g., 2, 4, 8) or a range of IDs separated by a colon (e.g, 8:13)',
+      'Specify individual token IDs separated by commas (e.g., 2, 4, 8) or a range of IDs separated by a colon (e.g., 8:13)',
   })
 
   const recipientState = useInputState({
@@ -97,8 +97,8 @@ const CollectionActionsPage: NextPage = () => {
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
   const showNumberOfTokensField = type === 'batch_mint'
-  const showTokenIdListField = type === 'batch_burn'
-  const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint'])
+  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer'])
+  const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
 
   const minterMessages = useMemo(
     () => minterContract?.use(minterContractState.value),
