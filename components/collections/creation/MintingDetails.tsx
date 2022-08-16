@@ -5,10 +5,12 @@ import { InputDateTime } from 'components/InputDateTime'
 import React, { useEffect, useState } from 'react'
 
 import { NumberInput } from '../../forms/FormInput'
+import type { UploadMethod } from './UploadDetails'
 
 interface MintingDetailsProps {
   onChange: (data: MintingDetailsDataProps) => void
   numberOfTokens: number | undefined
+  uploadMethod: UploadMethod
 }
 
 export interface MintingDetailsDataProps {
@@ -18,7 +20,7 @@ export interface MintingDetailsDataProps {
   startTime: string
 }
 
-export const MintingDetails = ({ onChange, numberOfTokens }: MintingDetailsProps) => {
+export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: MintingDetailsProps) => {
   const [timestamp, setTimestamp] = useState<Date | undefined>()
 
   const numberOfTokensState = useNumberInputState({
@@ -60,7 +62,12 @@ export const MintingDetails = ({ onChange, numberOfTokens }: MintingDetailsProps
   return (
     <div>
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
-        <NumberInput {...numberOfTokensState} disabled isRequired value={numberOfTokens} />
+        <NumberInput
+          {...numberOfTokensState}
+          disabled={uploadMethod === 'new'}
+          isRequired
+          value={uploadMethod === 'new' ? numberOfTokens : numberOfTokensState.value}
+        />
         <NumberInput {...unitPriceState} isRequired />
         <NumberInput {...perAddressLimitState} isRequired />
         <FormControl htmlId="timestamp" isRequired subtitle="Start time for the minting" title="Start Time">

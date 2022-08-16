@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
@@ -11,9 +12,12 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { TextInput } from '../../forms/FormInput'
+import type { UploadMethod } from './UploadDetails'
 
 interface CollectionDetailsProps {
   onChange: (data: CollectionDetailsDataProps) => void
+  uploadMethod: UploadMethod
+  coverImageUrl: string
 }
 
 export interface CollectionDetailsDataProps {
@@ -23,7 +27,7 @@ export interface CollectionDetailsDataProps {
   externalLink?: string
 }
 
-export const CollectionDetails = ({ onChange }: CollectionDetailsProps) => {
+export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
 
   const nameState = useInputState({
@@ -84,23 +88,44 @@ export const CollectionDetails = ({ onChange }: CollectionDetailsProps) => {
       <FormGroup subtitle="Information about your collection" title="Collection Details">
         <TextInput {...nameState} isRequired />
         <TextInput {...descriptionState} isRequired />
-        <FormControl isRequired title="Cover Image">
-          <input
-            accept="image/*"
-            className={clsx(
-              'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-              'before:hover:bg-white/5 before:transition',
-            )}
-            id="cover-image"
-            onChange={selectCoverImage}
-            type="file"
-          />
-          {coverImage !== null && (
-            <div className="w-[200px] h-[200px] rounded border-2">
-              <img alt="cover-preview" src={URL.createObjectURL(coverImage)} />
+
+        <FormControl isRequired={uploadMethod === 'new'} title="Cover Image">
+          {uploadMethod === 'new' && (
+            <input
+              accept="image/*"
+              className={clsx(
+                'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                'before:hover:bg-white/5 before:transition',
+              )}
+              id="cover-image"
+              onChange={selectCoverImage}
+              type="file"
+            />
+          )}
+
+          {coverImage !== null && uploadMethod === 'new' && (
+            <div className="max-w-[200px] max-h-[200px] rounded border-2">
+              <img alt="no-preview-available" src={URL.createObjectURL(coverImage)} />
             </div>
           )}
+          {uploadMethod === 'existing' && coverImageUrl?.includes('ipfs://') && (
+            <div className="max-w-[200px] max-h-[200px] rounded border-2">
+              <img
+                alt="no-preview-available"
+                src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
+              />
+            </div>
+          )}
+          {uploadMethod === 'existing' && coverImageUrl && !coverImageUrl?.includes('ipfs://') && (
+            <div className="max-w-[200px] max-h-[200px] rounded border-2">
+              <img alt="no-preview-available" src={coverImageUrl} />
+            </div>
+          )}
+          {uploadMethod === 'existing' && !coverImageUrl && (
+            <span className="italic font-light ">Waiting for cover image URL to be specified.</span>
+          )}
         </FormControl>
+
         <TextInput {...externalLinkState} />
       </FormGroup>
     </div>

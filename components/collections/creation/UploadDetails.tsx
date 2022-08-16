@@ -6,14 +6,13 @@ import { Conditional } from 'components/Conditional'
 import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataModal } from 'components/MetadataModal'
-import { setBaseTokenUri, setImage, useCollectionStore } from 'contexts/collection'
 import type { ChangeEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
 import { naturalCompare } from 'utils/sort'
 
-type UploadMethod = 'new' | 'existing'
+export type UploadMethod = 'new' | 'existing'
 
 interface UploadDetailsProps {
   onChange: (value: UploadDetailsDataProps) => void
@@ -26,10 +25,12 @@ export interface UploadDetailsDataProps {
   nftStorageApiKey?: string
   pinataApiKey?: string
   pinataSecretKey?: string
+  uploadMethod: UploadMethod
+  baseTokenURI?: string
+  imageUrl?: string
 }
 
 export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
-  const baseTokenURI = useCollectionStore().base_token_uri
   const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
   const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
@@ -60,13 +61,21 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     defaultValue: '9d6f42dc01eaab15f52eac8f36cc4f0ee4184944cb3cdbcda229d06ecf877ee7',
   })
 
-  const handleChangeBaseTokenUri = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setBaseTokenUri(event.target.value.toString())
-  }
+  const baseTokenUriState = useInputState({
+    id: 'baseTokenUri',
+    name: 'baseTokenUri',
+    title: 'Base Token URI',
+    placeholder: 'ipfs://',
+    defaultValue: '',
+  })
 
-  const handleChangeImage = (event: { target: { value: React.SetStateAction<string> } }) => {
-    setImage(event.target.value.toString())
-  }
+  const coverImageUrlState = useInputState({
+    id: 'coverImageUrl',
+    name: 'coverImageUrl',
+    title: 'Cover Image URL',
+    placeholder: 'ipfs://',
+    defaultValue: '',
+  })
 
   const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
     const files: File[] = []
@@ -135,6 +144,9 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         nftStorageApiKey: nftStorageApiKeyState.value,
         pinataApiKey: pinataApiKeyState.value,
         pinataSecretKey: pinataSecretKeyState.value,
+        uploadMethod,
+        baseTokenURI: baseTokenUriState.value,
+        imageUrl: coverImageUrlState.value,
       }
       onChange(data)
     } catch (error: any) {
@@ -147,11 +159,16 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     nftStorageApiKeyState.value,
     pinataApiKeyState.value,
     pinataSecretKeyState.value,
+    uploadMethod,
+    baseTokenUriState.value,
+    coverImageUrlState.value,
   ])
 
   useEffect(() => {
     setAssetFilesArray([])
     setMetadataFilesArray([])
+    baseTokenUriState.onChange('')
+    coverImageUrlState.onChange('')
   }, [uploadMethod])
 
   return (
@@ -192,14 +209,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         </div>
       </div>
 
-      {baseTokenURI && (
-        <Alert className="mt-5" type="info">
-          <a href={baseTokenURI} rel="noreferrer" target="_blank">
-            Base Token URI: {baseTokenURI}
-          </a>
-        </Alert>
-      )}
-
       <div className="p-3 py-5 pb-8">
         <Conditional test={uploadMethod === 'existing'}>
           <div className="ml-3 flex-column">
@@ -216,33 +225,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
               and upload your assets & metadata manually to get a base URI for your collection.
             </p>
             <div>
-              <label className="block mr-1 mb-1 ml-5 font-bold text-white dark:text-gray-300" htmlFor="coverImage">
-                Collection Cover Image
-              </label>
-              <input
-                className="py-2 px-1 mx-5 mt-2 mb-2 w-1/2 bg-white/10 rounded border-2 border-white/20 focus:ring
-          focus:ring-plumbus-20
-          form-input, placeholder:text-white/50,"
-                id="coverImage"
-                onChange={handleChangeImage}
-                placeholder="ipfs://bafybeigi3bwpvyvsmnbj46ra4hyffcxdeaj6ntfk5jpic5mx27x6ih2qvq/images/1.png"
-              />
+              <TextInput {...baseTokenUriState} className="w-1/2" />
             </div>
             <div>
-              <label
-                className="block mt-3 mr-1 mb-1 ml-5 font-bold text-white dark:text-gray-300"
-                htmlFor="baseTokenURI"
-              >
-                Base Token URI
-              </label>
-              <input
-                className="py-2 px-1 mx-5 mt-2 mb-2 w-1/2 bg-white/10 rounded border-2 border-white/20 focus:ring
-          focus:ring-plumbus-20
-          form-input, placeholder:text-white/50,"
-                id="baseTokenURI"
-                onChange={handleChangeBaseTokenUri}
-                placeholder="ipfs://..."
-              />
+              <TextInput {...coverImageUrlState} className="mt-2 w-1/2" />
             </div>
           </div>
         </Conditional>
