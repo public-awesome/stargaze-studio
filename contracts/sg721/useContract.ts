@@ -62,9 +62,12 @@ export function useSG721Contract(): UseSG721ContractProps {
     [SG721, address],
   )
 
-  const messages = useCallback((): Sg721Messages | undefined => {
-    return SG721?.messages(address)
-  }, [SG721, address])
+  const messages = useCallback(
+    (customAddress = ''): Sg721Messages | undefined => {
+      return SG721?.messages(address || customAddress)
+    },
+    [SG721, address],
+  )
 
   return {
     instantiate,

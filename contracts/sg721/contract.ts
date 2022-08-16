@@ -1,7 +1,8 @@
-import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import type { MsgExecuteContractEncodeObject, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toBase64, toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/stargate'
 import { coin } from '@cosmjs/stargate'
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -67,6 +68,7 @@ export interface SG721Instance {
 
   /// Burn an NFT the sender has access to
   burn: (tokenId: string) => Promise<string>
+  batchBurn: (tokenIds: string) => Promise<string>
 }
 
 export interface Sg721Messages {
@@ -78,6 +80,7 @@ export interface Sg721Messages {
   revokeAll: (operator: string) => RevokeAllMessage
   mint: (tokenId: string, owner: string, tokenURI?: string) => MintMessage
   burn: (tokenId: string) => BurnMessage
+  batchBurn: (tokenIds: string) => BatchBurnMessage
 }
 
 export interface TransferNFTMessage {
@@ -175,6 +178,13 @@ export interface BurnMessage {
       token_id: string
     }
   }
+  funds: Coin[]
+}
+
+export interface BatchBurnMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
   funds: Coin[]
 }
 
@@ -408,6 +418,49 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    const batchBurn = async (tokenIds: string): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          const msg = {
+            burn: { token_id: i.toString() },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          const msg = {
+            burn: { token_id: tokenNumbers[i].toString() },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      }
+
+      const res = await client.signAndBroadcast(txSigner, executeContractMsgs, 'auto', 'batch burn')
+
+      return res.transactionHash
+    }
+
     return {
       contractAddress,
       ownerOf,
@@ -430,6 +483,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       revokeAll,
       mint,
       burn,
+      batchBurn,
     }
   }
 
@@ -552,15 +606,39 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
-    const burn = (tokenId: string) => {
+    const burn = (contractAddr: string, tokenId: string) => {
       return {
         sender: txSigner,
-        contract: contractAddress,
+        contract: contractAddr,
         msg: {
           burn: {
             token_id: tokenId,
           },
         },
+        funds: [],
+      }
+    }
+
+    const batchBurn = (contractAddr: string, tokenIds: string): BatchBurnMessage => {
+      const msg: Record<string, unknown>[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          msg.push({
+            burn: { token_id: i.toString() },
+          })
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          msg.push({ burn: { token_id: tokenNumbers[i].toString() } })
+        }
+      }
+
+      return {
+        sender: txSigner,
+        contract: contractAddr,
+        msg,
         funds: [],
       }
     }
@@ -574,6 +652,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       revokeAll,
       mint,
       burn,
+      batchBurn,
     }
   }
 

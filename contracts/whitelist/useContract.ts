@@ -58,9 +58,12 @@ export function useWhiteListContract(): UseWhiteListContractProps {
     [whiteList, address],
   )
 
-  const messages = useCallback((): WhitelistMessages | undefined => {
-    return whiteList?.messages(address)
-  }, [whiteList, address])
+  const messages = useCallback(
+    (customAddress = ''): WhitelistMessages | undefined => {
+      return whiteList?.messages(address || customAddress)
+    },
+    [whiteList, address],
+  )
 
   return {
     instantiate,

@@ -35,7 +35,7 @@ export interface UseMinterContractProps {
   use: (customAddress: string) => MinterInstance | undefined
   updateContractAddress: (contractAddress: string) => void
   getContractAddress: () => string | undefined
-  messages: () => MinterMessages | undefined
+  messages: (contractAddress: string) => MinterMessages | undefined
 }
 
 export function useMinterContract(): UseMinterContractProps {
@@ -81,9 +81,12 @@ export function useMinterContract(): UseMinterContractProps {
     return address
   }
 
-  const messages = useCallback((): MinterMessages | undefined => {
-    return minter?.messages()
-  }, [minter])
+  const messages = useCallback(
+    (customAddress = ''): MinterMessages | undefined => {
+      return minter?.messages(address || customAddress)
+    },
+    [minter, address],
+  )
 
   return {
     instantiate,

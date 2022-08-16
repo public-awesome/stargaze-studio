@@ -149,7 +149,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return messages(contract)?.mint(args.recipient, args.tokenId, args.tokenURI)
     }
     case 'burn': {
-      return messages(contract)?.burn(args.tokenId)
+      return messages(contract)?.burn(args.contract, args.tokenId)
     }
     default: {
       return {}

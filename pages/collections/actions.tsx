@@ -23,6 +23,8 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { TextInput } from '../../components/forms/FormInput'
+
 const CollectionActionsPage: NextPage = () => {
   const { minter: minterContract, sg721: sg721Contract } = useContracts()
   const wallet = useWallet()
@@ -68,6 +70,14 @@ const CollectionActionsPage: NextPage = () => {
     subtitle: 'Enter the number of tokens to mint',
   })
 
+  const tokenIdListState = useInputState({
+    id: 'token-id-list',
+    name: 'tokenIdList',
+    title: 'The list of token IDs',
+    subtitle:
+      'Specify individual token IDs separated by commas (e.g., 2, 4, 8) or a range of IDs separated by a colon (e.g, 8:13)',
+  })
+
   const recipientState = useInputState({
     id: 'recipient-address',
     name: 'recipient',
@@ -85,8 +95,9 @@ const CollectionActionsPage: NextPage = () => {
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = type === 'update_start_time'
   const showLimitField = type === 'update_per_address_limit'
-  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for'])
-  const showTokenIdListField = type === 'batch_mint'
+  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
+  const showNumberOfTokensField = type === 'batch_mint'
+  const showTokenIdListField = type === 'batch_burn'
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint'])
 
   const minterMessages = useMemo(
@@ -104,6 +115,7 @@ const CollectionActionsPage: NextPage = () => {
     minterContract: minterContractState.value,
     sg721Contract: sg721ContractState.value,
     tokenId: tokenIdState.value,
+    tokenIds: tokenIdListState.value,
     batchNumber: batchNumberState.value,
     minterMessages,
     sg721Messages,
@@ -154,7 +166,8 @@ const CollectionActionsPage: NextPage = () => {
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
           {showTokenIdField && <NumberInput {...tokenIdState} />}
-          {showTokenIdListField && <NumberInput {...batchNumberState} />}
+          {showTokenIdListField && <TextInput {...tokenIdListState} />}
+          {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           <Conditional test={showDateField}>
             <FormControl htmlId="start-date" subtitle="Start time for the minting" title="Start Time">
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />

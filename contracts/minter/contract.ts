@@ -40,15 +40,15 @@ export interface MinterInstance {
 }
 
 export interface MinterMessages {
-  mint: (contractAddress: string, price: string) => MintMessage
-  setWhitelist: (contractAddress: string, whitelist: string) => SetWhitelistMessage
-  updateStartTime: (contractAddress: string, time: Timestamp) => UpdateStarTimeMessage
-  updatePerAddressLimit: (contractAddress: string, perAddressLimit: number) => UpdatePerAddressLimitMessage
-  mintTo: (contractAddress: string, recipient: string) => MintToMessage
-  mintFor: (contractAddress: string, recipient: string, tokenId: number) => MintForMessage
-  batchMint: (contractAddress: string, recipient: string, batchNumber: number) => BatchMintMessage
-  shuffle: (contractAddress: string) => ShuffleMessage
-  withdraw: (contractAddress: string) => WithdrawMessage
+  mint: (price: string) => MintMessage
+  setWhitelist: (whitelist: string) => SetWhitelistMessage
+  updateStartTime: (time: Timestamp) => UpdateStarTimeMessage
+  updatePerAddressLimit: (perAddressLimit: number) => UpdatePerAddressLimitMessage
+  mintTo: (recipient: string) => MintToMessage
+  mintFor: (recipient: string, tokenId: number) => MintForMessage
+  batchMint: (recipient: string, batchNumber: number) => BatchMintMessage
+  shuffle: () => ShuffleMessage
+  withdraw: () => WithdrawMessage
 }
 
 export interface MintMessage {
@@ -151,7 +151,7 @@ export interface MinterContract {
 
   use: (contractAddress: string) => MinterInstance
 
-  messages: () => MinterMessages
+  messages: (contractAddress: string) => MinterMessages
 }
 
 export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterContract => {
@@ -365,8 +365,8 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
     }
   }
 
-  const messages = () => {
-    const mint = (contractAddress: string, price: string): MintMessage => {
+  const messages = (contractAddress: string) => {
+    const mint = (price: string): MintMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -377,7 +377,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const setWhitelist = (contractAddress: string, whitelist: string): SetWhitelistMessage => {
+    const setWhitelist = (whitelist: string): SetWhitelistMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -390,7 +390,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const updateStartTime = (contractAddress: string, startTime: string): UpdateStarTimeMessage => {
+    const updateStartTime = (startTime: string): UpdateStarTimeMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -401,7 +401,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const updatePerAddressLimit = (contractAddress: string, limit: number): UpdatePerAddressLimitMessage => {
+    const updatePerAddressLimit = (limit: number): UpdatePerAddressLimitMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -414,7 +414,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const mintTo = (contractAddress: string, recipient: string): MintToMessage => {
+    const mintTo = (recipient: string): MintToMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -427,7 +427,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const mintFor = (contractAddress: string, recipient: string, tokenId: number): MintForMessage => {
+    const mintFor = (recipient: string, tokenId: number): MintForMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -441,7 +441,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const batchMint = (contractAddress: string, recipient: string, batchNumber: number): BatchMintMessage => {
+    const batchMint = (recipient: string, batchNumber: number): BatchMintMessage => {
       const msg: Record<string, unknown>[] = []
       for (let i = 0; i < batchNumber; i++) {
         msg.push({ mint_to: { recipient } })
@@ -454,7 +454,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const shuffle = (contractAddress: string): ShuffleMessage => {
+    const shuffle = (): ShuffleMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -465,7 +465,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const withdraw = (contractAddress: string): WithdrawMessage => {
+    const withdraw = (): WithdrawMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
