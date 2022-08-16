@@ -48,7 +48,7 @@ const Sg721QueryPage: NextPage = () => {
   })
   const tokenId = tokenIdState.value
 
-  const [type, setType] = useState<QueryType>('owner_of')
+  const [type, setType] = useState<QueryType>('collection_info')
 
   const addressVisible = ['approval', 'all_operators', 'tokens'].includes(type)
   const tokenIdVisible = ['owner_of', 'approval', 'approvals', 'nft_info', 'all_nft_info'].includes(type)
@@ -108,6 +108,7 @@ const Sg721QueryPage: NextPage = () => {
                 'placeholder:text-white/50',
                 'focus:ring focus:ring-plumbus-20',
               )}
+              defaultValue="collection_info"
               id="contract-query-type"
               name="query-type"
               onChange={(e) => setType(e.target.value as QueryType)}

@@ -45,8 +45,8 @@ const Sg721ExecutePage: NextPage = () => {
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
+    title: 'Sg721 Address',
+    subtitle: 'Address of the Sg721 contract',
   })
 
   const messageState = useInputState({
