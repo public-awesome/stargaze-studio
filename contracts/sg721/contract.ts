@@ -606,10 +606,10 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
-    const burn = (contractAddr: string, tokenId: string) => {
+    const burn = (tokenId: string) => {
       return {
         sender: txSigner,
-        contract: contractAddr,
+        contract: contractAddress,
         msg: {
           burn: {
             token_id: tokenId,
@@ -619,7 +619,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
-    const batchBurn = (contractAddr: string, tokenIds: string): BatchBurnMessage => {
+    const batchBurn = (tokenIds: string): BatchBurnMessage => {
       const msg: Record<string, unknown>[] = []
       if (tokenIds.includes(':')) {
         const [start, end] = tokenIds.split(':').map(Number)
@@ -637,7 +637,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
 
       return {
         sender: txSigner,
-        contract: contractAddr,
+        contract: contractAddress,
         msg,
         funds: [],
       }

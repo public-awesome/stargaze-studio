@@ -61,7 +61,13 @@ export const Sidebar = () => {
       </ul>
 
       {/* footer attribution */}
-      <div className="text-xs text-white/50">Stargaze Studio {process.env.APP_VERSION}</div>
+      <div className="text-xs text-white/50">
+        Stargaze Studio {process.env.APP_VERSION} <br />
+        Made by{' '}
+        <Anchor className="text-plumbus hover:underline" href="https://deuslabs.fi">
+          deus labs
+        </Anchor>
+      </div>
 
       {/* footer social links */}
       <div className="flex gap-x-6 items-center text-white/75">

@@ -124,28 +124,28 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { contract } = args
   switch (args.type) {
     case 'mint': {
-      return messages()?.mint(contract, args.price === '' ? '0' : args.price)
+      return messages(contract)?.mint(args.price === '' ? '0' : args.price)
     }
     case 'set_whitelist': {
-      return messages()?.setWhitelist(contract, args.whitelist)
+      return messages(contract)?.setWhitelist(args.whitelist)
     }
     case 'update_start_time': {
-      return messages()?.updateStartTime(contract, args.startTime)
+      return messages(contract)?.updateStartTime(args.startTime)
     }
     case 'update_per_address_limit': {
-      return messages()?.updatePerAddressLimit(contract, args.limit)
+      return messages(contract)?.updatePerAddressLimit(args.limit)
     }
     case 'mint_to': {
-      return messages()?.mintTo(contract, args.recipient)
+      return messages(contract)?.mintTo(args.recipient)
     }
     case 'mint_for': {
-      return messages()?.mintFor(contract, args.recipient, args.tokenId)
+      return messages(contract)?.mintFor(args.recipient, args.tokenId)
     }
     case 'shuffle': {
-      return messages()?.shuffle(contract)
+      return messages(contract)?.shuffle()
     }
     case 'withdraw': {
-      return messages()?.withdraw(contract)
+      return messages(contract)?.withdraw()
     }
     default: {
       return {}
