@@ -27,7 +27,7 @@ export interface DispatchExecuteProps {
 
 type Select<T extends ExecuteType> = T
 
-/** @see {@link MinterInstance} */
+/** @see {@link VendingFactoryInstance} */
 export type DispatchExecuteArgs = {
   contract: string
   messages?: VendingFactoryInstance

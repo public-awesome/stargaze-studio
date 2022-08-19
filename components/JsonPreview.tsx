@@ -66,7 +66,8 @@ export const JsonPreview = ({
       </div>
       {show && (
         <div className="overflow-auto p-2 font-mono text-sm">
-          <pre>{JSON.stringify(content, null, 2).trim()}</pre>
+          {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
+          <pre>{JSON.stringify(content, null, 2)?.trim()}</pre>
         </div>
       )}
     </div>

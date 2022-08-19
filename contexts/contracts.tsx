@@ -2,6 +2,8 @@ import type { UseMinterContractProps } from 'contracts/minter'
 import { useMinterContract } from 'contracts/minter'
 import type { UseSG721ContractProps } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
+import type { UseVendingFactoryContractProps } from 'contracts/vending-factory'
+import { useVendingFactoryContract } from 'contracts/vending-factory'
 import type { UseWhiteListContractProps } from 'contracts/whitelist'
 import { useWhiteListContract } from 'contracts/whitelist'
 import type { ReactNode, VFC } from 'react'
@@ -16,6 +18,7 @@ export interface ContractsStore extends State {
   sg721: UseSG721ContractProps | null
   minter: UseMinterContractProps | null
   whitelist: UseWhiteListContractProps | null
+  vendingFactory: UseVendingFactoryContractProps | null
 }
 
 /**
@@ -25,6 +28,7 @@ export const defaultValues: ContractsStore = {
   sg721: null,
   minter: null,
   whitelist: null,
+  vendingFactory: null,
 }
 
 /**
@@ -51,14 +55,16 @@ const ContractsSubscription: VFC = () => {
   const sg721 = useSG721Contract()
   const minter = useMinterContract()
   const whitelist = useWhiteListContract()
+  const vendingFactory = useVendingFactoryContract()
 
   useEffect(() => {
     useContracts.setState({
       sg721,
       minter,
       whitelist,
+      vendingFactory,
     })
-  }, [sg721, minter, whitelist])
+  }, [sg721, minter, whitelist, vendingFactory])
 
   return null
 }
