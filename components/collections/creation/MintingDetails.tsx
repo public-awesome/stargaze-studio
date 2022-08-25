@@ -35,8 +35,8 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
     id: 'unitPrice',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: '',
-    placeholder: '100',
+    subtitle: 'Price of each token (min. 50 STARS)',
+    placeholder: '50',
   })
 
   const perAddressLimitState = useNumberInputState({

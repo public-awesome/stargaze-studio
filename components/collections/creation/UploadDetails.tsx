@@ -78,11 +78,23 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   })
 
   const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
-    const files: File[] = []
-    let reader: FileReader
-    if (event.target.files === null) return
     setAssetFilesArray([])
     setMetadataFilesArray([])
+    if (event.target.files === null) return
+    //sort the files
+    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+    //check if the sorted file names are in numerical order
+    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+    for (let i = 0; i < sortedFileNames.length; i++) {
+      if (parseInt(sortedFileNames[i]) !== i + 1) {
+        toast.error('The file names should be in numerical order starting from 1.')
+        //clear the input
+        event.target.value = ''
+        return
+      }
+    }
+    const files: File[] = []
+    let reader: FileReader
     for (let i = 0; i < event.target.files.length; i++) {
       reader = new FileReader()
       reader.onload = (e) => {
@@ -102,10 +114,26 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   }
 
   const selectMetadata = (event: ChangeEvent<HTMLInputElement>) => {
+    setMetadataFilesArray([])
+    if (event.target.files === null) return toast.error('No files selected.')
+    if (event.target.files.length !== assetFilesArray.length) {
+      event.target.value = ''
+      return toast.error('The number of metadata files should be equal to the number of asset files.')
+    }
+    //sort the files
+    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+    //check if the sorted file names are in numerical order
+    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+    for (let i = 0; i < sortedFileNames.length; i++) {
+      if (parseInt(sortedFileNames[i]) !== i + 1) {
+        toast.error('The file names should be in numerical order starting from 1.')
+        //clear the input
+        event.target.value = ''
+        return
+      }
+    }
     const files: File[] = []
     let reader: FileReader
-    if (event.target.files === null) return toast.error('No files selected.')
-    setMetadataFilesArray([])
     for (let i = 0; i < event.target.files.length; i++) {
       reader = new FileReader()
       reader.onload = (e) => {

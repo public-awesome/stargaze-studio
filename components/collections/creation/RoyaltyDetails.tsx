@@ -1,6 +1,6 @@
 import { Conditional } from 'components/Conditional'
 import { FormGroup } from 'components/FormGroup'
-import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
+import { useInputState } from 'components/forms/FormInput.hooks'
 import React, { useEffect, useState } from 'react'
 
 import { NumberInput, TextInput } from '../../forms/FormInput'
@@ -28,19 +28,19 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
     placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
-  const royaltyShareState = useNumberInputState({
+  const royaltyShareState = useInputState({
     id: 'royalty-share',
     name: 'royaltyShare',
     title: 'Share Percentage',
     subtitle: 'Percentage of royalties to be paid',
-    placeholder: '8',
+    placeholder: '8%',
   })
 
   useEffect(() => {
     const data: RoyaltyDetailsDataProps = {
       royaltyType: royaltyState,
       paymentAddress: royaltyPaymentAddressState.value,
-      share: royaltyShareState.value,
+      share: Number(royaltyShareState.value),
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,8 +84,8 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
       </div>
       <Conditional test={royaltyState === 'new'}>
         <FormGroup subtitle="Information about royalty" title="Royalty Details">
-          <TextInput {...royaltyPaymentAddressState} />
-          <NumberInput {...royaltyShareState} />
+          <TextInput {...royaltyPaymentAddressState} isRequired />
+          <NumberInput {...royaltyShareState} isRequired />
         </FormGroup>
       </Conditional>
     </div>

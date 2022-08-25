@@ -43,15 +43,15 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: 'Price of each tokens in collection',
-    placeholder: '500',
+    subtitle: 'Token price for whitelisted addresses \n (min. 25 STARS)',
+    placeholder: '25',
   })
 
   const memberLimitState = useNumberInputState({
     id: 'member-limit',
     name: 'memberLimit',
     title: 'Member Limit',
-    subtitle: 'Limit of the whitelisted members',
+    subtitle: 'Maximum number of whitelisted addresses',
     placeholder: '1000',
   })
 
@@ -59,7 +59,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     id: 'per-address-limit',
     name: 'perAddressLimit',
     title: 'Per Address Limit',
-    subtitle: 'Limit of tokens per address',
+    subtitle: 'Maximum number of tokens per whitelisted address',
     placeholder: '5',
   })
 
@@ -145,11 +145,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
       </div>
 
       <Conditional test={whitelistState === 'existing'}>
-        <AddressInput
-          {...whitelistAddressState}
-          className="pb-5"
-          onChange={(e) => whitelistAddressState.onChange(e.target.value)}
-        />
+        <AddressInput {...whitelistAddressState} className="pb-5" isRequired />
       </Conditional>
 
       <Conditional test={whitelistState === 'new'}>
@@ -158,10 +154,20 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             <NumberInput isRequired {...uniPriceState} />
             <NumberInput isRequired {...memberLimitState} />
             <NumberInput isRequired {...perAddressLimitState} />
-            <FormControl htmlId="start-date" isRequired subtitle="Start time for the minting" title="Start Time">
+            <FormControl
+              htmlId="start-date"
+              isRequired
+              subtitle="Start time for minting tokens to whitelisted addresses"
+              title="Start Time"
+            >
               <InputDateTime minDate={new Date()} onChange={(date) => setStartDate(date)} value={startDate} />
             </FormControl>
-            <FormControl htmlId="end-date" isRequired subtitle="End time for the minting" title="End Time">
+            <FormControl
+              htmlId="end-date"
+              isRequired
+              subtitle="End time for minting tokens to whitelisted addresses"
+              title="End Time"
+            >
               <InputDateTime minDate={new Date()} onChange={(date) => setEndDate(date)} value={endDate} />
             </FormControl>
           </FormGroup>

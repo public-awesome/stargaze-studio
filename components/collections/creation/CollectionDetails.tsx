@@ -23,6 +23,7 @@ interface CollectionDetailsProps {
 export interface CollectionDetailsDataProps {
   name: string
   description: string
+  symbol: string
   imageFile: File[]
   externalLink?: string
 }
@@ -44,10 +45,17 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
     placeholder: 'My Awesome Collection Description',
   })
 
+  const symbolState = useInputState({
+    id: 'symbol',
+    name: 'symbol',
+    title: 'Symbol',
+    placeholder: 'SYMBOL',
+  })
+
   const externalLinkState = useInputState({
     id: 'external-link',
     name: 'externalLink',
-    title: 'External Link',
+    title: 'External Link (optional)',
     placeholder: 'https://my-collection...',
   })
 
@@ -56,6 +64,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
       const data: CollectionDetailsDataProps = {
         name: nameState.value,
         description: descriptionState.value,
+        symbol: symbolState.value,
         imageFile: coverImage ? [coverImage] : [],
         externalLink: externalLinkState.value,
       }
@@ -88,6 +97,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
       <FormGroup subtitle="Information about your collection" title="Collection Details">
         <TextInput {...nameState} isRequired />
         <TextInput {...descriptionState} isRequired />
+        <TextInput {...symbolState} isRequired />
 
         <FormControl isRequired={uploadMethod === 'new'} title="Cover Image">
           {uploadMethod === 'new' && (
