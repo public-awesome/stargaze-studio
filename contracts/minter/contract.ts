@@ -37,6 +37,7 @@ export interface MinterInstance {
   batchMint: (senderAddress: string, recipient: string, batchNumber: number) => Promise<string>
   shuffle: (senderAddress: string) => Promise<string>
   withdraw: (senderAddress: string) => Promise<string>
+  airdrop: (senderAddress: string, recipients: string[]) => Promise<string>
 }
 
 export interface MinterMessages {
@@ -46,9 +47,10 @@ export interface MinterMessages {
   updatePerAddressLimit: (perAddressLimit: number) => UpdatePerAddressLimitMessage
   mintTo: (recipient: string) => MintToMessage
   mintFor: (recipient: string, tokenId: number) => MintForMessage
-  batchMint: (recipient: string, batchNumber: number) => BatchMintMessage
+  batchMint: (recipient: string, batchNumber: number) => CustomMessage
   shuffle: () => ShuffleMessage
   withdraw: () => WithdrawMessage
+  airdrop: (recipients: string[]) => CustomMessage
 }
 
 export interface MintMessage {
@@ -114,7 +116,7 @@ export interface MintForMessage {
   funds: Coin[]
 }
 
-export interface BatchMintMessage {
+export interface CustomMessage {
   sender: string
   contract: string
   msg: Record<string, unknown>[]
@@ -301,6 +303,29 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       return res.transactionHash
     }
 
+    const airdrop = async (senderAddress: string, recipients: string[]): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        const msg = {
+          mint_to: { recipient: recipients[i] },
+        }
+        const executeContractMsg: MsgExecuteContractEncodeObject = {
+          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+          value: MsgExecuteContract.fromPartial({
+            sender: senderAddress,
+            contract: contractAddress,
+            msg: toUtf8(JSON.stringify(msg)),
+          }),
+        }
+
+        executeContractMsgs.push(executeContractMsg)
+      }
+
+      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'airdrop')
+
+      return res.transactionHash
+    }
+
     const shuffle = async (senderAddress: string): Promise<string> => {
       const res = await client.execute(
         senderAddress,
@@ -343,6 +368,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       mintTo,
       mintFor,
       batchMint,
+      airdrop,
       shuffle,
       withdraw,
     }
@@ -441,10 +467,23 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const batchMint = (recipient: string, batchNumber: number): BatchMintMessage => {
+    const batchMint = (recipient: string, batchNumber: number): CustomMessage => {
       const msg: Record<string, unknown>[] = []
       for (let i = 0; i < batchNumber; i++) {
         msg.push({ mint_to: { recipient } })
+      }
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
+    const airdrop = (recipients: string[]): CustomMessage => {
+      const msg: Record<string, unknown>[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        msg.push({ mint_to: { recipient: recipients[i] } })
       }
       return {
         sender: txSigner,
@@ -484,6 +523,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       mintTo,
       mintFor,
       batchMint,
+      airdrop,
       shuffle,
       withdraw,
     }

@@ -6,11 +6,13 @@ import { useActionsComboboxState } from 'components/collections/actions/Combobox
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
+import { FormGroup } from 'components/FormGroup'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
@@ -31,6 +33,7 @@ const CollectionActionsPage: NextPage = () => {
   const [lastTx, setLastTx] = useState('')
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
+  const [airdropArray, setAirdropArray] = useState<string[]>([])
 
   const comboboxState = useActionsComboboxState()
   const type = comboboxState.value?.id
@@ -99,6 +102,7 @@ const CollectionActionsPage: NextPage = () => {
   const showNumberOfTokensField = type === 'batch_mint'
   const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer'])
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
+  const showAirdropFileField = type === 'airdrop'
 
   const minterMessages = useMemo(
     () => minterContract?.use(minterContractState.value),
@@ -120,6 +124,7 @@ const CollectionActionsPage: NextPage = () => {
     minterMessages,
     sg721Messages,
     recipient: recipientState.value,
+    recipients: airdropArray,
     txSigner: wallet.address,
     type,
   }
@@ -148,6 +153,10 @@ const CollectionActionsPage: NextPage = () => {
     },
   )
 
+  const airdropFileOnChange = (data: string[]) => {
+    setAirdropArray(data)
+  }
+
   return (
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Collection Actions" />
@@ -168,6 +177,11 @@ const CollectionActionsPage: NextPage = () => {
           {showTokenIdField && <NumberInput {...tokenIdState} />}
           {showTokenIdListField && <TextInput {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
+          {showAirdropFileField && (
+            <FormGroup subtitle="TXT file that contains the airdrop addresses" title="Airdrop File">
+              <WhitelistUpload onChange={airdropFileOnChange} />
+            </FormGroup>
+          )}
           <Conditional test={showDateField}>
             <FormControl htmlId="start-date" subtitle="Start time for the minting" title="Start Time">
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />

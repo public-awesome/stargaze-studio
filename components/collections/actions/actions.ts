@@ -18,6 +18,7 @@ export const ACTION_TYPES = [
   'burn',
   'batch_burn',
   'shuffle',
+  'airdrop',
 ] as const
 
 export interface ActionListItem {
@@ -87,6 +88,11 @@ export const ACTION_LIST: ActionListItem[] = [
     name: 'Shuffle Tokens',
     description: 'Shuffle the token IDs',
   },
+  {
+    id: 'airdrop',
+    name: 'Airdrop Tokens',
+    description: 'Airdrop tokens to given addresses',
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -117,6 +123,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'batch_transfer'>; recipient: string; tokenIds: string }
   | { type: Select<'burn'>; tokenId: number }
   | { type: Select<'batch_burn'>; tokenIds: string }
+  | { type: Select<'airdrop'>; recipients: string[] }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -160,6 +167,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'batch_burn': {
       return sg721Messages.batchBurn(args.tokenIds)
+    }
+    case 'airdrop': {
+      return minterMessages.airdrop(txSigner, args.recipients)
     }
     default: {
       throw new Error('Unknown action')
@@ -209,6 +219,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'batch_burn': {
       return sg721Messages(sg721Contract)?.batchBurn(args.tokenIds)
+    }
+    case 'airdrop': {
+      return minterMessages(minterContract)?.airdrop(args.recipients)
     }
     default: {
       return {}

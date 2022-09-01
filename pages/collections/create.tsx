@@ -26,7 +26,6 @@ import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useEffect, useRef, useState } from 'react'
-import useCollapse from 'react-collapsed'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
@@ -35,15 +34,12 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
+import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { getAssetType } from '../../utils/getAssetType'
 
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
   const { minter: minterContract, whitelist: whitelistContract } = useContracts()
-
-  const { getCollapseProps, getToggleProps, isExpanded } = useCollapse()
-  const toggleProps = getToggleProps()
-  const collapseProps = getCollapseProps()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
@@ -53,11 +49,28 @@ const CollectionCreationPage: NextPage = () => {
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
+  const [readyToCreate, setReadyToCreate] = useState(false)
   const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+
+  const performChecks = () => {
+    try {
+      // setReadyToCreate(false)
+      // checkUploadDetails()
+      // checkCollectionDetails()
+      // checkMintingDetails()
+      // checkWhitelistDetails()
+      // checkRoyaltyDetails()
+      setReadyToCreate(true)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message)
+      setUploading(false)
+    }
+  }
 
   const createCollection = async () => {
     try {
@@ -66,11 +79,6 @@ const CollectionCreationPage: NextPage = () => {
       setMinterContractAddress(null)
       setSg721ContractAddress(null)
       setTransactionHash(null)
-      checkUploadDetails()
-      checkCollectionDetails()
-      checkMintingDetails()
-      checkWhitelistDetails()
-      checkRoyaltyDetails()
       if (uploadDetails?.uploadMethod === 'new') {
         setUploading(true)
 
@@ -84,22 +92,27 @@ const CollectionCreationPage: NextPage = () => {
           uploadDetails.pinataApiKey as string,
           uploadDetails.pinataSecretKey as string,
         )
+
         setUploading(false)
+
         setBaseTokenUri(baseUri)
         setCoverImageUrl(coverImageUri)
+
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+
         await instantiate(baseUri, coverImageUri, whitelist)
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setCoverImageUrl(uploadDetails?.imageUrl as string)
+
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+
         await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
       }
-
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message)
@@ -141,13 +154,14 @@ const CollectionCreationPage: NextPage = () => {
         share: (Number(royaltyDetails.share) / 100).toString(),
       }
     }
+
     const msg = {
       base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}/` : `${baseUri}`}`,
       num_tokens: mintingDetails?.numTokens,
       sg721_code_id: SG721_CODE_ID,
       sg721_instantiate_msg: {
         name: collectionDetails?.name,
-        symbol: 'SYMBOL',
+        symbol: collectionDetails?.symbol,
         minter: wallet.address,
         collection_info: {
           creator: wallet.address,
@@ -187,20 +201,25 @@ const CollectionCreationPage: NextPage = () => {
         .then((assetUri: string) => {
           const fileArray: File[] = []
           let reader: FileReader
+
           for (let i = 0; i < uploadDetails.metadataFiles.length; i++) {
             reader = new FileReader()
             reader.onload = (e) => {
               const data: any = JSON.parse(e.target?.result as string)
+
               if (
                 getAssetType(uploadDetails.assetFiles[i].name) === 'audio' ||
                 getAssetType(uploadDetails.assetFiles[i].name) === 'video'
               ) {
                 data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
               }
+
               data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+
               const metadataFileBlob = new Blob([JSON.stringify(data)], {
                 type: 'application/json',
               })
+
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
                 uploadDetails.metadataFiles[i].name.substring(0, uploadDetails.metadataFiles[i].name.lastIndexOf('.')),
@@ -208,6 +227,7 @@ const CollectionCreationPage: NextPage = () => {
                   type: 'application/json',
                 },
               )
+
               fileArray.push(updatedMetadataFile)
             }
             reader.onloadend = () => {
@@ -286,6 +306,7 @@ const CollectionCreationPage: NextPage = () => {
     )
       throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
+    if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
   }
 
   const checkWhitelistDetails = () => {
@@ -301,14 +322,18 @@ const CollectionCreationPage: NextPage = () => {
       if (whitelistDetails.endTime === '') throw new Error('End time is required')
       if (whitelistDetails.perAddressLimit === 0) throw new Error('Per address limit is required')
       if (whitelistDetails.memberLimit === 0) throw new Error('Member limit is required')
+      if (Number(whitelistDetails.startTime) > Number(whitelistDetails.endTime))
+        throw new Error('Whitelist start time cannot be later than whitelist end time')
+      if (Number(whitelistDetails.endTime) > Number(mintingDetails?.startTime))
+        throw new Error('Whitelist end time cannot be later than public start time')
     }
   }
 
   const checkRoyaltyDetails = () => {
     if (!royaltyDetails) throw new Error('Please fill out the royalty details')
     if (royaltyDetails.royaltyType === 'new') {
-      if (royaltyDetails.share === 0) throw new Error('Royalty share is required')
-      if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share')
+      if (royaltyDetails.share === 0) throw new Error('Royalty share percentage is required')
+      if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share percentage')
       if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
     }
   }
@@ -411,21 +436,22 @@ const CollectionCreationPage: NextPage = () => {
             uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
           />
         </div>
-
-        <div className="flex justify-between my-6">
-          <Button {...toggleProps} isWide type="button" variant="outline">
-            {isExpanded ? 'Hide' : 'Show'} Advanced Details
-          </Button>
-          <Button isWide onClick={createCollection} variant="solid">
-            Create Collection
-          </Button>
-        </div>
-
-        <section {...collapseProps} className="mb-10">
+        <div className="my-6">
           <WhitelistDetails onChange={setWhitelistDetails} />
           <div className="my-6" />
           <RoyaltyDetails onChange={setRoyaltyDetails} />
-        </section>
+        </div>
+        {readyToCreate && <ConfirmationModal confirm={createCollection} />}
+        <div className="flex justify-end w-full">
+          <Button className="px-0 mb-6 max-h-12" onClick={performChecks} variant="solid">
+            <label
+              className="relative justify-end w-full h-full text-white bg-plumbus-light hover:bg-plumbus-light border-0 btn modal-button"
+              htmlFor="my-modal-2"
+            >
+              Create Collection
+            </label>
+          </Button>
+        </div>
       </div>
     </div>
   )
