@@ -49,6 +49,7 @@ const CollectionCreationPage: NextPage = () => {
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
+  const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreate, setReadyToCreate] = useState(false)
   const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
@@ -74,6 +75,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const createCollection = async () => {
     try {
+      setCreatingCollection(true)
       setBaseTokenUri(null)
       setCoverImageUrl(null)
       setMinterContractAddress(null)
@@ -113,9 +115,11 @@ const CollectionCreationPage: NextPage = () => {
 
         await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
       }
+      setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message)
+      setCreatingCollection(false)
       setUploading(false)
     }
   }
@@ -443,9 +447,9 @@ const CollectionCreationPage: NextPage = () => {
         </div>
         {readyToCreate && <ConfirmationModal confirm={createCollection} />}
         <div className="flex justify-end w-full">
-          <Button className="px-0 mb-6 max-h-12" onClick={performChecks} variant="solid">
+          <Button className="px-0 mb-6 max-h-12" isLoading={creatingCollection} onClick={performChecks} variant="solid">
             <label
-              className="relative justify-end w-full h-full text-white bg-plumbus-light hover:bg-plumbus-light border-0 btn modal-button"
+              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus border-0 btn modal-button"
               htmlFor="my-modal-2"
             >
               Create Collection
