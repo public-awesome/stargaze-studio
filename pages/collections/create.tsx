@@ -59,12 +59,12 @@ const CollectionCreationPage: NextPage = () => {
 
   const performChecks = () => {
     try {
-      // setReadyToCreate(false)
-      // checkUploadDetails()
-      // checkCollectionDetails()
-      // checkMintingDetails()
-      // checkWhitelistDetails()
-      // checkRoyaltyDetails()
+      setReadyToCreate(false)
+      checkUploadDetails()
+      checkCollectionDetails()
+      checkMintingDetails()
+      checkWhitelistDetails()
+      checkRoyaltyDetails()
       setReadyToCreate(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
