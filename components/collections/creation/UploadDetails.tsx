@@ -42,21 +42,21 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     id: 'nft-storage-api-key',
     name: 'nftStorageApiKey',
     title: 'NFT Storage API Key',
-    placeholder: '...',
+    placeholder: 'Enter NFT.Storage API Key',
     defaultValue: '',
   })
   const pinataApiKeyState = useInputState({
     id: 'pinata-api-key',
     name: 'pinataApiKey',
     title: 'Pinata API Key',
-    placeholder: '...',
+    placeholder: 'Enter Pinata API Key',
     defaultValue: '',
   })
   const pinataSecretKeyState = useInputState({
     id: 'pinata-secret-key',
     name: 'pinataSecretKey',
     title: 'Pinata Secret Key',
-    placeholder: '...',
+    placeholder: 'Enter Pinata Secret Key',
     defaultValue: '',
   })
 
@@ -85,7 +85,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     //check if the sorted file names are in numerical order
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     for (let i = 0; i < sortedFileNames.length; i++) {
-      if (parseInt(sortedFileNames[i]) !== i + 1) {
+      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
         toast.error('The file names should be in numerical order starting from 1.')
         //clear the input
         event.target.value = ''
@@ -124,7 +124,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     //check if the sorted file names are in numerical order
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     for (let i = 0; i < sortedFileNames.length; i++) {
-      if (parseInt(sortedFileNames[i]) !== i + 1) {
+      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
         toast.error('The file names should be in numerical order starting from 1.')
         //clear the input
         event.target.value = ''
