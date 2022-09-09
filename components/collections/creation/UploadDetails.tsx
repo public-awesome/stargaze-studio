@@ -85,7 +85,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     //check if the sorted file names are in numerical order
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     for (let i = 0; i < sortedFileNames.length; i++) {
-      if (parseInt(sortedFileNames[i]) !== i + 1) {
+      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
         toast.error('The file names should be in numerical order starting from 1.')
         //clear the input
         event.target.value = ''
@@ -124,7 +124,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     //check if the sorted file names are in numerical order
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     for (let i = 0; i < sortedFileNames.length; i++) {
-      if (parseInt(sortedFileNames[i]) !== i + 1) {
+      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
         toast.error('The file names should be in numerical order starting from 1.')
         //clear the input
         event.target.value = ''
