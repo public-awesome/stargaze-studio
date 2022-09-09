@@ -42,21 +42,21 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     id: 'nft-storage-api-key',
     name: 'nftStorageApiKey',
     title: 'NFT Storage API Key',
-    placeholder: '...',
+    placeholder: 'Enter NFT.Storage API Key',
     defaultValue: '',
   })
   const pinataApiKeyState = useInputState({
     id: 'pinata-api-key',
     name: 'pinataApiKey',
     title: 'Pinata API Key',
-    placeholder: '...',
+    placeholder: 'Enter Pinata API Key',
     defaultValue: '',
   })
   const pinataSecretKeyState = useInputState({
     id: 'pinata-secret-key',
     name: 'pinataSecretKey',
     title: 'Pinata Secret Key',
-    placeholder: '...',
+    placeholder: 'Enter Pinata Secret Key',
     defaultValue: '',
   })
 
