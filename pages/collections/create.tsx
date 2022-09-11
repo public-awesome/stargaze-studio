@@ -53,7 +53,7 @@ const CollectionCreationPage: NextPage = () => {
   const [readyToCreate, setReadyToCreate] = useState(false)
   const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
-  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null>(null)
+  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null | undefined>(null)
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
@@ -417,15 +417,17 @@ const CollectionCreationPage: NextPage = () => {
                 {sg721ContractAddress}
               </Anchor>
               <br />
-              Whitelist Contract Address:{'  '}
-              <Anchor
-                className="text-stargaze hover:underline"
-                external
-                href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
-              >
-                {whitelistContractAddress}
-              </Anchor>
-              <br />
+              <Conditional test={whitelistContractAddress !== null && whitelistContractAddress !== undefined}>
+                Whitelist Contract Address:{'  '}
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
+                >
+                  {whitelistContractAddress}
+                </Anchor>
+                <br />
+              </Conditional>
               Transaction Hash: {'  '}
               <Anchor
                 className="text-stargaze hover:underline"
