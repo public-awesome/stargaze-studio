@@ -53,6 +53,7 @@ const CollectionCreationPage: NextPage = () => {
   const [readyToCreate, setReadyToCreate] = useState(false)
   const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
+  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null>(null)
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
@@ -80,6 +81,7 @@ const CollectionCreationPage: NextPage = () => {
       setCoverImageUrl(null)
       setMinterContractAddress(null)
       setSg721ContractAddress(null)
+      setWhitelistContractAddress(null)
       setTransactionHash(null)
       if (uploadDetails?.uploadMethod === 'new') {
         setUploading(true)
@@ -103,6 +105,7 @@ const CollectionCreationPage: NextPage = () => {
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
 
         await instantiate(baseUri, coverImageUri, whitelist)
       } else {
@@ -112,6 +115,7 @@ const CollectionCreationPage: NextPage = () => {
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
 
         await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
       }
@@ -269,7 +273,7 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new') {
       if (uploadDetails.uploadService === 'nft-storage') {
         if (uploadDetails.nftStorageApiKey === '') {
-          throw new Error('Please enter a valid NFT Storage API key')
+          throw new Error('Please enter a valid NFT.Storage API key')
         }
       } else if (uploadDetails.pinataApiKey === '' || uploadDetails.pinataSecretKey === '') {
         throw new Error('Please enter Pinata API and secret keys')
@@ -411,6 +415,15 @@ const CollectionCreationPage: NextPage = () => {
                 href={`/contracts/sg721/query/?contractAddress=${sg721ContractAddress as string}`}
               >
                 {sg721ContractAddress}
+              </Anchor>
+              <br />
+              Whitelist Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
+              >
+                {whitelistContractAddress}
               </Anchor>
               <br />
               Transaction Hash: {'  '}

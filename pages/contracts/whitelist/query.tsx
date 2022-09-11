@@ -40,7 +40,7 @@ const WhitelistQueryPage: NextPage = () => {
   })
   const address = addressState.value
 
-  const [type, setType] = useState<QueryType>('has_started')
+  const [type, setType] = useState<QueryType>('config')
 
   const addressVisible = type === 'has_member'
 
@@ -98,6 +98,7 @@ const WhitelistQueryPage: NextPage = () => {
                 'placeholder:text-white/50',
                 'focus:ring focus:ring-plumbus-20',
               )}
+              defaultValue="config"
               id="contract-query-type"
               name="query-type"
               onChange={(e) => setType(e.target.value as QueryType)}
