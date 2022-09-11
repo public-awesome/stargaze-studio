@@ -41,7 +41,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   const nftStorageApiKeyState = useInputState({
     id: 'nft-storage-api-key',
     name: 'nftStorageApiKey',
-    title: 'NFT Storage API Key',
+    title: 'NFT.Storage API Key',
     placeholder: 'Enter NFT.Storage API Key',
     defaultValue: '',
   })
@@ -243,7 +243,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
               Though Stargaze&apos;s sg721 contract allows for off-chain metadata storage, it is recommended to use a
               decentralized storage solution, such as IPFS. <br /> You may head over to{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
-                NFT Storage
+                NFT.Storage
               </Anchor>{' '}
               or{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
