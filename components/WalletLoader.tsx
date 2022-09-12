@@ -16,10 +16,10 @@ export const WalletLoader = () => {
   const displayName = useWalletStore((store) => store.name || getShortAddress(store.address))
 
   return (
-    <Popover className="my-8">
+    <Popover className="float-right my-8">
       {({ close }) => (
         <>
-          <div className="grid -mx-4">
+          <div className="grid mx-4">
             {!isReady && (
               <WalletButton className="w-full" isLoading={isLoading} onClick={() => void connect()}>
                 Connect Wallet

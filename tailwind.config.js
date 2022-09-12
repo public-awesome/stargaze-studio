@@ -12,7 +12,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        stargaze: { DEFAULT: '#FFA900' },
+        stargaze: { DEFAULT: '#DB2676' },
         dark: { DEFAULT: '#06090B' },
         gray: { DEFAULT: '#F3F6F8' },
         'dark-gray': { DEFAULT: '#191D20' },
@@ -20,16 +20,16 @@ module.exports = {
 
         neutral: colors.neutral,
         plumbus: {
-          DEFAULT: '#FFA900',
-          light: '#FFC922',
+          DEFAULT: '#DB2676',
+          light: '#AF1F5F',
           matte: '#5D89E9',
           dark: '#FFC900',
           10: '#FFF0ED',
           20: '#5D89E9',
           30: '#F5A7A2',
-          40: '#FFA900',
-          50: '#FFA900',
-          60: '#FFA900',
+          40: '#DB2676',
+          50: '#DB2676',
+          60: '#DB2676',
           70: '#AB5152',
           80: '#944144',
           90: '#7D3136',

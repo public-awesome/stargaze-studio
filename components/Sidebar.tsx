@@ -22,7 +22,7 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="w-full" src="/stargaze-text.png" />
+        <img alt="Brand Text" className="w-full" src="/stargaze_logo_800.svg" />
       </Anchor>
 
       {/* wallet button */}
@@ -33,9 +33,9 @@ export const Sidebar = () => {
         <Anchor
           key={href}
           className={clsx(
-            'py-2 px-4 -mx-4 uppercase', // styling
+            'py-2 px-4 -mx-4 uppercase rounded-lg', // styling
             'hover:bg-white/5 transition-colors', // hover styling
-            { 'font-bold text-plumbus': router.asPath === href }, // active route styling
+            { 'font-bold bg-plumbus hover:bg-plumbus': router.asPath === href }, // active route styling
             // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
           )}
           href={href}

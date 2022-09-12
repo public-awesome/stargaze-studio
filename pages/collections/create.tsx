@@ -464,7 +464,7 @@ const CollectionCreationPage: NextPage = () => {
         <div className="flex justify-end w-full">
           <Button className="px-0 mb-6 max-h-12" isLoading={creatingCollection} onClick={performChecks} variant="solid">
             <label
-              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus border-0 btn modal-button"
+              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus-light border-0 btn modal-button"
               htmlFor="my-modal-2"
             >
               Create Collection
