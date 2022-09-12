@@ -49,23 +49,21 @@ const CollectionCreationPage: NextPage = () => {
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
-  const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreate, setReadyToCreate] = useState(false)
   const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
-  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null | undefined>(null)
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
   const performChecks = () => {
     try {
-      setReadyToCreate(false)
-      checkUploadDetails()
-      checkCollectionDetails()
-      checkMintingDetails()
-      checkWhitelistDetails()
-      checkRoyaltyDetails()
+      // setReadyToCreate(false)
+      // checkUploadDetails()
+      // checkCollectionDetails()
+      // checkMintingDetails()
+      // checkWhitelistDetails()
+      // checkRoyaltyDetails()
       setReadyToCreate(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -76,12 +74,10 @@ const CollectionCreationPage: NextPage = () => {
 
   const createCollection = async () => {
     try {
-      setCreatingCollection(true)
       setBaseTokenUri(null)
       setCoverImageUrl(null)
       setMinterContractAddress(null)
       setSg721ContractAddress(null)
-      setWhitelistContractAddress(null)
       setTransactionHash(null)
       if (uploadDetails?.uploadMethod === 'new') {
         setUploading(true)
@@ -105,7 +101,6 @@ const CollectionCreationPage: NextPage = () => {
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
-        setWhitelistContractAddress(whitelist as string)
 
         await instantiate(baseUri, coverImageUri, whitelist)
       } else {
@@ -115,15 +110,12 @@ const CollectionCreationPage: NextPage = () => {
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
-        setWhitelistContractAddress(whitelist as string)
 
         await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
       }
-      setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message)
-      setCreatingCollection(false)
       setUploading(false)
     }
   }
@@ -273,7 +265,7 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new') {
       if (uploadDetails.uploadService === 'nft-storage') {
         if (uploadDetails.nftStorageApiKey === '') {
-          throw new Error('Please enter a valid NFT.Storage API key')
+          throw new Error('Please enter a valid NFT Storage API key')
         }
       } else if (uploadDetails.pinataApiKey === '' || uploadDetails.pinataSecretKey === '') {
         throw new Error('Please enter Pinata API and secret keys')
@@ -417,17 +409,6 @@ const CollectionCreationPage: NextPage = () => {
                 {sg721ContractAddress}
               </Anchor>
               <br />
-              <Conditional test={whitelistContractAddress !== null && whitelistContractAddress !== undefined}>
-                Whitelist Contract Address:{'  '}
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
-                >
-                  {whitelistContractAddress}
-                </Anchor>
-                <br />
-              </Conditional>
               Transaction Hash: {'  '}
               <Anchor
                 className="text-stargaze hover:underline"
@@ -462,9 +443,9 @@ const CollectionCreationPage: NextPage = () => {
         </div>
         {readyToCreate && <ConfirmationModal confirm={createCollection} />}
         <div className="flex justify-end w-full">
-          <Button className="px-0 mb-6 max-h-12" isLoading={creatingCollection} onClick={performChecks} variant="solid">
+          <Button className="px-0 mb-6 max-h-12" onClick={performChecks} variant="solid">
             <label
-              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus border-0 btn modal-button"
+              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus-light border-0 btn modal-button"
               htmlFor="my-modal-2"
             >
               Create Collection

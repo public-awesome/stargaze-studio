@@ -97,7 +97,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
         <div className="ml-4 font-bold form-check form-check-inline">
           <input
             checked={whitelistState === 'none'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="whitelistRadio1"
             name="whitelistRadioOptions1"
             onClick={() => {
@@ -106,14 +106,17 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             type="radio"
             value="None"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="whitelistRadio1">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="whitelistRadio1"
+          >
             No whitelist
           </label>
         </div>
         <div className="ml-4 font-bold form-check form-check-inline">
           <input
             checked={whitelistState === 'existing'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="whitelistRadio2"
             name="whitelistRadioOptions2"
             onClick={() => {
@@ -122,14 +125,17 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             type="radio"
             value="Existing"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="whitelistRadio2">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="whitelistRadio2"
+          >
             Existing whitelist
           </label>
         </div>
         <div className="ml-4 font-bold form-check form-check-inline">
           <input
             checked={whitelistState === 'new'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="whitelistRadio3"
             name="whitelistRadioOptions3"
             onClick={() => {
@@ -138,7 +144,10 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             type="radio"
             value="New"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="whitelistRadio3">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="whitelistRadio3"
+          >
             New whitelist
           </label>
         </div>
