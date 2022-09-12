@@ -15,9 +15,10 @@ import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/sg721/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/sg721/messages/execute'
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
 import type { FormEvent } from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
@@ -48,6 +49,8 @@ const Sg721ExecutePage: NextPage = () => {
     title: 'Sg721 Address',
     subtitle: 'Address of the Sg721 contract',
   })
+
+  const contractAddress = contractState.value
 
   const messageState = useInputState({
     id: 'message',
@@ -120,6 +123,19 @@ const Sg721ExecutePage: NextPage = () => {
       },
     },
   )
+
+  const router = useRouter()
+
+  useEffect(() => {
+    if (contractAddress.length > 0) {
+      void router.replace({ query: { contractAddress } })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractAddress])
+  useEffect(() => {
+    const initial = new URL(document.URL).searchParams.get('contractAddress')
+    if (initial && initial.length > 0) contractState.onChange(initial)
+  }, [])
 
   return (
     <section className="py-6 px-12 space-y-4">
