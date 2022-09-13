@@ -52,7 +52,7 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
         <div className="ml-4 font-bold form-check form-check-inline">
           <input
             checked={royaltyState === 'none'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="royaltyRadio1"
             name="royaltyRadioOptions1"
             onClick={() => {
@@ -61,14 +61,17 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
             type="radio"
             value="None"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="royaltyRadio1">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="royaltyRadio1"
+          >
             No royalty
           </label>
         </div>
         <div className="ml-4 font-bold form-check form-check-inline">
           <input
             checked={royaltyState === 'new'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="royaltyRadio2"
             name="royaltyRadioOptions2"
             onClick={() => {
@@ -77,7 +80,10 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
             type="radio"
             value="Existing"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="royaltyRadio2">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="royaltyRadio2"
+          >
             Configure royalty details
           </label>
         </div>

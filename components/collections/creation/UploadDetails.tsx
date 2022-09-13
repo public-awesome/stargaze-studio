@@ -204,7 +204,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input
             checked={uploadMethod === 'existing'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="inlineRadio1"
             name="inlineRadioOptions1"
             onClick={() => {
@@ -213,7 +213,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             type="radio"
             value="Existing"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio1">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="inlineRadio1"
+          >
             Use an existing base URI
           </label>
         </div>
@@ -221,7 +224,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input
             checked={uploadMethod === 'new'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="inlineRadio2"
             name="inlineRadioOptions2"
             onClick={() => {
@@ -230,7 +233,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             type="radio"
             value="New"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio2">
+          <label
+            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            htmlFor="inlineRadio2"
+          >
             Upload assets & metadata
           </label>
         </div>
@@ -266,7 +272,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                 <div className="form-check form-check-inline">
                   <input
                     checked={uploadService === 'nft-storage'}
-                    className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+                    className="peer sr-only"
                     id="inlineRadio3"
                     name="inlineRadioOptions3"
                     onClick={() => {
@@ -275,7 +281,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     type="radio"
                     value="nft-storage"
                   />
-                  <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio3">
+                  <label
+                    className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+                    htmlFor="inlineRadio3"
+                  >
                     Upload using NFT.Storage
                   </label>
                 </div>
@@ -283,7 +292,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                 <div className="ml-4 form-check form-check-inline">
                   <input
                     checked={uploadService === 'pinata'}
-                    className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+                    className="peer sr-only"
                     id="inlineRadio4"
                     name="inlineRadioOptions4"
                     onClick={() => {
@@ -292,7 +301,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     type="radio"
                     value="pinata"
                   />
-                  <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio4">
+                  <label
+                    className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+                    htmlFor="inlineRadio4"
+                  >
                     Upload using Pinata
                   </label>
                 </div>
