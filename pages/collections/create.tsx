@@ -436,6 +436,15 @@ const CollectionCreationPage: NextPage = () => {
               >
                 {transactionHash}
               </Anchor>
+              <Button className="mt-2">
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`https://testnet.publicawesome.dev/launchpad/${minterContractAddress as string}`}
+                >
+                  View on Launchpad
+                </Anchor>
+              </Button>
             </div>
           </Alert>
         </Conditional>
