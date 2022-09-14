@@ -10,14 +10,14 @@ export const NavbarLayout = ({ children }: NavbarLayoutProps) => {
     <div
       className={clsx(
         'hidden fixed top-0 z-50 ml-1 w-full max-w-full h-24',
-        'bg-black border-white/10',
+        'bg-black border-b border-white/10',
         'lg:flex lg:flex-row lg:justify-between lg:items-center',
       )}
     >
       {/* fixed component */}
-      <div className={clsx('flex flex-row pl-8')}>
+      <div className={clsx('flex flex-row pl-8 w-full w-max-full')}>
         {/* inner component */}
-        <div className={clsx('flex flex-shrink-0 items-center mt-1 mr-4')}>{children}</div>
+        <div className={clsx('flex flex-shrink-0 items-center mt-1 mr-4 w-full w-max-full')}>{children}</div>
       </div>
     </div>
   )

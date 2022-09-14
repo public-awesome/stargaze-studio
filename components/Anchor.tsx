@@ -23,7 +23,7 @@ export function Anchor({ children, external, href = '', rel = '', ...rest }: Anc
 
   return (
     <Wrap {...wrapProps}>
-      <a {...rest} {...linkProps} href={href}>
+      <a {...rest} {...linkProps} href={href ? href : undefined}>
         {children ?? (href ? trimHttp(href) : null)}
       </a>
     </Wrap>
