@@ -22,6 +22,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_API_URL: string
     readonly NEXT_PUBLIC_BLOCK_EXPLORER_URL: string
     readonly NEXT_PUBLIC_NETWORK: string
+    readonly NEXT_PUBLIC_STARGAZE_WEBSITE_URL: string
     readonly NEXT_PUBLIC_WEBSITE_URL: string
   }
 }

@@ -29,7 +29,7 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
-import { MINTER_CODE_ID, SG721_CODE_ID, WHITELIST_CODE_ID } from 'utils/constants'
+import { MINTER_CODE_ID, SG721_CODE_ID, STARGAZE_URL, WHITELIST_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -436,6 +436,15 @@ const CollectionCreationPage: NextPage = () => {
               >
                 {transactionHash}
               </Anchor>
+              <Button className="mt-2">
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`${STARGAZE_URL}/launchpad/${minterContractAddress as string}`}
+                >
+                  View on Launchpad
+                </Anchor>
+              </Button>
             </div>
           </Alert>
         </Conditional>
