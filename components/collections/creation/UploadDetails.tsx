@@ -220,7 +220,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             Upload assets & metadata
           </label>
         </div>
-        <div className="mt-3 font-bold form-check form-check-inline">
+        <div className="mt-3 ml-2 font-bold form-check form-check-inline">
           <input
             checked={uploadMethod === 'existing'}
             className="peer sr-only"
@@ -288,7 +288,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                   </label>
                 </div>
 
-                <div className="form-check form-check-inline">
+                <div className="ml-2 form-check form-check-inline">
                   <input
                     checked={uploadService === 'pinata'}
                     className="peer sr-only"
