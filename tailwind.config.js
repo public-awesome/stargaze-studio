@@ -14,7 +14,7 @@ module.exports = {
       colors: {
         stargaze: { DEFAULT: '#DB2676' },
         dark: { DEFAULT: '#06090B' },
-        gray: { DEFAULT: '#F3F6F8' },
+        gray: { DEFAULT: '#A9A9A9' },
         'dark-gray': { DEFAULT: '#191D20' },
         purple: { DEFAULT: '#7E5DFF' },
 

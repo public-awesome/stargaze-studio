@@ -203,26 +203,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
       <div className="flex justify-center">
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input
-            checked={uploadMethod === 'existing'}
-            className="peer sr-only"
-            id="inlineRadio1"
-            name="inlineRadioOptions1"
-            onClick={() => {
-              setUploadMethod('existing')
-            }}
-            type="radio"
-            value="Existing"
-          />
-          <label
-            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
-            htmlFor="inlineRadio1"
-          >
-            Use an existing base URI
-          </label>
-        </div>
-
-        <div className="mt-3 ml-4 font-bold form-check form-check-inline">
-          <input
             checked={uploadMethod === 'new'}
             className="peer sr-only"
             id="inlineRadio2"
@@ -234,10 +214,29 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             value="New"
           />
           <label
-            className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio2"
           >
             Upload assets & metadata
+          </label>
+        </div>
+        <div className="mt-3 ml-2 font-bold form-check form-check-inline">
+          <input
+            checked={uploadMethod === 'existing'}
+            className="peer sr-only"
+            id="inlineRadio1"
+            name="inlineRadioOptions1"
+            onClick={() => {
+              setUploadMethod('existing')
+            }}
+            type="radio"
+            value="Existing"
+          />
+          <label
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+            htmlFor="inlineRadio1"
+          >
+            Use an existing base URI
           </label>
         </div>
       </div>
@@ -282,14 +281,14 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     value="nft-storage"
                   />
                   <label
-                    className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
                     htmlFor="inlineRadio3"
                   >
                     Upload using NFT.Storage
                   </label>
                 </div>
 
-                <div className="ml-4 form-check form-check-inline">
+                <div className="ml-2 form-check form-check-inline">
                   <input
                     checked={uploadService === 'pinata'}
                     className="peer sr-only"
@@ -302,7 +301,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     value="pinata"
                   />
                   <label
-                    className="inline-block py-1 px-2 text-plumbus-light peer-checked:text-white hover:text-white peer-checked:bg-plumbus peer-checked:hover:bg-plumbus-light hover:bg-plumbus rounded-lg border border-plumbus-light cursor-pointer form-check-label"
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
                     htmlFor="inlineRadio4"
                   >
                     Upload using Pinata
