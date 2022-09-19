@@ -107,7 +107,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             value="None"
           />
           <label
-            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus hover:rounded-sm peer-checked:border-b-2 peer-checked:border-plumbus cursor-pointer form-check-label"
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="whitelistRadio1"
           >
             No whitelist
@@ -126,7 +126,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             value="Existing"
           />
           <label
-            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus hover:rounded-sm peer-checked:border-b-2 peer-checked:border-plumbus cursor-pointer form-check-label"
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="whitelistRadio2"
           >
             Existing whitelist
@@ -145,7 +145,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             value="New"
           />
           <label
-            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus hover:rounded-sm peer-checked:border-b-2 peer-checked:border-plumbus cursor-pointer form-check-label"
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="whitelistRadio3"
           >
             New whitelist

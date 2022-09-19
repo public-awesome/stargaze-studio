@@ -214,7 +214,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             value="New"
           />
           <label
-            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus  peer-checked:border-b-2 peer-checked:border-plumbus hover:border-plumbus-light cursor-pointer form-check-label"
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus hover:border-plumbus-light cursor-pointer form-check-label"
             htmlFor="inlineRadio2"
           >
             Upload assets & metadata
@@ -233,7 +233,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             value="Existing"
           />
           <label
-            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus  peer-checked:border-b-2 peer-checked:border-plumbus hover:border-plumbus-light cursor-pointer form-check-label"
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus hover:border-plumbus-light cursor-pointer form-check-label"
             htmlFor="inlineRadio1"
           >
             Use an existing base URI
@@ -281,7 +281,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     value="nft-storage"
                   />
                   <label
-                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus hover:rounded-sm peer-checked:border-b-2 peer-checked:border-plumbus cursor-pointer form-check-label"
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
                     htmlFor="inlineRadio3"
                   >
                     Upload using NFT.Storage
@@ -301,7 +301,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     value="pinata"
                   />
                   <label
-                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:bg-plumbus hover:rounded-sm peer-checked:border-b-2 peer-checked:border-plumbus cursor-pointer form-check-label"
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
                     htmlFor="inlineRadio4"
                   >
                     Upload using Pinata
