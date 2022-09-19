@@ -22,7 +22,7 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="w-full" src="stargaze_logo_800.svg" />
+        <img alt="Brand Text" className="w-full" src="/stargaze_logo_800.svg" />
       </Anchor>
 
       {/* wallet button */}
