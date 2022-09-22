@@ -7,7 +7,7 @@ import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -15,7 +15,7 @@ const CollectionActionsPage: NextPage = () => {
   const { minter: minterContract, sg721: sg721Contract } = useContracts()
   const wallet = useWallet()
 
-  const [action, setAction] = useState<boolean>(true)
+  const [action, setAction] = useState<boolean>(false)
 
   const sg721ContractState = useInputState({
     id: 'sg721-contract-address',
@@ -30,6 +30,15 @@ const CollectionActionsPage: NextPage = () => {
     title: 'Minter Address',
     subtitle: 'Address of the Minter contract',
   })
+
+  const minterMessages = useMemo(
+    () => minterContract?.use(minterContractState.value),
+    [minterContract, minterContractState.value],
+  )
+  const sg721Messages = useMemo(
+    () => sg721Contract?.use(sg721ContractState.value),
+    [sg721Contract, sg721ContractState.value],
+  )
 
   return (
     <section className="py-6 px-12 space-y-4">
@@ -87,7 +96,23 @@ const CollectionActionsPage: NextPage = () => {
                 </label>
               </div>
             </div>
-            <div>{(action && <CollectionActions />) || <CollectionQueries />}</div>
+            <div>
+              {(action && (
+                <CollectionActions
+                  minterContractAddress={minterContractState.value}
+                  minterMessages={minterMessages}
+                  sg721ContractAddress={sg721ContractState.value}
+                  sg721Messages={sg721Messages}
+                />
+              )) || (
+                <CollectionQueries
+                  minterContractAddress={minterContractState.value}
+                  minterMessages={minterMessages}
+                  sg721ContractAddress={sg721ContractState.value}
+                  sg721Messages={sg721Messages}
+                />
+              )}
+            </div>
           </div>
         </div>
       </form>

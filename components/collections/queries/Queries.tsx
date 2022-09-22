@@ -5,33 +5,25 @@ import { FormControl } from 'components/FormControl'
 import { AddressInput, TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
-import { useContracts } from 'contexts/contracts'
-import type { NextPage } from 'next'
-import { useMemo } from 'react'
+import type { MinterInstance } from 'contracts/minter'
+import type { SG721Instance } from 'contracts/sg721'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 
-export const CollectionQueries: NextPage = () => {
-  const { minter: minterContract, sg721: sg721Contract } = useContracts()
-
+interface CollectionQueriesProps {
+  minterContractAddress: string
+  sg721ContractAddress: string
+  sg721Messages: SG721Instance | undefined
+  minterMessages: MinterInstance | undefined
+}
+export const CollectionQueries = ({
+  sg721ContractAddress,
+  sg721Messages,
+  minterContractAddress,
+  minterMessages,
+}: CollectionQueriesProps) => {
   const comboboxState = useQueryComboboxState()
   const type = comboboxState.value?.id
-
-  const sg721ContractState = useInputState({
-    id: 'sg721-contract-address',
-    name: 'sg721-contract-address',
-    title: 'Sg721 Address',
-    subtitle: 'Address of the Sg721 contract',
-  })
-  const sg721ContractAddress = sg721ContractState.value
-
-  const minterContractState = useInputState({
-    id: 'minter-contract-address',
-    name: 'minter-contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
-  })
-  const minterContractAddress = minterContractState.value
 
   const tokenIdState = useInputState({
     id: 'token-id',
@@ -52,12 +44,6 @@ export const CollectionQueries: NextPage = () => {
 
   const showTokenIdField = type === 'token_info'
   const showAddressField = type === 'tokens_minted_to_user'
-
-  const minterMessages = useMemo(
-    () => minterContract?.use(minterContractAddress),
-    [minterContract, minterContractAddress],
-  )
-  const sg721Messages = useMemo(() => sg721Contract?.use(sg721ContractAddress), [sg721Contract, sg721ContractAddress])
 
   const { data: response } = useQuery(
     [sg721Messages, minterMessages, type, tokenId, address] as const,

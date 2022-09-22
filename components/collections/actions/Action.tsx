@@ -12,19 +12,30 @@ import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
 import { WhitelistUpload } from 'components/WhitelistUpload'
-import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { NextPage } from 'next'
+import type { MinterInstance } from 'contracts/minter'
+import type { SG721Instance } from 'contracts/sg721'
 import type { FormEvent } from 'react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 
 import { TextInput } from '../../forms/FormInput'
 
-export const CollectionActions: NextPage = () => {
-  const { minter: minterContract, sg721: sg721Contract } = useContracts()
+interface CollectionActionsProps {
+  minterContractAddress: string
+  sg721ContractAddress: string
+  sg721Messages: SG721Instance | undefined
+  minterMessages: MinterInstance | undefined
+}
+
+export const CollectionActions = ({
+  sg721ContractAddress,
+  sg721Messages,
+  minterContractAddress,
+  minterMessages,
+}: CollectionActionsProps) => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
 
@@ -33,20 +44,6 @@ export const CollectionActions: NextPage = () => {
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
-
-  const sg721ContractState = useInputState({
-    id: 'sg721-contract-address',
-    name: 'sg721-contract-address',
-    title: 'Sg721 Address',
-    subtitle: 'Address of the Sg721 contract',
-  })
-
-  const minterContractState = useInputState({
-    id: 'minter-contract-address',
-    name: 'minter-contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
-  })
 
   const limitState = useNumberInputState({
     id: 'per-address-limi',
@@ -100,21 +97,12 @@ export const CollectionActions: NextPage = () => {
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
   const showAirdropFileField = type === 'airdrop'
 
-  const minterMessages = useMemo(
-    () => minterContract?.use(minterContractState.value),
-    [minterContract, minterContractState.value],
-  )
-  const sg721Messages = useMemo(
-    () => sg721Contract?.use(sg721ContractState.value),
-    [sg721Contract, sg721ContractState.value],
-  )
-
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
     startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
     limit: limitState.value,
-    minterContract: minterContractState.value,
-    sg721Contract: sg721ContractState.value,
+    minterContract: minterContractAddress,
+    sg721Contract: sg721ContractAddress,
     tokenId: tokenIdState.value,
     tokenIds: tokenIdListState.value,
     batchNumber: batchNumberState.value,
@@ -131,7 +119,7 @@ export const CollectionActions: NextPage = () => {
       if (!type) {
         throw new Error('Please select an action!')
       }
-      if (minterContractState.value === '' && sg721ContractState.value === '') {
+      if (minterContractAddress === '' && sg721ContractAddress === '') {
         throw new Error('Please enter minter and sg721 contract addresses!')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {
