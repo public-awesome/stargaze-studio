@@ -25,7 +25,7 @@ export const QueryCombobox = ({ value, onChange }: QueryComboboxProps) => {
       labelAs={Combobox.Label}
       onChange={onChange}
       subtitle="Collection queries"
-      title="Query"
+      title=""
       value={value}
     >
       <div className="relative">
