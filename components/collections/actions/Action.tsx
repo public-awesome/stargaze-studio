@@ -143,7 +143,7 @@ export const CollectionActions = ({
   }
 
   return (
-    <form onSubmit={mutate}>
+    <form>
       <div className="grid grid-cols-2 mt-4">
         <div className="mr-2">
           <ActionsCombobox {...actionComboboxState} />
@@ -164,9 +164,14 @@ export const CollectionActions = ({
             </FormControl>
           </Conditional>
         </div>
-        <div>
-          <div className="relative">
-            <Button className="absolute top-0 right-0" isLoading={isLoading} rightIcon={<FaArrowRight />} type="submit">
+        <div className="-mt-6">
+          <div className="relative mb-2">
+            <Button
+              className="absolute top-0 right-0"
+              isLoading={isLoading}
+              onClick={mutate}
+              rightIcon={<FaArrowRight />}
+            >
               Execute
             </Button>
             <FormControl subtitle="View execution transaction hash" title="Transaction Hash">
