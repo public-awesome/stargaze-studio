@@ -37,6 +37,14 @@ import type { UploadMethod } from '../../components/collections/creation/UploadD
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { getAssetType } from '../../utils/getAssetType'
 
+export interface CollectionData {
+  name: string
+  address: string
+  minter: string
+  imageURL: string
+  time: number
+}
+
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
   const { minter: minterContract, whitelist: whitelistContract } = useContracts()
@@ -193,6 +201,41 @@ const CollectionCreationPage: NextPage = () => {
     setTransactionHash(data.transactionHash)
     setMinterContractAddress(data.contractAddress)
     setSg721ContractAddress(data.logs[0].events[3].attributes[2].value)
+    console.log(`ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const allCollections: Record<string, CollectionData[]>[] = localStorage['collections']
+      ? JSON.parse(localStorage['collections'])
+      : []
+    console.log('allCollections', allCollections)
+
+    const newCollectionData: CollectionData = {
+      name: collectionDetails?.name as string,
+      address: data.logs[0].events[3].attributes[2].value,
+      minter: data.contractAddress,
+      imageURL: `https://ipfs.stargaze.zone/ipfs/${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`,
+      time: new Date().getTime(),
+    }
+
+    //Get the CollectionData array for the current wallet address
+    const myCollections = allCollections.find((c) => Object.keys(c)[0] === wallet.address)
+    console.log('myCollections', myCollections)
+    if (myCollections === undefined) {
+      //If there is no CollectionData array for the current wallet address, create one in allCollections
+      allCollections.push({ [wallet.address]: [newCollectionData] })
+      //allCollections[allCollections.indexOf(myCollections)] = {[wallet.address]: myCollectionList}
+    } else {
+      //If there is a CollectionData array for the current wallet address, push the new collection data to it in allCollections
+      allCollections[allCollections.indexOf(myCollections)][wallet.address].push(newCollectionData)
+    }
+
+    //List of all collections for the current wallet address
+    const myCollectionList = myCollections ? Object.values(myCollections)[0] : []
+    console.log('myCollectionList', myCollectionList)
+
+    //Update the localStorage
+    localStorage['collections'] = JSON.stringify(allCollections)
+
+    console.log(localStorage['collections'])
   }
 
   const uploadFiles = async (): Promise<string> => {
