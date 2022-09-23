@@ -68,7 +68,6 @@ const CollectionList: NextPage = () => {
                       <div className="flex items-center space-x-8">
                         <Anchor
                           className="text-xl text-plumbus"
-                          external
                           href={`/collections/actions?sg721ContractAddress=${collection.address}&minterContractAddress=${collection.minter}`}
                         >
                           <FaSlidersH />
