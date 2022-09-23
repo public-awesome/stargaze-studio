@@ -29,17 +29,17 @@ const HomePage: NextPage = () => {
         </HomeCard>
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
+          link="/collections/myCollections"
+          title="My Collections"
+        >
+          View a list of your collections.
+        </HomeCard>
+        <HomeCard
+          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/collections/actions"
           title="Collection Actions"
         >
           Execute messages on a collection.
-        </HomeCard>
-        <HomeCard
-          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
-          link="/collections/queries"
-          title="Collection Queries"
-        >
-          Query data from a collection.
         </HomeCard>
       </div>
     </section>
