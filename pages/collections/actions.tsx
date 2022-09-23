@@ -6,8 +6,9 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -40,6 +41,31 @@ const CollectionActionsPage: NextPage = () => {
     [sg721Contract, sg721ContractState.value],
   )
 
+  const sg721ContractAddress = sg721ContractState.value
+  const minterContractAddress = minterContractState.value
+
+  const router = useRouter()
+
+  useEffect(() => {
+    if (minterContractAddress.length > 0 && sg721ContractAddress.length === 0) {
+      void router.replace({ query: { minterContractAddress } })
+    }
+    if (sg721ContractAddress.length > 0 && minterContractAddress.length === 0) {
+      void router.replace({ query: { sg721ContractAddress } })
+    }
+    if (sg721ContractAddress.length > 0 && minterContractAddress.length > 0) {
+      void router.replace({ query: { sg721ContractAddress, minterContractAddress } })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sg721ContractAddress, minterContractAddress])
+
+  useEffect(() => {
+    const initialMinter = new URL(document.URL).searchParams.get('minterContractAddress')
+    const initialSg721 = new URL(document.URL).searchParams.get('sg721ContractAddress')
+    if (initialMinter && initialMinter.length > 0) minterContractState.onChange(initialMinter)
+    if (initialSg721 && initialSg721.length > 0) sg721ContractState.onChange(initialSg721)
+  }, [])
+
   return (
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Collection Actions" />
@@ -59,25 +85,6 @@ const CollectionActionsPage: NextPage = () => {
             <div className="flex justify-items-start font-bold">
               <div className="form-check form-check-inline">
                 <input
-                  checked={action}
-                  className="peer sr-only"
-                  id="inlineRadio3"
-                  name="inlineRadioOptions3"
-                  onClick={() => {
-                    setAction(true)
-                  }}
-                  type="radio"
-                  value="true"
-                />
-                <label
-                  className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-                  htmlFor="inlineRadio3"
-                >
-                  Actions
-                </label>
-              </div>
-              <div className="ml-2 form-check form-check-inline">
-                <input
                   checked={!action}
                   className="peer sr-only"
                   id="inlineRadio4"
@@ -93,6 +100,25 @@ const CollectionActionsPage: NextPage = () => {
                   htmlFor="inlineRadio4"
                 >
                   Queries
+                </label>
+              </div>
+              <div className="ml-2 form-check form-check-inline">
+                <input
+                  checked={action}
+                  className="peer sr-only"
+                  id="inlineRadio3"
+                  name="inlineRadioOptions3"
+                  onClick={() => {
+                    setAction(true)
+                  }}
+                  type="radio"
+                  value="true"
+                />
+                <label
+                  className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  htmlFor="inlineRadio3"
+                >
+                  Actions
                 </label>
               </div>
             </div>
