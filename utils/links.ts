@@ -8,7 +8,7 @@ export const links = {
   deuslabs: `https://deuslabs.fi`,
   Discord: `https://discord.gg/stargaze`,
   Docs: `https://docs.stargaze.zone/`,
-  GitHub: `https://github.com/public-awesome`,
+  GitHub: `https://github.com/public-awesome/stargaze-studio`,
   Stargaze: `https://stargaze.zone/`,
   Telegram: `https://t.me/joinchat/ZQ95YmIn3AI0ODFh`,
   Twitter: `https://twitter.com/stargazezone`,

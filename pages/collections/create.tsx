@@ -29,13 +29,21 @@ import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
-import { MINTER_CODE_ID, SG721_CODE_ID, WHITELIST_CODE_ID } from 'utils/constants'
+import { MINTER_CODE_ID, SG721_CODE_ID, STARGAZE_URL, WHITELIST_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { getAssetType } from '../../utils/getAssetType'
+
+export interface CollectionData {
+  name: string
+  address: string
+  minter: string
+  imageURL: string
+  time: number
+}
 
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
@@ -49,21 +57,23 @@ const CollectionCreationPage: NextPage = () => {
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
+  const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreate, setReadyToCreate] = useState(false)
   const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
+  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null | undefined>(null)
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
   const performChecks = () => {
     try {
-      // setReadyToCreate(false)
-      // checkUploadDetails()
-      // checkCollectionDetails()
-      // checkMintingDetails()
-      // checkWhitelistDetails()
-      // checkRoyaltyDetails()
+      setReadyToCreate(false)
+      checkUploadDetails()
+      checkCollectionDetails()
+      checkMintingDetails()
+      checkWhitelistDetails()
+      checkRoyaltyDetails()
       setReadyToCreate(true)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -74,10 +84,12 @@ const CollectionCreationPage: NextPage = () => {
 
   const createCollection = async () => {
     try {
+      setCreatingCollection(true)
       setBaseTokenUri(null)
       setCoverImageUrl(null)
       setMinterContractAddress(null)
       setSg721ContractAddress(null)
+      setWhitelistContractAddress(null)
       setTransactionHash(null)
       if (uploadDetails?.uploadMethod === 'new') {
         setUploading(true)
@@ -101,6 +113,7 @@ const CollectionCreationPage: NextPage = () => {
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
 
         await instantiate(baseUri, coverImageUri, whitelist)
       } else {
@@ -110,12 +123,15 @@ const CollectionCreationPage: NextPage = () => {
         let whitelist: string | undefined
         if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
 
         await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
       }
+      setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message)
+      setCreatingCollection(false)
       setUploading(false)
     }
   }
@@ -185,6 +201,41 @@ const CollectionCreationPage: NextPage = () => {
     setTransactionHash(data.transactionHash)
     setMinterContractAddress(data.contractAddress)
     setSg721ContractAddress(data.logs[0].events[3].attributes[2].value)
+    console.log(`ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const allCollections: Record<string, CollectionData[]>[] = localStorage['collections']
+      ? JSON.parse(localStorage['collections'])
+      : []
+    console.log('allCollections', allCollections)
+
+    const newCollectionData: CollectionData = {
+      name: collectionDetails?.name as string,
+      address: data.logs[0].events[3].attributes[2].value,
+      minter: data.contractAddress,
+      imageURL: `https://ipfs.stargaze.zone/ipfs/${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`,
+      time: new Date().getTime(),
+    }
+
+    //Get the CollectionData array for the current wallet address
+    const myCollections = allCollections.find((c) => Object.keys(c)[0] === wallet.address)
+    console.log('myCollections', myCollections)
+    if (myCollections === undefined) {
+      //If there is no CollectionData array for the current wallet address, create one in allCollections
+      allCollections.push({ [wallet.address]: [newCollectionData] })
+      //allCollections[allCollections.indexOf(myCollections)] = {[wallet.address]: myCollectionList}
+    } else {
+      //If there is a CollectionData array for the current wallet address, push the new collection data to it in allCollections
+      allCollections[allCollections.indexOf(myCollections)][wallet.address].push(newCollectionData)
+    }
+
+    //List of all collections for the current wallet address
+    const myCollectionList = myCollections ? Object.values(myCollections)[0] : []
+    console.log('myCollectionList', myCollectionList)
+
+    //Update the localStorage
+    localStorage['collections'] = JSON.stringify(allCollections)
+
+    console.log(localStorage['collections'])
   }
 
   const uploadFiles = async (): Promise<string> => {
@@ -265,7 +316,7 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new') {
       if (uploadDetails.uploadService === 'nft-storage') {
         if (uploadDetails.nftStorageApiKey === '') {
-          throw new Error('Please enter a valid NFT Storage API key')
+          throw new Error('Please enter a valid NFT.Storage API key')
         }
       } else if (uploadDetails.pinataApiKey === '' || uploadDetails.pinataSecretKey === '') {
         throw new Error('Please enter Pinata API and secret keys')
@@ -409,6 +460,17 @@ const CollectionCreationPage: NextPage = () => {
                 {sg721ContractAddress}
               </Anchor>
               <br />
+              <Conditional test={whitelistContractAddress !== null && whitelistContractAddress !== undefined}>
+                Whitelist Contract Address:{'  '}
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
+                >
+                  {whitelistContractAddress}
+                </Anchor>
+                <br />
+              </Conditional>
               Transaction Hash: {'  '}
               <Anchor
                 className="text-stargaze hover:underline"
@@ -417,6 +479,15 @@ const CollectionCreationPage: NextPage = () => {
               >
                 {transactionHash}
               </Anchor>
+              <Button className="mt-2">
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`${STARGAZE_URL}/launchpad/${minterContractAddress as string}`}
+                >
+                  View on Launchpad
+                </Anchor>
+              </Button>
             </div>
           </Alert>
         </Conditional>
@@ -443,9 +514,9 @@ const CollectionCreationPage: NextPage = () => {
         </div>
         {readyToCreate && <ConfirmationModal confirm={createCollection} />}
         <div className="flex justify-end w-full">
-          <Button className="px-0 mb-6 max-h-12" onClick={performChecks} variant="solid">
+          <Button className="px-0 mb-6 max-h-12" isLoading={creatingCollection} onClick={performChecks} variant="solid">
             <label
-              className="relative justify-end w-full h-full text-white bg-plumbus-light hover:bg-plumbus-light border-0 btn modal-button"
+              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus-light border-0 btn modal-button"
               htmlFor="my-modal-2"
             >
               Create Collection

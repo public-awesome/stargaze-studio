@@ -25,7 +25,7 @@ export const Button = (props: ButtonProps) => {
           'bg-plumbus hover:bg-plumbus-light rounded ': variant === 'solid',
           'bg-plumbus hover:bg-plumbus-light rounded border border-plumbus-dark': variant === 'outline',
           'opacity-50 cursor-not-allowed pointer-events-none': isDisabled,
-          'animate-pulse cursor-wait pointer-events-none': isLoading,
+          'pl-2 animate-pulse cursor-wait pointer-events-none': isLoading,
         },
         className,
       )}

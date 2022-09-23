@@ -9,9 +9,14 @@ import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
 const routes = [
-  { text: 'Create Collection', href: `/collections/create/` },
-  { text: 'Collections', href: `/collections/` },
-  { text: 'Contract Dashboards', href: `/contracts/` },
+  { text: 'Collections', href: `/collections/`, isChild: false },
+  { text: 'Create a Collection', href: `/collections/create/`, isChild: true },
+  { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
+  { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
+  { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
+  { text: 'Minter Contract', href: `/contracts/minter/`, isChild: true },
+  { text: 'SG721 Contract', href: `/contracts/sg721/`, isChild: true },
+  { text: 'Whitelist Contract', href: `/contracts/whitelist/`, isChild: true },
 ]
 
 export const Sidebar = () => {
@@ -22,20 +27,24 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="w-full" src="/stargaze-text.png" />
+        <img alt="Brand Text" className="w-full" src="/stargaze_logo_800.svg" />
       </Anchor>
 
       {/* wallet button */}
       <WalletLoader />
-
       {/* main navigation routes */}
-      {routes.map(({ text, href }) => (
+      {routes.map(({ text, href, isChild }) => (
         <Anchor
           key={href}
           className={clsx(
-            'py-2 px-4 -mx-4 uppercase', // styling
+            'px-4 -mx-5 font-extrabold uppercase rounded-lg', // styling
             'hover:bg-white/5 transition-colors', // hover styling
-            { 'font-bold text-plumbus': router.asPath === href }, // active route styling
+            { 'py-0 ml-2 text-sm font-bold': isChild },
+            {
+              'text-gray hover:text-white':
+                router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1) !== href && isChild,
+            },
+            { 'text-plumbus': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1) === href && isChild }, // active route styling
             // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
           )}
           href={href}

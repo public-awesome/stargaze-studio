@@ -26,7 +26,7 @@ export const ActionsCombobox = ({ value, onChange }: ActionsComboboxProps) => {
       labelAs={Combobox.Label}
       onChange={onChange}
       subtitle="Collection actions"
-      title="Action"
+      title=""
       value={value}
     >
       <div className="relative">

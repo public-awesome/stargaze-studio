@@ -41,24 +41,23 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   const nftStorageApiKeyState = useInputState({
     id: 'nft-storage-api-key',
     name: 'nftStorageApiKey',
-    title: 'NFT Storage API Key',
-    placeholder: '...',
-    defaultValue:
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDJBODk5OGI4ZkE2YTM1NzMyYmMxQTRDQzNhOUU2M0Y2NUM3ZjA1RWIiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY1NTE5MTcwNDQ2MiwibmFtZSI6IlRlc3QifQ.IbdV_26bkPHSdd81sxox5AoG-5a4CCEY4aCrdbCXwAE',
+    title: 'NFT.Storage API Key',
+    placeholder: 'Enter NFT.Storage API Key',
+    defaultValue: '',
   })
   const pinataApiKeyState = useInputState({
     id: 'pinata-api-key',
     name: 'pinataApiKey',
     title: 'Pinata API Key',
-    placeholder: '...',
-    defaultValue: 'c8c2ea440c09ee8fa639',
+    placeholder: 'Enter Pinata API Key',
+    defaultValue: '',
   })
   const pinataSecretKeyState = useInputState({
     id: 'pinata-secret-key',
     name: 'pinataSecretKey',
     title: 'Pinata Secret Key',
-    placeholder: '...',
-    defaultValue: '9d6f42dc01eaab15f52eac8f36cc4f0ee4184944cb3cdbcda229d06ecf877ee7',
+    placeholder: 'Enter Pinata Secret Key',
+    defaultValue: '',
   })
 
   const baseTokenUriState = useInputState({
@@ -86,7 +85,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     //check if the sorted file names are in numerical order
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     for (let i = 0; i < sortedFileNames.length; i++) {
-      if (parseInt(sortedFileNames[i]) !== i + 1) {
+      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
         toast.error('The file names should be in numerical order starting from 1.')
         //clear the input
         event.target.value = ''
@@ -125,7 +124,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     //check if the sorted file names are in numerical order
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     for (let i = 0; i < sortedFileNames.length; i++) {
-      if (parseInt(sortedFileNames[i]) !== i + 1) {
+      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
         toast.error('The file names should be in numerical order starting from 1.')
         //clear the input
         event.target.value = ''
@@ -204,25 +203,8 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
       <div className="flex justify-center">
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input
-            checked={uploadMethod === 'existing'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
-            id="inlineRadio1"
-            name="inlineRadioOptions1"
-            onClick={() => {
-              setUploadMethod('existing')
-            }}
-            type="radio"
-            value="Existing"
-          />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio1">
-            Use an existing base URI
-          </label>
-        </div>
-
-        <div className="mt-3 ml-4 font-bold form-check form-check-inline">
-          <input
             checked={uploadMethod === 'new'}
-            className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+            className="peer sr-only"
             id="inlineRadio2"
             name="inlineRadioOptions2"
             onClick={() => {
@@ -231,8 +213,30 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             type="radio"
             value="New"
           />
-          <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio2">
+          <label
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+            htmlFor="inlineRadio2"
+          >
             Upload assets & metadata
+          </label>
+        </div>
+        <div className="mt-3 ml-2 font-bold form-check form-check-inline">
+          <input
+            checked={uploadMethod === 'existing'}
+            className="peer sr-only"
+            id="inlineRadio1"
+            name="inlineRadioOptions1"
+            onClick={() => {
+              setUploadMethod('existing')
+            }}
+            type="radio"
+            value="Existing"
+          />
+          <label
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+            htmlFor="inlineRadio1"
+          >
+            Use an existing base URI
           </label>
         </div>
       </div>
@@ -244,7 +248,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
               Though Stargaze&apos;s sg721 contract allows for off-chain metadata storage, it is recommended to use a
               decentralized storage solution, such as IPFS. <br /> You may head over to{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
-                NFT Storage
+                NFT.Storage
               </Anchor>{' '}
               or{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
@@ -267,7 +271,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                 <div className="form-check form-check-inline">
                   <input
                     checked={uploadService === 'nft-storage'}
-                    className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+                    className="peer sr-only"
                     id="inlineRadio3"
                     name="inlineRadioOptions3"
                     onClick={() => {
@@ -276,15 +280,18 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     type="radio"
                     value="nft-storage"
                   />
-                  <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio3">
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio3"
+                  >
                     Upload using NFT.Storage
                   </label>
                 </div>
 
-                <div className="ml-4 form-check form-check-inline">
+                <div className="ml-2 form-check form-check-inline">
                   <input
                     checked={uploadService === 'pinata'}
-                    className="float-none mr-2 mb-1 w-4 h-4 align-middle bg-white checked:bg-stargaze bg-center bg-no-repeat bg-contain rounded-full border border-gray-300 checked:border-white focus:outline-none transition duration-200 appearance-none cursor-pointer form-check-input"
+                    className="peer sr-only"
                     id="inlineRadio4"
                     name="inlineRadioOptions4"
                     onClick={() => {
@@ -293,7 +300,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                     type="radio"
                     value="pinata"
                   />
-                  <label className="inline-block text-white cursor-pointer form-check-label" htmlFor="inlineRadio4">
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio4"
+                  >
                     Upload using Pinata
                   </label>
                 </div>
