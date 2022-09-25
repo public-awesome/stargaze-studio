@@ -52,11 +52,11 @@ export const keplrConfig = (config: AppConfig): ChainInfo => ({
       coinMinimalDenom: config.feeToken,
       coinDecimals: config.coinMap[config.feeToken].fractionalDigits,
     },
-    {
-      coinDenom: config.coinMap[config.stakingToken].denom,
-      coinMinimalDenom: config.stakingToken,
-      coinDecimals: config.coinMap[config.stakingToken].fractionalDigits,
-    },
+    // {
+    //   coinDenom: config.coinMap[config.stakingToken].denom,
+    //   coinMinimalDenom: config.stakingToken,
+    //   coinDecimals: config.coinMap[config.stakingToken].fractionalDigits,
+    // },
   ],
   feeCurrencies: [
     {
