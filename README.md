@@ -4,8 +4,8 @@
 
 # stargaze-studio
 
-- Mainnet website: https://
-- Testnet website: https://
+- [Mainnet](https://studio.stargaze.zone/)
+- [Testnet](https://studio.publicawesome.dev/)
 
 ## Prerequisites
 
@@ -24,7 +24,7 @@
 
 ```sh
 # clone repository
-git clone https://github.com/deus-labs/stargaze-studio.git
+git clone https://github.com/public-awesome/stargaze-studio.git
 cd stargaze-studio
 
 # install dependencies
@@ -42,7 +42,7 @@ yarn lint
 
 ## References
 
-- https://docs.stargaze.zone
+- https://docs.stargaze.zone/guides/stargaze-studio
 
 ## Questions
 
