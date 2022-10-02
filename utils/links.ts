@@ -7,13 +7,13 @@ export const links = {
   // main links
   deuslabs: `https://deuslabs.fi`,
   Discord: `https://discord.gg/stargaze`,
-  Docs: `https://docs.stargaze.zone/`,
+  Docs: `https://docs.stargaze.zone/guides/stargaze-studio`,
   GitHub: `https://github.com/public-awesome/stargaze-studio`,
   Stargaze: `https://stargaze.zone/`,
   Telegram: `https://t.me/joinchat/ZQ95YmIn3AI0ODFh`,
   Twitter: `https://twitter.com/stargazezone`,
   Explorer: BLOCK_EXPLORER_URL,
-  Documentation: 'https://docs.stargaze.zone/guides/readme',
+  Documentation: 'https://docs.stargaze.zone/guides/stargaze-studio',
 }
 
 export const footerLinks = [
