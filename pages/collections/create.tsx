@@ -77,7 +77,7 @@ const CollectionCreationPage: NextPage = () => {
           setReadyToCreate(true)
         })
         .catch((err) => {
-          toast.error(`Invalid whitelist contract address: ${err.message}`)
+          toast.error(`Error in Whitelist Configuration: ${err.message}`)
           setReadyToCreate(false)
         })
     } catch (error: any) {
@@ -500,7 +500,7 @@ const CollectionCreationPage: NextPage = () => {
         {readyToCreate && <ConfirmationModal confirm={createCollection} />}
         <div className="flex justify-end w-full">
           <Button
-            className="relative justify-center px-4 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+            className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
             isLoading={creatingCollection}
             onClick={performChecks}
             variant="solid"
