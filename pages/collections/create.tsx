@@ -499,13 +499,13 @@ const CollectionCreationPage: NextPage = () => {
         </div>
         {readyToCreate && <ConfirmationModal confirm={createCollection} />}
         <div className="flex justify-end w-full">
-          <Button className="px-0 mb-6 max-h-12" isLoading={creatingCollection} onClick={performChecks} variant="solid">
-            <label
-              className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus-light border-0 btn modal-button"
-              htmlFor="temp"
-            >
-              Create Collection
-            </label>
+          <Button
+            className="relative justify-center px-4 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+            isLoading={creatingCollection}
+            onClick={performChecks}
+            variant="solid"
+          >
+            Create Collection
           </Button>
         </div>
       </div>
