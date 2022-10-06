@@ -71,10 +71,15 @@ const CollectionCreationPage: NextPage = () => {
       checkUploadDetails()
       checkCollectionDetails()
       checkMintingDetails()
-      checkWhitelistDetails()
       checkRoyaltyDetails()
-      setReadyToCreate(true)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      checkWhitelistDetails()
+        .then(() => {
+          setReadyToCreate(true)
+        })
+        .catch((err) => {
+          toast.error(`Invalid whitelist contract address: ${err.message}`)
+          setReadyToCreate(false)
+        })
     } catch (error: any) {
       toast.error(error.message)
       setUploading(false)
@@ -324,10 +329,15 @@ const CollectionCreationPage: NextPage = () => {
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
   }
 
-  const checkWhitelistDetails = () => {
+  const checkWhitelistDetails = async () => {
     if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
     if (whitelistDetails.whitelistType === 'existing') {
       if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
+      else {
+        const contract = whitelistContract?.use(whitelistDetails.contractAddress)
+        //check if the address belongs to a whitelist contract (see performChecks())
+        const config = await contract?.config()
+      }
     } else if (whitelistDetails.whitelistType === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
       if (whitelistDetails.unitPrice === '') throw new Error('Whitelist unit price is required')
@@ -492,7 +502,7 @@ const CollectionCreationPage: NextPage = () => {
           <Button className="px-0 mb-6 max-h-12" isLoading={creatingCollection} onClick={performChecks} variant="solid">
             <label
               className="relative justify-end w-full h-full text-white bg-plumbus hover:bg-plumbus-light border-0 btn modal-button"
-              htmlFor="my-modal-2"
+              htmlFor="temp"
             >
               Create Collection
             </label>

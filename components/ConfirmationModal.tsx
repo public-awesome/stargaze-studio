@@ -6,7 +6,7 @@ export interface ConfirmationModalProps {
 export const ConfirmationModal = (props: ConfirmationModalProps) => {
   return (
     <div>
-      <input className="modal-toggle" id="my-modal-2" type="checkbox" />
+      <input className="modal-toggle" defaultChecked id="my-modal-2" type="checkbox" />
       <label className="cursor-pointer modal" htmlFor="my-modal-2">
         <label
           className="absolute top-[40%] bottom-5 left-1/3 max-w-xl max-h-40 border-2 no-scrollbar modal-box"
