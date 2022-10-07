@@ -1,3 +1,5 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair
+/* eslint-disable @typescript-eslint/no-loop-func */
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
@@ -92,6 +94,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         return
       }
     }
+    let loadedFileCount = 0
     const files: File[] = []
     let reader: FileReader
     for (let i = 0; i < event.target.files.length; i++) {
@@ -103,9 +106,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         files.push(assetFile)
       }
       reader.readAsArrayBuffer(event.target.files[i])
-      reader.onloadend = (e) => {
+      reader.onloadend = () => {
         if (!event.target.files) return toast.error('No file selected.')
-        if (i === event.target.files.length - 1) {
+        loadedFileCount++
+        if (loadedFileCount === event.target.files.length) {
           setAssetFilesArray(files.sort((a, b) => naturalCompare(a.name, b.name)))
         }
       }
@@ -131,6 +135,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         return
       }
     }
+    let loadedFileCount = 0
     const files: File[] = []
     let reader: FileReader
     for (let i = 0; i < event.target.files.length; i++) {
@@ -142,9 +147,10 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         files.push(metadataFile)
       }
       reader.readAsText(event.target.files[i], 'utf8')
-      reader.onloadend = (e) => {
+      reader.onloadend = () => {
         if (!event.target.files) return toast.error('No file selected.')
-        if (i === event.target.files.length - 1) {
+        loadedFileCount++
+        if (loadedFileCount === event.target.files.length) {
           setMetadataFilesArray(files.sort((a, b) => naturalCompare(a.name, b.name)))
         }
       }
