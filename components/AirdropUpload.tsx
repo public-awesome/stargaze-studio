@@ -12,7 +12,8 @@ interface AirdropUploadProps {
 export const AirdropUpload = ({ onChange }: AirdropUploadProps) => {
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return toast.error('Error opening file')
-    if (!event.target.files[0].name.endsWith('.csv')) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!event.target.files[0]?.name.endsWith('.csv')) {
       toast.error('Please select a .csv file!')
       return onChange([])
     }
