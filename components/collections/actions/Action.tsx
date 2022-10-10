@@ -1,3 +1,4 @@
+import { AirdropUpload } from 'components/AirdropUpload'
 import { Button } from 'components/Button'
 import type { DispatchExecuteArgs } from 'components/collections/actions/actions'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'components/collections/actions/actions'
@@ -11,15 +12,15 @@ import { useInputState, useNumberInputState } from 'components/forms/FormInput.h
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
-import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useWallet } from 'contexts/wallet'
 import type { MinterInstance } from 'contracts/minter'
 import type { SG721Instance } from 'contracts/sg721'
 import type { FormEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import { TextInput } from '../../forms/FormInput'
 
@@ -40,6 +41,7 @@ export const CollectionActions = ({
   const [lastTx, setLastTx] = useState('')
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
+  const [airdropAllocationArray, setAirdropAllocationArray] = useState<AirdropAllocation[]>([])
   const [airdropArray, setAirdropArray] = useState<string[]>([])
 
   const actionComboboxState = useActionsComboboxState()
@@ -113,6 +115,22 @@ export const CollectionActions = ({
     txSigner: wallet.address,
     type,
   }
+
+  useEffect(() => {
+    const addresses: string[] = []
+    airdropAllocationArray.forEach((allocation) => {
+      for (let i = 0; i < Number(allocation.amount); i++) {
+        addresses.push(allocation.address)
+      }
+    })
+    //shuffle the addresses array
+    for (let i = addresses.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[addresses[i], addresses[j]] = [addresses[j], addresses[i]]
+    }
+    setAirdropArray(addresses)
+  }, [airdropAllocationArray])
+
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
       event.preventDefault()
@@ -138,8 +156,9 @@ export const CollectionActions = ({
     },
   )
 
-  const airdropFileOnChange = (data: string[]) => {
-    setAirdropArray(data)
+  const airdropFileOnChange = (data: AirdropAllocation[]) => {
+    setAirdropAllocationArray(data)
+    console.log(data)
   }
 
   return (
@@ -154,8 +173,11 @@ export const CollectionActions = ({
           {showTokenIdListField && <TextInput {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showAirdropFileField && (
-            <FormGroup subtitle="TXT file that contains the airdrop addresses" title="Airdrop File">
-              <WhitelistUpload onChange={airdropFileOnChange} />
+            <FormGroup
+              subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address."
+              title="Airdrop File"
+            >
+              <AirdropUpload onChange={airdropFileOnChange} />
             </FormGroup>
           )}
           <Conditional test={showDateField}>
