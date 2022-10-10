@@ -174,7 +174,7 @@ export const CollectionActions = ({
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showAirdropFileField && (
             <FormGroup
-              subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address."
+              subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: address,amount"
               title="Airdrop File"
             >
               <AirdropUpload onChange={airdropFileOnChange} />
