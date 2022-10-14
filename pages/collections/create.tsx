@@ -229,11 +229,6 @@ const CollectionCreationPage: NextPage = () => {
     setTransactionHash(data.transactionHash)
     setMinterContractAddress(data.minterAddress)
     setSg721ContractAddress(data.sg721Address)
-
-    /*const data = await minterContract.instantiate(MINTER_CODE_ID, msg, 'Stargaze Minter Contract', wallet.address)
-    setTransactionHash(data.transactionHash)
-    setMinterContractAddress(data.contractAddress)
-    setSg721ContractAddress(data.logs[0].events[3].attributes[2].value)*/
   }
 
   const uploadFiles = async (): Promise<string> => {
