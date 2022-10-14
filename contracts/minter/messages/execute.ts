@@ -5,13 +5,17 @@ export type ExecuteType = typeof EXECUTE_TYPES[number]
 
 export const EXECUTE_TYPES = [
   'mint',
+  'purge',
+  'update_mint_price',
   'set_whitelist',
   'update_start_time',
+  'update_start_trading_time',
   'update_per_address_limit',
   'mint_to',
   'mint_for',
   'shuffle',
   'withdraw',
+  'burn_remaining',
 ] as const
 
 export interface ExecuteListItem {
@@ -27,6 +31,16 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     description: `Mint new tokens for a given address`,
   },
   {
+    id: 'purge',
+    name: 'Purge',
+    description: `Purge`,
+  },
+  {
+    id: 'update_mint_price',
+    name: 'Update Mint Price',
+    description: `Update mint price`,
+  },
+  {
     id: 'set_whitelist',
     name: 'Set Whitelist',
     description: `Set whitelist contract address`,
@@ -35,6 +49,11 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     id: 'update_start_time',
     name: 'Update Start Time',
     description: `Update start time for minting`,
+  },
+  {
+    id: 'update_start_trading_time',
+    name: 'Update Start Trading Time',
+    description: `Update start trading time for minting`,
   },
   {
     id: 'update_per_address_limit',
@@ -56,6 +75,11 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     name: 'Shuffle',
     description: `Shuffle the token IDs`,
   },
+  {
+    id: 'burn_remaining',
+    name: 'Burn Remaining',
+    description: `Burn remaining tokens`,
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -72,14 +96,18 @@ export type DispatchExecuteArgs = {
   txSigner: string
 } & (
   | { type: undefined }
-  | { type: Select<'mint'>; price: string }
+  | { type: Select<'mint'> }
+  | { type: Select<'purge'> }
+  | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'set_whitelist'>; whitelist: string }
   | { type: Select<'update_start_time'>; startTime: string }
+  | { type: Select<'update_start_trading_time'>; startTime: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'mint_to'>; recipient: string }
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
   | { type: Select<'shuffle'> }
   | { type: Select<'withdraw'> }
+  | { type: Select<'burn_remaining'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -89,13 +117,22 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   }
   switch (args.type) {
     case 'mint': {
-      return messages.mint(txSigner, args.price === '' ? '0' : args.price)
+      return messages.mint(txSigner)
+    }
+    case 'purge': {
+      return messages.purge(txSigner)
+    }
+    case 'update_mint_price': {
+      return messages.updateMintPrice(txSigner, args.price)
     }
     case 'set_whitelist': {
       return messages.setWhitelist(txSigner, args.whitelist)
     }
     case 'update_start_time': {
       return messages.updateStartTime(txSigner, args.startTime)
+    }
+    case 'update_start_trading_time': {
+      return messages.updateStartTradingTime(txSigner, args.startTime)
     }
     case 'update_per_address_limit': {
       return messages.updatePerAddressLimit(txSigner, args.limit)
@@ -112,6 +149,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'withdraw': {
       return messages.withdraw(txSigner)
     }
+    case 'burn_remaining': {
+      return messages.burnRemaining(txSigner)
+    }
     default: {
       throw new Error('unknown execute type')
     }
@@ -124,13 +164,22 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { contract } = args
   switch (args.type) {
     case 'mint': {
-      return messages(contract)?.mint(args.price === '' ? '0' : args.price)
+      return messages(contract)?.mint()
+    }
+    case 'purge': {
+      return messages(contract)?.purge()
+    }
+    case 'update_mint_price': {
+      return messages(contract)?.updateMintPrice(args.price)
     }
     case 'set_whitelist': {
       return messages(contract)?.setWhitelist(args.whitelist)
     }
     case 'update_start_time': {
       return messages(contract)?.updateStartTime(args.startTime)
+    }
+    case 'update_start_trading_time': {
+      return messages(contract)?.updateStartTradingTime(args.startTime)
     }
     case 'update_per_address_limit': {
       return messages(contract)?.updatePerAddressLimit(args.limit)
@@ -146,6 +195,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'withdraw': {
       return messages(contract)?.withdraw()
+    }
+    case 'burn_remaining': {
+      return messages(contract)?.burnRemaining()
     }
     default: {
       return {}

@@ -6,11 +6,15 @@ import { useSG721Contract } from 'contracts/sg721'
 export type ActionType = typeof ACTION_TYPES[number]
 
 export const ACTION_TYPES = [
+  'mint',
+  'purge',
+  'update_mint_price',
   'mint_to',
   'mint_for',
   'batch_mint',
   'set_whitelist',
   'update_start_time',
+  'update_start_trading_time',
   'update_per_address_limit',
   'withdraw',
   'transfer',
@@ -19,6 +23,7 @@ export const ACTION_TYPES = [
   'batch_burn',
   'shuffle',
   'airdrop',
+  'burn_remaining',
 ] as const
 
 export interface ActionListItem {
@@ -28,6 +33,21 @@ export interface ActionListItem {
 }
 
 export const ACTION_LIST: ActionListItem[] = [
+  {
+    id: 'mint',
+    name: 'Mint',
+    description: `Mint a token`,
+  },
+  {
+    id: 'purge',
+    name: 'Purge',
+    description: `Purge`,
+  },
+  {
+    id: 'update_mint_price',
+    name: 'Update Mint Price',
+    description: `Update mint price`,
+  },
   {
     id: 'mint_to',
     name: 'Mint To',
@@ -52,6 +72,11 @@ export const ACTION_LIST: ActionListItem[] = [
     id: 'update_start_time',
     name: 'Update Start Time',
     description: `Update start time for minting`,
+  },
+  {
+    id: 'update_start_trading_time',
+    name: 'Update Start Trading Time',
+    description: `Update start time for trading`,
   },
   {
     id: 'update_per_address_limit',
@@ -93,6 +118,11 @@ export const ACTION_LIST: ActionListItem[] = [
     name: 'Airdrop Tokens',
     description: 'Airdrop tokens to given addresses',
   },
+  {
+    id: 'burn_remaining',
+    name: 'Burn Remaining Tokens',
+    description: 'Burn remaining tokens',
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -111,11 +141,15 @@ export type DispatchExecuteArgs = {
   txSigner: string
 } & (
   | { type: undefined }
+  | { type: Select<'mint'> }
+  | { type: Select<'purge'> }
+  | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'mint_to'>; recipient: string }
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
   | { type: Select<'batch_mint'>; recipient: string; batchNumber: number }
   | { type: Select<'set_whitelist'>; whitelist: string }
   | { type: Select<'update_start_time'>; startTime: string }
+  | { type: Select<'update_start_trading_time'>; startTime: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'shuffle'> }
   | { type: Select<'withdraw'> }
@@ -124,6 +158,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'burn'>; tokenId: number }
   | { type: Select<'batch_burn'>; tokenIds: string }
   | { type: Select<'airdrop'>; recipients: string[] }
+  | { type: Select<'burn_remaining'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -132,6 +167,15 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
+    case 'mint': {
+      return minterMessages.mint(txSigner)
+    }
+    case 'purge': {
+      return minterMessages.purge(txSigner)
+    }
+    case 'update_mint_price': {
+      return minterMessages.updateMintPrice(txSigner, args.price)
+    }
     case 'mint_to': {
       return minterMessages.mintTo(txSigner, args.recipient)
     }
@@ -146,6 +190,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'update_start_time': {
       return minterMessages.updateStartTime(txSigner, args.startTime)
+    }
+    case 'update_start_trading_time': {
+      return minterMessages.updateStartTradingTime(txSigner, args.startTime)
     }
     case 'update_per_address_limit': {
       return minterMessages.updatePerAddressLimit(txSigner, args.limit)
@@ -171,6 +218,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'airdrop': {
       return minterMessages.airdrop(txSigner, args.recipients)
     }
+    case 'burn_remaining': {
+      return minterMessages.burnRemaining(txSigner)
+    }
     default: {
       throw new Error('Unknown action')
     }
@@ -184,6 +234,15 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages: sg721Messages } = useSG721Contract()
   const { minterContract, sg721Contract } = args
   switch (args.type) {
+    case 'mint': {
+      return minterMessages(minterContract)?.mint()
+    }
+    case 'purge': {
+      return minterMessages(minterContract)?.purge()
+    }
+    case 'update_mint_price': {
+      return minterMessages(minterContract)?.updateMintPrice(args.price)
+    }
     case 'mint_to': {
       return minterMessages(minterContract)?.mintTo(args.recipient)
     }
@@ -198,6 +257,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'update_start_time': {
       return minterMessages(minterContract)?.updateStartTime(args.startTime)
+    }
+    case 'update_start_trading_time': {
+      return minterMessages(minterContract)?.updateStartTradingTime(args.startTime)
     }
     case 'update_per_address_limit': {
       return minterMessages(minterContract)?.updatePerAddressLimit(args.limit)
@@ -222,6 +284,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'airdrop': {
       return minterMessages(minterContract)?.airdrop(args.recipients)
+    }
+    case 'burn_remaining': {
+      return minterMessages(minterContract)?.burnRemaining()
     }
     default: {
       return {}

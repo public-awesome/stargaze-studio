@@ -28,9 +28,12 @@ export interface MinterInstance {
   getMintCount: (address: string) => Promise<any>
 
   //Execute
-  mint: (senderAddress: string, price: string) => Promise<string>
+  mint: (senderAddress: string) => Promise<string>
+  purge: (senderAddress: string) => Promise<string>
+  updateMintPrice: (senderAddress: string, price: string) => Promise<string>
   setWhitelist: (senderAddress: string, whitelist: string) => Promise<string>
   updateStartTime: (senderAddress: string, time: Timestamp) => Promise<string>
+  updateStartTradingTime: (senderAddress: string, time: Timestamp) => Promise<string>
   updatePerAddressLimit: (senderAddress: string, perAddressLimit: number) => Promise<string>
   mintTo: (senderAddress: string, recipient: string) => Promise<string>
   mintFor: (senderAddress: string, recipient: string, tokenId: number) => Promise<string>
@@ -38,12 +41,16 @@ export interface MinterInstance {
   shuffle: (senderAddress: string) => Promise<string>
   withdraw: (senderAddress: string) => Promise<string>
   airdrop: (senderAddress: string, recipients: string[]) => Promise<string>
+  burnRemaining: (senderAddress: string) => Promise<string>
 }
 
 export interface MinterMessages {
-  mint: (price: string) => MintMessage
+  mint: () => MintMessage
+  purge: () => PurgeMessage
+  updateMintPrice: (price: string) => UpdateMintPriceMessage
   setWhitelist: (whitelist: string) => SetWhitelistMessage
-  updateStartTime: (time: Timestamp) => UpdateStarTimeMessage
+  updateStartTime: (time: Timestamp) => UpdateStartTimeMessage
+  updateStartTradingTime: (time: Timestamp) => UpdateStartTradingTimeMessage
   updatePerAddressLimit: (perAddressLimit: number) => UpdatePerAddressLimitMessage
   mintTo: (recipient: string) => MintToMessage
   mintFor: (recipient: string, tokenId: number) => MintForMessage
@@ -51,6 +58,7 @@ export interface MinterMessages {
   shuffle: () => ShuffleMessage
   withdraw: () => WithdrawMessage
   airdrop: (recipients: string[]) => CustomMessage
+  burnRemaining: () => BurnRemainingMessage
 }
 
 export interface MintMessage {
@@ -58,6 +66,26 @@ export interface MintMessage {
   contract: string
   msg: {
     mint: Record<string, never>
+  }
+  funds: Coin[]
+}
+
+export interface PurgeMessage {
+  sender: string
+  contract: string
+  msg: {
+    purge: Record<string, never>
+  }
+  funds: Coin[]
+}
+
+export interface UpdateMintPriceMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_mint_price: {
+      price: string
+    }
   }
   funds: Coin[]
 }
@@ -73,11 +101,20 @@ export interface SetWhitelistMessage {
   funds: Coin[]
 }
 
-export interface UpdateStarTimeMessage {
+export interface UpdateStartTimeMessage {
   sender: string
   contract: string
   msg: {
     update_start_time: string
+  }
+  funds: Coin[]
+}
+
+export interface UpdateStartTradingTimeMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_start_trading_time: string
   }
   funds: Coin[]
 }
@@ -141,6 +178,31 @@ export interface WithdrawMessage {
   funds: Coin[]
 }
 
+export interface BurnRemainingMessage {
+  sender: string
+  contract: string
+  msg: {
+    burn_remaining: Record<string, never>
+  }
+  funds: Coin[]
+}
+
+export interface MintPriceMessage {
+  public_price: {
+    denom: string
+    amount: string
+  }
+  airdrop_price: {
+    denom: string
+    amount: string
+  }
+  whitelist_price: null
+  current_price: {
+    denom: string
+    amount: string
+  }
+}
+
 export interface MinterContract {
   instantiate: (
     senderAddress: string,
@@ -180,7 +242,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       return res
     }
 
-    const getMintPrice = async (): Promise<any> => {
+    const getMintPrice = async (): Promise<MintPriceMessage> => {
       const res = await client.queryContractSmart(contractAddress, {
         mint_price: {},
       })
@@ -195,7 +257,8 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
     }
 
     //Execute
-    const mint = async (senderAddress: string, price: string): Promise<string> => {
+    const mint = async (senderAddress: string): Promise<string> => {
+      const price = (await getMintPrice()).public_price.amount
       const res = await client.execute(
         senderAddress,
         contractAddress,
@@ -205,6 +268,36 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         'auto',
         '',
         [coin(price, 'ustars')],
+      )
+
+      return res.transactionHash
+    }
+
+    const purge = async (senderAddress: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          purge: {},
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const updateMintPrice = async (senderAddress: string, price: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_mint_price: {
+            price,
+          },
+        },
+        'auto',
+        '',
       )
 
       return res.transactionHash
@@ -230,6 +323,20 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         contractAddress,
         {
           update_start_time: { time },
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const updateStartTradingTime = async (senderAddress: string, time: Timestamp): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_start_trading_time: { time },
         },
         'auto',
         '',
@@ -335,6 +442,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         },
         'auto',
         '',
+        [coin(500000000, 'ustars')],
       )
 
       return res.transactionHash
@@ -354,6 +462,20 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       return res.transactionHash
     }
 
+    const burnRemaining = async (senderAddress: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          burn_remaining: {},
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
     return {
       contractAddress,
       getConfig,
@@ -362,8 +484,11 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       getMintPrice,
       getMintCount,
       mint,
+      purge,
+      updateMintPrice,
       setWhitelist,
       updateStartTime,
+      updateStartTradingTime,
       updatePerAddressLimit,
       mintTo,
       mintFor,
@@ -371,6 +496,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       airdrop,
       shuffle,
       withdraw,
+      burnRemaining,
     }
   }
 
@@ -392,14 +518,38 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
   }
 
   const messages = (contractAddress: string) => {
-    const mint = (price: string): MintMessage => {
+    const mint = (): MintMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
           mint: {},
         },
-        funds: [coin(price, 'ustars')],
+        funds: [],
+      }
+    }
+
+    const purge = (): PurgeMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          purge: {},
+        },
+        funds: [],
+      }
+    }
+
+    const updateMintPrice = (price: string): UpdateMintPriceMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_mint_price: {
+            price,
+          },
+        },
+        funds: [],
       }
     }
 
@@ -416,12 +566,23 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
-    const updateStartTime = (startTime: string): UpdateStarTimeMessage => {
+    const updateStartTime = (startTime: string): UpdateStartTimeMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
           update_start_time: startTime,
+        },
+        funds: [],
+      }
+    }
+
+    const updateStartTradingTime = (startTime: string): UpdateStartTradingTimeMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_start_trading_time: startTime,
         },
         funds: [],
       }
@@ -515,10 +676,24 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
+    const burnRemaining = (): BurnRemainingMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          burn_remaining: {},
+        },
+        funds: [],
+      }
+    }
+
     return {
       mint,
+      purge,
+      updateMintPrice,
       setWhitelist,
       updateStartTime,
+      updateStartTradingTime,
       updatePerAddressLimit,
       mintTo,
       mintFor,
@@ -526,6 +701,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       airdrop,
       shuffle,
       withdraw,
+      burnRemaining,
     }
   }
 

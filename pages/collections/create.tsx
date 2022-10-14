@@ -55,7 +55,7 @@ const CollectionCreationPage: NextPage = () => {
   } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
   const messages = useMemo(
-    () => vendingFactoryContract?.use('stars1qdcxmc82uh8tqf56kprjddkfy7p4ft4z46kh9f6lhnjxtgekra5qjj5r6c'),
+    () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
     [vendingFactoryContract, wallet.address],
   )
 
@@ -210,9 +210,9 @@ const CollectionCreationPage: NextPage = () => {
                 ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
                 : `${coverImageUri}`
             }`,
-            explicit_content: false, //todo
+            explicit_content: collectionDetails?.explicit,
             royalty_info: royaltyInfo,
-            start_trading_time: mintingDetails?.startTime || null,
+            start_trading_time: collectionDetails?.startTradingTime || null,
           },
         },
       },
