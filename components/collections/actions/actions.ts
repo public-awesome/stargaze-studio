@@ -70,12 +70,12 @@ export const ACTION_LIST: ActionListItem[] = [
   },
   {
     id: 'update_start_time',
-    name: 'Update Start Time',
+    name: 'Update Minting Start Time',
     description: `Update start time for minting`,
   },
   {
     id: 'update_start_trading_time',
-    name: 'Update Start Trading Time',
+    name: 'Update Trading Start Time',
     description: `Update start time for trading`,
   },
   {
