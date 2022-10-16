@@ -196,7 +196,10 @@ export interface MintPriceMessage {
     denom: string
     amount: string
   }
-  whitelist_price: null
+  whitelist_price?: {
+    denom: string
+    amount: string
+  }
   current_price: {
     denom: string
     amount: string
