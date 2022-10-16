@@ -84,7 +84,7 @@ const MinterQueryPage: NextPage = () => {
         link={links.Documentation}
         title="Minter Contract"
       />
-      <LinkTabs activeIndex={1} data={minterLinkTabs} />
+      <LinkTabs activeIndex={0} data={minterLinkTabs} />
 
       <div className="grid grid-cols-2 p-4 space-x-8">
         <div className="space-y-8">
