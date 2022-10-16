@@ -101,10 +101,11 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
         <TextInput {...descriptionState} isRequired />
         <TextInput {...symbolState} isRequired />
         <div className="flex flex-col space-y-2">
-          <span className="font-bold first-letter:capitalize">Explicit Content</span>
           <div>
-            <span className="first-letter:capitalize">Is this collection contains explicit content?</span>
-            <div className="flex justify-center">
+            <div className="flex">
+              <span className="mt-1 text-sm first-letter:capitalize">
+                Does the collection contain explicit content?
+              </span>
               <div className="ml-2 font-bold form-check form-check-inline">
                 <input
                   checked={explicit}
@@ -117,7 +118,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
                   type="radio"
                 />
                 <label
-                  className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
                   htmlFor="explicitRadio1"
                 >
                   YES
@@ -135,7 +136,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
                   type="radio"
                 />
                 <label
-                  className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
                   htmlFor="explicitRadio2"
                 >
                   NO
@@ -180,7 +181,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
             <span className="italic font-light ">Waiting for cover image URL to be specified.</span>
           )}
         </FormControl>
-        <FormControl htmlId="timestamp" subtitle="Minting start time (local) (optional)" title="Start Trading Time">
+        <FormControl htmlId="timestamp" subtitle="Trading start time (optional)" title="Trading Start Time">
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
         </FormControl>
       </FormGroup>

@@ -70,7 +70,7 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
         />
         <NumberInput {...unitPriceState} isRequired />
         <NumberInput {...perAddressLimitState} isRequired />
-        <FormControl htmlId="timestamp" isRequired subtitle="Listing start time (local)" title="Start Time">
+        <FormControl htmlId="timestamp" isRequired subtitle="Minting start time (local)" title="Start Time">
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
         </FormControl>
       </FormGroup>
