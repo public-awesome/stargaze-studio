@@ -26,6 +26,7 @@ export interface CollectionDetailsDataProps {
   description: string
   symbol: string
   imageFile: File[]
+  externalLink?: string
   startTradingTime?: string
   explicit: boolean
 }
@@ -56,6 +57,13 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
     placeholder: 'SYMBOL',
   })
 
+  const externalLinkState = useInputState({
+    id: 'external-link',
+    name: 'externalLink',
+    title: 'External Link (optional)',
+    placeholder: 'https://my-collection...',
+  })
+
   useEffect(() => {
     try {
       const data: CollectionDetailsDataProps = {
@@ -63,6 +71,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
         description: descriptionState.value,
         symbol: symbolState.value,
         imageFile: coverImage ? [coverImage] : [],
+        externalLink: externalLinkState.value,
         startTradingTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
         explicit,
       }
@@ -72,7 +81,15 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
       toast.error(error.message)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameState.value, descriptionState.value, symbolState.value, coverImage, timestamp, explicit])
+  }, [
+    nameState.value,
+    descriptionState.value,
+    symbolState.value,
+    externalLinkState.value,
+    coverImage,
+    timestamp,
+    explicit,
+  ])
 
   const selectCoverImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files === null) return toast.error('Error selecting cover image')
@@ -100,6 +117,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
         <TextInput {...nameState} isRequired />
         <TextInput {...descriptionState} isRequired />
         <TextInput {...symbolState} isRequired />
+        <TextInput {...externalLinkState} />
         <div className="flex flex-col space-y-2">
           <div>
             <div className="flex">
