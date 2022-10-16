@@ -72,7 +72,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
       toast.error(error.message)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nameState.value, descriptionState.value, coverImage, timestamp])
+  }, [nameState.value, descriptionState.value, coverImage, timestamp, explicit])
 
   const selectCoverImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files === null) return toast.error('Error selecting cover image')
