@@ -94,7 +94,7 @@ export const CollectionActions = ({
     id: 'update-mint-price',
     name: 'updateMintPrice',
     title: 'Update Mint Price',
-    subtitle: 'New minting price',
+    subtitle: 'New minting price in STARS',
   })
 
   const showWhitelistField = type === 'set_whitelist'
@@ -149,6 +149,11 @@ export const CollectionActions = ({
       if (minterContractAddress === '' && sg721ContractAddress === '') {
         throw new Error('Please enter minter and sg721 contract addresses!')
       }
+      if (type === 'update_mint_price' && priceState.value < 50) {
+        console.log('here')
+        throw new Error('Mint price must be at least 50 STARS')
+      }
+
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',

@@ -296,7 +296,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         contractAddress,
         {
           update_mint_price: {
-            price,
+            price: (Number(price) * 1000000).toString(),
           },
         },
         'auto',
@@ -549,7 +549,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         contract: contractAddress,
         msg: {
           update_mint_price: {
-            price,
+            price: (Number(price) * 1000000).toString(),
           },
         },
         funds: [],
