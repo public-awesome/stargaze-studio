@@ -32,6 +32,8 @@ const MinterInstantiatePage: NextPage = () => {
   const contract = useContracts().vendingFactory
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
+  const [timestamp, setTimestamp] = useState<Date | undefined>()
+  const [explicit, setExplicit] = useState<boolean>(false)
 
   const nameState = useInputState({
     id: 'name',
@@ -47,14 +49,6 @@ const MinterInstantiatePage: NextPage = () => {
     title: 'Symbol',
     placeholder: 'AWSM',
     subtitle: 'Symbol of the sg721 contract',
-  })
-
-  const minterState = useInputState({
-    id: 'minter-address',
-    name: 'minterAddress',
-    title: 'Minter Address',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
-    subtitle: 'Address that has the permissions to mint on sg721 contract',
   })
 
   const codeIdState = useNumberInputState({
@@ -103,12 +97,12 @@ const MinterInstantiatePage: NextPage = () => {
     placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
-  const royaltyShareState = useNumberInputState({
+  const royaltyShareState = useInputState({
     id: 'royalty-share',
     name: 'royaltyShare',
     title: 'Share Percentage',
     subtitle: 'Percentage of royalties to be paid',
-    placeholder: '8',
+    placeholder: '8%',
   })
 
   const unitPriceState = useNumberInputState({
@@ -161,8 +155,8 @@ const MinterInstantiatePage: NextPage = () => {
       let royaltyInfo = null
       if (royaltyPaymentAddressState.value && royaltyShareState.value) {
         royaltyInfo = {
-          paymentAddress: royaltyPaymentAddressState.value,
-          share: royaltyShareState.value,
+          payment_address: royaltyPaymentAddressState.value,
+          share: (Number(royaltyShareState.value) / 100).toString(),
         }
       }
 
@@ -201,6 +195,8 @@ const MinterInstantiatePage: NextPage = () => {
               description: descriptionState.value,
               image: imageState.value,
               external_link: externalLinkState.value || null,
+              explicit_content: explicit,
+              start_trading_time: timestamp ? (timestamp.getTime() * 1_000_000).toString() : null,
               royalty_info: royaltyInfo,
             },
           },
@@ -250,7 +246,6 @@ const MinterInstantiatePage: NextPage = () => {
         <NumberInput isRequired {...codeIdState} />
         <TextInput isRequired {...nameState} />
         <TextInput isRequired {...symbolState} />
-        <TextInput isRequired {...minterState} />
       </FormGroup>
 
       <FormGroup subtitle="Information about your collection" title="Collection Details">
@@ -258,6 +253,54 @@ const MinterInstantiatePage: NextPage = () => {
         <FormTextArea isRequired {...descriptionState} />
         <TextInput isRequired {...imageState} />
         <TextInput {...externalLinkState} />
+        <FormControl htmlId="timestamp" subtitle="Trading start time (local)" title="Trading Start Time (optional)">
+          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        </FormControl>
+        <div className="flex flex-col space-y-2">
+          <div>
+            <div className="flex">
+              <span className="mt-1 text-sm first-letter:capitalize">
+                Does the collection contain explicit content?
+              </span>
+              <div className="ml-2 font-bold form-check form-check-inline">
+                <input
+                  checked={explicit}
+                  className="peer sr-only"
+                  id="explicitRadio1"
+                  name="explicitRadioOptions1"
+                  onClick={() => {
+                    setExplicit(true)
+                  }}
+                  type="radio"
+                />
+                <label
+                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  htmlFor="explicitRadio1"
+                >
+                  YES
+                </label>
+              </div>
+              <div className="ml-2 font-bold form-check form-check-inline">
+                <input
+                  checked={!explicit}
+                  className="peer sr-only"
+                  id="explicitRadio2"
+                  name="explicitRadioOptions2"
+                  onClick={() => {
+                    setExplicit(false)
+                  }}
+                  type="radio"
+                />
+                <label
+                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  htmlFor="explicitRadio2"
+                >
+                  NO
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </FormGroup>
 
       <FormGroup subtitle="Information about royalty" title="Royalty Details">
