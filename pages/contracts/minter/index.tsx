@@ -1,1 +1,1 @@
-export { default } from './query'
+export { default } from './instantiate'
