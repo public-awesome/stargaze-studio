@@ -96,7 +96,7 @@ const Sg721QueryPage: NextPage = () => {
         link={links.Documentation}
         title="Sg721 Contract"
       />
-      <LinkTabs activeIndex={1} data={sg721LinkTabs} />
+      <LinkTabs activeIndex={0} data={sg721LinkTabs} />
 
       <div className="grid grid-cols-2 p-4 space-x-8">
         <div className="space-y-8">
