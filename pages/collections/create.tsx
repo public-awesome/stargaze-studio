@@ -350,6 +350,12 @@ const CollectionCreationPage: NextPage = () => {
       mintingDetails.perAddressLimit > mintingDetails.numTokens
     )
       throw new Error('Invalid limit for tokens per address')
+    if (
+      mintingDetails.numTokens > 100 &&
+      mintingDetails.numTokens < 100 * mintingDetails.perAddressLimit &&
+      mintingDetails.perAddressLimit > mintingDetails.numTokens / 100
+    )
+      throw new Error('Invalid limit for tokens per address. The limit cannot exceed 1% of the total number of tokens.')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
   }
