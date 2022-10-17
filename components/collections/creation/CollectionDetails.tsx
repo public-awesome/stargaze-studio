@@ -118,6 +118,46 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
         <TextInput {...descriptionState} isRequired />
         <TextInput {...symbolState} isRequired />
         <TextInput {...externalLinkState} />
+        <FormControl htmlId="timestamp" subtitle="Trading start time (local)" title="Trading Start Time (optional)">
+          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        </FormControl>
+
+        <FormControl isRequired={uploadMethod === 'new'} title="Cover Image">
+          {uploadMethod === 'new' && (
+            <input
+              accept="image/*"
+              className={clsx(
+                'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                'before:hover:bg-white/5 before:transition',
+              )}
+              id="cover-image"
+              onChange={selectCoverImage}
+              type="file"
+            />
+          )}
+
+          {coverImage !== null && uploadMethod === 'new' && (
+            <div className="max-w-[200px] max-h-[200px] rounded border-2">
+              <img alt="no-preview-available" src={URL.createObjectURL(coverImage)} />
+            </div>
+          )}
+          {uploadMethod === 'existing' && coverImageUrl?.includes('ipfs://') && (
+            <div className="max-w-[200px] max-h-[200px] rounded border-2">
+              <img
+                alt="no-preview-available"
+                src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
+              />
+            </div>
+          )}
+          {uploadMethod === 'existing' && coverImageUrl && !coverImageUrl?.includes('ipfs://') && (
+            <div className="max-w-[200px] max-h-[200px] rounded border-2">
+              <img alt="no-preview-available" src={coverImageUrl} />
+            </div>
+          )}
+          {uploadMethod === 'existing' && !coverImageUrl && (
+            <span className="italic font-light ">Waiting for cover image URL to be specified.</span>
+          )}
+        </FormControl>
         <div className="flex flex-col space-y-2">
           <div>
             <div className="flex">
@@ -163,45 +203,6 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
             </div>
           </div>
         </div>
-        <FormControl isRequired={uploadMethod === 'new'} title="Cover Image">
-          {uploadMethod === 'new' && (
-            <input
-              accept="image/*"
-              className={clsx(
-                'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                'before:hover:bg-white/5 before:transition',
-              )}
-              id="cover-image"
-              onChange={selectCoverImage}
-              type="file"
-            />
-          )}
-
-          {coverImage !== null && uploadMethod === 'new' && (
-            <div className="max-w-[200px] max-h-[200px] rounded border-2">
-              <img alt="no-preview-available" src={URL.createObjectURL(coverImage)} />
-            </div>
-          )}
-          {uploadMethod === 'existing' && coverImageUrl?.includes('ipfs://') && (
-            <div className="max-w-[200px] max-h-[200px] rounded border-2">
-              <img
-                alt="no-preview-available"
-                src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
-              />
-            </div>
-          )}
-          {uploadMethod === 'existing' && coverImageUrl && !coverImageUrl?.includes('ipfs://') && (
-            <div className="max-w-[200px] max-h-[200px] rounded border-2">
-              <img alt="no-preview-available" src={coverImageUrl} />
-            </div>
-          )}
-          {uploadMethod === 'existing' && !coverImageUrl && (
-            <span className="italic font-light ">Waiting for cover image URL to be specified.</span>
-          )}
-        </FormControl>
-        <FormControl htmlId="timestamp" subtitle="Trading start time (optional)" title="Trading Start Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-        </FormControl>
       </FormGroup>
     </div>
   )

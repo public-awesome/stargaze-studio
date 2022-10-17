@@ -337,6 +337,16 @@ const CollectionCreationPage: NextPage = () => {
     if (collectionDetails.description === '') throw new Error('Collection description is required')
     if (uploadDetails?.uploadMethod === 'new' && collectionDetails.imageFile.length === 0)
       throw new Error('Collection cover image is required')
+    if (
+      collectionDetails.startTradingTime &&
+      Number(collectionDetails.startTradingTime) < new Date().getTime() * 1000000
+    )
+      throw new Error('Invalid trading start time')
+    if (
+      collectionDetails.startTradingTime &&
+      Number(collectionDetails.startTradingTime) < Number(mintingDetails?.startTime)
+    )
+      throw new Error('Trading start time must be after minting start time')
   }
 
   const checkMintingDetails = () => {
