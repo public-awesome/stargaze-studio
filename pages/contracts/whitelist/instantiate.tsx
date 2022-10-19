@@ -76,7 +76,7 @@ const Sg721InstantiatePage: NextPage = () => {
         members: whitelistArray,
         start_time: (startDate.getTime() * 1_000_000).toString(),
         end_time: (endDate.getTime() * 1_000_000).toString(),
-        unit_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
+        mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
         per_address_limit: perAddressLimitState.value,
         member_limit: memberLimitState.value,
       }

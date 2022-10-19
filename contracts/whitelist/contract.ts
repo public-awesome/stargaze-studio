@@ -13,7 +13,7 @@ export interface ConfigResponse {
   readonly member_limit: number
   readonly start_time: string
   readonly end_time: string
-  readonly unit_price: Coin
+  readonly mint_price: Coin
   readonly is_active: boolean
 }
 export interface WhiteListInstance {
