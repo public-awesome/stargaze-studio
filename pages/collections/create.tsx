@@ -294,16 +294,6 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'existing' && !uploadDetails.baseTokenURI?.includes('ipfs://')) {
       throw new Error('Please specify a valid base token URI')
     }
-    if (
-      uploadDetails.uploadMethod === 'existing' &&
-      uploadDetails.imageUrl?.substring(uploadDetails.imageUrl.lastIndexOf('.') + 1) !== 'jpg' &&
-      uploadDetails.imageUrl?.substring(uploadDetails.imageUrl.lastIndexOf('.') + 1) !== 'png' &&
-      uploadDetails.imageUrl?.substring(uploadDetails.imageUrl.lastIndexOf('.') + 1) !== 'jpeg' &&
-      uploadDetails.imageUrl?.substring(uploadDetails.imageUrl.lastIndexOf('.') + 1) !== 'gif' &&
-      uploadDetails.imageUrl?.substring(uploadDetails.imageUrl.lastIndexOf('.') + 1) !== 'svg'
-    ) {
-      throw new Error('Please specify a valid cover image URL')
-    }
   }
 
   const checkCollectionDetails = () => {
