@@ -71,7 +71,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
         description: descriptionState.value,
         symbol: symbolState.value,
         imageFile: coverImage ? [coverImage] : [],
-        externalLink: externalLinkState.value,
+        externalLink: externalLinkState.value || undefined,
         startTradingTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
         explicit,
       }
