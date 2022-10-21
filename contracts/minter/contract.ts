@@ -325,7 +325,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         senderAddress,
         contractAddress,
         {
-          update_start_time: { time },
+          update_start_time: time,
         },
         'auto',
         '',
