@@ -13,7 +13,7 @@ export interface ConfigResponse {
   readonly member_limit: number
   readonly start_time: string
   readonly end_time: string
-  readonly unit_price: Coin
+  readonly mint_price: Coin
   readonly is_active: boolean
 }
 export interface WhiteListInstance {
@@ -219,7 +219,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
     admin?: string,
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(txSigner, codeId, initMsg, label, 'auto', {
-      funds: [coin('100000000', 'ustars')],
+      funds: [coin((Math.ceil(Number(initMsg.member_limit) / 1000) * 100000000).toString(), 'ustars')],
       admin,
     })
 

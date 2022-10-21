@@ -90,14 +90,22 @@ export const CollectionActions = ({
     subtitle: 'Address of the whitelist contract',
   })
 
+  const priceState = useNumberInputState({
+    id: 'update-mint-price',
+    name: 'updateMintPrice',
+    title: 'Update Mint Price',
+    subtitle: 'New minting price in STARS',
+  })
+
   const showWhitelistField = type === 'set_whitelist'
-  const showDateField = type === 'update_start_time'
+  const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
   const showNumberOfTokensField = type === 'batch_mint'
   const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer'])
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
   const showAirdropFileField = type === 'airdrop'
+  const showPriceField = type === 'update_mint_price'
 
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
@@ -114,6 +122,7 @@ export const CollectionActions = ({
     recipients: airdropArray,
     txSigner: wallet.address,
     type,
+    price: priceState.value.toString(),
   }
 
   useEffect(() => {
@@ -140,6 +149,11 @@ export const CollectionActions = ({
       if (minterContractAddress === '' && sg721ContractAddress === '') {
         throw new Error('Please enter minter and sg721 contract addresses!')
       }
+      if (type === 'update_mint_price' && priceState.value < 50) {
+        console.log('here')
+        throw new Error('Mint price must be at least 50 STARS')
+      }
+
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',
@@ -172,6 +186,7 @@ export const CollectionActions = ({
           {showTokenIdField && <NumberInput {...tokenIdState} />}
           {showTokenIdListField && <TextInput {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
+          {showPriceField && <NumberInput {...priceState} />}
           {showAirdropFileField && (
             <FormGroup
               subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: address,amount"
