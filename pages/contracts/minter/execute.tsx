@@ -80,7 +80,7 @@ const MinterExecutePage: NextPage = () => {
   })
 
   const showWhitelistField = type === 'set_whitelist'
-  const showDateField = type === 'update_start_time'
+  const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = type === 'mint_for'
   const showRecipientField = isEitherType(type, ['mint_to', 'mint_for'])

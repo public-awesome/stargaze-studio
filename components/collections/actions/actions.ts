@@ -149,7 +149,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'batch_mint'>; recipient: string; batchNumber: number }
   | { type: Select<'set_whitelist'>; whitelist: string }
   | { type: Select<'update_start_time'>; startTime: string }
-  | { type: Select<'update_start_trading_time'>; startTime: string }
+  | { type: Select<'update_start_trading_time'>; startTime?: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'shuffle'> }
   | { type: Select<'withdraw'> }
@@ -259,7 +259,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return minterMessages(minterContract)?.updateStartTime(args.startTime)
     }
     case 'update_start_trading_time': {
-      return minterMessages(minterContract)?.updateStartTradingTime(args.startTime)
+      return minterMessages(minterContract)?.updateStartTradingTime(args.startTime as string)
     }
     case 'update_per_address_limit': {
       return minterMessages(minterContract)?.updatePerAddressLimit(args.limit)
