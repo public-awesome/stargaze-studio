@@ -54,6 +54,7 @@ const CollectionCreationPage: NextPage = () => {
     vendingFactory: vendingFactoryContract,
   } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
+
   const messages = useMemo(
     () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
     [vendingFactoryContract, wallet.address],
