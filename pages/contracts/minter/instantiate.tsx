@@ -14,7 +14,6 @@ import { LinkTabs } from 'components/LinkTabs'
 import { minterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { InstantiateResponse } from 'contracts/minter'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import type { FormEvent } from 'react'
@@ -22,15 +21,19 @@ import { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaAsterisk } from 'react-icons/fa'
 import { useMutation } from 'react-query'
-import { MINTER_CODE_ID } from 'utils/constants'
+import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import type { CreateMinterResponse } from '../../../contracts/vendingFactory/contract'
+
 const MinterInstantiatePage: NextPage = () => {
   const wallet = useWallet()
-  const contract = useContracts().minter
+  const contract = useContracts().vendingFactory
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
+  const [timestamp, setTimestamp] = useState<Date | undefined>()
+  const [explicit, setExplicit] = useState<boolean>(false)
 
   const nameState = useInputState({
     id: 'name',
@@ -46,14 +49,6 @@ const MinterInstantiatePage: NextPage = () => {
     title: 'Symbol',
     placeholder: 'AWSM',
     subtitle: 'Symbol of the sg721 contract',
-  })
-
-  const minterState = useInputState({
-    id: 'minter-address',
-    name: 'minterAddress',
-    title: 'Minter Address',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
-    subtitle: 'Address that has the permissions to mint on sg721 contract',
   })
 
   const codeIdState = useNumberInputState({
@@ -102,12 +97,12 @@ const MinterInstantiatePage: NextPage = () => {
     placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
-  const royaltyShareState = useNumberInputState({
+  const royaltyShareState = useInputState({
     id: 'royalty-share',
     name: 'royaltyShare',
     title: 'Share Percentage',
     subtitle: 'Percentage of royalties to be paid',
-    placeholder: '8',
+    placeholder: '8%',
   })
 
   const unitPriceState = useNumberInputState({
@@ -115,7 +110,7 @@ const MinterInstantiatePage: NextPage = () => {
     name: 'unitPrice',
     title: 'Unit Price',
     subtitle: 'Price of each tokens in collection',
-    placeholder: '500',
+    placeholder: '50',
   })
 
   const baseTokenUriState = useInputState({
@@ -151,7 +146,7 @@ const MinterInstantiatePage: NextPage = () => {
   })
 
   const { data, isLoading, mutate } = useMutation(
-    async (event: FormEvent): Promise<InstantiateResponse | null> => {
+    async (event: FormEvent): Promise<CreateMinterResponse | null> => {
       event.preventDefault()
       if (!contract) {
         throw new Error('Smart contract connection failed')
@@ -160,8 +155,8 @@ const MinterInstantiatePage: NextPage = () => {
       let royaltyInfo = null
       if (royaltyPaymentAddressState.value && royaltyShareState.value) {
         royaltyInfo = {
-          paymentAddress: royaltyPaymentAddressState.value,
-          share: royaltyShareState.value,
+          payment_address: royaltyPaymentAddressState.value,
+          share: (Number(royaltyShareState.value) / 100).toString(),
         }
       }
 
@@ -173,8 +168,8 @@ const MinterInstantiatePage: NextPage = () => {
         throw new Error('Per address limit must be between 1 and 50')
       }
 
-      if (Number(unitPriceState.value) < 500) {
-        throw new Error('Unit price must be greater than 500 STARS')
+      if (Number(unitPriceState.value) < 50) {
+        throw new Error('Unit price must be greater than 50 STARS')
       }
 
       if (!startDate) {
@@ -182,31 +177,42 @@ const MinterInstantiatePage: NextPage = () => {
       }
 
       const msg = {
-        base_token_uri: baseTokenUriState.value,
-        num_tokens: tokenNumberState.value,
-        sg721_code_id: codeIdState.value,
-        sg721_instantiate_msg: {
-          name: nameState.value,
-          symbol: symbolState.value,
-          minter: minterState.value,
-          collection_info: {
-            creator: creatorState.value,
-            description: descriptionState.value,
-            image: imageState.value,
-            external_link: externalLinkState.value || null,
-            royalty_info: royaltyInfo,
+        create_minter: {
+          init_msg: {
+            base_token_uri: baseTokenUriState.value,
+            start_time: (startDate.getTime() * 1_000_000).toString(),
+            num_tokens: tokenNumberState.value,
+            mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
+            per_address_limit: perAddressLimitState.value,
+            whitelist: whitelistAddressState.value || null,
+          },
+          collection_params: {
+            code_id: codeIdState.value,
+            name: nameState.value,
+            symbol: symbolState.value,
+            info: {
+              creator: creatorState.value,
+              description: descriptionState.value,
+              image: imageState.value,
+              external_link: externalLinkState.value || null,
+              explicit_content: explicit,
+              start_trading_time: timestamp ? (timestamp.getTime() * 1_000_000).toString() : null,
+              royalty_info: royaltyInfo,
+            },
           },
         },
-        per_address_limit: perAddressLimitState.value,
-        unit_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
-        whitelist_address: whitelistAddressState.value || null,
-        start_time: (startDate.getTime() * 1_000_000).toString(),
       }
-      return toast.promise(contract.instantiate(MINTER_CODE_ID, msg, 'Stargaze Minter Contract', wallet.address), {
-        loading: 'Instantiating contract...',
-        error: 'Instantiation failed!',
-        success: 'Instantiation success!',
-      })
+
+      return toast.promise(
+        contract
+          .use(VENDING_FACTORY_ADDRESS)
+          ?.createMinter(wallet.address, msg, [coin('1000000000', 'ustars')]) as Promise<CreateMinterResponse>,
+        {
+          loading: 'Instantiating contract...',
+          error: 'Instantiation failed!',
+          success: 'Instantiation success!',
+        },
+      )
     },
     {
       onError: (error) => {
@@ -240,7 +246,6 @@ const MinterInstantiatePage: NextPage = () => {
         <NumberInput isRequired {...codeIdState} />
         <TextInput isRequired {...nameState} />
         <TextInput isRequired {...symbolState} />
-        <TextInput isRequired {...minterState} />
       </FormGroup>
 
       <FormGroup subtitle="Information about your collection" title="Collection Details">
@@ -248,6 +253,54 @@ const MinterInstantiatePage: NextPage = () => {
         <FormTextArea isRequired {...descriptionState} />
         <TextInput isRequired {...imageState} />
         <TextInput {...externalLinkState} />
+        <FormControl htmlId="timestamp" subtitle="Trading start time (local)" title="Trading Start Time (optional)">
+          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        </FormControl>
+        <div className="flex flex-col space-y-2">
+          <div>
+            <div className="flex">
+              <span className="mt-1 text-sm first-letter:capitalize">
+                Does the collection contain explicit content?
+              </span>
+              <div className="ml-2 font-bold form-check form-check-inline">
+                <input
+                  checked={explicit}
+                  className="peer sr-only"
+                  id="explicitRadio1"
+                  name="explicitRadioOptions1"
+                  onClick={() => {
+                    setExplicit(true)
+                  }}
+                  type="radio"
+                />
+                <label
+                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  htmlFor="explicitRadio1"
+                >
+                  YES
+                </label>
+              </div>
+              <div className="ml-2 font-bold form-check form-check-inline">
+                <input
+                  checked={!explicit}
+                  className="peer sr-only"
+                  id="explicitRadio2"
+                  name="explicitRadioOptions2"
+                  onClick={() => {
+                    setExplicit(false)
+                  }}
+                  type="radio"
+                />
+                <label
+                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                  htmlFor="explicitRadio2"
+                >
+                  NO
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
       </FormGroup>
 
       <FormGroup subtitle="Information about royalty" title="Royalty Details">

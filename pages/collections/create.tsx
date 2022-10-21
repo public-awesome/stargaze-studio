@@ -23,18 +23,20 @@ import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
+import type { DispatchExecuteArgs } from 'contracts/vendingFactory/messages/execute'
+import { dispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
 import {
   BLOCK_EXPLORER_URL,
-  MINTER_CODE_ID,
   NETWORK,
   SG721_CODE_ID,
   STARGAZE_URL,
+  VENDING_FACTORY_ADDRESS,
   WHITELIST_CODE_ID,
 } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
@@ -46,8 +48,16 @@ import { getAssetType } from '../../utils/getAssetType'
 
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
-  const { minter: minterContract, whitelist: whitelistContract } = useContracts()
+  const {
+    minter: minterContract,
+    whitelist: whitelistContract,
+    vendingFactory: vendingFactoryContract,
+  } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const messages = useMemo(
+    () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
+    [vendingFactoryContract, wallet.address],
+  )
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
@@ -148,7 +158,7 @@ const CollectionCreationPage: NextPage = () => {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
-      unit_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
+      mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
     }
@@ -176,35 +186,50 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const msg = {
-      base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}/` : `${baseUri}`}`,
-      num_tokens: mintingDetails?.numTokens,
-      sg721_code_id: SG721_CODE_ID,
-      sg721_instantiate_msg: {
-        name: collectionDetails?.name,
-        symbol: collectionDetails?.symbol,
-        minter: wallet.address,
-        collection_info: {
-          creator: wallet.address,
-          description: collectionDetails?.description,
-          image: `${
-            uploadDetails?.uploadMethod === 'new'
-              ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
-              : `${coverImageUri}`
-          }`,
-          external_link: collectionDetails?.externalLink === '' ? null : collectionDetails?.externalLink,
-          royalty_info: royaltyInfo,
+      create_minter: {
+        init_msg: {
+          base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}/` : `${baseUri}`}`,
+          start_time: mintingDetails?.startTime,
+          num_tokens: mintingDetails?.numTokens,
+          mint_price: {
+            amount: mintingDetails?.unitPrice,
+            denom: 'ustars',
+          },
+          per_address_limit: mintingDetails?.perAddressLimit,
+          whitelist,
+        },
+        collection_params: {
+          code_id: SG721_CODE_ID,
+          name: collectionDetails?.name,
+          symbol: collectionDetails?.symbol,
+          info: {
+            creator: wallet.address,
+            description: collectionDetails?.description,
+            image: `${
+              uploadDetails?.uploadMethod === 'new'
+                ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
+                : `${coverImageUri}`
+            }`,
+            external_link: collectionDetails?.externalLink,
+            explicit_content: collectionDetails?.explicit,
+            royalty_info: royaltyInfo,
+            start_trading_time: collectionDetails?.startTradingTime || null,
+          },
         },
       },
-      per_address_limit: mintingDetails?.perAddressLimit,
-      unit_price: coin(String(Number(mintingDetails?.unitPrice)), 'ustars'),
-      whitelist,
-      start_time: mintingDetails?.startTime,
     }
 
-    const data = await minterContract.instantiate(MINTER_CODE_ID, msg, 'Stargaze Minter Contract', wallet.address)
+    const payload: DispatchExecuteArgs = {
+      contract: VENDING_FACTORY_ADDRESS,
+      messages,
+      txSigner: wallet.address,
+      msg,
+      funds: [coin('1000000000', 'ustars')],
+    }
+    const data = await dispatchExecute(payload)
     setTransactionHash(data.transactionHash)
-    setMinterContractAddress(data.contractAddress)
-    setSg721ContractAddress(data.logs[0].events[3].attributes[2].value)
+    setMinterContractAddress(data.minterAddress)
+    setSg721ContractAddress(data.sg721Address)
   }
 
   const uploadFiles = async (): Promise<string> => {
@@ -302,6 +327,16 @@ const CollectionCreationPage: NextPage = () => {
     if (collectionDetails.description === '') throw new Error('Collection description is required')
     if (uploadDetails?.uploadMethod === 'new' && collectionDetails.imageFile.length === 0)
       throw new Error('Collection cover image is required')
+    if (
+      collectionDetails.startTradingTime &&
+      Number(collectionDetails.startTradingTime) < new Date().getTime() * 1000000
+    )
+      throw new Error('Invalid trading start time')
+    if (
+      collectionDetails.startTradingTime &&
+      Number(collectionDetails.startTradingTime) < Number(mintingDetails?.startTime)
+    )
+      throw new Error('Trading start time must be after minting start time')
   }
 
   const checkMintingDetails = () => {
@@ -315,6 +350,12 @@ const CollectionCreationPage: NextPage = () => {
       mintingDetails.perAddressLimit > mintingDetails.numTokens
     )
       throw new Error('Invalid limit for tokens per address')
+    if (
+      mintingDetails.numTokens > 100 &&
+      mintingDetails.numTokens < 100 * mintingDetails.perAddressLimit &&
+      mintingDetails.perAddressLimit > mintingDetails.numTokens / 100
+    )
+      throw new Error('Invalid limit for tokens per address. The limit cannot exceed 1% of the total number of tokens.')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
   }

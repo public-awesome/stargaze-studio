@@ -69,6 +69,26 @@ export const TextInput = forwardRef<HTMLInputElement, FormInputProps>(
   //
 )
 
+export const CheckBoxInput = forwardRef<HTMLInputElement, FormInputProps>(
+  function CheckBoxInput(props, ref) {
+    return (
+      <div className="flex flex-col space-y-2">
+        <label className="flex flex-col space-y-1" htmlFor="explicit">
+          <span className="font-bold first-letter:capitalize">Explicit Content</span>
+        </label>
+        <input
+          className="placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+          id="explicit"
+          name="explicit"
+          type="checkbox"
+          value=""
+        />
+      </div>
+    )
+  },
+  //
+)
+
 export const UrlInput = forwardRef<HTMLInputElement, FormInputProps>(
   function UrlInput(props, ref) {
     return <FormInput {...props} ref={ref} type="url" />

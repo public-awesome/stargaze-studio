@@ -145,7 +145,7 @@ const Sg721ExecutePage: NextPage = () => {
         link={links.Documentation}
         title="Sg721 Contract"
       />
-      <LinkTabs activeIndex={2} data={sg721LinkTabs} />
+      <LinkTabs activeIndex={1} data={sg721LinkTabs} />
 
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
