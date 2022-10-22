@@ -80,11 +80,11 @@ const MinterExecutePage: NextPage = () => {
   })
 
   const showWhitelistField = type === 'set_whitelist'
-  const showDateField = type === 'update_start_time'
+  const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = type === 'mint_for'
   const showRecipientField = isEitherType(type, ['mint_to', 'mint_for'])
-  const showPriceField = type === 'mint'
+  const showPriceField = type === 'update_mint_price'
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -96,7 +96,7 @@ const MinterExecutePage: NextPage = () => {
     messages,
     recipient: recipientState.value,
     txSigner: wallet.address,
-    price: priceState.value ? (Number(priceState.value) * 1_000_000).toString() : '0',
+    price: priceState.value ? priceState.value.toString() : '0',
     type,
   }
   const { isLoading, mutate } = useMutation(

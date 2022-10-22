@@ -101,7 +101,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'set_whitelist'>; whitelist: string }
   | { type: Select<'update_start_time'>; startTime: string }
-  | { type: Select<'update_start_trading_time'>; startTime: string }
+  | { type: Select<'update_start_trading_time'>; startTime?: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'mint_to'>; recipient: string }
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
@@ -179,7 +179,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return messages(contract)?.updateStartTime(args.startTime)
     }
     case 'update_start_trading_time': {
-      return messages(contract)?.updateStartTradingTime(args.startTime)
+      return messages(contract)?.updateStartTradingTime(args.startTime as string)
     }
     case 'update_per_address_limit': {
       return messages(contract)?.updatePerAddressLimit(args.limit)

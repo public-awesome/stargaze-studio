@@ -33,7 +33,7 @@ export interface MinterInstance {
   updateMintPrice: (senderAddress: string, price: string) => Promise<string>
   setWhitelist: (senderAddress: string, whitelist: string) => Promise<string>
   updateStartTime: (senderAddress: string, time: Timestamp) => Promise<string>
-  updateStartTradingTime: (senderAddress: string, time: Timestamp) => Promise<string>
+  updateStartTradingTime: (senderAddress: string, time?: Timestamp) => Promise<string>
   updatePerAddressLimit: (senderAddress: string, perAddressLimit: number) => Promise<string>
   mintTo: (senderAddress: string, recipient: string) => Promise<string>
   mintFor: (senderAddress: string, recipient: string, tokenId: number) => Promise<string>
@@ -325,7 +325,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         senderAddress,
         contractAddress,
         {
-          update_start_time: { time },
+          update_start_time: time,
         },
         'auto',
         '',
@@ -334,12 +334,12 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       return res.transactionHash
     }
 
-    const updateStartTradingTime = async (senderAddress: string, time: Timestamp): Promise<string> => {
+    const updateStartTradingTime = async (senderAddress: string, time?: Timestamp): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          update_start_trading_time: { time },
+          update_start_trading_time: time || null,
         },
         'auto',
         '',
