@@ -32,6 +32,8 @@ interface CollectionActionsProps {
   minterMessages: MinterInstance | undefined
 }
 
+type ExplicitContentType = true | false | undefined
+
 export const CollectionActions = ({
   sg721ContractAddress,
   sg721Messages,
@@ -45,7 +47,7 @@ export const CollectionActions = ({
   const [airdropAllocationArray, setAirdropAllocationArray] = useState<AirdropAllocation[]>([])
   const [airdropArray, setAirdropArray] = useState<string[]>([])
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>()
-  const [explicitContent, setExplicitContent] = useState(false)
+  const [explicitContent, setExplicitContent] = useState<ExplicitContentType>(undefined)
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -125,6 +127,7 @@ export const CollectionActions = ({
     name: 'royaltyPaymentAddress',
     title: 'Royalty Payment Address',
     subtitle: 'Address to receive royalties.',
+    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const royaltyShareState = useInputState({
@@ -217,8 +220,14 @@ export const CollectionActions = ({
         throw new Error('Please enter minter and sg721 contract addresses!')
       }
       if (type === 'update_mint_price' && priceState.value < 50) {
-        console.log('here')
         throw new Error('Mint price must be at least 50 STARS')
+      }
+
+      if (
+        type === 'update_collection_info' &&
+        (royaltyShareState.value ? !royaltyPaymentAddressState.value : royaltyPaymentAddressState.value)
+      ) {
+        throw new Error('Royalty payment address and share percentage are both required')
       }
 
       const txHash = await toast.promise(dispatchExecute(payload), {
@@ -239,7 +248,6 @@ export const CollectionActions = ({
 
   const airdropFileOnChange = (data: AirdropAllocation[]) => {
     setAirdropAllocationArray(data)
-    console.log(data)
   }
 
   return (
@@ -258,10 +266,10 @@ export const CollectionActions = ({
           {showImageField && <TextInput className="mb-2" {...imageState} />}
           {showExternalLinkField && <TextInput className="mb-2" {...externalLinkState} />}
           {showRoyaltyRelatedFields && (
-            <>
+            <div className="p-2 my-4 rounded border-2 border-gray-500/50">
               <TextInput className="mb-2" {...royaltyPaymentAddressState} />
               <NumberInput className="mb-2" {...royaltyShareState} />
-            </>
+            </div>
           )}
           {showExplicitContentField && (
             <div className="flex flex-col space-y-2">
@@ -272,7 +280,7 @@ export const CollectionActions = ({
                   </span>
                   <div className="ml-2 font-bold form-check form-check-inline">
                     <input
-                      checked={explicitContent}
+                      checked={explicitContent === true}
                       className="peer sr-only"
                       id="explicitRadio1"
                       name="explicitRadioOptions1"
@@ -290,7 +298,7 @@ export const CollectionActions = ({
                   </div>
                   <div className="ml-2 font-bold form-check form-check-inline">
                     <input
-                      checked={!explicitContent}
+                      checked={explicitContent === false}
                       className="peer sr-only"
                       id="explicitRadio2"
                       name="explicitRadioOptions2"

@@ -76,6 +76,7 @@ export interface SG721Instance {
   /// Mint a new NFT, can only be called by the contract minter
   mint: (tokenId: string, owner: string, tokenURI?: string) => Promise<string> //MintMsg<T>
   updateCollectionInfo: (collectionInfo: CollectionInfo) => Promise<string>
+  freezeCollectionInfo: () => Promise<string>
   /// Burn an NFT the sender has access to
   burn: (tokenId: string) => Promise<string>
   batchBurn: (tokenIds: string) => Promise<string>
@@ -94,6 +95,7 @@ export interface Sg721Messages {
   batchBurn: (tokenIds: string) => BatchBurnMessage
   batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
   updateCollectionInfo: (collectionInfo: CollectionInfo) => UpdateCollectionInfoMessage
+  freezeCollectionInfo: () => FreezeCollectionInfoMessage
 }
 
 export interface TransferNFTMessage {
@@ -216,6 +218,13 @@ export interface UpdateCollectionInfoMessage {
       collection_info: CollectionInfo
     }
   }
+  funds: Coin[]
+}
+
+export interface FreezeCollectionInfoMessage {
+  sender: string
+  contract: string
+  msg: { freeze_collection_info: Record<string, never> }
   funds: Coin[]
 }
 
@@ -537,12 +546,24 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
 
     // eslint-disable-next-line @typescript-eslint/no-shadow
     const updateCollectionInfo = async (collectionInfo: CollectionInfo): Promise<string> => {
-      console.log(collectionInfo)
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
           update_collection_info: { collection_info: collectionInfo },
+        },
+        'auto',
+        '',
+      )
+      return res.transactionHash
+    }
+
+    const freezeCollectionInfo = async (): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          freeze_collection_info: {},
         },
         'auto',
         '',
@@ -575,6 +596,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       batchBurn,
       batchTransfer,
       updateCollectionInfo,
+      freezeCollectionInfo,
     }
   }
 
@@ -767,6 +789,16 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         funds: [],
       }
     }
+    const freezeCollectionInfo = () => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          freeze_collection_info: {},
+        },
+        funds: [],
+      }
+    }
 
     return {
       transferNft,
@@ -780,6 +812,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       batchBurn,
       batchTransfer,
       updateCollectionInfo,
+      freezeCollectionInfo,
     }
   }
 
