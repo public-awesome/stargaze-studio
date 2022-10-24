@@ -107,10 +107,6 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
     reader.readAsArrayBuffer(event.target.files[0])
   }
 
-  useEffect(() => {
-    console.log(explicit)
-  }, [explicit])
-
   return (
     <div>
       <FormGroup subtitle="Information about your collection" title="Collection Details">

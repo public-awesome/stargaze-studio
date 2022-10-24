@@ -4,12 +4,22 @@ import type { Coin } from '@cosmjs/stargate'
 import { coin } from '@cosmjs/stargate'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 
+import type { RoyaltyInfo } from '../minter/contract'
+
 export interface InstantiateResponse {
   readonly contractAddress: string
   readonly transactionHash: string
 }
 
 export type Expiration = { at_height: number } | { at_time: string } | { never: Record<string, never> }
+
+export interface CollectionInfo {
+  description?: string
+  image?: string
+  external_link?: string
+  explicit_content?: boolean
+  royalty_info?: RoyaltyInfo | undefined
+}
 
 export interface SG721Instance {
   readonly contractAddress: string
@@ -65,7 +75,7 @@ export interface SG721Instance {
   revokeAll: (operator: string) => Promise<string>
   /// Mint a new NFT, can only be called by the contract minter
   mint: (tokenId: string, owner: string, tokenURI?: string) => Promise<string> //MintMsg<T>
-
+  updateCollectionInfo: (collectionInfo: CollectionInfo) => Promise<string>
   /// Burn an NFT the sender has access to
   burn: (tokenId: string) => Promise<string>
   batchBurn: (tokenIds: string) => Promise<string>
@@ -83,6 +93,7 @@ export interface Sg721Messages {
   burn: (tokenId: string) => BurnMessage
   batchBurn: (tokenIds: string) => BatchBurnMessage
   batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
+  updateCollectionInfo: (collectionInfo: CollectionInfo) => UpdateCollectionInfoMessage
 }
 
 export interface TransferNFTMessage {
@@ -194,6 +205,17 @@ export interface BatchTransferMessage {
   sender: string
   contract: string
   msg: Record<string, unknown>[]
+  funds: Coin[]
+}
+
+export interface UpdateCollectionInfoMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_collection_info: {
+      collection_info: CollectionInfo
+    }
+  }
   funds: Coin[]
 }
 
@@ -513,6 +535,21 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const updateCollectionInfo = async (collectionInfo: CollectionInfo): Promise<string> => {
+      console.log(collectionInfo)
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          update_collection_info: { collection_info: collectionInfo },
+        },
+        'auto',
+        '',
+      )
+      return res.transactionHash
+    }
+
     return {
       contractAddress,
       ownerOf,
@@ -537,6 +574,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       burn,
       batchBurn,
       batchTransfer,
+      updateCollectionInfo,
     }
   }
 
@@ -719,6 +757,16 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         funds: [],
       }
     }
+    const updateCollectionInfo = (collectionInfo: CollectionInfo) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_collection_info: { collection_info: collectionInfo },
+        },
+        funds: [],
+      }
+    }
 
     return {
       transferNft,
@@ -731,6 +779,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       burn,
       batchBurn,
       batchTransfer,
+      updateCollectionInfo,
     }
   }
 

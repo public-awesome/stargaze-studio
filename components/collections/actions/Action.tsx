@@ -22,6 +22,7 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
+import type { CollectionInfo } from '../../../contracts/sg721/contract'
 import { TextInput } from '../../forms/FormInput'
 
 interface CollectionActionsProps {
@@ -43,12 +44,14 @@ export const CollectionActions = ({
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [airdropAllocationArray, setAirdropAllocationArray] = useState<AirdropAllocation[]>([])
   const [airdropArray, setAirdropArray] = useState<string[]>([])
+  const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>()
+  const [explicitContent, setExplicitContent] = useState(false)
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
 
   const limitState = useNumberInputState({
-    id: 'per-address-limi',
+    id: 'per-address-limit',
     name: 'perAddressLimit',
     title: 'Per Address Limit',
     subtitle: 'Enter the per address limit',
@@ -97,6 +100,41 @@ export const CollectionActions = ({
     subtitle: 'New minting price in STARS',
   })
 
+  const descriptionState = useInputState({
+    id: 'collection-description',
+    name: 'description',
+    title: 'Collection Description',
+  })
+
+  const imageState = useInputState({
+    id: 'collection-cover-image',
+    name: 'cover_image',
+    title: 'Collection Cover Image',
+    subtitle: 'URL for collection cover image.',
+  })
+
+  const externalLinkState = useInputState({
+    id: 'collection-ext-link',
+    name: 'external_link',
+    title: 'External Link',
+    subtitle: 'External URL for the collection.',
+  })
+
+  const royaltyPaymentAddressState = useInputState({
+    id: 'royalty-payment-address',
+    name: 'royaltyPaymentAddress',
+    title: 'Royalty Payment Address',
+    subtitle: 'Address to receive royalties.',
+  })
+
+  const royaltyShareState = useInputState({
+    id: 'royalty-share',
+    name: 'royaltyShare',
+    title: 'Share Percentage',
+    subtitle: 'Percentage of royalties to be paid',
+    placeholder: '8%',
+  })
+
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
@@ -106,6 +144,11 @@ export const CollectionActions = ({
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
   const showAirdropFileField = type === 'airdrop'
   const showPriceField = type === 'update_mint_price'
+  const showDescriptionField = type === 'update_collection_info'
+  const showImageField = type === 'update_collection_info'
+  const showExternalLinkField = type === 'update_collection_info'
+  const showRoyaltyRelatedFields = type === 'update_collection_info'
+  const showExplicitContentField = type === 'update_collection_info'
 
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
@@ -123,7 +166,31 @@ export const CollectionActions = ({
     txSigner: wallet.address,
     type,
     price: priceState.value.toString(),
+    collectionInfo,
   }
+
+  useEffect(() => {
+    setCollectionInfo({
+      description: descriptionState.value || undefined,
+      image: imageState.value || undefined,
+      explicit_content: explicitContent,
+      external_link: externalLinkState.value || undefined,
+      royalty_info:
+        royaltyPaymentAddressState.value && royaltyShareState.value
+          ? {
+              payment_address: royaltyPaymentAddressState.value,
+              share: (Number(royaltyShareState.value) / 100).toString(),
+            }
+          : undefined,
+    })
+  }, [
+    descriptionState.value,
+    imageState.value,
+    explicitContent,
+    externalLinkState.value,
+    royaltyPaymentAddressState.value,
+    royaltyShareState.value,
+  ])
 
   useEffect(() => {
     const addresses: string[] = []
@@ -187,6 +254,62 @@ export const CollectionActions = ({
           {showTokenIdListField && <TextInput {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showPriceField && <NumberInput {...priceState} />}
+          {showDescriptionField && <TextInput className="mb-2" {...descriptionState} />}
+          {showImageField && <TextInput className="mb-2" {...imageState} />}
+          {showExternalLinkField && <TextInput className="mb-2" {...externalLinkState} />}
+          {showRoyaltyRelatedFields && (
+            <>
+              <TextInput className="mb-2" {...royaltyPaymentAddressState} />
+              <NumberInput className="mb-2" {...royaltyShareState} />
+            </>
+          )}
+          {showExplicitContentField && (
+            <div className="flex flex-col space-y-2">
+              <div>
+                <div className="flex">
+                  <span className="mt-1 text-sm first-letter:capitalize">
+                    Does the collection contain explicit content?
+                  </span>
+                  <div className="ml-2 font-bold form-check form-check-inline">
+                    <input
+                      checked={explicitContent}
+                      className="peer sr-only"
+                      id="explicitRadio1"
+                      name="explicitRadioOptions1"
+                      onClick={() => {
+                        setExplicitContent(true)
+                      }}
+                      type="radio"
+                    />
+                    <label
+                      className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                      htmlFor="explicitRadio1"
+                    >
+                      YES
+                    </label>
+                  </div>
+                  <div className="ml-2 font-bold form-check form-check-inline">
+                    <input
+                      checked={!explicitContent}
+                      className="peer sr-only"
+                      id="explicitRadio2"
+                      name="explicitRadioOptions2"
+                      onClick={() => {
+                        setExplicitContent(false)
+                      }}
+                      type="radio"
+                    />
+                    <label
+                      className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                      htmlFor="explicitRadio2"
+                    >
+                      NO
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           {showAirdropFileField && (
             <FormGroup
               subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: address,amount"
