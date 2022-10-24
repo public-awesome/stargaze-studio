@@ -114,7 +114,11 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
         <TextInput {...descriptionState} isRequired />
         <TextInput {...symbolState} isRequired />
         <TextInput {...externalLinkState} />
-        <FormControl htmlId="timestamp" subtitle="Trading start time (local)" title="Trading Start Time (optional)">
+        <FormControl
+          htmlId="timestamp"
+          subtitle="Trading start time offset will be set as 2 weeks by default."
+          title="Trading Start Time (optional)"
+        >
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
         </FormControl>
 
