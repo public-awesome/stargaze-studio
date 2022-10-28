@@ -37,6 +37,7 @@ export interface MinterInstance {
   updatePerAddressLimit: (senderAddress: string, perAddressLimit: number) => Promise<string>
   mintTo: (senderAddress: string, recipient: string) => Promise<string>
   mintFor: (senderAddress: string, recipient: string, tokenId: number) => Promise<string>
+  batchMintFor: (senderAddress: string, recipient: string, tokenIds: string) => Promise<string>
   batchMint: (senderAddress: string, recipient: string, batchNumber: number) => Promise<string>
   shuffle: (senderAddress: string) => Promise<string>
   withdraw: (senderAddress: string) => Promise<string>
@@ -54,6 +55,7 @@ export interface MinterMessages {
   updatePerAddressLimit: (perAddressLimit: number) => UpdatePerAddressLimitMessage
   mintTo: (recipient: string) => MintToMessage
   mintFor: (recipient: string, tokenId: number) => MintForMessage
+  batchMintFor: (recipient: string, tokenIds: string) => BatchMintForMessage
   batchMint: (recipient: string, batchNumber: number) => CustomMessage
   shuffle: () => ShuffleMessage
   withdraw: () => WithdrawMessage
@@ -150,6 +152,12 @@ export interface MintForMessage {
       token_id: number
     }
   }
+  funds: Coin[]
+}
+export interface BatchMintForMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
   funds: Coin[]
 }
 
@@ -390,6 +398,49 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       return res.transactionHash
     }
 
+    const batchMintFor = async (senderAddress: string, recipient: string, tokenIds: string): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          const msg = {
+            mint_for: { token_id: i, recipient },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          const msg = {
+            mint_for: { token_id: tokenNumbers[i], recipient },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      }
+
+      const res = await client.signAndBroadcast(txSigner, executeContractMsgs, 'auto', 'batch mint for')
+
+      return res.transactionHash
+    }
+
     const batchMint = async (senderAddress: string, recipient: string, batchNumber: number): Promise<string> => {
       const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
       for (let i = 0; i < batchNumber; i++) {
@@ -495,6 +546,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       updatePerAddressLimit,
       mintTo,
       mintFor,
+      batchMintFor,
       batchMint,
       airdrop,
       shuffle,
@@ -631,6 +683,30 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       }
     }
 
+    const batchMintFor = (recipient: string, tokenIds: string): BatchMintForMessage => {
+      const msg: Record<string, unknown>[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          msg.push({
+            mint_for: { token_id: i.toString(), recipient },
+          })
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          msg.push({ mint_for: { token_id: tokenNumbers[i].toString(), recipient } })
+        }
+      }
+
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
     const batchMint = (recipient: string, batchNumber: number): CustomMessage => {
       const msg: Record<string, unknown>[] = []
       for (let i = 0; i < batchNumber; i++) {
@@ -700,6 +776,7 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       updatePerAddressLimit,
       mintTo,
       mintFor,
+      batchMintFor,
       batchMint,
       airdrop,
       shuffle,
