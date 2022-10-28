@@ -1,6 +1,6 @@
 import type { MinterInstance } from 'contracts/minter'
 import { useMinterContract } from 'contracts/minter'
-import type { SG721Instance } from 'contracts/sg721'
+import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 
 export type ActionType = typeof ACTION_TYPES[number]
@@ -16,6 +16,8 @@ export const ACTION_TYPES = [
   'update_start_time',
   'update_start_trading_time',
   'update_per_address_limit',
+  'update_collection_info',
+  'freeze_collection_info',
   'withdraw',
   'transfer',
   'batch_transfer',
@@ -82,6 +84,16 @@ export const ACTION_LIST: ActionListItem[] = [
     id: 'update_per_address_limit',
     name: 'Update Tokens Per Address Limit',
     description: `Update token per address limit`,
+  },
+  {
+    id: 'update_collection_info',
+    name: 'Update Collection Info',
+    description: `Update Collection Info`,
+  },
+  {
+    id: 'freeze_collection_info',
+    name: 'Freeze Collection Info',
+    description: `Freeze collection info to prevent further updates`,
   },
   {
     id: 'withdraw',
@@ -159,6 +171,8 @@ export type DispatchExecuteArgs = {
   | { type: Select<'batch_burn'>; tokenIds: string }
   | { type: Select<'airdrop'>; recipients: string[] }
   | { type: Select<'burn_remaining'> }
+  | { type: Select<'update_collection_info'>; collectionInfo: CollectionInfo | undefined }
+  | { type: Select<'freeze_collection_info'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -196,6 +210,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'update_per_address_limit': {
       return minterMessages.updatePerAddressLimit(txSigner, args.limit)
+    }
+    case 'update_collection_info': {
+      return sg721Messages.updateCollectionInfo(args.collectionInfo as CollectionInfo)
+    }
+    case 'freeze_collection_info': {
+      return sg721Messages.freezeCollectionInfo()
     }
     case 'shuffle': {
       return minterMessages.shuffle(txSigner)
@@ -263,6 +283,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'update_per_address_limit': {
       return minterMessages(minterContract)?.updatePerAddressLimit(args.limit)
+    }
+    case 'update_collection_info': {
+      return sg721Messages(sg721Contract)?.updateCollectionInfo(args.collectionInfo as CollectionInfo)
+    }
+    case 'freeze_collection_info': {
+      return sg721Messages(sg721Contract)?.freezeCollectionInfo()
     }
     case 'shuffle': {
       return minterMessages(minterContract)?.shuffle()
