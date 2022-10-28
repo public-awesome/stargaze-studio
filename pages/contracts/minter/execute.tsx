@@ -37,7 +37,7 @@ const MinterExecutePage: NextPage = () => {
   const type = comboboxState.value?.id
 
   const limitState = useNumberInputState({
-    id: 'per-address-limi',
+    id: 'per-address-limit',
     name: 'perAddressLimit',
     title: 'Per Address Limit',
     subtitle: 'Enter the per address limit',

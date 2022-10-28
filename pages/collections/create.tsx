@@ -189,7 +189,7 @@ const CollectionCreationPage: NextPage = () => {
     const msg = {
       create_minter: {
         init_msg: {
-          base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}/` : `${baseUri}`}`,
+          base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}` : `${baseUri}`}`,
           start_time: mintingDetails?.startTime,
           num_tokens: mintingDetails?.numTokens,
           mint_price: {
@@ -431,9 +431,9 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri as string}/`}
+                  href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri as string}`}
                 >
-                  ipfs://{baseTokenUri as string}/
+                  ipfs://{baseTokenUri as string}
                 </Anchor>
               )}
               {uploadDetails?.uploadMethod === 'existing' && (

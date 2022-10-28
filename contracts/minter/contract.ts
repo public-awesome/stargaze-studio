@@ -12,7 +12,7 @@ export interface InstantiateResponse {
   readonly logs: readonly logs.Log[]
 }
 
-export interface RoyalityInfo {
+export interface RoyaltyInfo {
   payment_address: string
   share: string
 }
