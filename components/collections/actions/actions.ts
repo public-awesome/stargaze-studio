@@ -23,6 +23,7 @@ export const ACTION_TYPES = [
   'batch_transfer',
   'burn',
   'batch_burn',
+  'batch_mint_for',
   'shuffle',
   'airdrop',
   'burn_remaining',
@@ -56,14 +57,19 @@ export const ACTION_LIST: ActionListItem[] = [
     description: `Mint a token to a user`,
   },
   {
-    id: 'mint_for',
-    name: 'Mint For',
-    description: `Mint a token for a user with given token ID`,
-  },
-  {
     id: 'batch_mint',
     name: 'Batch Mint',
-    description: `Mint multiple tokens to a user with given token amount`,
+    description: `Mint multiple tokens to a user`,
+  },
+  {
+    id: 'mint_for',
+    name: 'Mint For',
+    description: `Mint a token for a user with the given token ID`,
+  },
+  {
+    id: 'batch_mint_for',
+    name: 'Batch Mint For',
+    description: `Mint a specific range of tokens from the collection to a specific address`,
   },
   {
     id: 'set_whitelist',
@@ -169,6 +175,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'batch_transfer'>; recipient: string; tokenIds: string }
   | { type: Select<'burn'>; tokenId: number }
   | { type: Select<'batch_burn'>; tokenIds: string }
+  | { type: Select<'batch_mint_for'>; recipient: string; tokenIds: string }
   | { type: Select<'airdrop'>; recipients: string[] }
   | { type: Select<'burn_remaining'> }
   | { type: Select<'update_collection_info'>; collectionInfo: CollectionInfo | undefined }
@@ -234,6 +241,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'batch_burn': {
       return sg721Messages.batchBurn(args.tokenIds)
+    }
+    case 'batch_mint_for': {
+      return minterMessages.batchMintFor(txSigner, args.recipient, args.tokenIds)
     }
     case 'airdrop': {
       return minterMessages.airdrop(txSigner, args.recipients)
@@ -307,6 +317,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'batch_burn': {
       return sg721Messages(sg721Contract)?.batchBurn(args.tokenIds)
+    }
+    case 'batch_mint_for': {
+      return minterMessages(minterContract)?.batchMintFor(args.recipient, args.tokenIds)
     }
     case 'airdrop': {
       return minterMessages(minterContract)?.airdrop(args.recipients)

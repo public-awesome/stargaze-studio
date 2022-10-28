@@ -444,7 +444,7 @@ const CollectionCreationPage: NextPage = () => {
                     baseTokenUri.lastIndexOf('ipfs://') + 7,
                   )}/`}
                 >
-                  ipfs://{baseTokenUri?.substring(baseTokenUri.lastIndexOf('ipfs://') + 7)}/
+                  ipfs://{baseTokenUri?.substring(baseTokenUri.lastIndexOf('ipfs://') + 7)}
                 </Anchor>
               )}
               <br />

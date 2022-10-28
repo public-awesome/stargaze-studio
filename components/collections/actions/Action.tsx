@@ -143,8 +143,15 @@ export const CollectionActions = ({
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
   const showNumberOfTokensField = type === 'batch_mint'
-  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer'])
-  const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
+  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer', 'batch_mint_for'])
+  const showRecipientField = isEitherType(type, [
+    'transfer',
+    'mint_to',
+    'mint_for',
+    'batch_mint',
+    'batch_transfer',
+    'batch_mint_for',
+  ])
   const showAirdropFileField = type === 'airdrop'
   const showPriceField = type === 'update_mint_price'
   const showDescriptionField = type === 'update_collection_info'
@@ -259,7 +266,7 @@ export const CollectionActions = ({
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
           {showTokenIdField && <NumberInput {...tokenIdState} />}
-          {showTokenIdListField && <TextInput {...tokenIdListState} />}
+          {showTokenIdListField && <TextInput className="mt-2" {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showPriceField && <NumberInput {...priceState} />}
           {showDescriptionField && <TextInput className="mb-2" {...descriptionState} />}
