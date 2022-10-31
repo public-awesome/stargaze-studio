@@ -6,7 +6,9 @@ import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
+import { Alert } from './Alert'
 import { Button } from './Button'
+import { Conditional } from './Conditional'
 import { TextInput } from './forms/FormInput'
 import { useInputState } from './forms/FormInput.hooks'
 import { MetadataAttributes } from './forms/MetadataAttributes'
@@ -64,6 +66,13 @@ export const MetadataModal = (props: MetadataModalProps) => {
       }
 
       setMetadata(parsedMetadata)
+    } else {
+      attributesState.reset()
+      nameState.onChange('')
+      descriptionState.onChange('')
+      externalUrlState.onChange('')
+      youtubeUrlState.onChange('')
+      setMetadata(null)
     }
   }
 
@@ -144,21 +153,42 @@ export const MetadataModal = (props: MetadataModalProps) => {
             subtitle={`Asset filename: ${props.assetFile?.name}`}
             title="Update Metadata"
           >
-            <TextInput {...nameState} onChange={(e) => nameState.onChange(e.target.value)} />
-            <TextInput {...descriptionState} onChange={(e) => descriptionState.onChange(e.target.value)} />
-            <TextInput {...externalUrlState} onChange={(e) => externalUrlState.onChange(e.target.value)} />
-            <TextInput {...youtubeUrlState} onChange={(e) => youtubeUrlState.onChange(e.target.value)} />
-            <MetadataAttributes
-              attributes={attributesState.entries}
-              onAdd={attributesState.add}
-              onChange={attributesState.update}
-              onRemove={attributesState.remove}
-              subtitle="Enter trait types and values"
-              title="Attributes"
+            <TextInput
+              {...nameState}
+              disabled={!props.metadataFile}
+              onChange={(e) => nameState.onChange(e.target.value)}
             />
+            <TextInput
+              {...descriptionState}
+              disabled={!props.metadataFile}
+              onChange={(e) => descriptionState.onChange(e.target.value)}
+            />
+            <TextInput
+              {...externalUrlState}
+              disabled={!props.metadataFile}
+              onChange={(e) => externalUrlState.onChange(e.target.value)}
+            />
+            <TextInput
+              {...youtubeUrlState}
+              disabled={!props.metadataFile}
+              onChange={(e) => youtubeUrlState.onChange(e.target.value)}
+            />
+            <Conditional test={props.metadataFile !== null}>
+              <MetadataAttributes
+                attributes={attributesState.entries}
+                onAdd={attributesState.add}
+                onChange={attributesState.update}
+                onRemove={attributesState.remove}
+                subtitle="Enter trait types and values"
+                title="Attributes"
+              />
+            </Conditional>
             <Button isDisabled={!props.metadataFile} onClick={generateUpdatedMetadata}>
               Update Metadata
             </Button>
+            <Conditional test={Boolean(!props.metadataFile)}>
+              <Alert type="info">No metadata file to preview. Please select metadata files.</Alert>
+            </Conditional>
           </MetadataFormGroup>
         </label>
       </label>
