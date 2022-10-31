@@ -113,7 +113,7 @@ export const MetadataModal = (props: MetadataModalProps) => {
     if (descriptionState.value === '') delete metadata.description
     else metadata.description = descriptionState.value
     if (externalUrlState.value === '') delete metadata.external_url
-    else metadata.externalUrl = externalUrlState.value
+    else metadata.external_url = externalUrlState.value
     if (youtubeUrlState.value === '') delete metadata.youtube_url
     else metadata.youtube_url = youtubeUrlState.value
 
