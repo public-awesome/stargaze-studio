@@ -69,7 +69,7 @@ const Sg721QueryPage: NextPage = () => {
     {
       placeholderData: null,
       onError: (error: any) => {
-        toast.error(error.message)
+        toast.error(error.message, { style: { maxWidth: 'none' } })
       },
       enabled: Boolean(contractAddress && contract && wallet),
     },

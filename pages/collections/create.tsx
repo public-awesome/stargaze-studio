@@ -88,11 +88,11 @@ const CollectionCreationPage: NextPage = () => {
           setReadyToCreate(true)
         })
         .catch((err) => {
-          toast.error(`Error in Whitelist Configuration: ${err.message}`)
+          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreate(false)
         })
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message, { style: { maxWidth: 'none' } })
       setUploading(false)
     }
   }
@@ -145,7 +145,7 @@ const CollectionCreationPage: NextPage = () => {
       setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message, { style: { maxWidth: 'none' } })
       setCreatingCollection(false)
       setUploading(false)
     }

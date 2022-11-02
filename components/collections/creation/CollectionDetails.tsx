@@ -78,7 +78,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
       onChange(data)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message, { style: { maxWidth: 'none' } })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
