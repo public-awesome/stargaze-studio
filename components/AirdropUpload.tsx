@@ -29,7 +29,7 @@ export const AirdropUpload = ({ onChange }: AirdropUploadProps) => {
         }
         return onChange(accountsData)
       } catch (error: any) {
-        toast.error(error.message)
+        toast.error(error.message, { style: { maxWidth: 'none' } })
       }
     }
     reader.readAsText(event.target.files[0])
