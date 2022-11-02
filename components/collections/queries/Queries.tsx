@@ -61,7 +61,7 @@ export const CollectionQueries = ({
     {
       placeholderData: null,
       onError: (error: any) => {
-        toast.error(error.message)
+        toast.error(error.message, { style: { maxWidth: 'none' } })
       },
       enabled: Boolean(sg721ContractAddress && minterContractAddress && type),
       retry: false,

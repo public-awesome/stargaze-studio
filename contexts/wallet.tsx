@@ -83,7 +83,7 @@ export const useWalletStore = create(
         init(signer)
         if (walletChange) set({ initializing: false })
       } catch (err: any) {
-        toast.error(err?.message)
+        toast.error(err?.message, { style: { maxWidth: 'none' } })
         set({ initializing: false })
       }
     },
@@ -113,7 +113,7 @@ export const useWalletStore = create(
         const client = (await createQueryClient()) as SigningCosmWasmClient
         set({ client })
       } catch (err: any) {
-        toast.error(err?.message)
+        toast.error(err?.message, { style: { maxWidth: 'none' } })
         set({ initializing: false })
       }
     },

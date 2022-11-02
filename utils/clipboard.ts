@@ -6,6 +6,6 @@ export async function copy(text: string, message: Renderable = 'Copied to clipbo
     await navigator.clipboard.writeText(text)
     return toast.success(message)
   } catch (err: unknown) {
-    return toast.error(String(err))
+    return toast.error(String(err), { style: { maxWidth: 'none' } })
   }
 }

@@ -183,7 +183,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
       }
       onChange(data)
     } catch (error: any) {
-      toast.error(error.message)
+      toast.error(error.message, { style: { maxWidth: 'none' } })
     }
   }, [
     assetFilesArray,
