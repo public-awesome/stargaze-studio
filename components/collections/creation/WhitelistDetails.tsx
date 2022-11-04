@@ -39,7 +39,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     defaultValue: '',
   })
 
-  const uniPriceState = useNumberInputState({
+  const unitPriceState = useNumberInputState({
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
@@ -72,7 +72,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
       whitelistType: whitelistState,
       contractAddress: whitelistAddressState.value,
       members: whitelistArray,
-      unitPrice: uniPriceState.value ? (Number(uniPriceState.value) * 1_000_000).toString() : '',
+      unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
       startTime: startDate ? (startDate.getTime() * 1_000_000).toString() : '',
       endTime: endDate ? (endDate.getTime() * 1_000_000).toString() : '',
       perAddressLimit: perAddressLimitState.value,
@@ -82,7 +82,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     whitelistAddressState.value,
-    uniPriceState.value,
+    unitPriceState.value,
     memberLimitState.value,
     perAddressLimitState.value,
     startDate,
@@ -160,7 +160,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
       <Conditional test={whitelistState === 'new'}>
         <div className="grid grid-cols-2">
           <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
-            <NumberInput isRequired {...uniPriceState} />
+            <NumberInput isRequired {...unitPriceState} />
             <NumberInput isRequired {...memberLimitState} />
             <NumberInput isRequired {...perAddressLimitState} />
             <FormControl
