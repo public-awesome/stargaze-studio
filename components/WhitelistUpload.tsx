@@ -11,13 +11,13 @@ interface WhitelistUploadProps {
 export const WhitelistUpload = ({ onChange }: WhitelistUploadProps) => {
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files) return toast.error('Error opening file')
+    if (event.target.files.length !== 1) {
+      toast.error('No file selected')
+      return onChange([])
+    }
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (event.target.files[0]?.type !== 'text/plain') {
       toast.error('Invalid file type')
-      return onChange([])
-    }
-    if (event.target.files.length === 0) {
-      toast.error('No file selected')
       return onChange([])
     }
     const reader = new FileReader()
