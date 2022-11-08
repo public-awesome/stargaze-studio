@@ -140,10 +140,22 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     let reader: FileReader
     for (let i = 0; i < event.target.files.length; i++) {
       reader = new FileReader()
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
         const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
+        try {
+          const parsedMetadata = JSON.parse(await metadataFile.text())
+          if (!parsedMetadata || typeof parsedMetadata !== 'object') {
+            event.target.value = ''
+            setMetadataFilesArray([])
+            return toast.error(`Invalid metadata file: ${metadataFile.name}`)
+          }
+        } catch (error) {
+          event.target.value = ''
+          setMetadataFilesArray([])
+          return toast.error(`Invalid metadata file: ${metadataFile.name}`)
+        }
         files.push(metadataFile)
       }
       reader.readAsText(event.target.files[i], 'utf8')
