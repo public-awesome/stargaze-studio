@@ -144,6 +144,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
         const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
+        files.push(metadataFile)
         try {
           const parsedMetadata = JSON.parse(await metadataFile.text())
           if (!parsedMetadata || typeof parsedMetadata !== 'object') {
@@ -156,7 +157,6 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
           setMetadataFilesArray([])
           return toast.error(`Invalid metadata file: ${metadataFile.name}`)
         }
-        files.push(metadataFile)
       }
       reader.readAsText(event.target.files[i], 'utf8')
       reader.onloadend = () => {
