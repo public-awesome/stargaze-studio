@@ -39,7 +39,12 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
   useEffect(() => {
     const data: RoyaltyDetailsDataProps = {
       royaltyType: royaltyState,
-      paymentAddress: royaltyPaymentAddressState.value,
+      paymentAddress: royaltyPaymentAddressState.value
+        .toLowerCase()
+        .replace(/,/g, '')
+        .replace(/"/g, '')
+        .replace(/'/g, '')
+        .replace(/ /g, ''),
       share: Number(royaltyShareState.value),
     }
     onChange(data)

@@ -369,6 +369,10 @@ const CollectionCreationPage: NextPage = () => {
         const contract = whitelistContract?.use(whitelistDetails.contractAddress)
         //check if the address belongs to a whitelist contract (see performChecks())
         const config = await contract?.config()
+        if (Number(config?.start_time) !== Number(mintingDetails?.startTime)) {
+          const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
+          throw Error(`Whitelist start time (${whitelistStartDate.toLocaleString()}) does not match minting start time`)
+        }
       }
     } else if (whitelistDetails.whitelistType === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
@@ -381,6 +385,8 @@ const CollectionCreationPage: NextPage = () => {
       if (whitelistDetails.memberLimit === 0) throw new Error('Member limit is required')
       if (Number(whitelistDetails.startTime) > Number(whitelistDetails.endTime))
         throw new Error('Whitelist start time cannot be later than whitelist end time')
+      if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
+        throw new Error('Whitelist start time must be the same as the minting start time')
     }
   }
 
