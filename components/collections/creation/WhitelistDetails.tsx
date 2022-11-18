@@ -70,7 +70,12 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   useEffect(() => {
     const data: WhitelistDetailsDataProps = {
       whitelistType: whitelistState,
-      contractAddress: whitelistAddressState.value,
+      contractAddress: whitelistAddressState.value
+        .toLowerCase()
+        .replace(/,/g, '')
+        .replace(/"/g, '')
+        .replace(/'/g, '')
+        .replace(/ /g, ''),
       members: whitelistArray,
       unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
       startTime: startDate ? (startDate.getTime() * 1_000_000).toString() : '',
