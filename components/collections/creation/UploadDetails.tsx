@@ -195,14 +195,12 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
         pinataSecretKey: pinataSecretKeyState.value,
         uploadMethod,
         baseTokenURI: baseTokenUriState.value
-          .toLowerCase()
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
           .replace(/ /g, '')
           .replace(regex, ''),
         imageUrl: coverImageUrlState.value
-          .toLowerCase()
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
