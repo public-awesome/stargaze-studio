@@ -12,6 +12,11 @@ export interface InstantiateResponse {
   readonly logs: readonly logs.Log[]
 }
 
+export interface MigrateResponse {
+  readonly transactionHash: string
+  readonly logs: readonly logs.Log[]
+}
+
 export interface RoyalityInfo {
   payment_address: string
   share: string
@@ -38,6 +43,8 @@ export interface MinterInstance {
   shuffle: (senderAddress: string) => Promise<string>
   withdraw: (senderAddress: string) => Promise<string>
   airdrop: (senderAddress: string, recipients: string[]) => Promise<string>
+  updateDiscountPrice: (senderAddress: string, price: string) => Promise<string>
+  removeDiscountPrice: (senderAddress: string) => Promise<string>
 }
 
 export interface MinterMessages {
@@ -51,6 +58,26 @@ export interface MinterMessages {
   shuffle: () => ShuffleMessage
   withdraw: () => WithdrawMessage
   airdrop: (recipients: string[]) => CustomMessage
+  updateDiscountPrice: (price: string) => UpdateDiscountPriceMessage
+  removeDiscountPrice: () => RemoveDiscountPriceMessage
+}
+
+export interface UpdateDiscountPriceMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_discount_price: Record<string, unknown>
+  }
+  funds: Coin[]
+}
+
+export interface RemoveDiscountPriceMessage {
+  sender: string
+  contract: string
+  msg: {
+    remove_discount_price: Record<string, never>
+  }
+  funds: Coin[]
 }
 
 export interface MintMessage {
@@ -150,6 +177,13 @@ export interface MinterContract {
     admin?: string,
     funds?: Coin[],
   ) => Promise<InstantiateResponse>
+
+  migrate: (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ) => Promise<MigrateResponse>
 
   use: (contractAddress: string) => MinterInstance
 
@@ -354,6 +388,35 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       return res.transactionHash
     }
 
+    const updateDiscountPrice = async (senderAddress: string, price: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_discount_price: {
+            price,
+          },
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const removeDiscountPrice = async (senderAddress: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          remove_discount_price: {},
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
     return {
       contractAddress,
       getConfig,
@@ -371,6 +434,21 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       airdrop,
       shuffle,
       withdraw,
+      updateDiscountPrice,
+      removeDiscountPrice,
+    }
+  }
+
+  const migrate = async (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ): Promise<MigrateResponse> => {
+    const result = await client.migrate(senderAddress, contractAddress, codeId, migrateMsg, 'auto')
+    return {
+      transactionHash: result.transactionHash,
+      logs: result.logs,
     }
   }
 
@@ -514,6 +592,28 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
         funds: [],
       }
     }
+    const updateDiscountPrice = (price: string): UpdateDiscountPriceMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_discount_price: {
+            price,
+          },
+        },
+        funds: [],
+      }
+    }
+    const removeDiscountPrice = (): RemoveDiscountPriceMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          remove_discount_price: {},
+        },
+        funds: [],
+      }
+    }
 
     return {
       mint,
@@ -526,8 +626,10 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
       airdrop,
       shuffle,
       withdraw,
+      updateDiscountPrice,
+      removeDiscountPrice,
     }
   }
 
-  return { use, instantiate, messages }
+  return { use, instantiate, messages, migrate }
 }
