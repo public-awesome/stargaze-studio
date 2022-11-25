@@ -12,6 +12,8 @@ export const EXECUTE_TYPES = [
   'mint_for',
   'shuffle',
   'withdraw',
+  'update_discount_price',
+  'remove_discount_price',
 ] as const
 
 export interface ExecuteListItem {
@@ -56,6 +58,16 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     name: 'Shuffle',
     description: `Shuffle the token IDs`,
   },
+  {
+    id: 'update_discount_price',
+    name: 'Update Discount Price',
+    description: `Updates discount price`,
+  },
+  {
+    id: 'remove_discount_price',
+    name: 'Remove Discount Price',
+    description: `Removes discount price`,
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -80,6 +92,8 @@ export type DispatchExecuteArgs = {
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
   | { type: Select<'shuffle'> }
   | { type: Select<'withdraw'> }
+  | { type: Select<'update_discount_price'>; price: string }
+  | { type: Select<'remove_discount_price'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -111,6 +125,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'withdraw': {
       return messages.withdraw(txSigner)
+    }
+    case 'update_discount_price': {
+      return messages.updateDiscountPrice(txSigner, args.price === '' ? '0' : args.price)
+    }
+    case 'remove_discount_price': {
+      return messages.removeDiscountPrice(txSigner)
     }
     default: {
       throw new Error('unknown execute type')
@@ -146,6 +166,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'withdraw': {
       return messages(contract)?.withdraw()
+    }
+    case 'update_discount_price': {
+      return messages(contract)?.updateDiscountPrice(args.price === '' ? '0' : args.price)
+    }
+    case 'remove_discount_price': {
+      return messages(contract)?.removeDiscountPrice()
     }
     default: {
       return {}

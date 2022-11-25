@@ -84,7 +84,7 @@ const MinterExecutePage: NextPage = () => {
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = type === 'mint_for'
   const showRecipientField = isEitherType(type, ['mint_to', 'mint_for'])
-  const showPriceField = type === 'mint'
+  const showPriceField = isEitherType(type, ['mint', 'update_discount_price'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
