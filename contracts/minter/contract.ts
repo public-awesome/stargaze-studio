@@ -12,6 +12,11 @@ export interface InstantiateResponse {
   readonly logs: readonly logs.Log[]
 }
 
+export interface MigrateResponse {
+  readonly transactionHash: string
+  readonly logs: readonly logs.Log[]
+}
+
 export interface RoyalityInfo {
   payment_address: string
   share: string
@@ -150,6 +155,13 @@ export interface MinterContract {
     admin?: string,
     funds?: Coin[],
   ) => Promise<InstantiateResponse>
+
+  migrate: (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ) => Promise<MigrateResponse>
 
   use: (contractAddress: string) => MinterInstance
 
@@ -374,6 +386,19 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
     }
   }
 
+  const migrate = async (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ): Promise<MigrateResponse> => {
+    const result = await client.migrate(senderAddress, contractAddress, codeId, migrateMsg, 'auto')
+    return {
+      transactionHash: result.transactionHash,
+      logs: result.logs,
+    }
+  }
+
   const instantiate = async (
     senderAddress: string,
     codeId: number,
@@ -529,5 +554,5 @@ export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterC
     }
   }
 
-  return { use, instantiate, messages }
+  return { use, instantiate, messages, migrate }
 }

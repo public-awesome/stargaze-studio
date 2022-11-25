@@ -34,6 +34,11 @@ export const minterLinkTabs: LinkTabProps[] = [
     description: `Execute Minter contract actions`,
     href: '/contracts/minter/execute',
   },
+  {
+    title: 'Migrate',
+    description: `Migrate Minter contract`,
+    href: '/contracts/minter/migrate',
+  },
 ]
 
 export const whitelistLinkTabs: LinkTabProps[] = [
