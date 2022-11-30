@@ -42,9 +42,11 @@ export const Sidebar = () => {
             { 'py-0 ml-2 text-sm font-bold': isChild },
             {
               'text-gray hover:text-white':
-                router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1) !== href && isChild,
+                !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
             },
-            { 'text-plumbus': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1) === href && isChild }, // active route styling
+            {
+              'text-plumbus': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
+            }, // active route styling
             // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
           )}
           href={href}
