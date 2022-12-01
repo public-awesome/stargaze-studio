@@ -116,7 +116,7 @@ const WhitelistExecutePage: NextPage = () => {
         link={links.Documentation}
         title="Whitelist Contract"
       />
-      <LinkTabs activeIndex={3} data={whitelistLinkTabs} />
+      <LinkTabs activeIndex={2} data={whitelistLinkTabs} />
 
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
