@@ -3,7 +3,7 @@ import type { logs } from '@cosmjs/stargate'
 import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
 
-import type { MinterContract, MinterInstance, MinterMessages } from './contract'
+import type { MigrateResponse, MinterContract, MinterInstance, MinterMessages } from './contract'
 import { minter as initContract } from './contract'
 
 /*export interface InstantiateResponse {
@@ -32,6 +32,7 @@ export interface UseMinterContractProps {
     admin?: string,
     funds?: Coin[],
   ) => Promise<InstantiateResponse>
+  migrate: (contractAddress: string, codeId: number, migrateMsg: Record<string, unknown>) => Promise<MigrateResponse>
   use: (customAddress: string) => MinterInstance | undefined
   updateContractAddress: (contractAddress: string) => void
   getContractAddress: () => string | undefined
@@ -70,6 +71,20 @@ export function useMinterContract(): UseMinterContractProps {
     [minter, wallet],
   )
 
+  const migrate = useCallback(
+    (contractAddress: string, codeId: number, migrateMsg: Record<string, unknown>): Promise<MigrateResponse> => {
+      return new Promise((resolve, reject) => {
+        if (!minter) {
+          reject(new Error('Contract is not initialized.'))
+          return
+        }
+        console.log(wallet.address, contractAddress, codeId)
+        minter.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+      })
+    },
+    [minter, wallet],
+  )
+
   const use = useCallback(
     (customAddress = ''): MinterInstance | undefined => {
       return minter?.use(address || customAddress)
@@ -94,5 +109,6 @@ export function useMinterContract(): UseMinterContractProps {
     updateContractAddress,
     getContractAddress,
     messages,
+    migrate,
   }
 }

@@ -11,6 +11,11 @@ export const sg721LinkTabs: LinkTabProps[] = [
     description: `Execute SG721 contract actions`,
     href: '/contracts/sg721/execute',
   },
+  {
+    title: 'Migrate',
+    description: `Migrate SG721 contract`,
+    href: '/contracts/sg721/migrate',
+  },
 ]
 
 export const minterLinkTabs: LinkTabProps[] = [
@@ -28,6 +33,11 @@ export const minterLinkTabs: LinkTabProps[] = [
     title: 'Execute',
     description: `Execute Minter contract actions`,
     href: '/contracts/minter/execute',
+  },
+  {
+    title: 'Migrate',
+    description: `Migrate Minter contract`,
+    href: '/contracts/minter/migrate',
   },
 ]
 
