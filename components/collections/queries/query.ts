@@ -1,3 +1,4 @@
+import type { BaseMinterInstance } from 'contracts/baseMinter'
 import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 
@@ -10,6 +11,8 @@ export const QUERY_TYPES = [
   'tokens_minted_to_user',
   // 'token_owners',
   'token_info',
+  'config',
+  'status',
 ] as const
 
 export interface QueryListItem {
@@ -18,7 +21,7 @@ export interface QueryListItem {
   description?: string
 }
 
-export const QUERY_LIST: QueryListItem[] = [
+export const VENDING_QUERY_LIST: QueryListItem[] = [
   {
     id: 'collection_info',
     name: 'Collection Info',
@@ -49,6 +52,43 @@ export const QUERY_LIST: QueryListItem[] = [
     name: 'Token Info',
     description: `Get information about a token in the collection.`,
   },
+  {
+    id: 'config',
+    name: 'Minter Config',
+    description: `Query Minter Config`,
+  },
+  {
+    id: 'status',
+    name: 'Minter Status',
+    description: `Query Minter Status`,
+  },
+]
+export const BASE_QUERY_LIST: QueryListItem[] = [
+  {
+    id: 'collection_info',
+    name: 'Collection Info',
+    description: `Get information about the collection.`,
+  },
+  {
+    id: 'tokens_minted_to_user',
+    name: 'Tokens Minted to User',
+    description: `Get the number of tokens minted in the collection to a user.`,
+  },
+  {
+    id: 'token_info',
+    name: 'Token Info',
+    description: `Get information about a token in the collection.`,
+  },
+  {
+    id: 'config',
+    name: 'Minter Config',
+    description: `Query Minter Config`,
+  },
+  {
+    id: 'status',
+    name: 'Minter Status',
+    description: `Query Minter Status`,
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -59,6 +99,7 @@ export interface DispatchExecuteProps {
 type Select<T extends QueryType> = T
 
 export type DispatchQueryArgs = {
+  baseMinterMessages?: BaseMinterInstance
   vendingMinterMessages?: VendingMinterInstance
   sg721Messages?: SG721Instance
 } & (
@@ -69,11 +110,13 @@ export type DispatchQueryArgs = {
   | { type: Select<'tokens_minted_to_user'>; address: string }
   // | { type: Select<'token_owners'> }
   | { type: Select<'token_info'>; tokenId: string }
+  | { type: Select<'config'> }
+  | { type: Select<'status'> }
 )
 
 export const dispatchQuery = async (args: DispatchQueryArgs) => {
-  const { vendingMinterMessages, sg721Messages } = args
-  if (!vendingMinterMessages || !sg721Messages) {
+  const { baseMinterMessages, vendingMinterMessages, sg721Messages } = args
+  if (!baseMinterMessages || !vendingMinterMessages || !sg721Messages) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
@@ -95,6 +138,12 @@ export const dispatchQuery = async (args: DispatchQueryArgs) => {
     case 'token_info': {
       if (!args.tokenId) return
       return sg721Messages.allNftInfo(args.tokenId)
+    }
+    case 'config': {
+      return baseMinterMessages.getConfig()
+    }
+    case 'status': {
+      return baseMinterMessages.getStatus()
     }
     default: {
       throw new Error('Unknown action')

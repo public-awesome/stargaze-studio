@@ -456,7 +456,7 @@ const CollectionCreationPage: NextPage = () => {
               <Anchor
                 className="text-stargaze hover:underline"
                 external
-                href={`/contracts/minter/query/?contractAddress=${vendingMinterContractAddress as string}`}
+                href={`/contracts/vendingMinter/query/?contractAddress=${vendingMinterContractAddress as string}`}
               >
                 {vendingMinterContractAddress}
               </Anchor>

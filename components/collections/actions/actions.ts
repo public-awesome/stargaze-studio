@@ -1,12 +1,16 @@
+import { useBaseMinterContract } from 'contracts/baseMinter'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { useVendingMinterContract } from 'contracts/vendingMinter'
 
+import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
+
 export type ActionType = typeof ACTION_TYPES[number]
 
 export const ACTION_TYPES = [
   'mint',
+  'mint_token_uri',
   'purge',
   'update_mint_price',
   'mint_to',
@@ -35,7 +39,55 @@ export interface ActionListItem {
   description?: string
 }
 
-export const ACTION_LIST: ActionListItem[] = [
+export const BASE_ACTION_LIST: ActionListItem[] = [
+  {
+    id: 'mint_token_uri',
+    name: 'Mint Token URI',
+    description: `Mint a token with the given token URI`,
+  },
+  {
+    id: 'update_start_trading_time',
+    name: 'Update Trading Start Time',
+    description: `Update start time for trading`,
+  },
+  {
+    id: 'update_collection_info',
+    name: 'Update Collection Info',
+    description: `Update Collection Info`,
+  },
+  {
+    id: 'freeze_collection_info',
+    name: 'Freeze Collection Info',
+    description: `Freeze collection info to prevent further updates`,
+  },
+  {
+    id: 'withdraw',
+    name: 'Withdraw Tokens',
+    description: `Withdraw tokens from the contract`,
+  },
+  {
+    id: 'transfer',
+    name: 'Transfer Tokens',
+    description: `Transfer tokens from one address to another`,
+  },
+  {
+    id: 'batch_transfer',
+    name: 'Batch Transfer Tokens',
+    description: `Transfer a list of tokens to a recipient`,
+  },
+  {
+    id: 'burn',
+    name: 'Burn Token',
+    description: `Burn a specified token from the collection`,
+  },
+  {
+    id: 'batch_burn',
+    name: 'Batch Burn Tokens',
+    description: `Burn a list of tokens from the collection`,
+  },
+]
+
+export const VENDING_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint',
     name: 'Mint',
@@ -150,16 +202,18 @@ export interface DispatchExecuteProps {
 
 type Select<T extends ActionType> = T
 
-/** @see {@link VendingMinterInstance} */
+/** @see {@link VendingMinterInstance}{@link BaseMinterInstance} */
 export type DispatchExecuteArgs = {
   minterContract: string
   sg721Contract: string
   vendingMinterMessages?: VendingMinterInstance
+  baseMinterMessages?: BaseMinterInstance
   sg721Messages?: SG721Instance
   txSigner: string
 } & (
   | { type: undefined }
   | { type: Select<'mint'> }
+  | { type: Select<'mint_token_uri'>; tokenUri: string }
   | { type: Select<'purge'> }
   | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'mint_to'>; recipient: string }
@@ -183,13 +237,16 @@ export type DispatchExecuteArgs = {
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
-  const { vendingMinterMessages, sg721Messages, txSigner } = args
-  if (!vendingMinterMessages || !sg721Messages) {
+  const { vendingMinterMessages, baseMinterMessages, sg721Messages, txSigner } = args
+  if (!vendingMinterMessages || !baseMinterMessages || !sg721Messages) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
     case 'mint': {
       return vendingMinterMessages.mint(txSigner)
+    }
+    case 'mint_token_uri': {
+      return baseMinterMessages.mint(txSigner, args.tokenUri)
     }
     case 'purge': {
       return vendingMinterMessages.purge(txSigner)
@@ -262,10 +319,15 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages: vendingMinterMessages } = useVendingMinterContract()
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages: sg721Messages } = useSG721Contract()
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { messages: baseMinterMessages } = useBaseMinterContract()
   const { minterContract, sg721Contract } = args
   switch (args.type) {
     case 'mint': {
       return vendingMinterMessages(minterContract)?.mint()
+    }
+    case 'mint_token_uri': {
+      return baseMinterMessages(minterContract)?.mint(args.tokenUri)
     }
     case 'purge': {
       return vendingMinterMessages(minterContract)?.purge()

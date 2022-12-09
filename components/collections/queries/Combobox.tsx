@@ -2,19 +2,30 @@ import { Combobox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
 import { matchSorter } from 'match-sorter'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
+import type { MinterType } from '../actions/Combobox'
 import type { QueryListItem } from './query'
-import { QUERY_LIST } from './query'
+import { BASE_QUERY_LIST, VENDING_QUERY_LIST } from './query'
 
 export interface QueryComboboxProps {
   value: QueryListItem | null
   onChange: (item: QueryListItem) => void
+  minterType?: MinterType
 }
 
-export const QueryCombobox = ({ value, onChange }: QueryComboboxProps) => {
+export const QueryCombobox = ({ value, onChange, minterType }: QueryComboboxProps) => {
   const [search, setSearch] = useState('')
+  const [QUERY_LIST, SET_QUERY_LIST] = useState<QueryListItem[]>(VENDING_QUERY_LIST)
+
+  useEffect(() => {
+    if (minterType === 'base') {
+      SET_QUERY_LIST(BASE_QUERY_LIST)
+    } else {
+      SET_QUERY_LIST(VENDING_QUERY_LIST)
+    }
+  }, [minterType])
 
   const filtered = search === '' ? QUERY_LIST : matchSorter(QUERY_LIST, search, { keys: ['id', 'name', 'description'] })
 
