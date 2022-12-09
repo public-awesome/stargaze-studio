@@ -1,7 +1,7 @@
-import type { MinterInstance } from 'contracts/minter'
-import { useMinterContract } from 'contracts/minter'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
+import type { VendingMinterInstance } from 'contracts/vendingMinter'
+import { useVendingMinterContract } from 'contracts/vendingMinter'
 
 export type ActionType = typeof ACTION_TYPES[number]
 
@@ -150,11 +150,11 @@ export interface DispatchExecuteProps {
 
 type Select<T extends ActionType> = T
 
-/** @see {@link MinterInstance} */
+/** @see {@link VendingMinterInstance} */
 export type DispatchExecuteArgs = {
   minterContract: string
   sg721Contract: string
-  minterMessages?: MinterInstance
+  vendingMinterMessages?: VendingMinterInstance
   sg721Messages?: SG721Instance
   txSigner: string
 } & (
@@ -183,40 +183,40 @@ export type DispatchExecuteArgs = {
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
-  const { minterMessages, sg721Messages, txSigner } = args
-  if (!minterMessages || !sg721Messages) {
+  const { vendingMinterMessages, sg721Messages, txSigner } = args
+  if (!vendingMinterMessages || !sg721Messages) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
     case 'mint': {
-      return minterMessages.mint(txSigner)
+      return vendingMinterMessages.mint(txSigner)
     }
     case 'purge': {
-      return minterMessages.purge(txSigner)
+      return vendingMinterMessages.purge(txSigner)
     }
     case 'update_mint_price': {
-      return minterMessages.updateMintPrice(txSigner, args.price)
+      return vendingMinterMessages.updateMintPrice(txSigner, args.price)
     }
     case 'mint_to': {
-      return minterMessages.mintTo(txSigner, args.recipient)
+      return vendingMinterMessages.mintTo(txSigner, args.recipient)
     }
     case 'mint_for': {
-      return minterMessages.mintFor(txSigner, args.recipient, args.tokenId)
+      return vendingMinterMessages.mintFor(txSigner, args.recipient, args.tokenId)
     }
     case 'batch_mint': {
-      return minterMessages.batchMint(txSigner, args.recipient, args.batchNumber)
+      return vendingMinterMessages.batchMint(txSigner, args.recipient, args.batchNumber)
     }
     case 'set_whitelist': {
-      return minterMessages.setWhitelist(txSigner, args.whitelist)
+      return vendingMinterMessages.setWhitelist(txSigner, args.whitelist)
     }
     case 'update_start_time': {
-      return minterMessages.updateStartTime(txSigner, args.startTime)
+      return vendingMinterMessages.updateStartTime(txSigner, args.startTime)
     }
     case 'update_start_trading_time': {
-      return minterMessages.updateStartTradingTime(txSigner, args.startTime)
+      return vendingMinterMessages.updateStartTradingTime(txSigner, args.startTime)
     }
     case 'update_per_address_limit': {
-      return minterMessages.updatePerAddressLimit(txSigner, args.limit)
+      return vendingMinterMessages.updatePerAddressLimit(txSigner, args.limit)
     }
     case 'update_collection_info': {
       return sg721Messages.updateCollectionInfo(args.collectionInfo as CollectionInfo)
@@ -225,10 +225,10 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return sg721Messages.freezeCollectionInfo()
     }
     case 'shuffle': {
-      return minterMessages.shuffle(txSigner)
+      return vendingMinterMessages.shuffle(txSigner)
     }
     case 'withdraw': {
-      return minterMessages.withdraw(txSigner)
+      return vendingMinterMessages.withdraw(txSigner)
     }
     case 'transfer': {
       return sg721Messages.transferNft(args.recipient, args.tokenId.toString())
@@ -243,13 +243,13 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return sg721Messages.batchBurn(args.tokenIds)
     }
     case 'batch_mint_for': {
-      return minterMessages.batchMintFor(txSigner, args.recipient, args.tokenIds)
+      return vendingMinterMessages.batchMintFor(txSigner, args.recipient, args.tokenIds)
     }
     case 'airdrop': {
-      return minterMessages.airdrop(txSigner, args.recipients)
+      return vendingMinterMessages.airdrop(txSigner, args.recipients)
     }
     case 'burn_remaining': {
-      return minterMessages.burnRemaining(txSigner)
+      return vendingMinterMessages.burnRemaining(txSigner)
     }
     default: {
       throw new Error('Unknown action')
@@ -259,40 +259,40 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
 
 export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { messages: minterMessages } = useMinterContract()
+  const { messages: vendingMinterMessages } = useVendingMinterContract()
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages: sg721Messages } = useSG721Contract()
   const { minterContract, sg721Contract } = args
   switch (args.type) {
     case 'mint': {
-      return minterMessages(minterContract)?.mint()
+      return vendingMinterMessages(minterContract)?.mint()
     }
     case 'purge': {
-      return minterMessages(minterContract)?.purge()
+      return vendingMinterMessages(minterContract)?.purge()
     }
     case 'update_mint_price': {
-      return minterMessages(minterContract)?.updateMintPrice(args.price)
+      return vendingMinterMessages(minterContract)?.updateMintPrice(args.price)
     }
     case 'mint_to': {
-      return minterMessages(minterContract)?.mintTo(args.recipient)
+      return vendingMinterMessages(minterContract)?.mintTo(args.recipient)
     }
     case 'mint_for': {
-      return minterMessages(minterContract)?.mintFor(args.recipient, args.tokenId)
+      return vendingMinterMessages(minterContract)?.mintFor(args.recipient, args.tokenId)
     }
     case 'batch_mint': {
-      return minterMessages(minterContract)?.batchMint(args.recipient, args.batchNumber)
+      return vendingMinterMessages(minterContract)?.batchMint(args.recipient, args.batchNumber)
     }
     case 'set_whitelist': {
-      return minterMessages(minterContract)?.setWhitelist(args.whitelist)
+      return vendingMinterMessages(minterContract)?.setWhitelist(args.whitelist)
     }
     case 'update_start_time': {
-      return minterMessages(minterContract)?.updateStartTime(args.startTime)
+      return vendingMinterMessages(minterContract)?.updateStartTime(args.startTime)
     }
     case 'update_start_trading_time': {
-      return minterMessages(minterContract)?.updateStartTradingTime(args.startTime as string)
+      return vendingMinterMessages(minterContract)?.updateStartTradingTime(args.startTime as string)
     }
     case 'update_per_address_limit': {
-      return minterMessages(minterContract)?.updatePerAddressLimit(args.limit)
+      return vendingMinterMessages(minterContract)?.updatePerAddressLimit(args.limit)
     }
     case 'update_collection_info': {
       return sg721Messages(sg721Contract)?.updateCollectionInfo(args.collectionInfo as CollectionInfo)
@@ -301,10 +301,10 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return sg721Messages(sg721Contract)?.freezeCollectionInfo()
     }
     case 'shuffle': {
-      return minterMessages(minterContract)?.shuffle()
+      return vendingMinterMessages(minterContract)?.shuffle()
     }
     case 'withdraw': {
-      return minterMessages(minterContract)?.withdraw()
+      return vendingMinterMessages(minterContract)?.withdraw()
     }
     case 'transfer': {
       return sg721Messages(sg721Contract)?.transferNft(args.recipient, args.tokenId.toString())
@@ -319,13 +319,13 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return sg721Messages(sg721Contract)?.batchBurn(args.tokenIds)
     }
     case 'batch_mint_for': {
-      return minterMessages(minterContract)?.batchMintFor(args.recipient, args.tokenIds)
+      return vendingMinterMessages(minterContract)?.batchMintFor(args.recipient, args.tokenIds)
     }
     case 'airdrop': {
-      return minterMessages(minterContract)?.airdrop(args.recipients)
+      return vendingMinterMessages(minterContract)?.airdrop(args.recipients)
     }
     case 'burn_remaining': {
-      return minterMessages(minterContract)?.burnRemaining()
+      return vendingMinterMessages(minterContract)?.burnRemaining()
     }
     default: {
       return {}

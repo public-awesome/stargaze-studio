@@ -18,26 +18,49 @@ export const sg721LinkTabs: LinkTabProps[] = [
   },
 ]
 
-export const minterLinkTabs: LinkTabProps[] = [
+export const vendingMinterLinkTabs: LinkTabProps[] = [
   {
     title: 'Instantiate',
-    description: `Initialize a new Minter contract`,
-    href: '/contracts/minter/instantiate',
+    description: `Initialize a new Vending Minter contract`,
+    href: '/contracts/vendingMinter/instantiate',
   },
   {
     title: 'Query',
-    description: `Dispatch queries with your Minter contract`,
-    href: '/contracts/minter/query',
+    description: `Dispatch queries with your Vending Minter contract`,
+    href: '/contracts/vendingMinter/query',
   },
   {
     title: 'Execute',
-    description: `Execute Minter contract actions`,
-    href: '/contracts/minter/execute',
+    description: `Execute Vending Minter contract actions`,
+    href: '/contracts/vendingMinter/execute',
   },
   {
     title: 'Migrate',
-    description: `Migrate Minter contract`,
-    href: '/contracts/minter/migrate',
+    description: `Migrate Vending Minter contract`,
+    href: '/contracts/vendingMinter/migrate',
+  },
+]
+
+export const baseMinterLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Instantiate',
+    description: `Initialize a new Base Minter contract`,
+    href: '/contracts/baseMinter/instantiate',
+  },
+  {
+    title: 'Query',
+    description: `Dispatch queries with your Base Minter contract`,
+    href: '/contracts/baseMinter/query',
+  },
+  {
+    title: 'Execute',
+    description: `Execute Base Minter contract actions`,
+    href: '/contracts/baseMinter/execute',
+  },
+  {
+    title: 'Migrate',
+    description: `Migrate Base Minter contract`,
+    href: '/contracts/baseMinter/migrate',
   },
 ]
 

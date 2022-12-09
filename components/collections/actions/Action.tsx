@@ -13,8 +13,8 @@ import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
 import { useWallet } from 'contexts/wallet'
-import type { MinterInstance } from 'contracts/minter'
 import type { SG721Instance } from 'contracts/sg721'
+import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -29,7 +29,7 @@ interface CollectionActionsProps {
   minterContractAddress: string
   sg721ContractAddress: string
   sg721Messages: SG721Instance | undefined
-  minterMessages: MinterInstance | undefined
+  vendingMinterMessages: VendingMinterInstance | undefined
 }
 
 type ExplicitContentType = true | false | undefined
@@ -38,7 +38,7 @@ export const CollectionActions = ({
   sg721ContractAddress,
   sg721Messages,
   minterContractAddress,
-  minterMessages,
+  vendingMinterMessages,
 }: CollectionActionsProps) => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
@@ -169,7 +169,7 @@ export const CollectionActions = ({
     tokenId: tokenIdState.value,
     tokenIds: tokenIdListState.value,
     batchNumber: batchNumberState.value,
-    minterMessages,
+    vendingMinterMessages,
     sg721Messages,
     recipient: recipientState.value,
     recipients: airdropArray,

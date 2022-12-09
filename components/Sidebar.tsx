@@ -14,7 +14,8 @@ const routes = [
   { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
   { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
   { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
-  { text: 'Minter Contract', href: `/contracts/minter/`, isChild: true },
+  { text: 'Base Minter Contract', href: `/contracts/baseMinter/`, isChild: true },
+  { text: 'Vending Minter Contract', href: `/contracts/vendingMinter/`, isChild: true },
   { text: 'SG721 Contract', href: `/contracts/sg721/`, isChild: true },
   { text: 'Whitelist Contract', href: `/contracts/whitelist/`, isChild: true },
 ]
@@ -37,9 +38,9 @@ export const Sidebar = () => {
         <Anchor
           key={href}
           className={clsx(
-            'px-4 -mx-5 font-extrabold uppercase rounded-lg', // styling
+            'px-2 -mx-5 font-extrabold uppercase rounded-lg', // styling
             'hover:bg-white/5 transition-colors', // hover styling
-            { 'py-0 ml-2 text-sm font-bold': isChild },
+            { 'py-0 -ml-2 text-sm font-bold': isChild },
             {
               'text-gray hover:text-white':
                 !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,

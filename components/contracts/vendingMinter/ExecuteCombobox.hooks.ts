@@ -1,4 +1,4 @@
-import type { ExecuteListItem } from 'contracts/minter/messages/execute'
+import type { ExecuteListItem } from 'contracts/vendingMinter/messages/execute'
 import { useState } from 'react'
 
 export const useExecuteComboboxState = () => {

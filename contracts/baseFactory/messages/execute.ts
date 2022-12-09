@@ -1,12 +1,12 @@
 import type { Coin } from '@cosmjs/proto-signing'
 
-import type { VendingFactoryInstance } from '../index'
-import { useVendingFactoryContract } from '../index'
+import type { BaseFactoryInstance } from '../index'
+import { useBaseFactoryContract } from '../index'
 
 /** @see {@link VendingFactoryInstance} */
 export interface DispatchExecuteArgs {
   contract: string
-  messages?: VendingFactoryInstance
+  messages?: BaseFactoryInstance
   txSigner: string
   msg: Record<string, unknown>
   funds: Coin[]
@@ -17,12 +17,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   if (!messages) {
     throw new Error('cannot dispatch execute, messages is not defined')
   }
-  return messages.createVendingMinter(txSigner, args.msg, args.funds)
+  return messages.createBaseMinter(txSigner, args.msg, args.funds)
 }
 
 export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { messages } = useVendingFactoryContract()
+  const { messages } = useBaseFactoryContract()
   const { contract } = args
-  return messages(contract)?.createVendingMinter(args.msg)
+  return messages(contract)?.createBaseMinter(args.msg)
 }

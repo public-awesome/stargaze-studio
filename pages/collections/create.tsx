@@ -49,7 +49,7 @@ import { getAssetType } from '../../utils/getAssetType'
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
   const {
-    minter: minterContract,
+    vendingMinter: vendingMinterContract,
     whitelist: whitelistContract,
     vendingFactory: vendingFactoryContract,
   } = useContracts()
@@ -69,7 +69,7 @@ const CollectionCreationPage: NextPage = () => {
   const [uploading, setUploading] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreate, setReadyToCreate] = useState(false)
-  const [minterContractAddress, setMinterContractAddress] = useState<string | null>(null)
+  const [vendingMinterContractAddress, setVendingMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
   const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null | undefined>(null)
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
@@ -102,7 +102,7 @@ const CollectionCreationPage: NextPage = () => {
       setCreatingCollection(true)
       setBaseTokenUri(null)
       setCoverImageUrl(null)
-      setMinterContractAddress(null)
+      setVendingMinterContractAddress(null)
       setSg721ContractAddress(null)
       setWhitelistContractAddress(null)
       setTransactionHash(null)
@@ -176,7 +176,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const instantiate = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
-    if (!minterContract) throw new Error('Contract not found')
+    if (!vendingMinterContract) throw new Error('Contract not found')
 
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
@@ -229,7 +229,7 @@ const CollectionCreationPage: NextPage = () => {
     }
     const data = await dispatchExecute(payload)
     setTransactionHash(data.transactionHash)
-    setMinterContractAddress(data.minterAddress)
+    setVendingMinterContractAddress(data.vendingMinterAddress)
     setSg721ContractAddress(data.sg721Address)
   }
 
@@ -399,8 +399,8 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
   useEffect(() => {
-    if (minterContractAddress !== null) scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [minterContractAddress])
+    if (vendingMinterContractAddress !== null) scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [vendingMinterContractAddress])
 
   useEffect(() => {
     setBaseTokenUri(uploadDetails?.baseTokenURI as string)
@@ -427,7 +427,7 @@ const CollectionCreationPage: NextPage = () => {
         </p>
       </div>
       <div className="mx-10" ref={scrollRef}>
-        <Conditional test={minterContractAddress !== null}>
+        <Conditional test={vendingMinterContractAddress !== null}>
           <Alert className="mt-5" type="info">
             <div>
               Base Token URI:{' '}
@@ -456,9 +456,9 @@ const CollectionCreationPage: NextPage = () => {
               <Anchor
                 className="text-stargaze hover:underline"
                 external
-                href={`/contracts/minter/query/?contractAddress=${minterContractAddress as string}`}
+                href={`/contracts/minter/query/?contractAddress=${vendingMinterContractAddress as string}`}
               >
-                {minterContractAddress}
+                {vendingMinterContractAddress}
               </Anchor>
               <br />
               SG721 Contract Address:{'  '}
@@ -504,7 +504,7 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-white"
                   external
-                  href={`${STARGAZE_URL}/launchpad/${minterContractAddress as string}`}
+                  href={`${STARGAZE_URL}/launchpad/${vendingMinterContractAddress as string}`}
                 >
                   View on Launchpad
                 </Anchor>

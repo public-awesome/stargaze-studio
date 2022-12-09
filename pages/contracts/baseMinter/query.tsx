@@ -1,16 +1,15 @@
 import clsx from 'clsx'
-import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { minterLinkTabs } from 'components/LinkTabs.data'
+import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { QueryType } from 'contracts/minter/messages/query'
-import { dispatchQuery, QUERY_LIST } from 'contracts/minter/messages/query'
+import type { QueryType } from 'contracts/baseMinter/messages/query'
+import { dispatchQuery, QUERY_LIST } from 'contracts/baseMinter/messages/query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -20,15 +19,15 @@ import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const MinterQueryPage: NextPage = () => {
-  const { minter: contract } = useContracts()
+const BaseMinterQueryPage: NextPage = () => {
+  const { baseMinter: contract } = useContracts()
   const wallet = useWallet()
 
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
+    title: 'Base Minter Address',
+    subtitle: 'Address of the Base Minter contract',
   })
   const contractAddress = contractState.value
 
@@ -78,13 +77,13 @@ const MinterQueryPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Query Minter Contract" />
+      <NextSeo title="Query Base Minter Contract" />
       <ContractPageHeader
-        description="Minter contract facilitates primary market vending machine style minting."
+        description="Base Minter contract facilitates 1/1 minting."
         link={links.Documentation}
-        title="Minter Contract"
+        title="Base Minter Contract"
       />
-      <LinkTabs activeIndex={1} data={minterLinkTabs} />
+      <LinkTabs activeIndex={1} data={baseMinterLinkTabs} />
 
       <div className="grid grid-cols-2 p-4 space-x-8">
         <div className="space-y-8">
@@ -107,9 +106,6 @@ const MinterQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional test={type === 'mint_count'}>
-            <AddressInput {...addressState} />
-          </Conditional>
         </div>
         <JsonPreview content={contractAddress ? { type, response } : null} title="Query Response" />
       </div>
@@ -117,4 +113,4 @@ const MinterQueryPage: NextPage = () => {
   )
 }
 
-export default withMetadata(MinterQueryPage, { center: false })
+export default withMetadata(BaseMinterQueryPage, { center: false })

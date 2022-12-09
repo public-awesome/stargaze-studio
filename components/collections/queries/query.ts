@@ -1,5 +1,5 @@
-import type { MinterInstance } from 'contracts/minter'
 import type { SG721Instance } from 'contracts/sg721'
+import type { VendingMinterInstance } from 'contracts/vendingMinter'
 
 export type QueryType = typeof QUERY_TYPES[number]
 
@@ -59,7 +59,7 @@ export interface DispatchExecuteProps {
 type Select<T extends QueryType> = T
 
 export type DispatchQueryArgs = {
-  minterMessages?: MinterInstance
+  vendingMinterMessages?: VendingMinterInstance
   sg721Messages?: SG721Instance
 } & (
   | { type: undefined }
@@ -72,8 +72,8 @@ export type DispatchQueryArgs = {
 )
 
 export const dispatchQuery = async (args: DispatchQueryArgs) => {
-  const { minterMessages, sg721Messages } = args
-  if (!minterMessages || !sg721Messages) {
+  const { vendingMinterMessages, sg721Messages } = args
+  if (!vendingMinterMessages || !sg721Messages) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
@@ -81,16 +81,16 @@ export const dispatchQuery = async (args: DispatchQueryArgs) => {
       return sg721Messages.collectionInfo()
     }
     case 'mint_price': {
-      return minterMessages.getMintPrice()
+      return vendingMinterMessages.getMintPrice()
     }
     case 'num_tokens': {
-      return minterMessages.getMintableNumTokens()
+      return vendingMinterMessages.getMintableNumTokens()
     }
     case 'tokens_minted_to_user': {
-      return minterMessages.getMintCount(args.address)
+      return vendingMinterMessages.getMintCount(args.address)
     }
     // case 'token_owners': {
-    //   return minterMessages.updateStartTime(txSigner, args.startTime)
+    //   return vendingMinterMessages.updateStartTime(txSigner, args.startTime)
     // }
     case 'token_info': {
       if (!args.tokenId) return

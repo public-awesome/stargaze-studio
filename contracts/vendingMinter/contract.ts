@@ -22,7 +22,7 @@ export interface RoyaltyInfo {
   share: string
 }
 
-export interface MinterInstance {
+export interface VendingMinterInstance {
   readonly contractAddress: string
 
   //Query
@@ -50,7 +50,7 @@ export interface MinterInstance {
   burnRemaining: (senderAddress: string) => Promise<string>
 }
 
-export interface MinterMessages {
+export interface VendingMinterMessages {
   mint: () => MintMessage
   purge: () => PurgeMessage
   updateMintPrice: (price: string) => UpdateMintPriceMessage
@@ -219,7 +219,7 @@ export interface MintPriceMessage {
   }
 }
 
-export interface MinterContract {
+export interface VendingMinterContract {
   instantiate: (
     senderAddress: string,
     codeId: number,
@@ -236,13 +236,13 @@ export interface MinterContract {
     migrateMsg: Record<string, unknown>,
   ) => Promise<MigrateResponse>
 
-  use: (contractAddress: string) => MinterInstance
+  use: (contractAddress: string) => VendingMinterInstance
 
-  messages: (contractAddress: string) => MinterMessages
+  messages: (contractAddress: string) => VendingMinterMessages
 }
 
-export const minter = (client: SigningCosmWasmClient, txSigner: string): MinterContract => {
-  const use = (contractAddress: string): MinterInstance => {
+export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): VendingMinterContract => {
+  const use = (contractAddress: string): VendingMinterInstance => {
     //Query
     const getConfig = async (): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {

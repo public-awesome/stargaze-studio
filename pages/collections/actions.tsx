@@ -13,7 +13,7 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
 const CollectionActionsPage: NextPage = () => {
-  const { minter: minterContract, sg721: sg721Contract } = useContracts()
+  const { vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
   const wallet = useWallet()
 
   const [action, setAction] = useState<boolean>(false)
@@ -32,9 +32,9 @@ const CollectionActionsPage: NextPage = () => {
     subtitle: 'Address of the Minter contract',
   })
 
-  const minterMessages = useMemo(
-    () => minterContract?.use(minterContractState.value),
-    [minterContract, minterContractState.value],
+  const vendingMinterMessages = useMemo(
+    () => vendingMinterContract?.use(minterContractState.value),
+    [vendingMinterContract, minterContractState.value],
   )
   const sg721Messages = useMemo(
     () => sg721Contract?.use(sg721ContractState.value),
@@ -126,14 +126,14 @@ const CollectionActionsPage: NextPage = () => {
               {(action && (
                 <CollectionActions
                   minterContractAddress={minterContractState.value}
-                  minterMessages={minterMessages}
+                  minterMessages={vendingMinterMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                 />
               )) || (
                 <CollectionQueries
                   minterContractAddress={minterContractState.value}
-                  minterMessages={minterMessages}
+                  minterMessages={vendingMinterMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                 />

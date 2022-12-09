@@ -4,8 +4,8 @@ import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 
-export interface CreateMinterResponse {
-  readonly minterAddress: string
+export interface CreateVendingMinterResponse {
+  readonly vendingMinterAddress: string
   readonly sg721Address: string
   readonly transactionHash: string
   readonly logs: readonly logs.Log[]
@@ -17,14 +17,18 @@ export interface VendingFactoryInstance {
   //Query
 
   //Execute
-  createMinter: (senderAddress: string, msg: Record<string, unknown>, funds: Coin[]) => Promise<CreateMinterResponse>
+  createVendingMinter: (
+    senderAddress: string,
+    msg: Record<string, unknown>,
+    funds: Coin[],
+  ) => Promise<CreateVendingMinterResponse>
 }
 
 export interface VendingFactoryMessages {
-  createMinter: (msg: Record<string, unknown>) => CreateMinterMessage
+  createVendingMinter: (msg: Record<string, unknown>) => CreateVendingMinterMessage
 }
 
-export interface CreateMinterMessage {
+export interface CreateVendingMinterMessage {
   sender: string
   contract: string
   msg: Record<string, unknown>
@@ -42,15 +46,15 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
     //Query
 
     //Execute
-    const createMinter = async (
+    const createVendingMinter = async (
       senderAddress: string,
       msg: Record<string, unknown>,
       funds: Coin[],
-    ): Promise<CreateMinterResponse> => {
+    ): Promise<CreateVendingMinterResponse> => {
       const result = await client.execute(senderAddress, VENDING_FACTORY_ADDRESS, msg, 'auto', '', funds)
 
       return {
-        minterAddress: result.logs[0].events[5].attributes[0].value,
+        vendingMinterAddress: result.logs[0].events[5].attributes[0].value,
         sg721Address: result.logs[0].events[5].attributes[2].value,
         transactionHash: result.transactionHash,
         logs: result.logs,
@@ -59,12 +63,12 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
 
     return {
       contractAddress,
-      createMinter,
+      createVendingMinter,
     }
   }
 
   const messages = (contractAddress: string) => {
-    const createMinter = (msg: Record<string, unknown>): CreateMinterMessage => {
+    const createVendingMinter = (msg: Record<string, unknown>): CreateVendingMinterMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -74,7 +78,7 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
     }
 
     return {
-      createMinter,
+      createVendingMinter,
     }
   }
 

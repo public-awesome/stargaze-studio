@@ -16,7 +16,7 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
 const CollectionQueriesPage: NextPage = () => {
-  const { minter: minterContract, sg721: sg721Contract } = useContracts()
+  const { vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
 
   const comboboxState = useQueryComboboxState()
   const type = comboboxState.value?.id
@@ -57,19 +57,19 @@ const CollectionQueriesPage: NextPage = () => {
   const showTokenIdField = type === 'token_info'
   const showAddressField = type === 'tokens_minted_to_user'
 
-  const minterMessages = useMemo(
-    () => minterContract?.use(minterContractAddress),
-    [minterContract, minterContractAddress],
+  const vendingMinterMessages = useMemo(
+    () => vendingMinterContract?.use(minterContractAddress),
+    [vendingMinterContract, minterContractAddress],
   )
   const sg721Messages = useMemo(() => sg721Contract?.use(sg721ContractAddress), [sg721Contract, sg721ContractAddress])
 
   const { data: response } = useQuery(
-    [sg721Messages, minterMessages, type, tokenId, address] as const,
+    [sg721Messages, vendingMinterMessages, type, tokenId, address] as const,
     async ({ queryKey }) => {
-      const [_sg721Messages, _minterMessages, _type, _tokenId, _address] = queryKey
+      const [_sg721Messages, _vendingMinterMessages, _type, _tokenId, _address] = queryKey
       const result = await dispatchQuery({
         tokenId: _tokenId,
-        minterMessages: _minterMessages,
+        minterMessages: _vendingMinterMessages,
         sg721Messages: _sg721Messages,
         address: _address,
         type: _type,
