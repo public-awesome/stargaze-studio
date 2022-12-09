@@ -15,7 +15,7 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
   {
     id: 'mint',
     name: 'Mint',
-    description: `Mint new tokens for a given address`,
+    description: `Mint a token with the given token URI`,
   },
   {
     id: 'update_start_trading_time',
