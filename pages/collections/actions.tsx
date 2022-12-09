@@ -111,7 +111,7 @@ const CollectionActionsPage: NextPage = () => {
         setMinterType('vending')
         console.log('Unable to retrieve contract version')
       })
-  }, [debouncedMinterContractState, wallet.address])
+  }, [debouncedMinterContractState, wallet.client])
 
   return (
     <section className="py-6 px-12 space-y-4">
