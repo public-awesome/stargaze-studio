@@ -233,7 +233,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   }, [uploadMethod])
 
   return (
-    <div className="justify-items-start mt-5 mb-3 rounded border border-2 border-white/20 flex-column">
+    <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">
       <div className="flex justify-center">
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input

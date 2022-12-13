@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import { coin } from '@cosmjs/proto-signing'
+import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
 import { Button } from 'components/Button'
@@ -15,6 +16,8 @@ import {
   WhitelistDetails,
 } from 'components/collections/creation'
 import type { CollectionDetailsDataProps } from 'components/collections/creation/CollectionDetails'
+import type { MinterDetailsDataProps } from 'components/collections/creation/MinterDetails'
+import { MinterDetails } from 'components/collections/creation/MinterDetails'
 import type { MintingDetailsDataProps } from 'components/collections/creation/MintingDetails'
 import type { RoyaltyDetailsDataProps } from 'components/collections/creation/RoyaltyDetails'
 import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
@@ -42,6 +45,7 @@ import {
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { getAssetType } from '../../utils/getAssetType'
@@ -62,13 +66,17 @@ const CollectionCreationPage: NextPage = () => {
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
+  const [minterDetails, setMinterDetails] = useState<MinterDetailsDataProps | null>(null)
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
+  const [minterType, setMinterType] = useState<MinterType>('vending')
 
   const [uploading, setUploading] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
-  const [readyToCreate, setReadyToCreate] = useState(false)
+  const [readyToCreateVm, setReadyToCreateVm] = useState(false)
+  const [readyToCreateBm, setReadyToCreateBm] = useState(false)
+  const [readyToUploadAndMint, setReadyToUploadAndMint] = useState(false)
   const [vendingMinterContractAddress, setVendingMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
   const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null | undefined>(null)
@@ -76,20 +84,20 @@ const CollectionCreationPage: NextPage = () => {
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
 
-  const performChecks = () => {
+  const performVendingMinterChecks = () => {
     try {
-      setReadyToCreate(false)
+      setReadyToCreateVm(false)
       checkUploadDetails()
       checkCollectionDetails()
       checkMintingDetails()
       checkRoyaltyDetails()
       checkWhitelistDetails()
         .then(() => {
-          setReadyToCreate(true)
+          setReadyToCreateVm(true)
         })
         .catch((err) => {
           toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
-          setReadyToCreate(false)
+          setReadyToCreateVm(false)
         })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
@@ -97,7 +105,157 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
 
-  const createCollection = async () => {
+  const performBaseMinterChecks = () => {
+    try {
+      setReadyToCreateBm(false)
+      checkUploadDetails()
+      checkCollectionDetails()
+      checkMintingDetails()
+      checkRoyaltyDetails()
+      checkWhitelistDetails()
+        .then(() => {
+          setReadyToCreateBm(true)
+        })
+        .catch((err) => {
+          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          setReadyToCreateBm(false)
+        })
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setUploading(false)
+    }
+  }
+
+  const performUploadAndMintChecks = () => {
+    try {
+      setReadyToUploadAndMint(false)
+      checkUploadDetails()
+      checkCollectionDetails()
+      checkMintingDetails()
+      checkRoyaltyDetails()
+      checkWhitelistDetails()
+        .then(() => {
+          setReadyToUploadAndMint(true)
+        })
+        .catch((err) => {
+          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          setReadyToUploadAndMint(false)
+        })
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setUploading(false)
+    }
+  }
+
+  const createVendingMinterCollection = async () => {
+    try {
+      setCreatingCollection(true)
+      setBaseTokenUri(null)
+      setCoverImageUrl(null)
+      setVendingMinterContractAddress(null)
+      setSg721ContractAddress(null)
+      setWhitelistContractAddress(null)
+      setTransactionHash(null)
+      if (uploadDetails?.uploadMethod === 'new') {
+        setUploading(true)
+
+        const baseUri = await uploadFiles()
+        //upload coverImageUri and append the file name
+        const coverImageUri = await upload(
+          collectionDetails?.imageFile as File[],
+          uploadDetails.uploadService,
+          'cover',
+          uploadDetails.nftStorageApiKey as string,
+          uploadDetails.pinataApiKey as string,
+          uploadDetails.pinataSecretKey as string,
+        )
+
+        setUploading(false)
+
+        setBaseTokenUri(baseUri)
+        setCoverImageUrl(coverImageUri)
+
+        let whitelist: string | undefined
+        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
+        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
+
+        await instantiate(baseUri, coverImageUri, whitelist)
+      } else {
+        setBaseTokenUri(uploadDetails?.baseTokenURI as string)
+        setCoverImageUrl(uploadDetails?.imageUrl as string)
+
+        let whitelist: string | undefined
+        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
+        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
+
+        await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
+      }
+      setCreatingCollection(false)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setCreatingCollection(false)
+      setUploading(false)
+    }
+  }
+
+  const createBaseMinterCollection = async () => {
+    try {
+      setCreatingCollection(true)
+      setBaseTokenUri(null)
+      setCoverImageUrl(null)
+      setVendingMinterContractAddress(null)
+      setSg721ContractAddress(null)
+      setWhitelistContractAddress(null)
+      setTransactionHash(null)
+      if (uploadDetails?.uploadMethod === 'new') {
+        setUploading(true)
+
+        const baseUri = await uploadFiles()
+        //upload coverImageUri and append the file name
+        const coverImageUri = await upload(
+          collectionDetails?.imageFile as File[],
+          uploadDetails.uploadService,
+          'cover',
+          uploadDetails.nftStorageApiKey as string,
+          uploadDetails.pinataApiKey as string,
+          uploadDetails.pinataSecretKey as string,
+        )
+
+        setUploading(false)
+
+        setBaseTokenUri(baseUri)
+        setCoverImageUrl(coverImageUri)
+
+        let whitelist: string | undefined
+        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
+        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
+
+        await instantiate(baseUri, coverImageUri, whitelist)
+      } else {
+        setBaseTokenUri(uploadDetails?.baseTokenURI as string)
+        setCoverImageUrl(uploadDetails?.imageUrl as string)
+
+        let whitelist: string | undefined
+        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
+        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        setWhitelistContractAddress(whitelist as string)
+
+        await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
+      }
+      setCreatingCollection(false)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setCreatingCollection(false)
+      setUploading(false)
+    }
+  }
+
+  const uploadAndMint = async () => {
     try {
       setCreatingCollection(true)
       setBaseTokenUri(null)
@@ -513,36 +671,142 @@ const CollectionCreationPage: NextPage = () => {
           </Alert>
         </Conditional>
       </div>
+      <div>
+        <div
+          className={clsx(
+            'mx-10 mt-5',
+            'grid before:absolute relative grid-cols-2 grid-flow-col items-stretch rounded',
+            'before:inset-x-0 before:bottom-0 before:border-white/25',
+          )}
+        >
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => setMinterType('vending')}
+              type="button"
+            >
+              <h4 className="font-bold">Vending Minter</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                Vending Minter contract facilitates primary market vending machine style minting
+              </span>
+            </button>
+          </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'base' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => setMinterType('base')}
+              type="button"
+            >
+              <h4 className="font-bold">Base Minter</h4>
+              <span className="text-sm text-white/80 line-clamp-2">Base Minter contract enables 1/1 minting</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {minterType === 'base' && (
+        <div>
+          <MinterDetails minterType={minterType} onChange={setMinterDetails} />
+        </div>
+      )}
+
       <div className="mx-10">
         <UploadDetails onChange={setUploadDetails} />
 
-        <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
-          <CollectionDetails
-            coverImageUrl={coverImageUrl as string}
-            onChange={setCollectionDetails}
-            uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
-          />
-          <MintingDetails
-            numberOfTokens={uploadDetails?.assetFiles.length}
-            onChange={setMintingDetails}
-            uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
-          />
-        </div>
-        <div className="my-6">
-          <WhitelistDetails onChange={setWhitelistDetails} />
-          <div className="my-6" />
-          <RoyaltyDetails onChange={setRoyaltyDetails} />
-        </div>
-        {readyToCreate && <ConfirmationModal confirm={createCollection} />}
+        <Conditional
+          test={minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')}
+        >
+          <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
+            <Conditional
+              test={
+                minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')
+              }
+            >
+              <CollectionDetails
+                coverImageUrl={coverImageUrl as string}
+                onChange={setCollectionDetails}
+                uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
+              />
+            </Conditional>
+            <Conditional test={minterType === 'vending'}>
+              <MintingDetails
+                numberOfTokens={uploadDetails?.assetFiles.length}
+                onChange={setMintingDetails}
+                uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
+              />
+            </Conditional>
+          </div>
+        </Conditional>
+
+        <Conditional
+          test={minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')}
+        >
+          <div className="my-6">
+            <Conditional test={minterType === 'vending'}>
+              <WhitelistDetails onChange={setWhitelistDetails} />
+              <div className="my-6" />
+            </Conditional>
+            <RoyaltyDetails onChange={setRoyaltyDetails} />
+          </div>
+        </Conditional>
+        <Conditional test={readyToCreateVm && minterType === 'vending'}>
+          <ConfirmationModal confirm={createVendingMinterCollection} />
+        </Conditional>
+        <Conditional
+          test={readyToCreateBm && minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new'}
+        >
+          <ConfirmationModal confirm={createBaseMinterCollection} />
+        </Conditional>
+        <Conditional
+          test={readyToUploadAndMint && minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'}
+        >
+          <ConfirmationModal confirm={uploadAndMint} />
+        </Conditional>
         <div className="flex justify-end w-full">
-          <Button
-            className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
-            isLoading={creatingCollection}
-            onClick={performChecks}
-            variant="solid"
-          >
-            Create Collection
-          </Button>
+          <Conditional test={minterType === 'vending'}>
+            <Button
+              className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+              isLoading={creatingCollection}
+              onClick={performVendingMinterChecks}
+              variant="solid"
+            >
+              Create Collection
+            </Button>
+          </Conditional>
+          <Conditional test={minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new'}>
+            <Button
+              className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+              isLoading={creatingCollection}
+              onClick={performBaseMinterChecks}
+              variant="solid"
+            >
+              Create BM Collection
+            </Button>
+          </Conditional>
+          <Conditional test={minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'}>
+            <Button
+              className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+              isLoading={creatingCollection}
+              onClick={performUploadAndMintChecks}
+              variant="solid"
+            >
+              Upload & Mint Token
+            </Button>
+          </Conditional>
         </div>
       </div>
     </div>

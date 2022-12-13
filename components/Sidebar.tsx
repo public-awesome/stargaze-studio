@@ -46,7 +46,7 @@ export const Sidebar = () => {
                 !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
             },
             {
-              'text-plumbus': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
+              'text-stargaze': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
             }, // active route styling
             // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
           )}
