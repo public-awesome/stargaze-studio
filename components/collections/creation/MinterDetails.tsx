@@ -35,7 +35,7 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
   const wallet = useWallet()
 
   const [myBaseMinterContracts, setMyBaseMinterContracts] = useState<MinterInfo[]>([])
-  const [minterAcquisitionMethod, setMinterAcquisitionMethod] = useState<MinterAcquisitionMethod>('existing')
+  const [minterAcquisitionMethod, setMinterAcquisitionMethod] = useState<MinterAcquisitionMethod>('new')
 
   const existingMinterState = useInputState({
     id: 'existingMinter',
@@ -79,7 +79,7 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
         minterContracts.map(async (minterContract: any) => {
           await getMinterContractType(minterContract.minter)
             .then((contractType) => {
-              if (contractType?.includes('sg-minter')) {
+              if (contractType?.includes('sg-base-minter')) {
                 setMyBaseMinterContracts((prevState) => [...prevState, minterContract])
               }
             })
@@ -181,12 +181,12 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
             <select
               className="mt-8 w-full max-w-lg text-sm bg-white/10 select select-bordered"
               onChange={(e) => {
-                existingMinterState.onChange(e.target.value.slice(e.target.value.indexOf('-') + 2))
+                existingMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
                 e.preventDefault()
               }}
             >
               <option className="mt-2 text-lg bg-[#1A1A1A]" disabled selected>
-                Select a Base Minter Contract
+                Select one of your existing Base Minter Contracts
               </option>
               {renderMinterContracts()}
             </select>

@@ -26,8 +26,10 @@ import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { DispatchExecuteArgs } from 'contracts/vendingFactory/messages/execute'
-import { dispatchExecute } from 'contracts/vendingFactory/messages/execute'
+import type { DispatchExecuteArgs as BaseFactoryDispatchExecuteArgs } from 'contracts/baseFactory/messages/execute'
+import { dispatchExecute as baseFactoryDispatchExecute } from 'contracts/baseFactory/messages/execute'
+import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'contracts/vendingFactory/messages/execute'
+import { dispatchExecute as vendingFactoryDispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -35,6 +37,7 @@ import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
 import {
+  BASE_FACTORY_ADDRESS,
   BLOCK_EXPLORER_URL,
   NETWORK,
   SG721_CODE_ID,
@@ -53,15 +56,22 @@ import { getAssetType } from '../../utils/getAssetType'
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
   const {
+    baseMinter: baseMinterContract,
     vendingMinter: vendingMinterContract,
     whitelist: whitelistContract,
     vendingFactory: vendingFactoryContract,
+    baseFactory: baseFactoryContract,
   } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  const messages = useMemo(
+  const vendingFactoryMessages = useMemo(
     () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
     [vendingFactoryContract, wallet.address],
+  )
+
+  const baseFactoryMessages = useMemo(
+    () => baseFactoryContract?.use(BASE_FACTORY_ADDRESS),
+    [baseFactoryContract, wallet.address],
   )
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
@@ -109,9 +119,8 @@ const CollectionCreationPage: NextPage = () => {
     try {
       setReadyToCreateBm(false)
       checkUploadDetails()
-      checkCollectionDetails()
-      checkMintingDetails()
       checkRoyaltyDetails()
+      checkCollectionDetails()
       checkWhitelistDetails()
         .then(() => {
           setReadyToCreateBm(true)
@@ -130,9 +139,6 @@ const CollectionCreationPage: NextPage = () => {
     try {
       setReadyToUploadAndMint(false)
       checkUploadDetails()
-      checkCollectionDetails()
-      checkMintingDetails()
-      checkRoyaltyDetails()
       checkWhitelistDetails()
         .then(() => {
           setReadyToUploadAndMint(true)
@@ -145,6 +151,12 @@ const CollectionCreationPage: NextPage = () => {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       setUploading(false)
     }
+  }
+
+  const resetReadyFlags = () => {
+    setReadyToCreateVm(false)
+    setReadyToCreateBm(false)
+    setReadyToUploadAndMint(false)
   }
 
   const createVendingMinterCollection = async () => {
@@ -180,7 +192,7 @@ const CollectionCreationPage: NextPage = () => {
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
         setWhitelistContractAddress(whitelist as string)
 
-        await instantiate(baseUri, coverImageUri, whitelist)
+        await instantiateVendingMinter(baseUri, coverImageUri, whitelist)
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setCoverImageUrl(uploadDetails?.imageUrl as string)
@@ -190,7 +202,7 @@ const CollectionCreationPage: NextPage = () => {
         else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
         setWhitelistContractAddress(whitelist as string)
 
-        await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
+        await instantiateVendingMinter(baseTokenUri as string, coverImageUrl as string, whitelist)
       }
       setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -229,22 +241,12 @@ const CollectionCreationPage: NextPage = () => {
         setBaseTokenUri(baseUri)
         setCoverImageUrl(coverImageUri)
 
-        let whitelist: string | undefined
-        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
-        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
-        setWhitelistContractAddress(whitelist as string)
-
-        await instantiate(baseUri, coverImageUri, whitelist)
+        await instantiateBaseMinter(baseUri, coverImageUri)
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setCoverImageUrl(uploadDetails?.imageUrl as string)
 
-        let whitelist: string | undefined
-        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
-        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
-        setWhitelistContractAddress(whitelist as string)
-
-        await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
+        await instantiateBaseMinter(uploadDetails?.baseTokenURI as string, uploadDetails?.imageUrl as string)
       }
       setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -257,48 +259,49 @@ const CollectionCreationPage: NextPage = () => {
 
   const uploadAndMint = async () => {
     try {
+      if (!wallet.initialized) throw new Error('Wallet not connected')
+      if (!baseMinterContract) throw new Error('Contract not found')
       setCreatingCollection(true)
       setBaseTokenUri(null)
       setCoverImageUrl(null)
       setVendingMinterContractAddress(null)
       setSg721ContractAddress(null)
-      setWhitelistContractAddress(null)
       setTransactionHash(null)
+
       if (uploadDetails?.uploadMethod === 'new') {
         setUploading(true)
-
-        const baseUri = await uploadFiles()
-        //upload coverImageUri and append the file name
-        const coverImageUri = await upload(
-          collectionDetails?.imageFile as File[],
-          uploadDetails.uploadService,
-          'cover',
-          uploadDetails.nftStorageApiKey as string,
-          uploadDetails.pinataApiKey as string,
-          uploadDetails.pinataSecretKey as string,
-        )
-
-        setUploading(false)
-
-        setBaseTokenUri(baseUri)
-        setCoverImageUrl(coverImageUri)
-
-        let whitelist: string | undefined
-        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
-        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
-        setWhitelistContractAddress(whitelist as string)
-
-        await instantiate(baseUri, coverImageUri, whitelist)
+        await uploadFiles()
+          .then(async (baseUri) => {
+            setUploading(false)
+            setBaseTokenUri(baseUri)
+            const result = await baseMinterContract
+              .use(minterDetails?.existingMinter as string)
+              ?.mint(wallet.address, `ipfs://${baseUri}`)
+            console.log(result)
+            return result
+          })
+          .then((result) => {
+            toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+          })
+          .catch((error) => {
+            toast.error(error.message, { style: { maxWidth: 'none' } })
+            setUploading(false)
+            setCreatingCollection(false)
+          })
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
-        setCoverImageUrl(uploadDetails?.imageUrl as string)
-
-        let whitelist: string | undefined
-        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
-        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
-        setWhitelistContractAddress(whitelist as string)
-
-        await instantiate(baseTokenUri as string, coverImageUrl as string, whitelist)
+        setUploading(false)
+        await baseMinterContract
+          .use(minterDetails?.existingMinter as string)
+          ?.mint(wallet.address, `ipfs://${uploadDetails?.baseTokenURI}`)
+          .then((result) => {
+            toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+          })
+          .catch((error) => {
+            toast.error(error.message, { style: { maxWidth: 'none' } })
+            setUploading(false)
+            setCreatingCollection(false)
+          })
       }
       setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -332,9 +335,9 @@ const CollectionCreationPage: NextPage = () => {
     return data.contractAddress
   }
 
-  const instantiate = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
+  const instantiateVendingMinter = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
-    if (!vendingMinterContract) throw new Error('Contract not found')
+    if (!vendingFactoryContract) throw new Error('Contract not found')
 
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
@@ -378,16 +381,65 @@ const CollectionCreationPage: NextPage = () => {
       },
     }
 
-    const payload: DispatchExecuteArgs = {
+    const payload: VendingFactoryDispatchExecuteArgs = {
       contract: VENDING_FACTORY_ADDRESS,
-      messages,
+      messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
       funds: [coin('1000000000', 'ustars')],
     }
-    const data = await dispatchExecute(payload)
+    const data = await vendingFactoryDispatchExecute(payload)
     setTransactionHash(data.transactionHash)
     setVendingMinterContractAddress(data.vendingMinterAddress)
+    setSg721ContractAddress(data.sg721Address)
+  }
+
+  const instantiateBaseMinter = async (baseUri: string, coverImageUri: string) => {
+    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!baseFactoryContract) throw new Error('Contract not found')
+
+    let royaltyInfo = null
+    if (royaltyDetails?.royaltyType === 'new') {
+      royaltyInfo = {
+        payment_address: royaltyDetails.paymentAddress,
+        share: (Number(royaltyDetails.share) / 100).toString(),
+      }
+    }
+
+    const msg = {
+      create_minter: {
+        init_msg: null,
+        collection_params: {
+          code_id: SG721_CODE_ID,
+          name: collectionDetails?.name,
+          symbol: collectionDetails?.symbol,
+          info: {
+            creator: wallet.address,
+            description: collectionDetails?.description,
+            image: `${
+              uploadDetails?.uploadMethod === 'new'
+                ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
+                : `${coverImageUri}`
+            }`,
+            external_link: collectionDetails?.externalLink,
+            explicit_content: collectionDetails?.explicit,
+            royalty_info: royaltyInfo,
+            start_trading_time: collectionDetails?.startTradingTime || null,
+          },
+        },
+      },
+    }
+
+    const payload: BaseFactoryDispatchExecuteArgs = {
+      contract: BASE_FACTORY_ADDRESS,
+      messages: baseFactoryMessages,
+      txSigner: wallet.address,
+      msg,
+      funds: [coin('1000000000', 'ustars')],
+    }
+    const data = await baseFactoryDispatchExecute(payload)
+    setTransactionHash(data.transactionHash)
+    setVendingMinterContractAddress(data.baseMinterAddress)
     setSg721ContractAddress(data.sg721Address)
   }
 
@@ -459,6 +511,9 @@ const CollectionCreationPage: NextPage = () => {
     if (!uploadDetails) {
       throw new Error('Please select assets and metadata')
     }
+    if (minterType === 'base' && uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length > 1) {
+      throw new Error('Base Minter can only mint one asset at a time. Please select only one asset.')
+    }
     if (uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length === 0) {
       throw new Error('Please select the assets')
     }
@@ -477,6 +532,9 @@ const CollectionCreationPage: NextPage = () => {
     }
     if (uploadDetails.uploadMethod === 'existing' && !uploadDetails.baseTokenURI?.includes('ipfs://')) {
       throw new Error('Please specify a valid base token URI')
+    }
+    if (minterDetails?.minterAcquisitionMethod === 'existing' && !minterDetails.existingMinter) {
+      throw new Error('Please specify a valid Base Minter contract address')
     }
   }
 
@@ -565,12 +623,27 @@ const CollectionCreationPage: NextPage = () => {
     setCoverImageUrl(uploadDetails?.imageUrl as string)
   }, [uploadDetails?.baseTokenURI, uploadDetails?.imageUrl])
 
+  useEffect(() => {
+    resetReadyFlags()
+    setVendingMinterContractAddress(null)
+  }, [minterType, minterDetails?.minterAcquisitionMethod])
+
   return (
     <div>
-      <NextSeo title="Create Collection" />
+      <NextSeo
+        title={
+          minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'
+            ? 'Mint Token'
+            : 'Create Collection'
+        }
+      />
 
       <div className="mt-5 space-y-5 text-center">
-        <h1 className="font-heading text-4xl font-bold">Create Collection</h1>
+        <h1 className="font-heading text-4xl font-bold">
+          {minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'
+            ? 'Mint Token'
+            : 'Create Collection'}
+        </h1>
 
         <Conditional test={uploading}>
           <LoadingModal />
@@ -689,7 +762,10 @@ const CollectionCreationPage: NextPage = () => {
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => setMinterType('vending')}
+              onClick={() => {
+                setMinterType('vending')
+                resetReadyFlags()
+              }}
               type="button"
             >
               <h4 className="font-bold">Vending Minter</h4>
@@ -708,7 +784,10 @@ const CollectionCreationPage: NextPage = () => {
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => setMinterType('base')}
+              onClick={() => {
+                setMinterType('base')
+                resetReadyFlags()
+              }}
               type="button"
             >
               <h4 className="font-bold">Base Minter</h4>
@@ -725,7 +804,11 @@ const CollectionCreationPage: NextPage = () => {
       )}
 
       <div className="mx-10">
-        <UploadDetails onChange={setUploadDetails} />
+        <UploadDetails
+          minterAcquisitionMethod={minterDetails?.minterAcquisitionMethod}
+          minterType={minterType}
+          onChange={setUploadDetails}
+        />
 
         <Conditional
           test={minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')}
@@ -794,7 +877,7 @@ const CollectionCreationPage: NextPage = () => {
               onClick={performBaseMinterChecks}
               variant="solid"
             >
-              Create BM Collection
+              Create Collection
             </Button>
           </Conditional>
           <Conditional test={minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'}>

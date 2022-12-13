@@ -2,14 +2,18 @@ import clsx from 'clsx'
 import { useCallback, useMemo, useState } from 'react'
 import { getAssetType } from 'utils/getAssetType'
 
+import type { MinterType } from './collections/actions/Combobox'
+import { Conditional } from './Conditional'
+
 interface AssetsPreviewProps {
   assetFilesArray: File[]
   updateMetadataFileIndex: (index: number) => void
+  minterType: MinterType
 }
 
 const ITEM_NUMBER = 12
 
-export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: AssetsPreviewProps) => {
+export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex, minterType }: AssetsPreviewProps) => {
   const [page, setPage] = useState(1)
 
   const totalPages = useMemo(() => Math.ceil(assetFilesArray.length / ITEM_NUMBER), [assetFilesArray])
@@ -116,23 +120,25 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
   return (
     <div className="flex flex-col items-center">
       <div className="mt-2 w-[400px] h-[300px]">{renderImages()}</div>
-      <div className="mt-5 btn-group">
-        <button className="text-white bg-plumbus-light btn" onClick={multiplePrevPage} type="button">
-          ««
-        </button>
-        <button className="text-white bg-plumbus-light btn" onClick={prevPage} type="button">
-          «
-        </button>
-        <button className="text-white btn" type="button">
-          Page {page}/{totalPages}
-        </button>
-        <button className="text-white bg-plumbus-light btn" onClick={nextPage} type="button">
-          »
-        </button>
-        <button className="text-white bg-plumbus-light btn" onClick={multipleNextPage} type="button">
-          »»
-        </button>
-      </div>
+      <Conditional test={minterType === 'vending'}>
+        <div className="mt-5 btn-group">
+          <button className="text-white bg-plumbus-light btn" onClick={multiplePrevPage} type="button">
+            ««
+          </button>
+          <button className="text-white bg-plumbus-light btn" onClick={prevPage} type="button">
+            «
+          </button>
+          <button className="text-white btn" type="button">
+            Page {page}/{totalPages}
+          </button>
+          <button className="text-white bg-plumbus-light btn" onClick={nextPage} type="button">
+            »
+          </button>
+          <button className="text-white bg-plumbus-light btn" onClick={multipleNextPage} type="button">
+            »»
+          </button>
+        </div>
+      </Conditional>
     </div>
   )
 }
