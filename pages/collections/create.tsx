@@ -508,6 +508,7 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const checkUploadDetails = () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected.')
     if (!uploadDetails) {
       throw new Error('Please select assets and metadata')
     }
