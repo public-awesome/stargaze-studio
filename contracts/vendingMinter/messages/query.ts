@@ -1,4 +1,4 @@
-import type { MinterInstance } from '../contract'
+import type { VendingMinterInstance } from '../contract'
 
 export type QueryType = typeof QUERY_TYPES[number]
 
@@ -24,7 +24,7 @@ export const QUERY_LIST: QueryListItem[] = [
 
 export interface DispatchQueryProps {
   address: string
-  messages: MinterInstance | undefined
+  messages: VendingMinterInstance | undefined
   type: QueryType
 }
 

@@ -4,7 +4,7 @@ import type { Coin, logs } from '@cosmjs/stargate'
 import { coin } from '@cosmjs/stargate'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 
-import type { RoyaltyInfo } from '../minter/contract'
+import type { RoyaltyInfo } from '../vendingMinter/contract'
 
 export interface InstantiateResponse {
   readonly contractAddress: string

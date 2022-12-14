@@ -40,7 +40,7 @@ export const ConfirmationModal = (props: ConfirmationModalProps) => {
               />
             </div>
             <br />
-            Are you sure to create a collection with the specified assets, metadata and parameters?
+            Are you sure to proceed with the specified assets, metadata and parameters?
           </div>
           <div className="flex justify-end w-full">
             <Button className="px-0 mt-4 mr-5 mb-4 max-h-12 bg-gray-600 hover:bg-gray-600">

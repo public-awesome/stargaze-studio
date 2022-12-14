@@ -1,0 +1,243 @@
+import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import type { Coin } from '@cosmjs/proto-signing'
+import { coin } from '@cosmjs/proto-signing'
+import type { logs } from '@cosmjs/stargate'
+import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
+import toast from 'react-hot-toast'
+import { BASE_FACTORY_ADDRESS } from 'utils/constants'
+
+export interface InstantiateResponse {
+  readonly contractAddress: string
+  readonly transactionHash: string
+  readonly logs: readonly logs.Log[]
+}
+
+export interface MigrateResponse {
+  readonly transactionHash: string
+  readonly logs: readonly logs.Log[]
+}
+
+export interface RoyaltyInfo {
+  payment_address: string
+  share: string
+}
+
+export interface BaseMinterInstance {
+  readonly contractAddress: string
+
+  //Query
+  getConfig: () => Promise<any>
+  getStatus: () => Promise<any>
+
+  //Execute
+  mint: (senderAddress: string, tokenUri: string) => Promise<string>
+  updateStartTradingTime: (senderAddress: string, time?: Timestamp) => Promise<string>
+}
+
+export interface BaseMinterMessages {
+  mint: (tokenUri: string) => MintMessage
+  updateStartTradingTime: (time: Timestamp) => UpdateStartTradingTimeMessage
+}
+
+export interface MintMessage {
+  sender: string
+  contract: string
+  msg: {
+    mint: {
+      token_uri: string
+    }
+  }
+  funds: Coin[]
+}
+
+export interface UpdateStartTradingTimeMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_start_trading_time: string
+  }
+  funds: Coin[]
+}
+
+export interface CustomMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
+  funds: Coin[]
+}
+
+export interface MintPriceMessage {
+  public_price: {
+    denom: string
+    amount: string
+  }
+  airdrop_price: {
+    denom: string
+    amount: string
+  }
+  whitelist_price?: {
+    denom: string
+    amount: string
+  }
+  current_price: {
+    denom: string
+    amount: string
+  }
+}
+
+export interface BaseMinterContract {
+  instantiate: (
+    senderAddress: string,
+    codeId: number,
+    initMsg: Record<string, unknown>,
+    label: string,
+    admin?: string,
+    funds?: Coin[],
+  ) => Promise<InstantiateResponse>
+
+  migrate: (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ) => Promise<MigrateResponse>
+
+  use: (contractAddress: string) => BaseMinterInstance
+
+  messages: (contractAddress: string) => BaseMinterMessages
+}
+
+export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): BaseMinterContract => {
+  const use = (contractAddress: string): BaseMinterInstance => {
+    //Query
+    const getFactoryParameters = async (): Promise<any> => {
+      const res = await client.queryContractSmart(BASE_FACTORY_ADDRESS, { params: {} })
+      return res
+      console.log(res)
+    }
+
+    const getConfig = async (): Promise<any> => {
+      const res = await client.queryContractSmart(contractAddress, {
+        config: {},
+      })
+      return res
+    }
+
+    const getStatus = async (): Promise<any> => {
+      const res = await client.queryContractSmart(contractAddress, {
+        status: {},
+      })
+      return res
+    }
+
+    //Execute
+    const mint = async (senderAddress: string, tokenUri: string): Promise<string> => {
+      //const factoryParameters = await baseFactory?.use(BASE_FACTORY_ADDRESS)?.getParams()
+
+      const factoryParameters = await toast.promise(getFactoryParameters(), {
+        loading: 'Querying Factory Parameters...',
+        error: 'Querying Factory Parameters failed!',
+        success: 'Query successful! Minting...',
+      })
+      console.log(factoryParameters.params.mint_fee_bps)
+
+      const price = (await getConfig()).config.mint_price.amount
+      console.log(price)
+      console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          mint: { token_uri: tokenUri },
+        },
+        'auto',
+        '',
+        [coin((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100 / 100, 'ustars')],
+      )
+
+      return res.transactionHash
+    }
+
+    const updateStartTradingTime = async (senderAddress: string, time?: Timestamp): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_start_trading_time: time || null,
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    return {
+      contractAddress,
+      getConfig,
+      getStatus,
+      mint,
+      updateStartTradingTime,
+    }
+  }
+
+  const migrate = async (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ): Promise<MigrateResponse> => {
+    const result = await client.migrate(senderAddress, contractAddress, codeId, migrateMsg, 'auto')
+    return {
+      transactionHash: result.transactionHash,
+      logs: result.logs,
+    }
+  }
+
+  const instantiate = async (
+    senderAddress: string,
+    codeId: number,
+    initMsg: Record<string, unknown>,
+    label: string,
+  ): Promise<InstantiateResponse> => {
+    const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto', {
+      funds: [coin('1000000000', 'ustars')],
+    })
+    return {
+      contractAddress: result.contractAddress,
+      transactionHash: result.transactionHash,
+      logs: result.logs,
+    }
+  }
+
+  const messages = (contractAddress: string) => {
+    const mint = (tokenUri: string): MintMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          mint: { token_uri: tokenUri },
+        },
+        funds: [],
+      }
+    }
+
+    const updateStartTradingTime = (startTime: string): UpdateStartTradingTimeMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_start_trading_time: startTime,
+        },
+        funds: [],
+      }
+    }
+
+    return {
+      mint,
+      updateStartTradingTime,
+    }
+  }
+
+  return { use, instantiate, migrate, messages }
+}

@@ -12,7 +12,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        stargaze: { DEFAULT: '#DB2676' },
+        stargaze: { DEFAULT: '#DB2676', 80: '#C81F71' },
         dark: { DEFAULT: '#06090B' },
         gray: { DEFAULT: '#A9A9A9' },
         'dark-gray': { DEFAULT: '#191D20' },

@@ -1,5 +1,5 @@
-import type { MinterInstance } from '../index'
-import { useMinterContract } from '../index'
+import type { VendingMinterInstance } from '../index'
+import { useVendingMinterContract } from '../index'
 
 export type ExecuteType = typeof EXECUTE_TYPES[number]
 
@@ -89,10 +89,10 @@ export interface DispatchExecuteProps {
 
 type Select<T extends ExecuteType> = T
 
-/** @see {@link MinterInstance} */
+/** @see {@link VendingMinterInstance} */
 export type DispatchExecuteArgs = {
   contract: string
-  messages?: MinterInstance
+  messages?: VendingMinterInstance
   txSigner: string
 } & (
   | { type: undefined }
@@ -160,7 +160,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
 
 export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { messages } = useMinterContract()
+  const { messages } = useVendingMinterContract()
   const { contract } = args
   switch (args.type) {
     case 'mint': {

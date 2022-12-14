@@ -1,20 +1,20 @@
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
-import { ExecuteCombobox } from 'components/contracts/minter/ExecuteCombobox'
-import { useExecuteComboboxState } from 'components/contracts/minter/ExecuteCombobox.hooks'
+import { ExecuteCombobox } from 'components/contracts/baseMinter/ExecuteCombobox'
+import { useExecuteComboboxState } from 'components/contracts/baseMinter/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
-import { AddressInput, NumberInput } from 'components/forms/FormInput'
-import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
+import { AddressInput, TextInput } from 'components/forms/FormInput'
+import { useInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { minterLinkTabs } from 'components/LinkTabs.data'
+import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { DispatchExecuteArgs } from 'contracts/minter/messages/execute'
-import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/minter/messages/execute'
+import type { DispatchExecuteArgs } from 'contracts/baseMinter/messages/execute'
+import { dispatchExecute, previewExecutePayload } from 'contracts/baseMinter/messages/execute'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -26,8 +26,8 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const MinterExecutePage: NextPage = () => {
-  const { minter: contract } = useContracts()
+const BaseMinterExecutePage: NextPage = () => {
+  const { baseMinter: contract } = useContracts()
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
 
@@ -36,67 +36,31 @@ const MinterExecutePage: NextPage = () => {
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
 
-  const limitState = useNumberInputState({
-    id: 'per-address-limit',
-    name: 'perAddressLimit',
-    title: 'Per Address Limit',
-    subtitle: 'Enter the per address limit',
-  })
-
-  const tokenIdState = useNumberInputState({
-    id: 'token-id',
-    name: 'tokenId',
-    title: 'Token ID',
-    subtitle: 'Enter the token ID',
-  })
-
-  const priceState = useNumberInputState({
-    id: 'price',
-    name: 'price',
-    title: 'Price',
-    subtitle: 'Enter the token price',
-  })
-
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
+    title: 'Base Minter Address',
+    subtitle: 'Address of the Base Minter contract',
+  })
+
+  const tokenUriState = useInputState({
+    id: 'token-uri',
+    name: 'token-uri',
+    title: 'Token URI',
+    placeholder: 'ipfs://',
   })
   const contractAddress = contractState.value
 
-  const recipientState = useInputState({
-    id: 'recipient-address',
-    name: 'recipient',
-    title: 'Recipient Address',
-    subtitle: 'Address of the recipient',
-  })
-
-  const whitelistState = useInputState({
-    id: 'whitelist-address',
-    name: 'whitelistAddress',
-    title: 'Whitelist Address',
-    subtitle: 'Address of the whitelist contract',
-  })
-
-  const showWhitelistField = type === 'set_whitelist'
-  const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
-  const showLimitField = type === 'update_per_address_limit'
-  const showTokenIdField = type === 'mint_for'
-  const showRecipientField = isEitherType(type, ['mint_to', 'mint_for'])
-  const showPriceField = type === 'update_mint_price'
+  const showDateField = type === 'update_start_trading_time'
+  const showTokenUriField = type === 'mint'
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
-    whitelist: whitelistState.value,
     startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
-    limit: limitState.value,
+    tokenUri: tokenUriState.value,
     contract: contractState.value,
-    tokenId: tokenIdState.value,
     messages,
-    recipient: recipientState.value,
     txSigner: wallet.address,
-    price: priceState.value ? priceState.value.toString() : '0',
     type,
   }
   const { isLoading, mutate } = useMutation(
@@ -139,26 +103,23 @@ const MinterExecutePage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Execute Minter Contract" />
+      <NextSeo title="Execute Base Minter Contract" />
       <ContractPageHeader
-        description="Minter contract facilitates primary market vending machine style minting."
+        description="Base Minter contract facilitates 1/1 minting."
         link={links.Documentation}
-        title="Minter Contract"
+        title="Base Minter Contract"
       />
-      <LinkTabs activeIndex={2} data={minterLinkTabs} />
+      <LinkTabs activeIndex={2} data={baseMinterLinkTabs} />
 
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
           <AddressInput {...contractState} />
           <ExecuteCombobox {...comboboxState} />
-          {showRecipientField && <AddressInput {...recipientState} />}
-          {showWhitelistField && <AddressInput {...whitelistState} />}
-          {showLimitField && <NumberInput {...limitState} />}
-          {showTokenIdField && <NumberInput {...tokenIdState} />}
-          {showPriceField && <NumberInput {...priceState} />}
-          {/* TODO: Fix address execute message */}
+          <Conditional test={showTokenUriField}>
+            <TextInput {...tokenUriState} />
+          </Conditional>
           <Conditional test={showDateField}>
-            <FormControl htmlId="start-date" subtitle="Start time for the minting" title="Start Time">
+            <FormControl htmlId="start-date" subtitle="Start time for trading." title="Trading Start Time">
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
             </FormControl>
           </Conditional>
@@ -181,4 +142,4 @@ const MinterExecutePage: NextPage = () => {
   )
 }
 
-export default withMetadata(MinterExecutePage, { center: false })
+export default withMetadata(BaseMinterExecutePage, { center: false })

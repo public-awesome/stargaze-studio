@@ -2,19 +2,31 @@ import { Combobox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
 import { matchSorter } from 'match-sorter'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
 import type { ActionListItem } from './actions'
-import { ACTION_LIST } from './actions'
+import { BASE_ACTION_LIST, VENDING_ACTION_LIST } from './actions'
+
+export type MinterType = 'base' | 'vending'
 
 export interface ActionsComboboxProps {
   value: ActionListItem | null
   onChange: (item: ActionListItem) => void
+  minterType?: MinterType
 }
 
-export const ActionsCombobox = ({ value, onChange }: ActionsComboboxProps) => {
+export const ActionsCombobox = ({ value, onChange, minterType }: ActionsComboboxProps) => {
   const [search, setSearch] = useState('')
+  const [ACTION_LIST, SET_ACTION_LIST] = useState<ActionListItem[]>(VENDING_ACTION_LIST)
+
+  useEffect(() => {
+    if (minterType === 'base') {
+      SET_ACTION_LIST(BASE_ACTION_LIST)
+    } else {
+      SET_ACTION_LIST(VENDING_ACTION_LIST)
+    }
+  }, [minterType])
 
   const filtered =
     search === '' ? ACTION_LIST : matchSorter(ACTION_LIST, search, { keys: ['id', 'name', 'description'] })
@@ -68,7 +80,7 @@ export const ActionsCombobox = ({ value, onChange }: ActionsComboboxProps) => {
               <Combobox.Option
                 key={entry.id}
                 className={({ active }) =>
-                  clsx('flex relative flex-col py-2 px-4 space-y-1 cursor-pointer', { 'bg-plumbus-70': active })
+                  clsx('flex relative flex-col py-2 px-4 space-y-1 cursor-pointer', { 'bg-stargaze-80': active })
                 }
                 value={entry}
               >
