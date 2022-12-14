@@ -78,7 +78,7 @@ export const QueryCombobox = ({ value, onChange, minterType }: QueryComboboxProp
               <Combobox.Option
                 key={entry.id}
                 className={({ active }) =>
-                  clsx('flex relative flex-col py-2 px-4 space-y-1 cursor-pointer', { 'bg-plumbus-70': active })
+                  clsx('flex relative flex-col py-2 px-4 space-y-1 cursor-pointer', { 'bg-stargaze-80': active })
                 }
                 value={entry}
               >

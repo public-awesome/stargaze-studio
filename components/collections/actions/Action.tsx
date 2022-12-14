@@ -287,7 +287,7 @@ export const CollectionActions = ({
           {showTokenIdListField && <TextInput className="mt-2" {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showPriceField && <NumberInput {...priceState} />}
-          {showDescriptionField && <TextInput className="mb-2" {...descriptionState} />}
+          {showDescriptionField && <TextInput className="my-2" {...descriptionState} />}
           {showImageField && <TextInput className="mb-2" {...imageState} />}
           {showExternalLinkField && <TextInput className="mb-2" {...externalLinkState} />}
           {showRoyaltyRelatedFields && (
