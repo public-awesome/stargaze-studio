@@ -25,7 +25,11 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex, minter
         tempArray.push(
           <video
             key={assetFile.name}
-            className="absolute px-1 my-1 max-h-24 thumbnail"
+            className={clsx(
+              'absolute px-1 my-1 thumbnail',
+              { 'max-h-24': minterType === 'vending' },
+              { 'max-h-72': minterType === 'base' },
+            )}
             id="video"
             muted
             onMouseEnter={(e) => {
@@ -54,7 +58,11 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex, minter
     return assetFilesArray.slice((page - 1) * ITEM_NUMBER, page * ITEM_NUMBER).map((assetSource, index) => (
       <button
         key={assetSource.name}
-        className="relative p-0 w-[100px] h-[100px] bg-transparent hover:bg-transparent border-0 btn modal-button"
+        className={clsx(
+          'relative p-0 bg-transparent hover:bg-transparent border-0 btn modal-button',
+          { 'w-[100px] h-[100px]': minterType === 'vending' },
+          { 'mt-14 ml-20 w-[288px] h-[288px]': minterType === 'base' },
+        )}
         onClick={() => {
           updateMetadataFileIndex((page - 1) * ITEM_NUMBER + index)
         }}
@@ -64,18 +72,29 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex, minter
           className="relative p-0 w-full h-full bg-transparent hover:bg-transparent border-0 btn modal-button"
           htmlFor="my-modal-4"
         >
-          <div
-            className={clsx(
-              'flex absolute right-20 bottom-20 justify-center items-center',
-              'text-sm  text-white bg-stargaze rounded-full',
-              getOverlaySize(),
-            )}
-          >
-            {(page - 1) * 12 + (index + 1)}
-          </div>
+          <Conditional test={minterType === 'vending'}>
+            <div
+              className={clsx(
+                'flex absolute right-20 bottom-20 justify-center items-center',
+                'text-sm  text-white bg-stargaze rounded-full',
+                getOverlaySize(),
+              )}
+            >
+              {(page - 1) * 12 + (index + 1)}
+            </div>
+          </Conditional>
           {getAssetType(assetSource.name) === 'audio' && (
             <div className="flex absolute flex-col items-center mt-4 ml-2">
-              <img key={`audio-${index}`} alt="audio_icon" className="mb-2 ml-1 w-6 h-6 thumbnail" src="/audio.png" />
+              <img
+                key={`audio-${index}`}
+                alt="audio_icon"
+                className={clsx(
+                  'mb-2 ml-1 thumbnail',
+                  { 'w-6 h-6': minterType === 'vending' },
+                  { 'w-24 h-24': minterType === 'base' },
+                )}
+                src="/audio.png"
+              />
               <span className="flex self-center ">{assetSource.name}</span>
             </div>
           )}
@@ -87,7 +106,11 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex, minter
               <img
                 key={`image-${index}`}
                 alt="asset"
-                className="px-1 my-1 max-h-24 thumbnail"
+                className={clsx(
+                  'px-1 my-1 thumbnail',
+                  { 'max-h-24': minterType === 'vending' },
+                  { 'max-h-72': minterType === 'base' },
+                )}
                 src={URL.createObjectURL(assetSource)}
               />
             </div>
