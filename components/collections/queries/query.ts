@@ -9,6 +9,7 @@ export const QUERY_TYPES = [
   'mint_price',
   'num_tokens',
   'tokens_minted_to_user',
+  'tokens',
   // 'token_owners',
   'token_info',
   'config',
@@ -70,7 +71,7 @@ export const BASE_QUERY_LIST: QueryListItem[] = [
     description: `Get information about the collection.`,
   },
   {
-    id: 'tokens_minted_to_user',
+    id: 'tokens',
     name: 'Tokens Minted to User',
     description: `Get the number of tokens minted in the collection to a user.`,
   },
@@ -108,6 +109,7 @@ export type DispatchQueryArgs = {
   | { type: Select<'mint_price'> }
   | { type: Select<'num_tokens'> }
   | { type: Select<'tokens_minted_to_user'>; address: string }
+  | { type: Select<'tokens'>; address: string }
   // | { type: Select<'token_owners'> }
   | { type: Select<'token_info'>; tokenId: string }
   | { type: Select<'config'> }
@@ -131,6 +133,9 @@ export const dispatchQuery = async (args: DispatchQueryArgs) => {
     }
     case 'tokens_minted_to_user': {
       return vendingMinterMessages.getMintCount(args.address)
+    }
+    case 'tokens': {
+      return sg721Messages.tokens(args.address)
     }
     // case 'token_owners': {
     //   return vendingMinterMessages.updateStartTime(txSigner, args.startTime)

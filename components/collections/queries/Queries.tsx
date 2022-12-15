@@ -50,7 +50,7 @@ export const CollectionQueries = ({
   const address = addressState.value
 
   const showTokenIdField = type === 'token_info'
-  const showAddressField = type === 'tokens_minted_to_user'
+  const showAddressField = type === 'tokens_minted_to_user' || type === 'tokens'
 
   const { data: response } = useQuery(
     [sg721Messages, baseMinterMessages, vendingMinterMessages, type, tokenId, address] as const,

@@ -241,7 +241,10 @@ const CollectionCreationPage: NextPage = () => {
         setBaseTokenUri(baseUri)
         setCoverImageUrl(coverImageUri)
 
-        await instantiateBaseMinter(baseUri, coverImageUri)
+        await instantiateBaseMinter(
+          `ipfs://${baseUri}/${uploadDetails.metadataFiles[0].name.split('.')[0]}`,
+          coverImageUri,
+        )
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setCoverImageUrl(uploadDetails?.imageUrl as string)
@@ -276,7 +279,8 @@ const CollectionCreationPage: NextPage = () => {
             setBaseTokenUri(baseUri)
             const result = await baseMinterContract
               .use(minterDetails?.existingMinter as string)
-              ?.mint(wallet.address, `ipfs://${baseUri}`)
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              ?.mint(wallet.address, `ipfs://${baseUri}/${uploadDetails?.metadataFiles[0].name.split('.')[0]}`)
             console.log(result)
             return result
           })
@@ -397,6 +401,7 @@ const CollectionCreationPage: NextPage = () => {
   const instantiateBaseMinter = async (baseUri: string, coverImageUri: string) => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
     if (!baseFactoryContract) throw new Error('Contract not found')
+    if (!baseMinterContract) throw new Error('Contract not found')
 
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
@@ -437,10 +442,37 @@ const CollectionCreationPage: NextPage = () => {
       msg,
       funds: [coin('1000000000', 'ustars')],
     }
-    const data = await baseFactoryDispatchExecute(payload)
-    setTransactionHash(data.transactionHash)
-    setVendingMinterContractAddress(data.baseMinterAddress)
-    setSg721ContractAddress(data.sg721Address)
+    await baseFactoryDispatchExecute(payload)
+      .then(async (data) => {
+        setTransactionHash(data.transactionHash)
+        setVendingMinterContractAddress(data.baseMinterAddress)
+        setSg721ContractAddress(data.sg721Address)
+        await toast
+          .promise(
+            baseMinterContract
+              .use(data.baseMinterAddress)
+
+              ?.mint(wallet.address, baseUri) as Promise<string>,
+            {
+              loading: 'Minting token...',
+              success: (result) => `Token minted successfully! Tx Hash: ${result}`,
+              error: (error) => `Failed to mint token: ${error.message}`,
+            },
+            { style: { maxWidth: 'none' } },
+          )
+          .catch((error) => {
+            toast.error(error.message, { style: { maxWidth: 'none' } })
+            setUploading(false)
+            setCreatingCollection(false)
+          })
+        setUploading(false)
+        setCreatingCollection(false)
+      })
+      .catch((error) => {
+        toast.error(error.message, { style: { maxWidth: 'none' } })
+        setUploading(false)
+        setCreatingCollection(false)
+      })
   }
 
   const uploadFiles = async (): Promise<string> => {
@@ -521,7 +553,8 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new' && uploadDetails.metadataFiles.length === 0) {
       throw new Error('Please select the metadata files')
     }
-    if (uploadDetails.uploadMethod === 'new') compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
+    if (uploadDetails.uploadMethod === 'new' && minterType === 'vending')
+      compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
     if (uploadDetails.uploadMethod === 'new') {
       if (uploadDetails.uploadService === 'nft-storage') {
         if (uploadDetails.nftStorageApiKey === '') {
@@ -688,7 +721,11 @@ const CollectionCreationPage: NextPage = () => {
               <Anchor
                 className="text-stargaze hover:underline"
                 external
-                href={`/contracts/vendingMinter/query/?contractAddress=${vendingMinterContractAddress as string}`}
+                href={
+                  minterType === 'vending'
+                    ? `/contracts/vendingMinter/query/?contractAddress=${vendingMinterContractAddress as string}`
+                    : `/contracts/baseMinter/query/?contractAddress=${vendingMinterContractAddress as string}`
+                }
               >
                 {vendingMinterContractAddress}
               </Anchor>
