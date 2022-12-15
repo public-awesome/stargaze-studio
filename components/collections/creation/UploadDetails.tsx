@@ -92,16 +92,18 @@ export const UploadDetails = ({ onChange, minterType, minterAcquisitionMethod }:
     setAssetFilesArray([])
     setMetadataFilesArray([])
     if (event.target.files === null) return
-    //sort the files
-    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
-    //check if the sorted file names are in numerical order
-    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
-    for (let i = 0; i < sortedFileNames.length; i++) {
-      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
-        toast.error('The file names should be in numerical order starting from 1.')
-        //clear the input
-        event.target.value = ''
-        return
+    if (minterType === 'vending') {
+      //sort the files
+      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+      //check if the sorted file names are in numerical order
+      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+      for (let i = 0; i < sortedFileNames.length; i++) {
+        if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
+          toast.error('The file names should be in numerical order starting from 1.')
+          //clear the input
+          event.target.value = ''
+          return
+        }
       }
     }
     let loadedFileCount = 0
@@ -133,16 +135,18 @@ export const UploadDetails = ({ onChange, minterType, minterAcquisitionMethod }:
       event.target.value = ''
       return toast.error('The number of metadata files should be equal to the number of asset files.')
     }
-    //sort the files
-    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
-    //check if the sorted file names are in numerical order
-    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
-    for (let i = 0; i < sortedFileNames.length; i++) {
-      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
-        toast.error('The file names should be in numerical order starting from 1.')
-        //clear the input
-        event.target.value = ''
-        return
+    if (minterType === 'vending') {
+      //sort the files
+      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+      //check if the sorted file names are in numerical order
+      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+      for (let i = 0; i < sortedFileNames.length; i++) {
+        if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
+          toast.error('The file names should be in numerical order starting from 1.')
+          //clear the input
+          event.target.value = ''
+          return
+        }
       }
     }
     let loadedFileCount = 0

@@ -276,7 +276,8 @@ const CollectionCreationPage: NextPage = () => {
             setBaseTokenUri(baseUri)
             const result = await baseMinterContract
               .use(minterDetails?.existingMinter as string)
-              ?.mint(wallet.address, `ipfs://${baseUri}`)
+              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+              ?.mint(wallet.address, `ipfs://${baseUri}/${uploadDetails?.metadataFiles[0].name.split('.')[0]}`)
             console.log(result)
             return result
           })
@@ -521,7 +522,8 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new' && uploadDetails.metadataFiles.length === 0) {
       throw new Error('Please select the metadata files')
     }
-    if (uploadDetails.uploadMethod === 'new') compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
+    if (uploadDetails.uploadMethod === 'new' && minterType === 'vending')
+      compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
     if (uploadDetails.uploadMethod === 'new') {
       if (uploadDetails.uploadService === 'nft-storage') {
         if (uploadDetails.nftStorageApiKey === '') {
