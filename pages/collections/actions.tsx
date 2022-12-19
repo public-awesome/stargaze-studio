@@ -1,3 +1,4 @@
+import { toUtf8 } from '@cosmjs/encoding'
 import { CollectionActions } from 'components/collections/actions/Action'
 import { CollectionQueries } from 'components/collections/queries/Queries'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -9,14 +10,19 @@ import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
 import { useEffect, useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
+import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import type { MinterType } from '../../components/collections/actions/Combobox'
+
 const CollectionActionsPage: NextPage = () => {
-  const { minter: minterContract, sg721: sg721Contract } = useContracts()
+  const { baseMinter: baseMinterContract, vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
   const wallet = useWallet()
 
   const [action, setAction] = useState<boolean>(false)
+  const [minterType, setMinterType] = useState<MinterType>('vending')
 
   const sg721ContractState = useInputState({
     id: 'sg721-contract-address',
@@ -32,9 +38,15 @@ const CollectionActionsPage: NextPage = () => {
     subtitle: 'Address of the Minter contract',
   })
 
-  const minterMessages = useMemo(
-    () => minterContract?.use(minterContractState.value),
-    [minterContract, minterContractState.value],
+  const debouncedMinterContractState = useDebounce(minterContractState.value, 300)
+
+  const vendingMinterMessages = useMemo(
+    () => vendingMinterContract?.use(minterContractState.value),
+    [vendingMinterContract, minterContractState.value],
+  )
+  const baseMinterMessages = useMemo(
+    () => baseMinterContract?.use(minterContractState.value),
+    [baseMinterContract, minterContractState.value],
   )
   const sg721Messages = useMemo(
     () => sg721Contract?.use(sg721ContractState.value),
@@ -65,6 +77,41 @@ const CollectionActionsPage: NextPage = () => {
     if (initialMinter && initialMinter.length > 0) minterContractState.onChange(initialMinter)
     if (initialSg721 && initialSg721.length > 0) sg721ContractState.onChange(initialSg721)
   }, [])
+
+  useEffect(() => {
+    async function getMinterContractType() {
+      if (wallet.client && debouncedMinterContractState.length > 0) {
+        const client = wallet.client
+        const data = await toast.promise(
+          client.queryContractRaw(
+            debouncedMinterContractState,
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          ),
+          {
+            loading: 'Retrieving Minter type...',
+            error: 'Minter type retrieval failed.',
+            success: 'Minter type retrieved.',
+          },
+        )
+        const contract: string = JSON.parse(new TextDecoder().decode(data as Uint8Array)).contract
+        console.log(contract)
+        return contract
+      }
+    }
+    void getMinterContractType()
+      .then((contract) => {
+        if (contract?.includes('sg-base-minter')) {
+          setMinterType('base')
+        } else {
+          setMinterType('vending')
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+        setMinterType('vending')
+        console.log('Unable to retrieve contract version')
+      })
+  }, [debouncedMinterContractState, wallet.client])
 
   return (
     <section className="py-6 px-12 space-y-4">
@@ -124,18 +171,23 @@ const CollectionActionsPage: NextPage = () => {
             </div>
             <div>
               {(action && (
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 <CollectionActions
+                  baseMinterMessages={baseMinterMessages}
                   minterContractAddress={minterContractState.value}
-                  minterMessages={minterMessages}
+                  minterType={minterType}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
+                  vendingMinterMessages={vendingMinterMessages}
                 />
               )) || (
                 <CollectionQueries
+                  baseMinterMessages={baseMinterMessages}
                   minterContractAddress={minterContractState.value}
-                  minterMessages={minterMessages}
+                  minterType={minterType}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
+                  vendingMinterMessages={vendingMinterMessages}
                 />
               )}
             </div>

@@ -11,15 +11,20 @@ import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataModal } from 'components/MetadataModal'
 import type { ChangeEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
 import { naturalCompare } from 'utils/sort'
+
+import type { MinterType } from '../actions/Combobox'
+import type { MinterAcquisitionMethod } from './MinterDetails'
 
 export type UploadMethod = 'new' | 'existing'
 
 interface UploadDetailsProps {
   onChange: (value: UploadDetailsDataProps) => void
+  minterType: MinterType
+  minterAcquisitionMethod?: MinterAcquisitionMethod
 }
 
 export interface UploadDetailsDataProps {
@@ -34,13 +39,16 @@ export interface UploadDetailsDataProps {
   imageUrl?: string
 }
 
-export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
+export const UploadDetails = ({ onChange, minterType, minterAcquisitionMethod }: UploadDetailsProps) => {
   const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
   const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
+
+  const assetFilesRef = useRef<HTMLInputElement | null>(null)
+  const metadataFilesRef = useRef<HTMLInputElement | null>(null)
 
   const nftStorageApiKeyState = useInputState({
     id: 'nft-storage-api-key',
@@ -67,7 +75,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   const baseTokenUriState = useInputState({
     id: 'baseTokenUri',
     name: 'baseTokenUri',
-    title: 'Base Token URI',
+    title: minterType === 'vending' ? 'Base Token URI' : 'Token URI',
     placeholder: 'ipfs://',
     defaultValue: '',
   })
@@ -84,16 +92,18 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
     setAssetFilesArray([])
     setMetadataFilesArray([])
     if (event.target.files === null) return
-    //sort the files
-    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
-    //check if the sorted file names are in numerical order
-    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
-    for (let i = 0; i < sortedFileNames.length; i++) {
-      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
-        toast.error('The file names should be in numerical order starting from 1.')
-        //clear the input
-        event.target.value = ''
-        return
+    if (minterType === 'vending') {
+      //sort the files
+      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+      //check if the sorted file names are in numerical order
+      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+      for (let i = 0; i < sortedFileNames.length; i++) {
+        if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
+          toast.error('The file names should be in numerical order starting from 1.')
+          //clear the input
+          event.target.value = ''
+          return
+        }
       }
     }
     let loadedFileCount = 0
@@ -125,16 +135,18 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
       event.target.value = ''
       return toast.error('The number of metadata files should be equal to the number of asset files.')
     }
-    //sort the files
-    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
-    //check if the sorted file names are in numerical order
-    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
-    for (let i = 0; i < sortedFileNames.length; i++) {
-      if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
-        toast.error('The file names should be in numerical order starting from 1.')
-        //clear the input
-        event.target.value = ''
-        return
+    if (minterType === 'vending') {
+      //sort the files
+      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+      //check if the sorted file names are in numerical order
+      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+      for (let i = 0; i < sortedFileNames.length; i++) {
+        if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
+          toast.error('The file names should be in numerical order starting from 1.')
+          //clear the input
+          event.target.value = ''
+          return
+        }
       }
     }
     let loadedFileCount = 0
@@ -226,14 +238,16 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
   ])
 
   useEffect(() => {
+    if (assetFilesRef.current) assetFilesRef.current.value = ''
+    if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
     setMetadataFilesArray([])
     baseTokenUriState.onChange('')
     coverImageUrlState.onChange('')
-  }, [uploadMethod])
+  }, [uploadMethod, minterType, minterAcquisitionMethod])
 
   return (
-    <div className="justify-items-start mt-5 mb-3 rounded border border-2 border-white/20 flex-column">
+    <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">
       <div className="flex justify-center">
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input
@@ -251,7 +265,7 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio2"
           >
-            Upload assets & metadata
+            {minterType === 'base' ? 'Upload asset & metadata' : 'Upload assets & metadata'}
           </label>
         </div>
         <div className="mt-3 ml-2 font-bold form-check form-check-inline">
@@ -270,13 +284,13 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio1"
           >
-            Use an existing base URI
+            {minterType === 'base' ? 'Use an existing Token URI' : 'Use an existing base URI'}
           </label>
         </div>
       </div>
 
       <div className="p-3 py-5 pb-8">
-        <Conditional test={uploadMethod === 'existing'}>
+        <Conditional test={uploadMethod === 'existing' && minterType === 'vending'}>
           <div className="ml-3 flex-column">
             <p className="mb-5 ml-5">
               Though Stargaze&apos;s sg721 contract allows for off-chain metadata storage, it is recommended to use a
@@ -293,9 +307,35 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
             <div>
               <TextInput {...baseTokenUriState} className="w-1/2" />
             </div>
+            <Conditional test={minterType !== 'base'}>
+              <div>
+                <TextInput {...coverImageUrlState} className="mt-2 w-1/2" />
+              </div>
+            </Conditional>
+          </div>
+        </Conditional>
+        <Conditional test={uploadMethod === 'existing' && minterType === 'base'}>
+          <div className="ml-3 flex-column">
+            <p className="mb-5 ml-5">
+              Though Stargaze&apos;s sg721 contract allows for off-chain metadata storage, it is recommended to use a
+              decentralized storage solution, such as IPFS. <br /> You may head over to{' '}
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
+                NFT.Storage
+              </Anchor>{' '}
+              or{' '}
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
+                Pinata
+              </Anchor>{' '}
+              and upload your asset & metadata manually to get a URI for your token before minting.
+            </p>
             <div>
-              <TextInput {...coverImageUrlState} className="mt-2 w-1/2" />
+              <TextInput {...baseTokenUriState} className="w-1/2" />
             </div>
+            <Conditional test={minterType !== 'base' || (minterType === 'base' && minterAcquisitionMethod === 'new')}>
+              <div>
+                <TextInput {...coverImageUrlState} className="mt-2 w-1/2" />
+              </div>
+            </Conditional>
           </div>
         </Conditional>
         <Conditional test={uploadMethod === 'new'}>
@@ -390,8 +430,9 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                           'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
                         )}
                         id="assetFiles"
-                        multiple
+                        multiple={minterType === 'vending'}
                         onChange={selectAssets}
+                        ref={assetFilesRef}
                         type="file"
                       />
                     </div>
@@ -418,8 +459,9 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                             'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
                           )}
                           id="metadataFiles"
-                          multiple
+                          multiple={minterType === 'vending'}
                           onChange={selectMetadata}
+                          ref={metadataFilesRef}
                           type="file"
                         />
                       </div>
@@ -435,7 +477,11 @@ export const UploadDetails = ({ onChange }: UploadDetailsProps) => {
                 </div>
 
                 <Conditional test={assetFilesArray.length > 0}>
-                  <AssetsPreview assetFilesArray={assetFilesArray} updateMetadataFileIndex={updateMetadataFileIndex} />
+                  <AssetsPreview
+                    assetFilesArray={assetFilesArray}
+                    minterType={minterType}
+                    updateMetadataFileIndex={updateMetadataFileIndex}
+                  />
                 </Conditional>
               </div>
             </div>

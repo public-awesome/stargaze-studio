@@ -14,7 +14,7 @@ const nextConfig = {
     NEXT_PUBLIC_WEBSITE_URL:
       process.env.NODE_ENV === 'development' ? LOCALHOST_URL : process.env.NEXT_PUBLIC_WEBSITE_URL,
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
   trailingSlash: true,
   webpack(config, { dev, webpack }) {
     // svgr integration

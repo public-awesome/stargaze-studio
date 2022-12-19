@@ -16,7 +16,7 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
 const CollectionQueriesPage: NextPage = () => {
-  const { minter: minterContract, sg721: sg721Contract } = useContracts()
+  const { baseMinter: baseMinterContract, vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
 
   const comboboxState = useQueryComboboxState()
   const type = comboboxState.value?.id
@@ -57,19 +57,25 @@ const CollectionQueriesPage: NextPage = () => {
   const showTokenIdField = type === 'token_info'
   const showAddressField = type === 'tokens_minted_to_user'
 
-  const minterMessages = useMemo(
-    () => minterContract?.use(minterContractAddress),
-    [minterContract, minterContractAddress],
+  const vendingMinterMessages = useMemo(
+    () => vendingMinterContract?.use(minterContractAddress),
+    [vendingMinterContract, minterContractAddress],
+  )
+  const baseMinterMessages = useMemo(
+    () => baseMinterContract?.use(minterContractAddress),
+    [baseMinterContract, minterContractAddress],
   )
   const sg721Messages = useMemo(() => sg721Contract?.use(sg721ContractAddress), [sg721Contract, sg721ContractAddress])
 
   const { data: response } = useQuery(
-    [sg721Messages, minterMessages, type, tokenId, address] as const,
+    [sg721Messages, baseMinterMessages, vendingMinterMessages, type, tokenId, address] as const,
     async ({ queryKey }) => {
-      const [_sg721Messages, _minterMessages, _type, _tokenId, _address] = queryKey
+      const [_sg721Messages, _baseMinterMessages_, _vendingMinterMessages, _type, _tokenId, _address] = queryKey
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await dispatchQuery({
         tokenId: _tokenId,
-        minterMessages: _minterMessages,
+        vendingMinterMessages: _vendingMinterMessages,
+        baseMinterMessages: _baseMinterMessages_,
         sg721Messages: _sg721Messages,
         address: _address,
         type: _type,

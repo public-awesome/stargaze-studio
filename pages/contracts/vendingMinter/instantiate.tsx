@@ -11,7 +11,7 @@ import { FormTextArea } from 'components/forms/FormTextArea'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { minterLinkTabs } from 'components/LinkTabs.data'
+import { vendingMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
@@ -25,9 +25,9 @@ import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-import type { CreateMinterResponse } from '../../../contracts/vendingFactory/contract'
+import type { CreateVendingMinterResponse } from '../../../contracts/vendingFactory/contract'
 
-const MinterInstantiatePage: NextPage = () => {
+const VendingMinterInstantiatePage: NextPage = () => {
   const wallet = useWallet()
   const contract = useContracts().vendingFactory
 
@@ -146,7 +146,7 @@ const MinterInstantiatePage: NextPage = () => {
   })
 
   const { data, isLoading, mutate } = useMutation(
-    async (event: FormEvent): Promise<CreateMinterResponse | null> => {
+    async (event: FormEvent): Promise<CreateVendingMinterResponse | null> => {
       event.preventDefault()
       if (!contract) {
         throw new Error('Smart contract connection failed')
@@ -206,7 +206,9 @@ const MinterInstantiatePage: NextPage = () => {
       return toast.promise(
         contract
           .use(VENDING_FACTORY_ADDRESS)
-          ?.createMinter(wallet.address, msg, [coin('1000000000', 'ustars')]) as Promise<CreateMinterResponse>,
+          ?.createVendingMinter(wallet.address, msg, [
+            coin('1000000000', 'ustars'),
+          ]) as Promise<CreateVendingMinterResponse>,
         {
           loading: 'Instantiating contract...',
           error: 'Instantiation failed!',
@@ -225,13 +227,13 @@ const MinterInstantiatePage: NextPage = () => {
 
   return (
     <form className="py-6 px-12 space-y-4" onSubmit={mutate}>
-      <NextSeo title="Instantiate Minter Contract" />
+      <NextSeo title="Instantiate Vending Minter Contract" />
       <ContractPageHeader
-        description="Minter contract facilitates primary market vending machine style minting."
+        description="Vending Minter contract facilitates primary market vending machine style minting."
         link={links.Documentation}
-        title="Minter Contract"
+        title="Vending Minter Contract"
       />
-      <LinkTabs activeIndex={0} data={minterLinkTabs} />
+      <LinkTabs activeIndex={0} data={vendingMinterLinkTabs} />
 
       <Conditional test={Boolean(data)}>
         <Alert type="info">
@@ -329,4 +331,4 @@ const MinterInstantiatePage: NextPage = () => {
   )
 }
 
-export default withMetadata(MinterInstantiatePage, { center: false })
+export default withMetadata(VendingMinterInstantiatePage, { center: false })

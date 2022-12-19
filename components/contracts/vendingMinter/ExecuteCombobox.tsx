@@ -1,8 +1,8 @@
 import { Combobox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
-import type { ExecuteListItem } from 'contracts/minter/messages/execute'
-import { EXECUTE_LIST } from 'contracts/minter/messages/execute'
+import type { ExecuteListItem } from 'contracts/vendingMinter/messages/execute'
+import { EXECUTE_LIST } from 'contracts/vendingMinter/messages/execute'
 import { matchSorter } from 'match-sorter'
 import { Fragment, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
@@ -67,7 +67,7 @@ export const ExecuteCombobox = ({ value, onChange }: ExecuteComboboxProps) => {
               <Combobox.Option
                 key={entry.id}
                 className={({ active }) =>
-                  clsx('flex relative flex-col py-2 px-4 space-y-1 cursor-pointer', { 'bg-plumbus-70': active })
+                  clsx('flex relative flex-col py-2 px-4 space-y-1 cursor-pointer', { 'bg-stargaze-80': active })
                 }
                 value={entry}
               >

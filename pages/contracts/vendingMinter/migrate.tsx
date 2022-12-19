@@ -1,16 +1,16 @@
 import { Button } from 'components/Button'
 import { ContractPageHeader } from 'components/ContractPageHeader'
-import { useExecuteComboboxState } from 'components/contracts/minter/ExecuteCombobox.hooks'
+import { useExecuteComboboxState } from 'components/contracts/vendingMinter/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { minterLinkTabs } from 'components/LinkTabs.data'
+import { vendingMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { MigrateResponse } from 'contracts/minter'
+import type { MigrateResponse } from 'contracts/vendingMinter'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -22,8 +22,8 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const MinterMigratePage: NextPage = () => {
-  const { minter: contract } = useContracts()
+const VendingMinterMigratePage: NextPage = () => {
+  const { vendingMinter: contract } = useContracts()
   const wallet = useWallet()
 
   const [lastTx, setLastTx] = useState('')
@@ -34,15 +34,15 @@ const MinterMigratePage: NextPage = () => {
     id: 'code-id',
     name: 'code-id',
     title: 'Code ID',
-    subtitle: 'Code ID of the New Minter',
+    subtitle: 'Code ID of the New Vending Minter',
     placeholder: '1',
   })
 
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
+    title: 'Vending Minter Address',
+    subtitle: 'Address of the Vending Minter contract',
   })
   const contractAddress = contractState.value
 
@@ -90,13 +90,13 @@ const MinterMigratePage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Migrate Minter Contract" />
+      <NextSeo title="Migrate Vending Minter Contract" />
       <ContractPageHeader
-        description="Minter contract facilitates primary market vending machine style minting."
+        description="Vending Minter contract facilitates primary market vending machine style minting."
         link={links.Documentation}
-        title="Minter Contract"
+        title="Vending Minter Contract"
       />
-      <LinkTabs activeIndex={3} data={minterLinkTabs} />
+      <LinkTabs activeIndex={3} data={vendingMinterLinkTabs} />
 
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
@@ -129,4 +129,4 @@ const MinterMigratePage: NextPage = () => {
   )
 }
 
-export default withMetadata(MinterMigratePage, { center: false })
+export default withMetadata(VendingMinterMigratePage, { center: false })

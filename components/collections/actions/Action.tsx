@@ -13,8 +13,9 @@ import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
 import { useWallet } from 'contexts/wallet'
-import type { MinterInstance } from 'contracts/minter'
+import type { BaseMinterInstance } from 'contracts/baseMinter'
 import type { SG721Instance } from 'contracts/sg721'
+import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -24,12 +25,15 @@ import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import type { CollectionInfo } from '../../../contracts/sg721/contract'
 import { TextInput } from '../../forms/FormInput'
+import type { MinterType } from './Combobox'
 
 interface CollectionActionsProps {
   minterContractAddress: string
   sg721ContractAddress: string
   sg721Messages: SG721Instance | undefined
-  minterMessages: MinterInstance | undefined
+  vendingMinterMessages: VendingMinterInstance | undefined
+  baseMinterMessages: BaseMinterInstance | undefined
+  minterType: MinterType
 }
 
 type ExplicitContentType = true | false | undefined
@@ -38,7 +42,9 @@ export const CollectionActions = ({
   sg721ContractAddress,
   sg721Messages,
   minterContractAddress,
-  minterMessages,
+  vendingMinterMessages,
+  baseMinterMessages,
+  minterType,
 }: CollectionActionsProps) => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
@@ -86,6 +92,14 @@ export const CollectionActions = ({
     name: 'recipient',
     title: 'Recipient Address',
     subtitle: 'Address of the recipient',
+  })
+
+  const tokenURIState = useInputState({
+    id: 'token-uri',
+    name: 'tokenURI',
+    title: 'Token URI',
+    subtitle: 'URI for the token to be minted',
+    placeholder: 'ipfs://',
   })
 
   const whitelistState = useInputState({
@@ -138,6 +152,7 @@ export const CollectionActions = ({
     placeholder: '8%',
   })
 
+  const showTokenUriField = type === 'mint_token_uri'
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
@@ -168,8 +183,10 @@ export const CollectionActions = ({
     sg721Contract: sg721ContractAddress,
     tokenId: tokenIdState.value,
     tokenIds: tokenIdListState.value,
+    tokenUri: tokenURIState.value,
     batchNumber: batchNumberState.value,
-    minterMessages,
+    vendingMinterMessages,
+    baseMinterMessages,
     sg721Messages,
     recipient: recipientState.value,
     recipients: airdropArray,
@@ -261,15 +278,16 @@ export const CollectionActions = ({
     <form>
       <div className="grid grid-cols-2 mt-4">
         <div className="mr-2">
-          <ActionsCombobox {...actionComboboxState} />
+          <ActionsCombobox minterType={minterType} {...actionComboboxState} />
           {showRecipientField && <AddressInput {...recipientState} />}
+          {showTokenUriField && <TextInput className="mt-2" {...tokenURIState} />}
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
           {showTokenIdField && <NumberInput {...tokenIdState} />}
           {showTokenIdListField && <TextInput className="mt-2" {...tokenIdListState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showPriceField && <NumberInput {...priceState} />}
-          {showDescriptionField && <TextInput className="mb-2" {...descriptionState} />}
+          {showDescriptionField && <TextInput className="my-2" {...descriptionState} />}
           {showImageField && <TextInput className="mb-2" {...imageState} />}
           {showExternalLinkField && <TextInput className="mb-2" {...externalLinkState} />}
           {showRoyaltyRelatedFields && (
@@ -334,7 +352,7 @@ export const CollectionActions = ({
             </FormGroup>
           )}
           <Conditional test={showDateField}>
-            <FormControl htmlId="start-date" subtitle="Start time for the minting" title="Start Time">
+            <FormControl className="mt-2" htmlId="start-date" title="Start Time">
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
             </FormControl>
           </Conditional>
