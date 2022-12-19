@@ -782,58 +782,66 @@ const CollectionCreationPage: NextPage = () => {
           </Alert>
         </Conditional>
       </div>
-      <div>
-        <div
-          className={clsx(
-            'mx-10 mt-5',
-            'grid before:absolute relative grid-cols-2 grid-flow-col items-stretch rounded',
-            'before:inset-x-0 before:bottom-0 before:border-white/25',
-          )}
-        >
+
+      {/* To be removed */}
+      <Conditional test={BASE_FACTORY_ADDRESS === undefined}>
+        <div className="mx-10 mt-5" />
+      </Conditional>
+      <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
+        {/* /To be removed */}
+        <div>
           <div
             className={clsx(
-              'isolate space-y-1 border-2',
-              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-              minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
-              minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              'mx-10 mt-5',
+              'grid before:absolute relative grid-cols-2 grid-flow-col items-stretch rounded',
+              'before:inset-x-0 before:bottom-0 before:border-white/25',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMinterType('vending')
-                resetReadyFlags()
-              }}
-              type="button"
+            <div
+              className={clsx(
+                'isolate space-y-1 border-2',
+                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+                minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
+                minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              )}
             >
-              <h4 className="font-bold">Vending Minter</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Vending Minter contract facilitates primary market vending machine style minting
-              </span>
-            </button>
-          </div>
-          <div
-            className={clsx(
-              'isolate space-y-1 border-2',
-              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-              minterType === 'base' ? 'border-stargaze' : 'border-transparent',
-              minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
-            )}
-          >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMinterType('base')
-                resetReadyFlags()
-              }}
-              type="button"
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMinterType('vending')
+                  resetReadyFlags()
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Vending Minter</h4>
+                <span className="text-sm text-white/80 line-clamp-2">
+                  Vending Minter contract facilitates primary market vending machine style minting
+                </span>
+              </button>
+            </div>
+            <div
+              className={clsx(
+                'isolate space-y-1 border-2',
+                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+                minterType === 'base' ? 'border-stargaze' : 'border-transparent',
+                minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              )}
             >
-              <h4 className="font-bold">Base Minter</h4>
-              <span className="text-sm text-white/80 line-clamp-2">Base Minter contract enables 1/1 minting</span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMinterType('base')
+                  resetReadyFlags()
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Base Minter</h4>
+                <span className="text-sm text-white/80 line-clamp-2">Base Minter contract enables 1/1 minting</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </Conditional>
 
       {minterType === 'base' && (
         <div>
