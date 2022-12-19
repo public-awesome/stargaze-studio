@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
+import { BASE_FACTORY_ADDRESS } from '../utils/constants'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
@@ -24,6 +25,11 @@ export const Sidebar = () => {
   const router = useRouter()
   const wallet = useWallet()
 
+  let tempRoutes = routes
+  if (BASE_FACTORY_ADDRESS === undefined) {
+    tempRoutes = routes.filter((route) => route.href !== '/contracts/baseMinter/')
+  }
+
   return (
     <SidebarLayout>
       {/* Stargaze brand as home button */}
@@ -34,7 +40,7 @@ export const Sidebar = () => {
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
-      {routes.map(({ text, href, isChild }) => (
+      {tempRoutes.map(({ text, href, isChild }) => (
         <Anchor
           key={href}
           className={clsx(
