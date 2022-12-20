@@ -247,6 +247,46 @@ export const CollectionActions = ({
         throw new Error('Mint price must be at least 50 STARS')
       }
 
+      if (wallet.client && type === 'update_mint_price') {
+        const contractConfig = wallet.client.queryContractSmart(minterContractAddress, {
+          config: {},
+        })
+        await toast
+          .promise(
+            wallet.client.queryContractSmart(minterContractAddress, {
+              mint_price: {},
+            }),
+            {
+              error: `Querying mint price failed!`,
+              loading: 'Querying current mint price...',
+              success: (price) => {
+                console.log(price)
+                return `Current mint price is ${Number(price.public_price.amount) / 1000000} STARS`
+              },
+            },
+          )
+          .then(async (price) => {
+            if (Number(price.public_price.amount) / 1000000 <= priceState.value) {
+              await contractConfig
+                .then((config) => {
+                  console.log(config.start_time, Date.now() * 1000000)
+                  if (Number(config.start_time) < Date.now() * 1000000) {
+                    throw new Error(
+                      `Minting has already started on ${new Date(
+                        Number(config.start_time) / 1000000,
+                      ).toLocaleString()}. Updated mint price cannot be higher than the current price of ${
+                        Number(price.public_price.amount) / 1000000
+                      } STARS`,
+                    )
+                  }
+                })
+                .catch((error) => {
+                  throw new Error(String(error).substring(String(error).lastIndexOf('Error:') + 7))
+                })
+            }
+          })
+      }
+
       if (
         type === 'update_collection_info' &&
         (royaltyShareState.value ? !royaltyPaymentAddressState.value : royaltyPaymentAddressState.value)
@@ -265,7 +305,7 @@ export const CollectionActions = ({
     },
     {
       onError: (error) => {
-        toast.error(String(error))
+        toast.error(String(error), { style: { maxWidth: 'none' } })
       },
     },
   )
