@@ -81,7 +81,7 @@ export const WhitelistUpload = ({ onChange }: WhitelistUploadProps) => {
         await toast
           .promise(resolveAddresses(strippedNames), {
             loading: 'Resolving addresses...',
-            success: 'Address resolution successful!',
+            success: 'Address resolution finalized.',
             error: 'Address resolution failed!',
           })
           .then((addresses) => {
