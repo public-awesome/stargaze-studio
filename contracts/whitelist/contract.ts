@@ -9,7 +9,7 @@ export interface InstantiateResponse {
 
 export interface ConfigResponse {
   readonly num_members: number
-  readonly per_address: number
+  readonly per_address_limit: number
   readonly member_limit: number
   readonly start_time: string
   readonly end_time: string

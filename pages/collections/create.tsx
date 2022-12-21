@@ -623,6 +623,15 @@ const CollectionCreationPage: NextPage = () => {
           const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
           throw Error(`Whitelist start time (${whitelistStartDate.toLocaleString()}) does not match minting start time`)
         }
+        if (
+          mintingDetails?.numTokens &&
+          config?.per_address_limit &&
+          mintingDetails.numTokens > 100 &&
+          Number(config.per_address_limit) > mintingDetails.numTokens / 100
+        )
+          throw Error(
+            `Whitelist configuration error: Invalid limit for tokens per address (${config.per_address_limit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
+          )
       }
     } else if (whitelistDetails.whitelistType === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
@@ -637,6 +646,15 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Whitelist start time cannot be later than whitelist end time')
       if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
         throw new Error('Whitelist start time must be the same as the minting start time')
+      if (
+        mintingDetails?.numTokens &&
+        whitelistDetails.perAddressLimit &&
+        mintingDetails.numTokens > 100 &&
+        whitelistDetails.perAddressLimit > mintingDetails.numTokens / 100
+      )
+        throw Error(
+          `Whitelist configuration error: Invalid limit for tokens per address (${whitelistDetails.perAddressLimit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
+        )
     }
   }
 
