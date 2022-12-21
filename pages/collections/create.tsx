@@ -103,15 +103,19 @@ const CollectionCreationPage: NextPage = () => {
       checkRoyaltyDetails()
       checkWhitelistDetails()
         .then(() => {
+          checkwalletBalance()
           setReadyToCreateVm(true)
         })
         .catch((err) => {
-          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          if (String(err.message).includes('Insufficient wallet balance'))
+            toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+          else toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreateVm(false)
         })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       setUploading(false)
+      setReadyToCreateVm(false)
     }
   }
 
@@ -623,6 +627,15 @@ const CollectionCreationPage: NextPage = () => {
           const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
           throw Error(`Whitelist start time (${whitelistStartDate.toLocaleString()}) does not match minting start time`)
         }
+        if (
+          mintingDetails?.numTokens &&
+          config?.per_address_limit &&
+          mintingDetails.numTokens > 100 &&
+          Number(config.per_address_limit) > mintingDetails.numTokens / 100
+        )
+          throw Error(
+            `Whitelist configuration error: Invalid limit for tokens per address (${config.per_address_limit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
+          )
       }
     } else if (whitelistDetails.whitelistType === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
@@ -631,12 +644,23 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Invalid unit price: The minimum unit price for whitelisted addresses is 25 STARS')
       if (whitelistDetails.startTime === '') throw new Error('Start time is required')
       if (whitelistDetails.endTime === '') throw new Error('End time is required')
-      if (whitelistDetails.perAddressLimit === 0) throw new Error('Per address limit is required')
-      if (whitelistDetails.memberLimit === 0) throw new Error('Member limit is required')
+      if (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
+        throw new Error('Per address limit is required')
+      if (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
+        throw new Error('Member limit is required')
       if (Number(whitelistDetails.startTime) > Number(whitelistDetails.endTime))
         throw new Error('Whitelist start time cannot be later than whitelist end time')
       if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
         throw new Error('Whitelist start time must be the same as the minting start time')
+      if (
+        mintingDetails?.numTokens &&
+        whitelistDetails.perAddressLimit &&
+        mintingDetails.numTokens > 100 &&
+        whitelistDetails.perAddressLimit > mintingDetails.numTokens / 100
+      )
+        throw Error(
+          `Whitelist configuration error: Invalid limit for tokens per address (${whitelistDetails.perAddressLimit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
+        )
     }
   }
 
@@ -646,6 +670,19 @@ const CollectionCreationPage: NextPage = () => {
       if (royaltyDetails.share === 0) throw new Error('Royalty share percentage is required')
       if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share percentage')
       if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
+    }
+  }
+
+  const checkwalletBalance = () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
+      const amountNeeded = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + 1000000000
+      if (amountNeeded >= Number(wallet.balance[0].amount))
+        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+    } else {
+      const amountNeeded = 1000000000
+      if (amountNeeded >= Number(wallet.balance[0].amount))
+        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     }
   }
   useEffect(() => {
