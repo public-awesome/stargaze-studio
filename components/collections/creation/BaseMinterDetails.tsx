@@ -14,30 +14,30 @@ import { useDebounce } from '../../../utils/debounce'
 import { TextInput } from '../../forms/FormInput'
 import type { MinterType } from '../actions/Combobox'
 
-export type MinterAcquisitionMethod = 'existing' | 'new'
+export type BaseMinterAcquisitionMethod = 'existing' | 'new'
 
 export interface MinterInfo {
   name: string
   minter: string
 }
 
-interface MinterDetailsProps {
-  onChange: (data: MinterDetailsDataProps) => void
+interface BaseMinterDetailsProps {
+  onChange: (data: BaseMinterDetailsDataProps) => void
   minterType: MinterType
 }
 
-export interface MinterDetailsDataProps {
-  minterAcquisitionMethod: MinterAcquisitionMethod
-  existingMinter: string | undefined
+export interface BaseMinterDetailsDataProps {
+  baseMinterAcquisitionMethod: BaseMinterAcquisitionMethod
+  existingBaseMinter: string | undefined
 }
 
-export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
+export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsProps) => {
   const wallet = useWallet()
 
   const [myBaseMinterContracts, setMyBaseMinterContracts] = useState<MinterInfo[]>([])
-  const [minterAcquisitionMethod, setMinterAcquisitionMethod] = useState<MinterAcquisitionMethod>('new')
+  const [baseMinterAcquisitionMethod, setBaseMinterAcquisitionMethod] = useState<BaseMinterAcquisitionMethod>('new')
 
-  const existingMinterState = useInputState({
+  const existingBaseMinterState = useInputState({
     id: 'existingMinter',
     name: 'existingMinter',
     title: 'Existing Base Minter Contract Address',
@@ -97,11 +97,11 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
 
   const debouncedMyBaseMinterContracts = useDebounce(myBaseMinterContracts, 500)
 
-  const renderMinterContracts = useCallback(() => {
-    return myBaseMinterContracts.map((minterContract, index) => {
+  const renderBaseMinterContracts = useCallback(() => {
+    return myBaseMinterContracts.map((baseMinterContract, index) => {
       return (
         <option key={index} className="mt-2 text-lg bg-[#1A1A1A]">
-          {`${minterContract.name} - ${minterContract.minter}`}
+          {`${baseMinterContract.name} - ${baseMinterContract.minter}`}
         </option>
       )
     })
@@ -118,31 +118,31 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
   }
 
   useEffect(() => {
-    if (debouncedWalletAddress && minterAcquisitionMethod === 'existing') {
+    if (debouncedWalletAddress && baseMinterAcquisitionMethod === 'existing') {
       void displayToast()
     }
-  }, [debouncedWalletAddress, minterAcquisitionMethod])
+  }, [debouncedWalletAddress, baseMinterAcquisitionMethod])
 
   useEffect(() => {
-    const data: MinterDetailsDataProps = {
-      minterAcquisitionMethod,
-      existingMinter: existingMinterState.value,
+    const data: BaseMinterDetailsDataProps = {
+      baseMinterAcquisitionMethod,
+      existingBaseMinter: existingBaseMinterState.value,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingMinterState.value, minterAcquisitionMethod])
+  }, [existingBaseMinterState.value, baseMinterAcquisitionMethod])
 
   return (
     <div className="mx-10 mb-4 rounded border-2 border-white/20">
       <div className="flex justify-center mb-2">
         <div className="mt-3 ml-4 font-bold form-check form-check-inline">
           <input
-            checked={minterAcquisitionMethod === 'new'}
+            checked={baseMinterAcquisitionMethod === 'new'}
             className="peer sr-only"
             id="inlineRadio5"
             name="inlineRadioOptions5"
             onClick={() => {
-              setMinterAcquisitionMethod('new')
+              setBaseMinterAcquisitionMethod('new')
             }}
             type="radio"
             value="New"
@@ -156,12 +156,12 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
         </div>
         <div className="mt-3 ml-2 font-bold form-check form-check-inline">
           <input
-            checked={minterAcquisitionMethod === 'existing'}
+            checked={baseMinterAcquisitionMethod === 'existing'}
             className="peer sr-only"
             id="inlineRadio6"
             name="inlineRadioOptions6"
             onClick={() => {
-              setMinterAcquisitionMethod('existing')
+              setBaseMinterAcquisitionMethod('existing')
             }}
             type="radio"
             value="Existing"
@@ -175,22 +175,22 @@ export const MinterDetails = ({ onChange, minterType }: MinterDetailsProps) => {
         </div>
       </div>
 
-      {minterAcquisitionMethod === 'existing' && (
+      {baseMinterAcquisitionMethod === 'existing' && (
         <div>
           <div className="grid grid-cols-2 grid-flow-col my-4 mx-10">
             <select
               className="mt-8 w-full max-w-lg text-sm bg-white/10 select select-bordered"
               onChange={(e) => {
-                existingMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
+                existingBaseMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
                 e.preventDefault()
               }}
             >
               <option className="mt-2 text-lg bg-[#1A1A1A]" disabled selected>
-                Select one of your existing Base Minter Contracts
+                Select one of your existing Base Minter contracts
               </option>
-              {renderMinterContracts()}
+              {renderBaseMinterContracts()}
             </select>
-            <TextInput defaultValue={existingMinterState.value} {...existingMinterState} isRequired />
+            <TextInput defaultValue={existingBaseMinterState.value} {...existingBaseMinterState} isRequired />
           </div>
         </div>
       )}

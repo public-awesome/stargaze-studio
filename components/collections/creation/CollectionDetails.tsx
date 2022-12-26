@@ -13,12 +13,14 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { TextInput } from '../../forms/FormInput'
+import type { MinterType } from '../actions/Combobox'
 import type { UploadMethod } from './UploadDetails'
 
 interface CollectionDetailsProps {
   onChange: (data: CollectionDetailsDataProps) => void
   uploadMethod: UploadMethod
   coverImageUrl: string
+  minterType: MinterType
 }
 
 export interface CollectionDetailsDataProps {
@@ -31,7 +33,7 @@ export interface CollectionDetailsDataProps {
   explicit: boolean
 }
 
-export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: CollectionDetailsProps) => {
+export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minterType }: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
@@ -110,19 +112,30 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
   return (
     <div>
       <FormGroup subtitle="Information about your collection" title="Collection Details">
-        <TextInput {...nameState} isRequired />
-        <TextInput {...descriptionState} isRequired />
-        <TextInput {...symbolState} isRequired />
-        <TextInput {...externalLinkState} />
-        <FormControl
-          htmlId="timestamp"
-          subtitle="Trading start time offset will be set as 2 weeks by default."
-          title="Trading Start Time (optional)"
-        >
-          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-        </FormControl>
+        <div className={clsx(minterType === 'base' ? 'grid grid-cols-2 -ml-16 max-w-5xl' : '')}>
+          <div className={clsx(minterType === 'base' ? 'ml-0' : '')}>
+            <TextInput {...nameState} isRequired />
+            <TextInput className="mt-2" {...descriptionState} isRequired />
+            <TextInput className="mt-2" {...symbolState} isRequired />
+          </div>
+          <div className={clsx(minterType === 'base' ? 'ml-10' : '')}>
+            <TextInput {...externalLinkState} />
+            <FormControl
+              className={clsx(minterType === 'base' ? 'mt-12' : '')}
+              htmlId="timestamp"
+              subtitle="Trading start time offset will be set as 2 weeks by default."
+              title="Trading Start Time (optional)"
+            >
+              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+            </FormControl>
+          </div>
+        </div>
 
-        <FormControl isRequired={uploadMethod === 'new'} title="Cover Image">
+        <FormControl
+          className={clsx(minterType === 'base' ? '-ml-16' : '')}
+          isRequired={uploadMethod === 'new'}
+          title="Cover Image"
+        >
           {uploadMethod === 'new' && (
             <input
               accept="image/*"
@@ -158,7 +171,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
             <span className="italic font-light ">Waiting for cover image URL to be specified.</span>
           )}
         </FormControl>
-        <div className="flex flex-col space-y-2">
+        <div className={clsx(minterType === 'base' ? 'flex flex-col -ml-16 space-y-2' : 'flex flex-col space-y-2')}>
           <div>
             <div className="flex">
               <span className="mt-1 text-sm first-letter:capitalize">

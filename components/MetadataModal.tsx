@@ -1,7 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
@@ -111,9 +111,6 @@ export const MetadataModal = (props: MetadataModalProps) => {
   const attributesState = useMetadataAttributesState()
 
   const generateUpdatedMetadata = () => {
-    console.log(`Current parsed data: ${parsedMetadata}`)
-    console.log('Updating...')
-
     metadata.attributes = Object.values(attributesState)[1]
     metadata.attributes = metadata.attributes.filter((attribute: { trait_type: string }) => attribute.trait_type !== '')
 
@@ -133,7 +130,6 @@ export const MetadataModal = (props: MetadataModalProps) => {
     const editedMetadataFile = new File([metadataFileBlob], metadataFile.name, { type: 'application/json' })
     props.updateMetadata(editedMetadataFile)
     toast.success('Metadata updated successfully.')
-    console.log(editedMetadataFile)
   }
 
   useEffect(() => {
