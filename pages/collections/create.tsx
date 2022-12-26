@@ -15,9 +15,9 @@ import {
   UploadDetails,
   WhitelistDetails,
 } from 'components/collections/creation'
+import type { BaseMinterDetailsDataProps } from 'components/collections/creation/BaseMinterDetails'
+import { BaseMinterDetails } from 'components/collections/creation/BaseMinterDetails'
 import type { CollectionDetailsDataProps } from 'components/collections/creation/CollectionDetails'
-import type { MinterDetailsDataProps } from 'components/collections/creation/MinterDetails'
-import { MinterDetails } from 'components/collections/creation/MinterDetails'
 import type { MintingDetailsDataProps } from 'components/collections/creation/MintingDetails'
 import type { RoyaltyDetailsDataProps } from 'components/collections/creation/RoyaltyDetails'
 import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
@@ -76,13 +76,14 @@ const CollectionCreationPage: NextPage = () => {
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
-  const [minterDetails, setMinterDetails] = useState<MinterDetailsDataProps | null>(null)
+  const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
   const [minterType, setMinterType] = useState<MinterType>('vending')
 
   const [uploading, setUploading] = useState(false)
+  const [isMintingComplete, setIsMintingComplete] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreateVm, setReadyToCreateVm] = useState(false)
   const [readyToCreateBm, setReadyToCreateBm] = useState(false)
@@ -223,6 +224,7 @@ const CollectionCreationPage: NextPage = () => {
       setBaseTokenUri(null)
       setCoverImageUrl(null)
       setVendingMinterContractAddress(null)
+      setIsMintingComplete(false)
       setSg721ContractAddress(null)
       setWhitelistContractAddress(null)
       setTransactionHash(null)
@@ -242,11 +244,19 @@ const CollectionCreationPage: NextPage = () => {
 
         setUploading(false)
 
-        setBaseTokenUri(baseUri)
+        setBaseTokenUri(
+          `${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+            0,
+            (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+          )}`,
+        )
         setCoverImageUrl(coverImageUri)
 
         await instantiateBaseMinter(
-          `ipfs://${baseUri}/${uploadDetails.metadataFiles[0].name.split('.')[0]}`,
+          `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+            0,
+            (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+          )}`,
           coverImageUri,
         )
       } else {
@@ -276,32 +286,46 @@ const CollectionCreationPage: NextPage = () => {
       setTransactionHash(null)
 
       if (uploadDetails?.uploadMethod === 'new') {
+        console.log(JSON.stringify(uploadDetails.baseMinterMetadataFile?.text()))
         setUploading(true)
         await uploadFiles()
           .then(async (baseUri) => {
             setUploading(false)
-            setBaseTokenUri(baseUri)
+            setBaseTokenUri(
+              `${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+                0,
+                (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+              )}`,
+            )
             const result = await baseMinterContract
-              .use(minterDetails?.existingMinter as string)
-              // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-              ?.mint(wallet.address, `ipfs://${baseUri}/${uploadDetails?.metadataFiles[0].name.split('.')[0]}`)
+              .use(baseMinterDetails?.existingBaseMinter as string)
+
+              ?.mint(
+                wallet.address,
+                `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+                  0,
+                  (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+                )}`,
+              )
             console.log(result)
             return result
           })
           .then((result) => {
             toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+            setIsMintingComplete(true)
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
             setUploading(false)
             setCreatingCollection(false)
+            setIsMintingComplete(false)
           })
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setUploading(false)
         await baseMinterContract
-          .use(minterDetails?.existingMinter as string)
-          ?.mint(wallet.address, `ipfs://${uploadDetails?.baseTokenURI}`)
+          .use(baseMinterDetails?.existingBaseMinter as string)
+          ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
             toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
           })
@@ -459,7 +483,10 @@ const CollectionCreationPage: NextPage = () => {
               ?.mint(wallet.address, baseUri) as Promise<string>,
             {
               loading: 'Minting token...',
-              success: (result) => `Token minted successfully! Tx Hash: ${result}`,
+              success: (result) => {
+                setIsMintingComplete(true)
+                return `Token minted successfully! Tx Hash: ${result}`
+              },
               error: (error) => `Failed to mint token: ${error.message}`,
             },
             { style: { maxWidth: 'none' } },
@@ -467,6 +494,7 @@ const CollectionCreationPage: NextPage = () => {
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
             setUploading(false)
+            setIsMintingComplete(false)
             setCreatingCollection(false)
           })
         setUploading(false)
@@ -491,30 +519,84 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails.pinataSecretKey as string,
       )
         .then((assetUri: string) => {
-          const fileArray: File[] = []
-          let reader: FileReader
+          if (minterType === 'vending') {
+            const fileArray: File[] = []
+            let reader: FileReader
 
-          for (let i = 0; i < uploadDetails.metadataFiles.length; i++) {
-            reader = new FileReader()
+            for (let i = 0; i < uploadDetails.metadataFiles.length; i++) {
+              reader = new FileReader()
+              reader.onload = (e) => {
+                const data: any = JSON.parse(e.target?.result as string)
+
+                if (
+                  getAssetType(uploadDetails.assetFiles[i].name) === 'audio' ||
+                  getAssetType(uploadDetails.assetFiles[i].name) === 'video'
+                ) {
+                  data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+                }
+
+                data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+
+                const metadataFileBlob = new Blob([JSON.stringify(data)], {
+                  type: 'application/json',
+                })
+
+                const updatedMetadataFile = new File(
+                  [metadataFileBlob],
+                  uploadDetails.metadataFiles[i].name.substring(
+                    0,
+                    uploadDetails.metadataFiles[i].name.lastIndexOf('.'),
+                  ),
+                  {
+                    type: 'application/json',
+                  },
+                )
+
+                fileArray.push(updatedMetadataFile)
+              }
+              reader.onloadend = () => {
+                if (i === uploadDetails.metadataFiles.length - 1) {
+                  upload(
+                    fileArray,
+                    uploadDetails.uploadService,
+                    'metadata',
+                    uploadDetails.nftStorageApiKey as string,
+                    uploadDetails.pinataApiKey as string,
+                    uploadDetails.pinataSecretKey as string,
+                  )
+                    .then(resolve)
+                    .catch(reject)
+                }
+              }
+              reader.readAsText(uploadDetails.metadataFiles[i], 'utf8')
+            }
+          } else if (minterType === 'base') {
+            const fileArray: File[] = []
+            const reader: FileReader = new FileReader()
+
             reader.onload = (e) => {
               const data: any = JSON.parse(e.target?.result as string)
 
               if (
-                getAssetType(uploadDetails.assetFiles[i].name) === 'audio' ||
-                getAssetType(uploadDetails.assetFiles[i].name) === 'video'
+                getAssetType(uploadDetails.assetFiles[0].name) === 'audio' ||
+                getAssetType(uploadDetails.assetFiles[0].name) === 'video'
               ) {
-                data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+                data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
               }
 
-              data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+              data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
 
               const metadataFileBlob = new Blob([JSON.stringify(data)], {
                 type: 'application/json',
               })
 
+              console.log('Name: ', (uploadDetails.baseMinterMetadataFile as File).name)
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
-                uploadDetails.metadataFiles[i].name.substring(0, uploadDetails.metadataFiles[i].name.lastIndexOf('.')),
+                (uploadDetails.baseMinterMetadataFile as File).name.substring(
+                  0,
+                  (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+                ),
                 {
                   type: 'application/json',
                 },
@@ -523,20 +605,19 @@ const CollectionCreationPage: NextPage = () => {
               fileArray.push(updatedMetadataFile)
             }
             reader.onloadend = () => {
-              if (i === uploadDetails.metadataFiles.length - 1) {
-                upload(
-                  fileArray,
-                  uploadDetails.uploadService,
-                  'metadata',
-                  uploadDetails.nftStorageApiKey as string,
-                  uploadDetails.pinataApiKey as string,
-                  uploadDetails.pinataSecretKey as string,
-                )
-                  .then(resolve)
-                  .catch(reject)
-              }
+              upload(
+                fileArray,
+                uploadDetails.uploadService,
+                'metadata',
+                uploadDetails.nftStorageApiKey as string,
+                uploadDetails.pinataApiKey as string,
+                uploadDetails.pinataSecretKey as string,
+              )
+                .then(resolve)
+                .catch(reject)
             }
-            reader.readAsText(uploadDetails.metadataFiles[i], 'utf8')
+            console.log('File: ', uploadDetails.baseMinterMetadataFile)
+            reader.readAsText(uploadDetails.baseMinterMetadataFile as File, 'utf8')
           }
         })
         .catch(reject)
@@ -554,7 +635,7 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length === 0) {
       throw new Error('Please select the assets')
     }
-    if (uploadDetails.uploadMethod === 'new' && uploadDetails.metadataFiles.length === 0) {
+    if (minterType === 'vending' && uploadDetails.uploadMethod === 'new' && uploadDetails.metadataFiles.length === 0) {
       throw new Error('Please select the metadata files')
     }
     if (uploadDetails.uploadMethod === 'new' && minterType === 'vending')
@@ -571,7 +652,7 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'existing' && !uploadDetails.baseTokenURI?.includes('ipfs://')) {
       throw new Error('Please specify a valid base token URI')
     }
-    if (minterDetails?.minterAcquisitionMethod === 'existing' && !minterDetails.existingMinter) {
+    if (baseMinterDetails?.baseMinterAcquisitionMethod === 'existing' && !baseMinterDetails.existingBaseMinter) {
       throw new Error('Please specify a valid Base Minter contract address')
     }
   }
@@ -600,6 +681,7 @@ const CollectionCreationPage: NextPage = () => {
     if (Number(mintingDetails.unitPrice) < 50000000)
       throw new Error('Invalid unit price: The minimum unit price is 50 STARS')
     if (
+      !mintingDetails.perAddressLimit ||
       mintingDetails.perAddressLimit < 1 ||
       mintingDetails.perAddressLimit > 50 ||
       mintingDetails.perAddressLimit > mintingDetails.numTokens
@@ -634,7 +716,7 @@ const CollectionCreationPage: NextPage = () => {
           Number(config.per_address_limit) > mintingDetails.numTokens / 100
         )
           throw Error(
-            `Whitelist configuration error: Invalid limit for tokens per address (${config.per_address_limit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
+            `Invalid limit for tokens per address (${config.per_address_limit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
           )
       }
     } else if (whitelistDetails.whitelistType === 'new') {
@@ -659,7 +741,7 @@ const CollectionCreationPage: NextPage = () => {
         whitelistDetails.perAddressLimit > mintingDetails.numTokens / 100
       )
         throw Error(
-          `Whitelist configuration error: Invalid limit for tokens per address (${whitelistDetails.perAddressLimit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
+          `Invalid limit for tokens per address (${whitelistDetails.perAddressLimit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
         )
     }
   }
@@ -697,13 +779,14 @@ const CollectionCreationPage: NextPage = () => {
   useEffect(() => {
     resetReadyFlags()
     setVendingMinterContractAddress(null)
-  }, [minterType, minterDetails?.minterAcquisitionMethod])
+    setIsMintingComplete(false)
+  }, [minterType, baseMinterDetails?.baseMinterAcquisitionMethod, uploadDetails?.uploadMethod])
 
   return (
     <div>
       <NextSeo
         title={
-          minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'
+          minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
             ? 'Mint Token'
             : 'Create Collection'
         }
@@ -711,7 +794,7 @@ const CollectionCreationPage: NextPage = () => {
 
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
-          {minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'
+          {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
             ? 'Mint Token'
             : 'Create Collection'}
         </h1>
@@ -732,28 +815,30 @@ const CollectionCreationPage: NextPage = () => {
         <Conditional test={vendingMinterContractAddress !== null}>
           <Alert className="mt-5" type="info">
             <div>
-              Base Token URI:{' '}
-              {uploadDetails?.uploadMethod === 'new' && (
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri as string}`}
-                >
-                  ipfs://{baseTokenUri as string}
-                </Anchor>
-              )}
-              {uploadDetails?.uploadMethod === 'existing' && (
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri?.substring(
-                    baseTokenUri.lastIndexOf('ipfs://') + 7,
-                  )}/`}
-                >
-                  ipfs://{baseTokenUri?.substring(baseTokenUri.lastIndexOf('ipfs://') + 7)}
-                </Anchor>
-              )}
-              <br />
+              <Conditional test={minterType === 'vending' || isMintingComplete}>
+                {minterType === 'vending' ? 'Base Token URI: ' : 'Token URI: '}{' '}
+                {uploadDetails?.uploadMethod === 'new' && (
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri as string}`}
+                  >
+                    ipfs://{baseTokenUri as string}
+                  </Anchor>
+                )}
+                {uploadDetails?.uploadMethod === 'existing' && (
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri?.substring(
+                      baseTokenUri.lastIndexOf('ipfs://') + 7,
+                    )}/`}
+                  >
+                    ipfs://{baseTokenUri?.substring(baseTokenUri.lastIndexOf('ipfs://') + 7)}
+                  </Anchor>
+                )}
+                <br />
+              </Conditional>
               Minter Contract Address:{'  '}
               <Anchor
                 className="text-stargaze hover:underline"
@@ -882,28 +967,33 @@ const CollectionCreationPage: NextPage = () => {
 
       {minterType === 'base' && (
         <div>
-          <MinterDetails minterType={minterType} onChange={setMinterDetails} />
+          <BaseMinterDetails minterType={minterType} onChange={setBaseMinterDetails} />
         </div>
       )}
 
       <div className="mx-10">
         <UploadDetails
-          minterAcquisitionMethod={minterDetails?.minterAcquisitionMethod}
+          baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
           minterType={minterType}
           onChange={setUploadDetails}
         />
 
         <Conditional
-          test={minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')}
+          test={
+            minterType === 'vending' ||
+            (minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'new')
+          }
         >
           <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
             <Conditional
               test={
-                minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')
+                minterType === 'vending' ||
+                (minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'new')
               }
             >
               <CollectionDetails
                 coverImageUrl={coverImageUrl as string}
+                minterType={minterType}
                 onChange={setCollectionDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
               />
@@ -919,7 +1009,10 @@ const CollectionCreationPage: NextPage = () => {
         </Conditional>
 
         <Conditional
-          test={minterType === 'vending' || (minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new')}
+          test={
+            minterType === 'vending' ||
+            (minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'new')
+          }
         >
           <div className="my-6">
             <Conditional test={minterType === 'vending'}>
@@ -933,12 +1026,16 @@ const CollectionCreationPage: NextPage = () => {
           <ConfirmationModal confirm={createVendingMinterCollection} />
         </Conditional>
         <Conditional
-          test={readyToCreateBm && minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new'}
+          test={readyToCreateBm && minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'new'}
         >
           <ConfirmationModal confirm={createBaseMinterCollection} />
         </Conditional>
         <Conditional
-          test={readyToUploadAndMint && minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'}
+          test={
+            readyToUploadAndMint &&
+            minterType === 'base' &&
+            baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
+          }
         >
           <ConfirmationModal confirm={uploadAndMint} />
         </Conditional>
@@ -953,7 +1050,7 @@ const CollectionCreationPage: NextPage = () => {
               Create Collection
             </Button>
           </Conditional>
-          <Conditional test={minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'new'}>
+          <Conditional test={minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'new'}>
             <Button
               className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
               isLoading={creatingCollection}
@@ -963,7 +1060,7 @@ const CollectionCreationPage: NextPage = () => {
               Create Collection
             </Button>
           </Conditional>
-          <Conditional test={minterType === 'base' && minterDetails?.minterAcquisitionMethod === 'existing'}>
+          <Conditional test={minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'}>
             <Button
               className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
               isLoading={creatingCollection}

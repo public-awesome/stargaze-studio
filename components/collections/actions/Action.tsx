@@ -205,7 +205,7 @@ export const CollectionActions = ({
       royalty_info:
         royaltyPaymentAddressState.value && royaltyShareState.value
           ? {
-              payment_address: royaltyPaymentAddressState.value,
+              payment_address: royaltyPaymentAddressState.value.trim(),
               share: (Number(royaltyShareState.value) / 100).toString(),
             }
           : undefined,
@@ -260,7 +260,7 @@ export const CollectionActions = ({
               error: `Querying mint price failed!`,
               loading: 'Querying current mint price...',
               success: (price) => {
-                console.log(price)
+                console.log('Current mint price: ', price)
                 return `Current mint price is ${Number(price.public_price.amount) / 1000000} STARS`
               },
             },
