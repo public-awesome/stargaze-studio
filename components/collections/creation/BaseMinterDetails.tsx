@@ -151,7 +151,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio5"
           >
-            Create a New Base Minter Contract
+            Create a New 1/1 Collection
           </label>
         </div>
         <div className="mt-3 ml-2 font-bold form-check form-check-inline">
@@ -170,7 +170,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio6"
           >
-            Use an Existing Base Minter Contract
+            Append a New Token to an Existing 1/1 Collection
           </label>
         </div>
       </div>
