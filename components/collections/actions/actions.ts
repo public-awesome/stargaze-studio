@@ -42,8 +42,8 @@ export interface ActionListItem {
 export const BASE_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_token_uri',
-    name: 'Mint Token URI',
-    description: `Mint a token with the given token URI`,
+    name: 'Append New Token',
+    description: `Append a new token to the collection`,
   },
   {
     id: 'update_start_trading_time',
