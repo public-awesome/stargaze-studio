@@ -935,7 +935,7 @@ const CollectionCreationPage: NextPage = () => {
                 }}
                 type="button"
               >
-                <h4 className="font-bold">Vending Minter</h4>
+                <h4 className="font-bold">Vending Machine Collection</h4>
                 <span className="text-sm text-white/80 line-clamp-2">
                   Vending Minter contract facilitates primary market vending machine style minting
                 </span>
@@ -957,8 +957,10 @@ const CollectionCreationPage: NextPage = () => {
                 }}
                 type="button"
               >
-                <h4 className="font-bold">Base Minter</h4>
-                <span className="text-sm text-white/80 line-clamp-2">Base Minter contract enables 1/1 minting</span>
+                <h4 className="font-bold">1/1 Collection</h4>
+                <span className="text-sm text-white/80 line-clamp-2">
+                  An appendable collection that allows for direct secondary market listing of tokens
+                </span>
               </button>
             </div>
           </div>
