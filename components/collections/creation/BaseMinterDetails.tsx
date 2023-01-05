@@ -124,6 +124,9 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
       setMyBaseMinterContracts([])
       existingBaseMinterState.onChange('')
       void displayToast()
+    } else if (baseMinterAcquisitionMethod === 'new' || !wallet.initialized) {
+      setMyBaseMinterContracts([])
+      existingBaseMinterState.onChange('')
     }
   }, [debouncedWalletAddress, baseMinterAcquisitionMethod])
 
@@ -134,7 +137,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingBaseMinterState.value, baseMinterAcquisitionMethod])
+  }, [existingBaseMinterState.value, baseMinterAcquisitionMethod, wallet.initialized])
 
   return (
     <div className="mx-10 mb-4 rounded border-2 border-white/20">
@@ -184,7 +187,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
           <div className={clsx('my-4 mx-10')}>
             <Conditional test={myBaseMinterContracts.length !== 0}>
               <select
-                className="mt-4 w-full max-w-3xl text-sm bg-white/10 select select-bordered"
+                className="mt-4 w-full max-w-3xl text-base bg-white/10 select select-bordered"
                 onChange={(e) => {
                   existingBaseMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
                   e.preventDefault()
@@ -198,16 +201,23 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
             </Conditional>
             <Conditional test={myBaseMinterContracts.length === 0}>
               <div className="flex flex-col">
-                <Alert className="my-2 w-[90%]" type="info">
-                  No previous 1/1 collections were found. You may create a new 1/1 collection or fill in the minter
-                  contract address manually.
-                </Alert>
-                <TextInput
-                  className="w-3/5"
-                  defaultValue={existingBaseMinterState.value}
-                  {...existingBaseMinterState}
-                  isRequired
-                />
+                <Conditional test={wallet.initialized}>
+                  <Alert className="my-2 w-[90%]" type="info">
+                    No previous 1/1 collections were found. You may create a new 1/1 collection or fill in the minter
+                    contract address manually.
+                  </Alert>
+                  <TextInput
+                    className="w-3/5"
+                    defaultValue={existingBaseMinterState.value}
+                    {...existingBaseMinterState}
+                    isRequired
+                  />
+                </Conditional>
+                <Conditional test={!wallet.initialized}>
+                  <Alert className="my-2 w-[90%]" type="warning">
+                    Please connect your wallet first.
+                  </Alert>
+                </Conditional>
               </div>
             </Conditional>
           </div>
