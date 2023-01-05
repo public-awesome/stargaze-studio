@@ -43,7 +43,7 @@ export const BASE_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_token_uri',
     name: 'Append New Token',
-    description: `Append a new token to the collection`,
+    description: `Mint a new token and append it to the collection`,
   },
   {
     id: 'update_start_trading_time',
