@@ -88,7 +88,7 @@ const CollectionActionsPage: NextPage = () => {
             toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
           ),
           {
-            loading: 'Retrieving Minter type...',
+            loading: 'Retrieving minter type...',
             error: 'Minter type retrieval failed.',
             success: 'Minter type retrieved.',
           },
