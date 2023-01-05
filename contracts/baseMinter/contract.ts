@@ -141,8 +141,12 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
       })
       console.log(factoryParameters.params.mint_fee_bps)
 
-      const price = (await getConfig()).config.mint_price.amount
-      console.log(price)
+      const price = (await getConfig()).config?.mint_price.amount
+      if (!price) {
+        throw new Error(
+          'Unable to retrieve a valid mint price. It may be that the given contract address does not belong to a Base Minter contract.',
+        )
+      }
       console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
       const res = await client.execute(
         senderAddress,

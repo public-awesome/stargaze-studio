@@ -4,6 +4,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { toUtf8 } from '@cosmjs/encoding'
 import axios from 'axios'
+import clsx from 'clsx'
+import { Alert } from 'components/Alert'
+import { Conditional } from 'components/Conditional'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { useWallet } from 'contexts/wallet'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -73,7 +76,6 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
   }
 
   const filterBaseMinterContracts = async () => {
-    setMyBaseMinterContracts([])
     await fetchMinterContracts()
       .then((minterContracts) =>
         minterContracts.map(async (minterContract: any) => {
@@ -107,18 +109,20 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
     })
   }, [debouncedMyBaseMinterContracts])
 
-  const debouncedWalletAddress = useDebounce(wallet.address, 500)
+  const debouncedWalletAddress = useDebounce(wallet.address, 300)
 
   const displayToast = async () => {
     await toast.promise(filterBaseMinterContracts(), {
-      loading: 'Fetching Base Minter contracts...',
-      success: 'Base Minter contracts retrieved.',
-      error: 'Unable to retrieve Base Minter contracts.',
+      loading: 'Retrieving previous 1/1 collections...',
+      success: 'Collection retrieval finalized.',
+      error: 'Unable to retrieve any 1/1 collections.',
     })
   }
 
   useEffect(() => {
     if (debouncedWalletAddress && baseMinterAcquisitionMethod === 'existing') {
+      setMyBaseMinterContracts([])
+      existingBaseMinterState.onChange('')
       void displayToast()
     }
   }, [debouncedWalletAddress, baseMinterAcquisitionMethod])
@@ -177,20 +181,35 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
 
       {baseMinterAcquisitionMethod === 'existing' && (
         <div>
-          <div className="grid grid-cols-2 grid-flow-col my-4 mx-10">
-            <select
-              className="mt-8 w-full max-w-lg text-sm bg-white/10 select select-bordered"
-              onChange={(e) => {
-                existingBaseMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
-                e.preventDefault()
-              }}
-            >
-              <option className="mt-2 text-lg bg-[#1A1A1A]" disabled selected>
-                Select one of your existing Base Minter contracts
-              </option>
-              {renderBaseMinterContracts()}
-            </select>
-            <TextInput defaultValue={existingBaseMinterState.value} {...existingBaseMinterState} isRequired />
+          <div className={clsx('my-4 mx-10')}>
+            <Conditional test={myBaseMinterContracts.length !== 0}>
+              <select
+                className="mt-4 w-full max-w-3xl text-sm bg-white/10 select select-bordered"
+                onChange={(e) => {
+                  existingBaseMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
+                  e.preventDefault()
+                }}
+              >
+                <option className="mt-2 text-lg bg-[#1A1A1A]" disabled selected>
+                  Select one of your existing 1/1 collections
+                </option>
+                {renderBaseMinterContracts()}
+              </select>
+            </Conditional>
+            <Conditional test={myBaseMinterContracts.length === 0}>
+              <div className="flex flex-col">
+                <Alert className="my-2 w-[90%]" type="info">
+                  No previous 1/1 collections were found. You may create a new 1/1 collection or fill in the minter
+                  contract address manually.
+                </Alert>
+                <TextInput
+                  className="w-3/5"
+                  defaultValue={existingBaseMinterState.value}
+                  {...existingBaseMinterState}
+                  isRequired
+                />
+              </div>
+            </Conditional>
           </div>
         </div>
       )}
