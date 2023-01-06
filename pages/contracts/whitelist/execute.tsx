@@ -13,6 +13,7 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { whitelistLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/whitelist/messages/execute'
@@ -25,6 +26,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -33,6 +35,7 @@ const WhitelistExecutePage: NextPage = () => {
   const wallet = useWallet()
 
   const [lastTx, setLastTx] = useState('')
+  const [memberList, setMemberList] = useState<string[]>([])
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -68,7 +71,14 @@ const WhitelistExecutePage: NextPage = () => {
     type,
     limit: limitState.value,
     timestamp: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
-    members: addressListState.values.map((a) => a.address),
+    members: [
+      ...new Set(
+        addressListState.values
+          .map((a) => a.address)
+          .filter((address) => address !== '' && isValidAddress(address) && address.startsWith('stars'))
+          .concat(memberList),
+      ),
+    ],
   }
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
@@ -145,6 +155,7 @@ const WhitelistExecutePage: NextPage = () => {
               subtitle="Enter the member addresses"
               title="Addresses"
             />
+            <WhitelistUpload onChange={setMemberList} />
           </Conditional>
         </div>
         <div className="space-y-8">
