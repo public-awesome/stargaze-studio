@@ -311,7 +311,7 @@ const CollectionCreationPage: NextPage = () => {
             return result
           })
           .then((result) => {
-            toast.success(`Minted & appended successfully! Tx Hash: ${result}`, {
+            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
@@ -330,7 +330,7 @@ const CollectionCreationPage: NextPage = () => {
           .use(baseMinterDetails?.existingBaseMinter as string)
           ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
-            toast.success(`Minted & appended successfully! Tx Hash: ${result}`, {
+            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
