@@ -1,3 +1,4 @@
+import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -74,8 +75,8 @@ const WhitelistExecutePage: NextPage = () => {
     members: [
       ...new Set(
         addressListState.values
-          .map((a) => a.address)
-          .filter((address) => address !== '' && isValidAddress(address) && address.startsWith('stars'))
+          .map((a) => a.address.trim())
+          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
           .concat(memberList),
       ),
     ],
@@ -155,6 +156,9 @@ const WhitelistExecutePage: NextPage = () => {
               subtitle="Enter the member addresses"
               title="Addresses"
             />
+            <Alert className="mt-8" type="info">
+              You may optionally choose a text file of additional member addresses.
+            </Alert>
             <WhitelistUpload onChange={setMemberList} />
           </Conditional>
         </div>
