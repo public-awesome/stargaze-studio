@@ -661,6 +661,8 @@ const CollectionCreationPage: NextPage = () => {
     if (!collectionDetails) throw new Error('Please fill out the collection details')
     if (collectionDetails.name === '') throw new Error('Collection name is required')
     if (collectionDetails.description === '') throw new Error('Collection description is required')
+    if (collectionDetails.description.length > 512)
+      throw new Error('Collection description cannot exceed 512 characters')
     if (uploadDetails?.uploadMethod === 'new' && collectionDetails.imageFile.length === 0)
       throw new Error('Collection cover image is required')
     if (
