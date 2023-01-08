@@ -318,11 +318,11 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
               and upload your assets & metadata manually to get a base URI for your collection.
             </p>
             <div>
-              <TextInput {...baseTokenUriState} className="w-1/2" />
+              <TextInput {...baseTokenUriState} className="ml-4 w-1/2" />
             </div>
             <Conditional test={minterType !== 'base'}>
               <div>
-                <TextInput {...coverImageUrlState} className="mt-2 w-1/2" />
+                <TextInput {...coverImageUrlState} className="mt-2 ml-4 w-1/2" />
               </div>
             </Conditional>
           </div>
@@ -342,13 +342,13 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
               and upload your asset & metadata manually to get a URI for your token before minting.
             </p>
             <div>
-              <TextInput {...baseTokenUriState} className="w-1/2" />
+              <TextInput {...baseTokenUriState} className="ml-4 w-1/2" />
             </div>
             <Conditional
               test={minterType !== 'base' || (minterType === 'base' && baseMinterAcquisitionMethod === 'new')}
             >
               <div>
-                <TextInput {...coverImageUrlState} className="mt-2 w-1/2" />
+                <TextInput {...coverImageUrlState} className="mt-2 ml-4 w-1/2" />
               </div>
             </Conditional>
           </div>
