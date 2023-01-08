@@ -311,7 +311,10 @@ const CollectionCreationPage: NextPage = () => {
             return result
           })
           .then((result) => {
-            toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+            toast.success(`Minted & appended successfully! Tx Hash: ${result}`, {
+              style: { maxWidth: 'none' },
+              duration: 5000,
+            })
             setIsMintingComplete(true)
           })
           .catch((error) => {
@@ -327,7 +330,10 @@ const CollectionCreationPage: NextPage = () => {
           .use(baseMinterDetails?.existingBaseMinter as string)
           ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
-            toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+            toast.success(`Minted & appended successfully! Tx Hash: ${result}`, {
+              style: { maxWidth: 'none' },
+              duration: 5000,
+            })
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
@@ -789,7 +795,7 @@ const CollectionCreationPage: NextPage = () => {
       <NextSeo
         title={
           minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Mint Token'
+            ? 'Append Token'
             : 'Create Collection'
         }
       />
@@ -797,7 +803,7 @@ const CollectionCreationPage: NextPage = () => {
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
           {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Mint Token'
+            ? 'Append Token'
             : 'Create Collection'}
         </h1>
 
@@ -1071,7 +1077,7 @@ const CollectionCreationPage: NextPage = () => {
               onClick={performUploadAndMintChecks}
               variant="solid"
             >
-              Upload & Mint Token
+              Mint & Append Token
             </Button>
           </Conditional>
         </div>
