@@ -311,7 +311,10 @@ const CollectionCreationPage: NextPage = () => {
             return result
           })
           .then((result) => {
-            toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
+              style: { maxWidth: 'none' },
+              duration: 5000,
+            })
             setIsMintingComplete(true)
           })
           .catch((error) => {
@@ -327,7 +330,10 @@ const CollectionCreationPage: NextPage = () => {
           .use(baseMinterDetails?.existingBaseMinter as string)
           ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
-            toast.success(`Minted successfully! Tx Hash: ${result}`, { style: { maxWidth: 'none' }, duration: 5000 })
+            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
+              style: { maxWidth: 'none' },
+              duration: 5000,
+            })
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
@@ -661,6 +667,8 @@ const CollectionCreationPage: NextPage = () => {
     if (!collectionDetails) throw new Error('Please fill out the collection details')
     if (collectionDetails.name === '') throw new Error('Collection name is required')
     if (collectionDetails.description === '') throw new Error('Collection description is required')
+    if (collectionDetails.description.length > 512)
+      throw new Error('Collection description cannot exceed 512 characters')
     if (uploadDetails?.uploadMethod === 'new' && collectionDetails.imageFile.length === 0)
       throw new Error('Collection cover image is required')
     if (
@@ -673,6 +681,13 @@ const CollectionCreationPage: NextPage = () => {
       Number(collectionDetails.startTradingTime) < Number(mintingDetails?.startTime)
     )
       throw new Error('Trading start time must be after minting start time')
+    if (collectionDetails.externalLink) {
+      try {
+        const url = new URL(collectionDetails.externalLink)
+      } catch (e: any) {
+        throw new Error(`Invalid external link: Make sure to include the protocol (e.g. https://)`)
+      }
+    }
   }
 
   const checkMintingDetails = () => {
@@ -787,7 +802,7 @@ const CollectionCreationPage: NextPage = () => {
       <NextSeo
         title={
           minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Mint Token'
+            ? 'Append Token'
             : 'Create Collection'
         }
       />
@@ -795,7 +810,7 @@ const CollectionCreationPage: NextPage = () => {
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
           {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Mint Token'
+            ? 'Append Token'
             : 'Create Collection'}
         </h1>
 
@@ -1069,7 +1084,7 @@ const CollectionCreationPage: NextPage = () => {
               onClick={performUploadAndMintChecks}
               variant="solid"
             >
-              Upload & Mint Token
+              Mint & Append Token
             </Button>
           </Conditional>
         </div>
