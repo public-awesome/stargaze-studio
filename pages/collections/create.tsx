@@ -681,6 +681,13 @@ const CollectionCreationPage: NextPage = () => {
       Number(collectionDetails.startTradingTime) < Number(mintingDetails?.startTime)
     )
       throw new Error('Trading start time must be after minting start time')
+    if (collectionDetails.externalLink) {
+      try {
+        const url = new URL(collectionDetails.externalLink)
+      } catch (e: any) {
+        throw new Error(`Invalid external link: Make sure to include the protocol (e.g. https://)`)
+      }
+    }
   }
 
   const checkMintingDetails = () => {
