@@ -22,6 +22,7 @@ import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
+import { resolveAddress } from 'utils/resolveAddress'
 
 import type { CollectionInfo } from '../../../contracts/sg721/contract'
 import { TextInput } from '../../forms/FormInput'
@@ -54,6 +55,7 @@ export const CollectionActions = ({
   const [airdropArray, setAirdropArray] = useState<string[]>([])
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>()
   const [explicitContent, setExplicitContent] = useState<ExplicitContentType>(undefined)
+  const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -188,13 +190,43 @@ export const CollectionActions = ({
     vendingMinterMessages,
     baseMinterMessages,
     sg721Messages,
-    recipient: recipientState.value,
+    recipient: resolvedRecipientAddress,
     recipients: airdropArray,
     txSigner: wallet.address,
     type,
     price: priceState.value.toString(),
     collectionInfo,
   }
+  const resolveRecipientAddress = async () => {
+    await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedRecipientAddress(resolvedAddress as string)
+    })
+  }
+  useEffect(() => {
+    void resolveRecipientAddress()
+  }, [recipientState.value])
+
+  const resolveRoyaltyPaymentAddress = async () => {
+    await resolveAddress(royaltyPaymentAddressState.value.trim(), wallet).then((resolvedAddress) => {
+      setCollectionInfo({
+        description: descriptionState.value || undefined,
+        image: imageState.value || undefined,
+        explicit_content: explicitContent,
+        external_link: externalLinkState.value || undefined,
+        royalty_info:
+          royaltyPaymentAddressState.value && royaltyShareState.value
+            ? {
+                payment_address: resolvedAddress as string,
+                share: (Number(royaltyShareState.value) / 100).toString(),
+              }
+            : undefined,
+      })
+    })
+  }
+
+  useEffect(() => {
+    void resolveRoyaltyPaymentAddress()
+  }, [royaltyPaymentAddressState.value])
 
   useEffect(() => {
     setCollectionInfo({
