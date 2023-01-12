@@ -25,12 +25,15 @@ import { useMutation } from 'react-query'
 import { parseJson } from 'utils/json'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 
 const Sg721ExecutePage: NextPage = () => {
   const { sg721: contract } = useContracts()
   const wallet = useWallet()
 
   const [lastTx, setLastTx] = useState('')
+  const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
+  const [resolvedOperatorAddress, setResolvedOperatorAddress] = useState<string>('')
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -93,8 +96,8 @@ const Sg721ExecutePage: NextPage = () => {
     contract: contractState.value,
     tokenId: tokenIdState.value,
     messages,
-    recipient: recipientState.value,
-    operator: operatorState.value,
+    recipient: resolvedRecipientAddress,
+    operator: resolvedOperatorAddress,
     type,
     tokenURI: tokenURIState.value,
     msg: parseJson(messageState.value) || {},
@@ -136,6 +139,24 @@ const Sg721ExecutePage: NextPage = () => {
     const initial = new URL(document.URL).searchParams.get('contractAddress')
     if (initial && initial.length > 0) contractState.onChange(initial)
   }, [])
+
+  const resolveRecipientAddress = async () => {
+    await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedRecipientAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveRecipientAddress()
+  }, [recipientState.value])
+
+  const resolveOperatorAddress = async () => {
+    await resolveAddress(operatorState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedOperatorAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveOperatorAddress()
+  }, [operatorState.value])
 
   return (
     <section className="py-6 px-12 space-y-4">
