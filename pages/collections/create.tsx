@@ -52,6 +52,7 @@ import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import { getAssetType } from '../../utils/getAssetType'
+import { isValidAddress } from '../../utils/isValidAddress'
 
 const CollectionCreationPage: NextPage = () => {
   const wallet = useWallet()
@@ -767,6 +768,12 @@ const CollectionCreationPage: NextPage = () => {
       if (royaltyDetails.share === 0) throw new Error('Royalty share percentage is required')
       if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share percentage')
       if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
+      if (!isValidAddress(royaltyDetails.paymentAddress)) {
+        if (royaltyDetails.paymentAddress.trim().endsWith('.stars')) {
+          throw new Error('Royalty payment address could not be resolved')
+        }
+        throw new Error('Invalid royalty payment address')
+      }
     }
   }
 
