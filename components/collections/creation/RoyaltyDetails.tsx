@@ -1,8 +1,10 @@
 import { Conditional } from 'components/Conditional'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
+import { useWallet } from 'contexts/wallet'
 import React, { useEffect, useState } from 'react'
 
+import { resolveAddress } from '../../../utils/resolveAddress'
 import { NumberInput, TextInput } from '../../forms/FormInput'
 
 interface RoyaltyDetailsProps {
@@ -18,6 +20,7 @@ export interface RoyaltyDetailsDataProps {
 type RoyaltyState = 'none' | 'new'
 
 export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
+  const wallet = useWallet()
   const [royaltyState, setRoyaltyState] = useState<RoyaltyState>('none')
 
   const royaltyPaymentAddressState = useInputState({
@@ -37,17 +40,23 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
   })
 
   useEffect(() => {
-    const data: RoyaltyDetailsDataProps = {
-      royaltyType: royaltyState,
-      paymentAddress: royaltyPaymentAddressState.value
+    void resolveAddress(
+      royaltyPaymentAddressState.value
         .toLowerCase()
         .replace(/,/g, '')
         .replace(/"/g, '')
         .replace(/'/g, '')
         .replace(/ /g, ''),
-      share: Number(royaltyShareState.value),
-    }
-    onChange(data)
+      wallet,
+    ).then((royaltyPaymentAddress) => {
+      royaltyPaymentAddressState.onChange(royaltyPaymentAddress)
+      const data: RoyaltyDetailsDataProps = {
+        royaltyType: royaltyState,
+        paymentAddress: royaltyPaymentAddressState.value,
+        share: Number(royaltyShareState.value),
+      }
+      onChange(data)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [royaltyState, royaltyPaymentAddressState.value, royaltyShareState.value])
 

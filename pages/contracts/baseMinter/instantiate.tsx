@@ -17,7 +17,7 @@ import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import type { FormEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaAsterisk } from 'react-icons/fa'
 import { useMutation } from 'react-query'
@@ -27,6 +27,7 @@ import { links } from 'utils/links'
 
 import type { CreateBaseMinterResponse } from '../../../contracts/baseFactory/contract'
 import { SG721_CODE_ID } from '../../../utils/constants'
+import { resolveAddress } from '../../../utils/resolveAddress'
 
 const BaseMinterInstantiatePage: NextPage = () => {
   const wallet = useWallet()
@@ -160,6 +161,18 @@ const BaseMinterInstantiatePage: NextPage = () => {
   )
 
   const txHash = data?.transactionHash
+
+  useEffect(() => {
+    void resolveAddress(creatorState.value, wallet).then((resolvedAddress) => {
+      creatorState.onChange(resolvedAddress)
+    })
+  }, [creatorState.value])
+
+  useEffect(() => {
+    void resolveAddress(royaltyPaymentAddressState.value, wallet).then((resolvedAddress) => {
+      royaltyPaymentAddressState.onChange(resolvedAddress)
+    })
+  }, [royaltyPaymentAddressState.value])
 
   return (
     <form className="py-6 px-12 space-y-4" onSubmit={mutate}>

@@ -25,6 +25,7 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 
 const VendingMinterExecutePage: NextPage = () => {
   const { vendingMinter: contract } = useContracts()
@@ -32,6 +33,7 @@ const VendingMinterExecutePage: NextPage = () => {
   const [lastTx, setLastTx] = useState('')
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
+  const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -94,7 +96,7 @@ const VendingMinterExecutePage: NextPage = () => {
     contract: contractState.value,
     tokenId: tokenIdState.value,
     messages,
-    recipient: recipientState.value,
+    recipient: resolvedRecipientAddress,
     txSigner: wallet.address,
     price: priceState.value ? priceState.value.toString() : '0',
     type,
@@ -182,6 +184,15 @@ const VendingMinterExecutePage: NextPage = () => {
     const initial = new URL(document.URL).searchParams.get('contractAddress')
     if (initial && initial.length > 0) contractState.onChange(initial)
   }, [])
+
+  const resolveRecipientAddress = async () => {
+    await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedRecipientAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveRecipientAddress()
+  }, [recipientState.value])
 
   return (
     <section className="py-6 px-12 space-y-4">
