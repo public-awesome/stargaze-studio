@@ -35,7 +35,6 @@ const BaseMinterInstantiatePage: NextPage = () => {
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
-  const [resolvedCreatorAddress, setResolvedCreatorAddress] = useState<string>()
 
   const nameState = useInputState({
     id: 'name',

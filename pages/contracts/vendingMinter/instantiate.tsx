@@ -17,13 +17,14 @@ import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import type { FormEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaAsterisk } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 
 import type { CreateVendingMinterResponse } from '../../../contracts/vendingFactory/contract'
 
@@ -222,8 +223,19 @@ const VendingMinterInstantiatePage: NextPage = () => {
       },
     },
   )
-
   const txHash = data?.transactionHash
+
+  useEffect(() => {
+    void resolveAddress(creatorState.value, wallet).then((resolvedAddress) => {
+      creatorState.onChange(resolvedAddress)
+    })
+  }, [creatorState.value])
+
+  useEffect(() => {
+    void resolveAddress(royaltyPaymentAddressState.value, wallet).then((resolvedAddress) => {
+      royaltyPaymentAddressState.onChange(resolvedAddress)
+    })
+  }, [royaltyPaymentAddressState.value])
 
   return (
     <form className="py-6 px-12 space-y-4" onSubmit={mutate}>
