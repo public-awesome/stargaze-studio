@@ -6,7 +6,7 @@ import { SG721_NAME_ADDRESS } from './constants'
 import { isValidAddress } from './isValidAddress'
 
 export const resolveAddress = async (name: string, wallet: KeplrWalletStore): Promise<string> => {
-  if (!name.trim().endsWith('.stars')) return name
+  if (!name.trim().endsWith('.stars')) return name.trim()
 
   if (wallet.client) {
     const tokenUri = await wallet.client
@@ -15,7 +15,7 @@ export const resolveAddress = async (name: string, wallet: KeplrWalletStore): Pr
         toUtf8(
           Buffer.from(
             `0006${Buffer.from('tokens').toString('hex')}${Buffer.from(
-              name.substring(0, name.lastIndexOf('.')),
+              name.trim().substring(0, name.trim().lastIndexOf('.')),
             ).toString('hex')}`,
             'hex',
           ).toString(),
@@ -25,12 +25,12 @@ export const resolveAddress = async (name: string, wallet: KeplrWalletStore): Pr
         const parsedTokenUri = JSON.parse(new TextDecoder().decode(res as Uint8Array)).token_uri
         console.log(parsedTokenUri)
         if (parsedTokenUri && isValidAddress(parsedTokenUri)) return parsedTokenUri as string
-        toast.error(`Resolved address is empty or invalid for the name: ${name}`)
+        toast.error(`Resolved address is empty or invalid for the name: ${name.trim()}`)
         return name
       })
       .catch((e) => {
         console.log(e)
-        toast.error(`Error resolving address for the name: ${name}`)
+        toast.error(`Error resolving address for the name: ${name.trim()}`)
         return name
       })
     return tokenUri

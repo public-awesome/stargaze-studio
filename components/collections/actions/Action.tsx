@@ -344,7 +344,6 @@ export const CollectionActions = ({
 
   const airdropFileOnChange = (data: AirdropAllocation[]) => {
     setAirdropAllocationArray(data)
-    console.log('airdrop allocation array: ', data)
   }
 
   return (

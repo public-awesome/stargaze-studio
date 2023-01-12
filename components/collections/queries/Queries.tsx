@@ -11,6 +11,8 @@ import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 
+import { useWallet } from '../../../contexts/wallet'
+import { resolveAddress } from '../../../utils/resolveAddress'
 import type { MinterType } from '../actions/Combobox'
 
 interface CollectionQueriesProps {
@@ -29,6 +31,8 @@ export const CollectionQueries = ({
   baseMinterMessages,
   minterType,
 }: CollectionQueriesProps) => {
+  const wallet = useWallet()
+
   const comboboxState = useQueryComboboxState()
   const type = comboboxState.value?.id
 
@@ -57,20 +61,26 @@ export const CollectionQueries = ({
     async ({ queryKey }) => {
       const [_sg721Messages, _baseMinterMessages_, _vendingMinterMessages, _type, _tokenId, _address] = queryKey
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const result = await dispatchQuery({
-        tokenId: _tokenId,
-        vendingMinterMessages: _vendingMinterMessages,
-        baseMinterMessages: _baseMinterMessages_,
-        sg721Messages: _sg721Messages,
-        address: _address,
-        type: _type,
+      const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const result = await dispatchQuery({
+          tokenId: _tokenId,
+          vendingMinterMessages: _vendingMinterMessages,
+          baseMinterMessages: _baseMinterMessages_,
+          sg721Messages: _sg721Messages,
+          address: resolvedAddress,
+          type: _type,
+        })
+        return result
       })
-      return result
+      return res
     },
     {
       placeholderData: null,
       onError: (error: any) => {
-        toast.error(error.message, { style: { maxWidth: 'none' } })
+        if (addressState.value.length > 12 && !addressState.value.includes('.')) {
+          toast.error(error.message, { style: { maxWidth: 'none' } })
+        }
       },
       enabled: Boolean(sg721ContractAddress && minterContractAddress && type),
       retry: false,
