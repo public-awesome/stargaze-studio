@@ -19,6 +19,7 @@ import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 
 const VendingMinterQueryPage: NextPage = () => {
   const { vendingMinter: contract } = useContracts()
@@ -47,12 +48,15 @@ const VendingMinterQueryPage: NextPage = () => {
     async ({ queryKey }) => {
       const [_contractAddress, _type, _contract, _wallet] = queryKey
       const messages = contract?.use(_contractAddress)
-      const result = await dispatchQuery({
-        address,
-        messages,
-        type,
+      const res = await resolveAddress(address, wallet).then(async (resolvedAddress) => {
+        const result = await dispatchQuery({
+          address: resolvedAddress,
+          messages,
+          type,
+        })
+        return result
       })
-      return result
+      return res
     },
     {
       placeholderData: null,
