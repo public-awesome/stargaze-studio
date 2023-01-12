@@ -19,6 +19,7 @@ import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 
 const WhitelistQueryPage: NextPage = () => {
   const { whitelist: contract } = useContracts()
@@ -49,12 +50,15 @@ const WhitelistQueryPage: NextPage = () => {
     async ({ queryKey }) => {
       const [_contractAddress, _type, _contract, _wallet, _address] = queryKey
       const messages = contract?.use(contractAddress)
-      const result = await dispatchQuery({
-        messages,
-        type,
-        address: _address,
+      const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
+        const result = await dispatchQuery({
+          messages,
+          type,
+          address: resolvedAddress,
+        })
+        return result
       })
-      return result
+      return res
     },
     {
       placeholderData: null,
