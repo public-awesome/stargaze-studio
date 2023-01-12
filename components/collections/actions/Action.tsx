@@ -199,7 +199,7 @@ export const CollectionActions = ({
   }
   const resolveRecipientAddress = async () => {
     await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
-      setResolvedRecipientAddress(resolvedAddress as string)
+      setResolvedRecipientAddress(resolvedAddress)
     })
   }
   useEffect(() => {
@@ -216,7 +216,7 @@ export const CollectionActions = ({
         royalty_info:
           royaltyPaymentAddressState.value && royaltyShareState.value
             ? {
-                payment_address: resolvedAddress as string,
+                payment_address: resolvedAddress,
                 share: (Number(royaltyShareState.value) / 100).toString(),
               }
             : undefined,
@@ -344,6 +344,7 @@ export const CollectionActions = ({
 
   const airdropFileOnChange = (data: AirdropAllocation[]) => {
     setAirdropAllocationArray(data)
+    console.log('airdrop allocation array: ', data)
   }
 
   return (

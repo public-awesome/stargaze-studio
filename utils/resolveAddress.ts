@@ -5,7 +5,7 @@ import type { KeplrWalletStore } from '../contexts/wallet'
 import { SG721_NAME_ADDRESS } from './constants'
 import { isValidAddress } from './isValidAddress'
 
-export const resolveAddress = async (name: string, wallet: KeplrWalletStore): Promise<string | undefined> => {
+export const resolveAddress = async (name: string, wallet: KeplrWalletStore): Promise<string> => {
   if (!name.trim().endsWith('.stars')) return name
 
   if (wallet.client) {

@@ -13,17 +13,19 @@ export const isValidAccountsFile = (file: AirdropAllocation[]) => {
     sumOfAmounts += Number(allocation.amount)
   })
   if (sumOfAmounts > 10000) {
-    toast.error(`Accounts file must have less than 10000 accounts`)
+    toast.error(`Accounts file must cover less than 10000 tokens`)
     return false
   }
 
   const checks = file.map((account) => {
     // Check if address is valid bech32 address
-    if (!isValidAddress(account.address)) {
-      return { address: false }
+    if (account.address.trim().startsWith('stars')) {
+      if (!isValidAddress(account.address.trim())) {
+        return { address: false }
+      }
     }
     // Check if address start with stars
-    if (!account.address.startsWith('stars')) {
+    if (!account.address.trim().startsWith('stars') && !account.address.trim().endsWith('.stars')) {
       return { address: false }
     }
     // Check if amount is valid
@@ -33,7 +35,9 @@ export const isValidAccountsFile = (file: AirdropAllocation[]) => {
     return null
   })
 
-  const isStargazeAddresses = file.every((account) => account.address.startsWith('stars'))
+  const isStargazeAddresses = file.every(
+    (account) => account.address.trim().startsWith('stars') || account.address.trim().endsWith('.stars'),
+  )
   if (!isStargazeAddresses) {
     toast.error('All accounts must be on the same network')
     return false
