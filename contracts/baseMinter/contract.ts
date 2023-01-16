@@ -1,8 +1,10 @@
-import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import type { MsgExecuteContractEncodeObject, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import { toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 import toast from 'react-hot-toast'
 import { BASE_FACTORY_ADDRESS } from 'utils/constants'
 
@@ -32,11 +34,13 @@ export interface BaseMinterInstance {
   //Execute
   mint: (senderAddress: string, tokenUri: string) => Promise<string>
   updateStartTradingTime: (senderAddress: string, time?: Timestamp) => Promise<string>
+  batchMint: (senderAddress: string, recipient: string, batchCount: number) => Promise<string>
 }
 
 export interface BaseMinterMessages {
   mint: (tokenUri: string) => MintMessage
   updateStartTradingTime: (time: Timestamp) => UpdateStartTradingTimeMessage
+  batchMint: (recipient: string, batchNumber: number) => CustomMessage
 }
 
 export interface MintMessage {
@@ -176,12 +180,52 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
       return res.transactionHash
     }
 
+    const batchMint = async (senderAddress: string, baseUri: string, batchCount: number): Promise<string> => {
+      const factoryParameters = await toast.promise(getFactoryParameters(), {
+        loading: 'Querying Factory Parameters...',
+        error: 'Querying Factory Parameters failed!',
+        success: 'Query successful! Minting...',
+      })
+      console.log(factoryParameters.params.mint_fee_bps)
+
+      const price = (await getConfig()).config?.mint_price.amount
+      if (!price) {
+        throw new Error(
+          'Unable to retrieve a valid mint price. It may be that the given contract address does not belong to a Base Minter contract.',
+        )
+      }
+      console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
+
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      for (let i = 0; i < batchCount; i++) {
+        const msg = {
+          mint: { token_uri: `${baseUri}/${i}` },
+        }
+        const executeContractMsg: MsgExecuteContractEncodeObject = {
+          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+          value: MsgExecuteContract.fromPartial({
+            sender: senderAddress,
+            contract: contractAddress,
+            msg: toUtf8(JSON.stringify(msg)),
+            funds: [coin((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100 / 100, 'ustars')],
+          }),
+        }
+
+        executeContractMsgs.push(executeContractMsg)
+      }
+
+      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'batch mint')
+
+      return res.transactionHash
+    }
+
     return {
       contractAddress,
       getConfig,
       getStatus,
       mint,
       updateStartTradingTime,
+      batchMint,
     }
   }
 
@@ -237,9 +281,23 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
       }
     }
 
+    const batchMint = (baseUri: string, batchCount: number): CustomMessage => {
+      const msg: Record<string, unknown>[] = []
+      for (let i = 0; i < batchCount; i++) {
+        msg.push({ mint: { token_uri: `${baseUri}/${i}` } })
+      }
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
     return {
       mint,
       updateStartTradingTime,
+      batchMint,
     }
   }
 
