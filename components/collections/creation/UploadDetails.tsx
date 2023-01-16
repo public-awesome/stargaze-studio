@@ -51,7 +51,6 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
 
-  //let baseMinterMetadataFile: File | undefined
   const [baseMinterMetadataFile, setBaseMinterMetadataFile] = useState<File | undefined>()
 
   const assetFilesRef = useRef<HTMLInputElement | null>(null)
@@ -138,11 +137,14 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
   const selectMetadata = (event: ChangeEvent<HTMLInputElement>) => {
     setMetadataFilesArray([])
     if (event.target.files === null) return toast.error('No files selected.')
-    if (minterType === 'vending' && event.target.files.length !== assetFilesArray.length) {
+    if (
+      (minterType === 'vending' || (minterType === 'base' && assetFilesArray.length > 1)) &&
+      event.target.files.length !== assetFilesArray.length
+    ) {
       event.target.value = ''
       return toast.error('The number of metadata files should be equal to the number of asset files.')
     }
-    if (minterType === 'vending') {
+    if (minterType === 'vending' || (minterType === 'base' && assetFilesArray.length > 1)) {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
@@ -150,7 +152,6 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
       for (let i = 0; i < sortedFileNames.length; i++) {
         if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
           toast.error('The file names should be in numerical order starting from 1.')
-          //clear the input
           event.target.value = ''
           return
         }

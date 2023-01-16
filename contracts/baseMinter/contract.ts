@@ -199,7 +199,7 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
       const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
       for (let i = 0; i < batchCount; i++) {
         const msg = {
-          mint: { token_uri: `${baseUri}/${i}` },
+          mint: { token_uri: `${baseUri}/${i + 1}` },
         }
         const executeContractMsg: MsgExecuteContractEncodeObject = {
           typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
@@ -284,7 +284,7 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
     const batchMint = (baseUri: string, batchCount: number): CustomMessage => {
       const msg: Record<string, unknown>[] = []
       for (let i = 0; i < batchCount; i++) {
-        msg.push({ mint: { token_uri: `${baseUri}/${i}` } })
+        msg.push({ mint: { token_uri: `${baseUri}/${i + 1}` } })
       }
       return {
         sender: txSigner,

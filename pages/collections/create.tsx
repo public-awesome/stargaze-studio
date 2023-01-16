@@ -244,22 +244,28 @@ const CollectionCreationPage: NextPage = () => {
         )
 
         setUploading(false)
-
-        setBaseTokenUri(
-          `${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
-            0,
-            (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
-          )}`,
-        )
+        if (uploadDetails.assetFiles.length === 1) {
+          setBaseTokenUri(
+            `${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+              0,
+              (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+            )}`,
+          )
+        } else {
+          setBaseTokenUri(baseUri)
+        }
         setCoverImageUrl(coverImageUri)
-
-        await instantiateBaseMinter(
-          `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
-            0,
-            (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
-          )}`,
-          coverImageUri,
-        )
+        if (uploadDetails.assetFiles.length === 1) {
+          await instantiateBaseMinter(
+            `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+              0,
+              (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+            )}`,
+            coverImageUri,
+          )
+        } else {
+          await instantiateBaseMinter(`ipfs://${baseUri}`, coverImageUri)
+        }
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setCoverImageUrl(uploadDetails?.imageUrl as string)
@@ -482,28 +488,51 @@ const CollectionCreationPage: NextPage = () => {
         setTransactionHash(data.transactionHash)
         setVendingMinterContractAddress(data.baseMinterAddress)
         setSg721ContractAddress(data.sg721Address)
-        await toast
-          .promise(
-            baseMinterContract
-              .use(data.baseMinterAddress)
-
-              ?.mint(wallet.address, baseUri) as Promise<string>,
-            {
-              loading: 'Minting token...',
-              success: (result) => {
-                setIsMintingComplete(true)
-                return `Token minted successfully! Tx Hash: ${result}`
+        if (uploadDetails?.assetFiles.length === 1) {
+          await toast
+            .promise(
+              baseMinterContract.use(data.baseMinterAddress)?.mint(wallet.address, baseUri) as Promise<string>,
+              {
+                loading: 'Minting token...',
+                success: (result) => {
+                  setIsMintingComplete(true)
+                  return `Token minted successfully! Tx Hash: ${result}`
+                },
+                error: (error) => `Failed to mint token: ${error.message}`,
               },
-              error: (error) => `Failed to mint token: ${error.message}`,
-            },
-            { style: { maxWidth: 'none' } },
-          )
-          .catch((error) => {
-            toast.error(error.message, { style: { maxWidth: 'none' } })
-            setUploading(false)
-            setIsMintingComplete(false)
-            setCreatingCollection(false)
-          })
+              { style: { maxWidth: 'none' } },
+            )
+            .catch((error) => {
+              toast.error(error.message, { style: { maxWidth: 'none' } })
+              setUploading(false)
+              setIsMintingComplete(false)
+              setCreatingCollection(false)
+            })
+        } else {
+          console.log('Here')
+          console.log(data.baseMinterAddress)
+          await toast
+            .promise(
+              baseMinterContract
+                .use(data.baseMinterAddress)
+                ?.batchMint(wallet.address, baseUri, uploadDetails?.assetFiles.length as number) as Promise<string>,
+              {
+                loading: 'Minting tokens...',
+                success: (result) => {
+                  setIsMintingComplete(true)
+                  return `Tokens minted successfully! Tx Hash: ${result}`
+                },
+                error: (error) => `Failed to mint tokens: ${error.message}`,
+              },
+              { style: { maxWidth: 'none' } },
+            )
+            .catch((error) => {
+              toast.error(error.message, { style: { maxWidth: 'none' } })
+              setUploading(false)
+              setIsMintingComplete(false)
+              setCreatingCollection(false)
+            })
+        }
         setUploading(false)
         setCreatingCollection(false)
       })
@@ -526,7 +555,7 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails.pinataSecretKey as string,
       )
         .then((assetUri: string) => {
-          if (minterType === 'vending') {
+          if (minterType === 'vending' || (minterType === 'base' && uploadDetails.assetFiles.length > 1)) {
             const fileArray: File[] = []
             let reader: FileReader
 
@@ -577,7 +606,7 @@ const CollectionCreationPage: NextPage = () => {
               }
               reader.readAsText(uploadDetails.metadataFiles[i], 'utf8')
             }
-          } else if (minterType === 'base') {
+          } else if (minterType === 'base' && uploadDetails.assetFiles.length === 1) {
             const fileArray: File[] = []
             const reader: FileReader = new FileReader()
 
@@ -636,9 +665,9 @@ const CollectionCreationPage: NextPage = () => {
     if (!uploadDetails) {
       throw new Error('Please select assets and metadata')
     }
-    if (minterType === 'base' && uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length > 1) {
-      throw new Error('Base Minter can only mint one asset at a time. Please select only one asset.')
-    }
+    // if (minterType === 'base' && uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length > 1) {
+    //   throw new Error('Base Minter can only mint one asset at a time. Please select only one asset.')
+    // }
     if (uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length === 0) {
       throw new Error('Please select the assets')
     }
