@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-misleading-character-class */
 /* eslint-disable no-control-regex */
 /* eslint-disable @typescript-eslint/no-loop-func */
@@ -50,7 +51,6 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
 
-  //let baseMinterMetadataFile: File | undefined
   const [baseMinterMetadataFile, setBaseMinterMetadataFile] = useState<File | undefined>()
 
   const assetFilesRef = useRef<HTMLInputElement | null>(null)
@@ -98,7 +98,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
     setAssetFilesArray([])
     setMetadataFilesArray([])
     if (event.target.files === null) return
-    if (minterType === 'vending') {
+    if (minterType === 'vending' || (minterType === 'base' && event.target.files.length > 1)) {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
@@ -137,11 +137,14 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
   const selectMetadata = (event: ChangeEvent<HTMLInputElement>) => {
     setMetadataFilesArray([])
     if (event.target.files === null) return toast.error('No files selected.')
-    if (minterType === 'vending' && event.target.files.length !== assetFilesArray.length) {
+    if (
+      (minterType === 'vending' || (minterType === 'base' && assetFilesArray.length > 1)) &&
+      event.target.files.length !== assetFilesArray.length
+    ) {
       event.target.value = ''
       return toast.error('The number of metadata files should be equal to the number of asset files.')
     }
-    if (minterType === 'vending') {
+    if (minterType === 'vending' || (minterType === 'base' && assetFilesArray.length > 1)) {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
@@ -149,7 +152,6 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
       for (let i = 0; i < sortedFileNames.length; i++) {
         if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
           toast.error('The file names should be in numerical order starting from 1.')
-          //clear the input
           event.target.value = ''
           return
         }
@@ -445,7 +447,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                           'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
                         )}
                         id="assetFiles"
-                        multiple={minterType === 'vending'}
+                        multiple
                         onChange={selectAssets}
                         ref={assetFilesRef}
                         type="file"
@@ -459,7 +461,11 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                         className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
                         htmlFor="metadataFiles"
                       >
-                        {minterType === 'vending' ? 'Metadata Selection' : 'Metadata Selection (optional)'}
+                        {minterType === 'vending'
+                          ? 'Metadata Selection'
+                          : assetFilesArray.length === 1
+                          ? 'Metadata Selection (optional)'
+                          : 'Metadata Selection'}
                       </label>
                       <div
                         className={clsx(
@@ -474,7 +480,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                             'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
                           )}
                           id="metadataFiles"
-                          multiple={minterType === 'vending'}
+                          multiple
                           onChange={selectMetadata}
                           ref={metadataFilesRef}
                           type="file"
@@ -482,7 +488,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                       </div>
                     </div>
                   )}
-                  <Conditional test={minterType === 'vending'}>
+                  <Conditional test={assetFilesArray.length > 1}>
                     <MetadataModal
                       assetFile={assetFilesArray[metadataFileArrayIndex]}
                       metadataFile={metadataFilesArray[metadataFileArrayIndex]}
@@ -496,14 +502,22 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                   <AssetsPreview assetFilesArray={assetFilesArray} updateMetadataFileIndex={updateMetadataFileIndex} />
                 </Conditional>
                 <Conditional test={assetFilesArray.length > 0 && minterType === 'base'}>
-                  <SingleAssetPreview
-                    relatedAsset={assetFilesArray[0]}
-                    subtitle={`Asset filename: ${assetFilesArray[0]?.name}`}
-                    updateMetadataFileIndex={updateMetadataFileIndex}
-                  />
+                  <Conditional test={assetFilesArray.length === 1}>
+                    <SingleAssetPreview
+                      relatedAsset={assetFilesArray[0]}
+                      subtitle={`Asset filename: ${assetFilesArray[0]?.name}`}
+                      updateMetadataFileIndex={updateMetadataFileIndex}
+                    />
+                  </Conditional>
+                  <Conditional test={assetFilesArray.length > 1}>
+                    <AssetsPreview
+                      assetFilesArray={assetFilesArray}
+                      updateMetadataFileIndex={updateMetadataFileIndex}
+                    />
+                  </Conditional>
                 </Conditional>
               </div>
-              <Conditional test={minterType === 'base' && assetFilesArray.length > 0}>
+              <Conditional test={minterType === 'base' && assetFilesArray.length === 1}>
                 <MetadataInput
                   selectedAssetFile={assetFilesArray[0]}
                   selectedMetadataFile={metadataFilesArray[0]}
