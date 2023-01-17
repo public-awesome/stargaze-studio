@@ -298,27 +298,35 @@ const CollectionCreationPage: NextPage = () => {
         await uploadFiles()
           .then(async (baseUri) => {
             setUploading(false)
-            setBaseTokenUri(
-              `${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
-                0,
-                (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
-              )}`,
-            )
-            const result = await baseMinterContract
-              .use(baseMinterDetails?.existingBaseMinter as string)
-
-              ?.mint(
-                wallet.address,
-                `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+            if (uploadDetails.assetFiles.length === 1) {
+              setBaseTokenUri(
+                `${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
                   0,
                   (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
                 )}`,
               )
+              const result = await baseMinterContract
+                .use(baseMinterDetails?.existingBaseMinter as string)
+
+                ?.mint(
+                  wallet.address,
+                  `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
+                    0,
+                    (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
+                  )}`,
+                )
+              console.log(result)
+              return result
+            }
+            setBaseTokenUri(baseUri)
+            const result = await baseMinterContract
+              .use(baseMinterDetails?.existingBaseMinter as string)
+              ?.batchMint(wallet.address, `ipfs://${baseUri}`, uploadDetails.assetFiles.length)
             console.log(result)
             return result
           })
           .then((result) => {
-            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
+            toast.success(`Token(s) minted & appended to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
@@ -1120,7 +1128,7 @@ const CollectionCreationPage: NextPage = () => {
               onClick={performUploadAndMintChecks}
               variant="solid"
             >
-              Mint & Append Token
+              Mint & Append Token(s)
             </Button>
           </Conditional>
         </div>
