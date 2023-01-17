@@ -98,7 +98,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
     setAssetFilesArray([])
     setMetadataFilesArray([])
     if (event.target.files === null) return
-    if (minterType === 'vending') {
+    if (minterType === 'vending' || (minterType === 'base' && assetFilesArray.length > 1)) {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
