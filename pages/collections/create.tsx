@@ -816,12 +816,12 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
-    if (whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
+    if (minterType === 'vending' && whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
       const amountNeeded = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + 2500000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     } else {
-      const amountNeeded = 2500000000
+      const amountNeeded = minterType === 'vending' ? 2500000000 : 1000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     }
