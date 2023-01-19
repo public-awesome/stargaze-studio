@@ -66,6 +66,7 @@ const CollectionQueriesPage: NextPage = () => {
   useEffect(() => {
     if (response) {
       setNumTokens(response['num_tokens'])
+      setPers(0)
     }
   }, [response])
 
@@ -148,11 +149,11 @@ const CollectionQueriesPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Collection Queries" />
+      <NextSeo title="Warm Up Your Collection" />
       <ContractPageHeader
-        description="Here you can query your collection for information"
+        description="Here you can warm up your collection items"
         link={links.Documentation}
-        title="Collection Queries"
+        title="Warm Up Collection Items"
       />
       <div className="space-y-8">
         <AddressInput {...minterContractState} />
@@ -167,7 +168,7 @@ const CollectionQueriesPage: NextPage = () => {
           <div className="flex flex-row w-full text-center">
             <div className="w-1/3">{numTokens}</div>
             <div className="w-1/3">{doneList.length}</div>
-            <div className="w-1/3">%{pers}</div>
+            <div className="w-1/3">{(Math.round(pers * 100) / 100).toFixed(2)}%</div>
           </div>
         </div>
         <div>
