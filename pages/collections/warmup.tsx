@@ -7,6 +7,7 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import Lister from 'components/Lister'
 import { useContracts } from 'contexts/contracts'
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -20,6 +21,7 @@ const CollectionQueriesPage: NextPage = () => {
   const sg721ContractAddress = `sg721ContractState.value`
   const [doneList, setDoneList] = useState<number[]>([])
   const [processList, setProcessList] = useState<number[]>([])
+  const [errorList, setErrorList] = useState<number[]>([])
   const [numTokens, setNumTokens] = useState(0)
   const [pers, setPers] = useState(0)
   const minterContractState = useInputState({
@@ -39,6 +41,20 @@ const CollectionQueriesPage: NextPage = () => {
     [baseMinterContract, minterContractAddress],
   )
   const sg721Messages = useMemo(() => sg721Contract?.use(sg721ContractAddress), [sg721Contract, sg721ContractAddress])
+
+  const router = useRouter()
+
+  useEffect(() => {
+    if (minterContractState.value.length > 0) {
+      void router.replace({ query: { minterContractAddress } })
+    }
+  }, [minterContractState.value])
+
+  useEffect(() => {
+    const initial = new URL(document.URL).searchParams.get('minterContractAddress')
+    if (initial && initial.length > 0) minterContractState.onChange(initial)
+    console.log(minterContractState, minterContractAddress)
+  }, [])
 
   const { data: response } = useQuery(
     [sg721Messages, baseMinterMessages, vendingMinterMessages, type] as const,
@@ -67,7 +83,10 @@ const CollectionQueriesPage: NextPage = () => {
     if (response) {
       setNumTokens(response['num_tokens'])
       setPers(0)
-    }
+      setDoneList([])
+      setProcessList([])
+      setErrorList([])
+    } else setNumTokens(0)
   }, [response])
 
   useEffect(() => {
@@ -79,7 +98,7 @@ const CollectionQueriesPage: NextPage = () => {
     let alternate
     switch (attempt) {
       case 1: {
-        alternate = url.replace('ipfs://', 'https://ipfs.stargaze.zone/ipfs/')
+        alternate = url.replace('ipfs://', 'https://cf-ipfs.com/ipfs/')
         break
       }
       case 2: {
@@ -87,11 +106,11 @@ const CollectionQueriesPage: NextPage = () => {
         break
       }
       case 3: {
-        alternate = url.replace('ipfs://', 'https://cf-ipfs.com/ipfs/')
+        alternate = url.replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/')
         break
       }
       default: {
-        alternate = url.replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/')
+        alternate = url.replace('ipfs://', 'https://ipfs.stargaze.zone/ipfs/')
         break
       }
     }
@@ -125,6 +144,17 @@ const CollectionQueriesPage: NextPage = () => {
     }
     if (totalAttempt !== 4) {
       void warmOne(i, image, attempt === 3 ? 0 : attempt + 1, attempt === 3 ? totalAttempt + 1 : totalAttempt)
+    } else {
+      setErrorList((existingItems) => {
+        return [i, ...existingItems]
+      })
+      setProcessList((existingItems) => {
+        const index = existingItems.indexOf(i, 0)
+        if (index > -1) {
+          existingItems.splice(index, 1)
+        }
+        return existingItems
+      })
     }
   }
 
@@ -175,6 +205,9 @@ const CollectionQueriesPage: NextPage = () => {
           <Button
             isDisabled={!response}
             onClick={() => {
+              setDoneList([])
+              setProcessList([])
+              setErrorList([])
               void warmingProcess(response['base_token_uri'], 0)
             }}
           >
@@ -184,7 +217,7 @@ const CollectionQueriesPage: NextPage = () => {
       </div>
 
       <div className="grid grid-cols-5 p-4 space-x-8">
-        {processList.map((value: number, index: number) => {
+        {errorList.map((value: number, index: number) => {
           return <Lister key={index.toString()} data={value.toString()} />
         })}
       </div>
