@@ -14,6 +14,7 @@ const routes = [
   { text: 'Create a Collection', href: `/collections/create/`, isChild: true },
   { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
   { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
+  { text: 'Warm Up', href: `/collections/warmup/`, isChild: true },
   { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
   { text: 'Base Minter Contract', href: `/contracts/baseMinter/`, isChild: true },
   { text: 'Vending Minter Contract', href: `/contracts/vendingMinter/`, isChild: true },
