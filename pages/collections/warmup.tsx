@@ -1,71 +1,63 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import axios from 'axios'
 import { Button } from 'components/Button'
-import { dispatchQuery } from 'components/collections/queries/query'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import Lister from 'components/Lister'
 import { useContracts } from 'contexts/contracts'
+import { dispatchQuery } from 'contracts/vendingMinter/messages/query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { useWallet } from '../../contexts/wallet'
+
 const CollectionQueriesPage: NextPage = () => {
-  const { baseMinter: baseMinterContract, vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
-  const type = 'config'
-  const sg721ContractAddress = `sg721ContractState.value`
+  const { vendingMinter: vendingMinterContract } = useContracts()
+  const wallet = useWallet()
+
   const [doneList, setDoneList] = useState<number[]>([])
   const [processList, setProcessList] = useState<number[]>([])
   const [errorList, setErrorList] = useState<number[]>([])
   const [numTokens, setNumTokens] = useState(0)
-  const [pers, setPers] = useState(0)
+  const [percentage, setPercentage] = useState(0)
   const minterContractState = useInputState({
     id: 'minter-contract-address',
     name: 'minter-contract-address',
-    title: 'Minter Address',
-    subtitle: 'Address of the Minter contract',
+    title: 'Minter Contract Address',
+    defaultValue: '',
+    placeholder: 'stars1...',
   })
   const minterContractAddress = minterContractState.value
-
-  const vendingMinterMessages = useMemo(
-    () => vendingMinterContract?.use(minterContractAddress),
-    [vendingMinterContract, minterContractAddress],
-  )
-  const baseMinterMessages = useMemo(
-    () => baseMinterContract?.use(minterContractAddress),
-    [baseMinterContract, minterContractAddress],
-  )
-  const sg721Messages = useMemo(() => sg721Contract?.use(sg721ContractAddress), [sg721Contract, sg721ContractAddress])
 
   const router = useRouter()
 
   useEffect(() => {
-    if (minterContractState.value.length > 0) {
+    if (minterContractAddress.length > 0) {
       void router.replace({ query: { minterContractAddress } })
     }
-  }, [minterContractState.value])
+  }, [minterContractAddress])
 
   useEffect(() => {
     const initial = new URL(document.URL).searchParams.get('minterContractAddress')
     if (initial && initial.length > 0) minterContractState.onChange(initial)
-    console.log(minterContractState, minterContractAddress)
   }, [])
 
   const { data: response } = useQuery(
-    [sg721Messages, baseMinterMessages, vendingMinterMessages, type] as const,
-    async ({ queryKey }) => {
-      const [_sg721Messages, _baseMinterMessages_, _vendingMinterMessages, _type] = queryKey
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    [minterContractAddress, vendingMinterContract, wallet] as const,
+    async () => {
+      const messages = vendingMinterContract?.use(minterContractAddress)
       const result = await dispatchQuery({
-        vendingMinterMessages: _vendingMinterMessages,
-        baseMinterMessages: _baseMinterMessages_,
-        sg721Messages: _sg721Messages,
-        type: _type,
+        address: '',
+        messages,
+        type: 'config',
       })
       return result
     },
@@ -74,15 +66,14 @@ const CollectionQueriesPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(sg721ContractAddress && minterContractAddress && type),
-      retry: false,
+      enabled: Boolean(minterContractAddress && vendingMinterContract),
     },
   )
 
   useEffect(() => {
     if (response) {
       setNumTokens(response['num_tokens'])
-      setPers(0)
+      setPercentage(0)
       setDoneList([])
       setProcessList([])
       setErrorList([])
@@ -90,8 +81,8 @@ const CollectionQueriesPage: NextPage = () => {
   }, [response])
 
   useEffect(() => {
-    if (numTokens !== 0) setPers((100 * doneList.length) / numTokens)
-    else setPers(0)
+    if (numTokens !== 0) setPercentage((100 * doneList.length) / numTokens)
+    else setPercentage(0)
   }, [doneList.length, numTokens])
 
   function chooseAlternate(url: string, attempt: number) {
@@ -140,7 +131,7 @@ const CollectionQueriesPage: NextPage = () => {
         return
       }
     } catch (e) {
-      console.log('hata: ', i, e)
+      console.log('error: ', i, e)
     }
     if (totalAttempt !== 4) {
       void warmOne(i, image, attempt === 3 ? 0 : attempt + 1, attempt === 3 ? totalAttempt + 1 : totalAttempt)
@@ -161,7 +152,6 @@ const CollectionQueriesPage: NextPage = () => {
   async function warmingProcess(url: string, attempt: number) {
     const link = `${chooseAlternate(url, attempt)}/1`
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { data, status } = await axios.get(link)
       if (status === 200) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -179,11 +169,11 @@ const CollectionQueriesPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Warm Up Your Collection" />
+      <NextSeo title="Collection Warm Up" />
       <ContractPageHeader
-        description="Here you can warm up your collection items"
+        description="Here you can pre-warm your collection for improved IPFS performance."
         link={links.Documentation}
-        title="Warm Up Collection Items"
+        title="Collection Warm Up"
       />
       <div className="space-y-8">
         <AddressInput {...minterContractState} />
@@ -198,7 +188,7 @@ const CollectionQueriesPage: NextPage = () => {
           <div className="flex flex-row w-full text-center">
             <div className="w-1/3">{numTokens}</div>
             <div className="w-1/3">{doneList.length}</div>
-            <div className="w-1/3">{(Math.round(pers * 100) / 100).toFixed(2)}%</div>
+            <div className="w-1/3">{(Math.round(percentage * 100) / 100).toFixed(2)}%</div>
           </div>
         </div>
         <div>
