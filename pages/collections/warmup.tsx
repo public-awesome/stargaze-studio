@@ -1,33 +1,33 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import axios from 'axios'
 import { Button } from 'components/Button'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import Lister from 'components/Lister'
-import { useContracts } from 'contexts/contracts'
-import { dispatchQuery } from 'contracts/vendingMinter/messages/query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-import { useWallet } from '../../contexts/wallet'
+interface ConfigResponse {
+  num_tokens: number
+  base_token_uri: string
+}
 
 const CollectionQueriesPage: NextPage = () => {
-  const { vendingMinter: vendingMinterContract } = useContracts()
-  const wallet = useWallet()
-
+  const [client, setClient] = useState<CosmWasmClient>()
+  const [baseUri, SetBaseUri] = useState('')
   const [doneList, setDoneList] = useState<number[]>([])
   const [processList, setProcessList] = useState<number[]>([])
   const [errorList, setErrorList] = useState<number[]>([])
   const [numTokens, setNumTokens] = useState(0)
-  const [percentage, setPercentage] = useState(0)
+  const [percentage, setPercentage] = useState('0.00')
   const minterContractState = useInputState({
     id: 'minter-contract-address',
     name: 'minter-contract-address',
@@ -40,6 +40,30 @@ const CollectionQueriesPage: NextPage = () => {
   const router = useRouter()
 
   useEffect(() => {
+    async function init() {
+      setClient(await CosmWasmClient.connect('https://rpc.elgafar-1.stargaze-apis.com/')) //'https://rpc.stargaze-apis.com/'))
+    }
+    void init()
+  }, [])
+
+  useEffect(() => {
+    async function get() {
+      if (client && minterContractAddress) {
+        const res: ConfigResponse = await client.queryContractSmart(minterContractAddress, {
+          config: {},
+        })
+        setNumTokens(res.num_tokens)
+        SetBaseUri(res.base_token_uri)
+        setPercentage('0.00')
+        setDoneList([])
+        setProcessList([])
+        setErrorList([])
+      }
+    }
+    void get()
+  }, [minterContractAddress, client])
+
+  useEffect(() => {
     if (minterContractAddress.length > 0) {
       void router.replace({ query: { minterContractAddress } })
     }
@@ -50,39 +74,9 @@ const CollectionQueriesPage: NextPage = () => {
     if (initial && initial.length > 0) minterContractState.onChange(initial)
   }, [])
 
-  const { data: response } = useQuery(
-    [minterContractAddress, vendingMinterContract, wallet] as const,
-    async () => {
-      const messages = vendingMinterContract?.use(minterContractAddress)
-      const result = await dispatchQuery({
-        address: '',
-        messages,
-        type: 'config',
-      })
-      return result
-    },
-    {
-      placeholderData: null,
-      onError: (error: any) => {
-        toast.error(error.message, { style: { maxWidth: 'none' } })
-      },
-      enabled: Boolean(minterContractAddress && vendingMinterContract),
-    },
-  )
-
   useEffect(() => {
-    if (response) {
-      setNumTokens(response['num_tokens'])
-      setPercentage(0)
-      setDoneList([])
-      setProcessList([])
-      setErrorList([])
-    } else setNumTokens(0)
-  }, [response])
-
-  useEffect(() => {
-    if (numTokens !== 0) setPercentage((100 * doneList.length) / numTokens)
-    else setPercentage(0)
+    if (numTokens !== 0) setPercentage((((Math.round(100 * doneList.length) / numTokens) * 100) / 100).toFixed(2))
+    else setPercentage('0')
   }, [doneList.length, numTokens])
 
   function chooseAlternate(url: string, attempt: number) {
@@ -154,8 +148,7 @@ const CollectionQueriesPage: NextPage = () => {
     try {
       const { data, status } = await axios.get(link)
       if (status === 200) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        for (let i = 1; i <= response['num_tokens']; i++) {
+        for (let i = 1; i <= numTokens; i++) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
           void warmOne(i, data.image, 0, 0)
         }
@@ -180,7 +173,7 @@ const CollectionQueriesPage: NextPage = () => {
       </div>
       <div className="flex flex-row">
         <div className="flex flex-col mr-20 w-4/5 text-xl border border-stargaze">
-          <div className="flex flex-row w-full text-center">
+          <div className="flex flex-row mt-2 w-full text-center">
             <div className="w-1/3">Total</div>
             <div className="w-1/3">Warmed</div>
             <div className="w-1/3">Percentage</div>
@@ -188,24 +181,26 @@ const CollectionQueriesPage: NextPage = () => {
           <div className="flex flex-row w-full text-center">
             <div className="w-1/3">{numTokens}</div>
             <div className="w-1/3">{doneList.length}</div>
-            <div className="w-1/3">{(Math.round(percentage * 100) / 100).toFixed(2)}%</div>
+            <div className="w-1/3">{percentage}%</div>
+          </div>
+          <div className="flex justify-center w-full">
+            <progress className="my-5 mx-2 w-4/5 h-2 progress" max="100" value={percentage} />
           </div>
         </div>
-        <div>
+        <div className="content-center">
           <Button
-            isDisabled={!response}
+            isDisabled={baseUri === ''}
             onClick={() => {
               setDoneList([])
               setProcessList([])
               setErrorList([])
-              void warmingProcess(response['base_token_uri'], 0)
+              void warmingProcess(baseUri, 0)
             }}
           >
             Start
           </Button>
         </div>
       </div>
-
       <div className="grid grid-cols-5 p-4 space-x-8">
         {errorList.map((value: number, index: number) => {
           return <Lister key={index.toString()} data={value.toString()} />
