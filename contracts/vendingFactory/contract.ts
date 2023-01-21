@@ -73,7 +73,7 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
         sender: txSigner,
         contract: contractAddress,
         msg,
-        funds: [coin('1000000000', 'ustars')],
+        funds: [coin('3000000000', 'ustars')],
       }
     }
 
