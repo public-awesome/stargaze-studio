@@ -1,7 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable jsx-a11y/media-has-caption */
 import type { ReactNode } from 'react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getAssetType } from 'utils/getAssetType'
 
 export interface MetadataFormGroupProps {
@@ -13,6 +13,7 @@ export interface MetadataFormGroupProps {
 
 export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
   const { title, subtitle, relatedAsset, children } = props
+  const [htmlContents, setHtmlContents] = useState<string>('')
 
   const videoPreview = useMemo(
     () => (
@@ -40,6 +41,17 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
     [relatedAsset],
   )
 
+  useEffect(() => {
+    if (getAssetType(relatedAsset?.name as string) !== 'html') return
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (typeof e.target?.result === 'string') {
+        setHtmlContents(e.target.result)
+      }
+    }
+    reader.readAsText(new Blob([relatedAsset as File]))
+  }, [relatedAsset])
+
   return (
     <div className="flex p-4 pt-0 space-x-4 w-full">
       <div className="flex flex-col w-1/3">
@@ -53,6 +65,9 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
                 {getAssetType(relatedAsset.name) === 'video' && videoPreview}
                 {getAssetType(relatedAsset.name) === 'image' && (
                   <img alt="preview" src={URL.createObjectURL(relatedAsset)} />
+                )}
+                {getAssetType(relatedAsset.name) === 'html' && (
+                  <iframe allowFullScreen height="420px" srcDoc={htmlContents} title="Preview" width="100%" />
                 )}
               </div>
             )}

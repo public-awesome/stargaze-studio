@@ -96,6 +96,18 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
               />
             </div>
           )}
+
+          {getAssetType(assetSource.name) === 'html' && (
+            <div className="flex absolute flex-col items-center mt-4 ml-2">
+              <img
+                key={`html-${index}`}
+                alt="html_icon"
+                className={clsx('mb-2 ml-1 w-10 h-10 thumbnail')}
+                src="/html.png"
+              />
+              <span className="flex self-center">{assetSource.name.toLowerCase()}</span>
+            </div>
+          )}
         </label>
       </button>
     ))
