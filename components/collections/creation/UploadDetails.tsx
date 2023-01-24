@@ -488,7 +488,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                       </div>
                     </div>
                   )}
-                  <Conditional test={assetFilesArray.length > 1}>
+                  <Conditional test={assetFilesArray.length >= 1}>
                     <MetadataModal
                       assetFile={assetFilesArray[metadataFileArrayIndex]}
                       metadataFile={metadataFilesArray[metadataFileArrayIndex]}
