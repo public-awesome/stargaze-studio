@@ -441,7 +441,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
                       )}
                     >
                       <input
-                        accept="image/*, audio/*, video/*"
+                        accept="image/*, audio/*, video/*, .html"
                         className={clsx(
                           'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
                           'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
