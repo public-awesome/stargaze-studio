@@ -1,5 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -576,12 +576,13 @@ const CollectionCreationPage: NextPage = () => {
 
                 if (
                   getAssetType(uploadDetails.assetFiles[i].name) === 'audio' ||
-                  getAssetType(uploadDetails.assetFiles[i].name) === 'video'
+                  getAssetType(uploadDetails.assetFiles[i].name) === 'video' ||
+                  getAssetType(uploadDetails.assetFiles[i].name) === 'html'
                 ) {
                   data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
                 }
-
-                data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
+                if (getAssetType(uploadDetails.assetFiles[i].name) !== 'html')
+                  data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
 
                 const metadataFileBlob = new Blob([JSON.stringify(data)], {
                   type: 'application/json',
