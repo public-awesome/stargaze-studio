@@ -67,9 +67,7 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
                   <img alt="preview" src={URL.createObjectURL(relatedAsset)} />
                 )}
                 {getAssetType(relatedAsset.name) === 'html' && (
-                  <div>
-                    <iframe allowFullScreen height="420px" srcDoc={htmlContents} title="Preview" width="100%" />
-                  </div>
+                  <iframe allowFullScreen height="420px" srcDoc={htmlContents} title="Preview" width="100%" />
                 )}
               </div>
             )}
