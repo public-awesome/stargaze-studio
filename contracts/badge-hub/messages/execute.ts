@@ -1,21 +1,18 @@
-import type { BadgeHubInstance } from '../index'
+import type { Badge, BadgeHubInstance, Metadata } from '../index'
 import { useBadgeHubContract } from '../index'
 
 export type ExecuteType = typeof EXECUTE_TYPES[number]
 
 export const EXECUTE_TYPES = [
-  'mint',
-  'purge',
-  'update_mint_price',
-  'set_whitelist',
-  'update_start_time',
-  'update_start_trading_time',
-  'update_per_address_limit',
-  'mint_to',
-  'mint_for',
-  'shuffle',
-  'withdraw',
-  'burn_remaining',
+  'create_badge',
+  'edit_badge',
+  'add_keys',
+  'purge_keys',
+  'purge_owners',
+  'mint_by_minter',
+  'mint_by_key',
+  'mint_by_keys',
+  'set_nft',
 ] as const
 
 export interface ExecuteListItem {
@@ -26,59 +23,49 @@ export interface ExecuteListItem {
 
 export const EXECUTE_LIST: ExecuteListItem[] = [
   {
-    id: 'mint',
-    name: 'Mint',
-    description: `Mint new tokens for a given address`,
+    id: 'create_badge',
+    name: 'Create Badge',
+    description: `Create a new badge with the specified mint rule and metadata`,
   },
   {
-    id: 'purge',
-    name: 'Purge',
-    description: `Purge`,
+    id: 'edit_badge',
+    name: 'Edit Badge',
+    description: `Edit the badge with the specified ID`,
   },
   {
-    id: 'update_mint_price',
-    name: 'Update Mint Price',
-    description: `Update mint price`,
+    id: 'add_keys',
+    name: 'Add Keys',
+    description: `Add keys to the badge with the specified ID`,
   },
   {
-    id: 'set_whitelist',
-    name: 'Set Whitelist',
-    description: `Set whitelist contract address`,
+    id: 'purge_keys',
+    name: 'Purge Keys',
+    description: `Purge keys from the badge with the specified ID`,
   },
   {
-    id: 'update_start_time',
-    name: 'Update Start Time',
-    description: `Update start time for minting`,
+    id: 'purge_owners',
+    name: 'Purge Owners',
+    description: `Purge owners from the badge with the specified ID`,
   },
   {
-    id: 'update_start_trading_time',
-    name: 'Update Start Trading Time',
-    description: `Update start trading time for minting`,
+    id: 'mint_by_minter',
+    name: 'Mint by Minter',
+    description: `Mint a new token by the minter with the specified ID`,
   },
   {
-    id: 'update_per_address_limit',
-    name: 'Update Per Address Limit',
-    description: `Update token per address limit`,
+    id: 'mint_by_key',
+    name: 'Mint by Key',
+    description: `Mint a new token by the key with the specified ID`,
   },
   {
-    id: 'mint_to',
-    name: 'Mint To',
-    description: `Mint tokens to a given address`,
+    id: 'mint_by_keys',
+    name: 'Mint by Keys',
+    description: `Mint a new token by the keys with the specified ID`,
   },
   {
-    id: 'mint_for',
-    name: 'Mint For',
-    description: `Mint tokens for a given address with a given token ID`,
-  },
-  {
-    id: 'shuffle',
-    name: 'Shuffle',
-    description: `Shuffle the token IDs`,
-  },
-  {
-    id: 'burn_remaining',
-    name: 'Burn Remaining',
-    description: `Burn remaining tokens`,
+    id: 'set_nft',
+    name: 'Set NFT',
+    description: `Set the Badge NFT contract address for the Badge Hub contract`,
   },
 ]
 
@@ -89,25 +76,22 @@ export interface DispatchExecuteProps {
 
 type Select<T extends ExecuteType> = T
 
-/** @see {@link VendingMinterInstance} */
+/** @see {@link BadgeHubInstance} */
 export type DispatchExecuteArgs = {
   contract: string
   messages?: BadgeHubInstance
   txSigner: string
 } & (
   | { type: undefined }
-  | { type: Select<'mint'> }
-  | { type: Select<'purge'> }
-  | { type: Select<'update_mint_price'>; price: string }
-  | { type: Select<'set_whitelist'>; whitelist: string }
-  | { type: Select<'update_start_time'>; startTime: string }
-  | { type: Select<'update_start_trading_time'>; startTime?: string }
-  | { type: Select<'update_per_address_limit'>; limit: number }
-  | { type: Select<'mint_to'>; recipient: string }
-  | { type: Select<'mint_for'>; recipient: string; tokenId: number }
-  | { type: Select<'shuffle'> }
-  | { type: Select<'withdraw'> }
-  | { type: Select<'burn_remaining'> }
+  | { type: Select<'create_badge'>; badge: Badge }
+  | { type: Select<'edit_badge'>; id: number; metadata: Metadata }
+  | { type: Select<'add_keys'>; id: number; keys: string[] }
+  | { type: Select<'purge_keys'>; id: number; limit?: number }
+  | { type: Select<'purge_owners'>; id: number; limit?: number }
+  | { type: Select<'mint_by_minter'>; id: number; owners: string[] }
+  | { type: Select<'mint_by_key'>; id: number; owner: string; signature: string }
+  | { type: Select<'mint_by_keys'>; id: number; owner: string; pubkey: string; signature: string }
+  | { type: Select<'set_nft'>; nft: string }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -116,41 +100,32 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     throw new Error('cannot dispatch execute, messages is not defined')
   }
   switch (args.type) {
-    case 'mint': {
-      return messages.mint(txSigner)
+    case 'create_badge': {
+      return messages.createBadge(txSigner, args.badge)
     }
-    case 'purge': {
-      return messages.purge(txSigner)
+    case 'edit_badge': {
+      return messages.editBadge(txSigner, args.id, args.metadata)
     }
-    case 'update_mint_price': {
-      return messages.updateMintPrice(txSigner, args.price)
+    case 'add_keys': {
+      return messages.addKeys(txSigner, args.id, args.keys)
     }
-    case 'set_whitelist': {
-      return messages.setWhitelist(txSigner, args.whitelist)
+    case 'purge_keys': {
+      return messages.purgeKeys(txSigner, args.id, args.limit)
     }
-    case 'update_start_time': {
-      return messages.updateStartTime(txSigner, args.startTime)
+    case 'purge_owners': {
+      return messages.purgeOwners(txSigner, args.id, args.limit)
     }
-    case 'update_start_trading_time': {
-      return messages.updateStartTradingTime(txSigner, args.startTime)
+    case 'mint_by_minter': {
+      return messages.mintByMinter(txSigner, args.id, args.owners)
     }
-    case 'update_per_address_limit': {
-      return messages.updatePerAddressLimit(txSigner, args.limit)
+    case 'mint_by_key': {
+      return messages.mintByKey(txSigner, args.id, args.owner, args.signature)
     }
-    case 'mint_to': {
-      return messages.mintTo(txSigner, args.recipient)
+    case 'mint_by_keys': {
+      return messages.mintByKeys(txSigner, args.id, args.owner, args.pubkey, args.signature)
     }
-    case 'mint_for': {
-      return messages.mintFor(txSigner, args.recipient, args.tokenId)
-    }
-    case 'shuffle': {
-      return messages.shuffle(txSigner)
-    }
-    case 'withdraw': {
-      return messages.withdraw(txSigner)
-    }
-    case 'burn_remaining': {
-      return messages.burnRemaining(txSigner)
+    case 'set_nft': {
+      return messages.setNft(txSigner, args.nft)
     }
     default: {
       throw new Error('unknown execute type')
@@ -163,41 +138,32 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages } = useBadgeHubContract()
   const { contract } = args
   switch (args.type) {
-    case 'mint': {
-      return messages(contract)?.mint()
+    case 'create_badge': {
+      return messages(contract)?.createBadge(args.badge)
     }
-    case 'purge': {
-      return messages(contract)?.purge()
+    case 'edit_badge': {
+      return messages(contract)?.editBadge(args.id, args.metadata)
     }
-    case 'update_mint_price': {
-      return messages(contract)?.updateMintPrice(args.price)
+    case 'add_keys': {
+      return messages(contract)?.addKeys(args.id, args.keys)
     }
-    case 'set_whitelist': {
-      return messages(contract)?.setWhitelist(args.whitelist)
+    case 'purge_keys': {
+      return messages(contract)?.purgeKeys(args.id, args.limit)
     }
-    case 'update_start_time': {
-      return messages(contract)?.updateStartTime(args.startTime)
+    case 'purge_owners': {
+      return messages(contract)?.purgeOwners(args.id, args.limit)
     }
-    case 'update_start_trading_time': {
-      return messages(contract)?.updateStartTradingTime(args.startTime as string)
+    case 'mint_by_minter': {
+      return messages(contract)?.mintByMinter(args.id, args.owners)
     }
-    case 'update_per_address_limit': {
-      return messages(contract)?.updatePerAddressLimit(args.limit)
+    case 'mint_by_key': {
+      return messages(contract)?.mintByKey(args.id, args.owner, args.signature)
     }
-    case 'mint_to': {
-      return messages(contract)?.mintTo(args.recipient)
+    case 'mint_by_keys': {
+      return messages(contract)?.mintByKeys(args.id, args.owner, args.pubkey, args.signature)
     }
-    case 'mint_for': {
-      return messages(contract)?.mintFor(args.recipient, args.tokenId)
-    }
-    case 'shuffle': {
-      return messages(contract)?.shuffle()
-    }
-    case 'withdraw': {
-      return messages(contract)?.withdraw()
-    }
-    case 'burn_remaining': {
-      return messages(contract)?.burnRemaining()
+    case 'set_nft': {
+      return messages(contract)?.setNft(args.nft)
     }
     default: {
       return {}

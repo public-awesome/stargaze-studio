@@ -2,7 +2,7 @@ import type { BadgeHubInstance } from '../contract'
 
 export type QueryType = typeof QUERY_TYPES[number]
 
-export const QUERY_TYPES = ['config', 'mintable_num_tokens', 'start_time', 'mint_price', 'mint_count'] as const
+export const QUERY_TYPES = ['config', 'getBadge', 'getBadges', 'getKey', 'getKeys'] as const
 
 export interface QueryListItem {
   id: QueryType
@@ -12,39 +12,36 @@ export interface QueryListItem {
 
 export const QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Config', description: 'View current config' },
-  { id: 'mintable_num_tokens', name: 'Total Mintable Tokens', description: 'View the total amount of mintable tokens' },
-  { id: 'start_time', name: 'Start Time', description: 'View the start time for minting' },
-  { id: 'mint_price', name: 'Mint Price', description: 'View the mint price' },
-  {
-    id: 'mint_count',
-    name: 'Total Minted Count',
-    description: 'View the total amount of minted tokens for an address',
-  },
+  { id: 'getBadge', name: 'Query Badge', description: 'Query a badge by ID' },
+  { id: 'getBadges', name: 'Query a list of Badges', description: 'Query the list of badges' },
+  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID' },
+  { id: 'getKeys', name: 'Query a list of Keys', description: 'Query the list of keys' },
 ]
 
 export interface DispatchQueryProps {
-  address: string
+  id: number
+  pubkey: string
   messages: BadgeHubInstance | undefined
   type: QueryType
 }
 
 export const dispatchQuery = (props: DispatchQueryProps) => {
-  const { address, messages, type } = props
+  const { id, pubkey, messages, type } = props
   switch (type) {
     case 'config': {
       return messages?.getConfig()
     }
-    case 'mintable_num_tokens': {
-      return messages?.getMintableNumTokens()
+    case 'getBadge': {
+      return messages?.getBadge(id)
     }
-    case 'start_time': {
-      return messages?.getStartTime()
+    case 'getBadges': {
+      return messages?.getBadges()
     }
-    case 'mint_price': {
-      return messages?.getMintPrice()
+    case 'getKey': {
+      return messages?.getKey(id, pubkey)
     }
-    case 'mint_count': {
-      return messages?.getMintCount(address)
+    case 'getKeys': {
+      return messages?.getKeys(id)
     }
     default: {
       throw new Error('unknown query type')

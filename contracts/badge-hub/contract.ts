@@ -1,10 +1,12 @@
-import type { MsgExecuteContractEncodeObject, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
-import { toUtf8 } from '@cosmjs/encoding'
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable camelcase */
+import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
-import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -17,201 +19,185 @@ export interface MigrateResponse {
   readonly logs: readonly logs.Log[]
 }
 
+export interface Rule {
+  by_key?: string
+  by_minter?: string
+  by_keys?: string[]
+}
+
+export interface Trait {
+  display_type?: string
+  trait_type: string
+  value: string
+}
+
+export interface Metadata {
+  name?: string
+  image?: string
+  image_date?: string
+  external_url?: string
+  description?: string
+  attributes?: Trait[]
+  background_color?: string
+  animation_url?: string
+  youtube_url?: string
+}
+
+export interface Badge {
+  manager: string
+  metadata: Metadata
+  transferrable: boolean
+  rule: Rule
+  expiry?: Timestamp
+  max_supply?: number
+}
+
 export interface BadgeHubInstance {
   readonly contractAddress: string
 
   //Query
   getConfig: () => Promise<any>
-  getMintableNumTokens: () => Promise<any>
-  getStartTime: () => Promise<any>
-  getMintPrice: () => Promise<any>
-  getMintCount: (address: string) => Promise<any>
+  getBadge: (id: number) => Promise<any>
+  getBadges: (start_after?: number, limit?: number) => Promise<any>
+  getKey: (id: number, pubkey: string) => Promise<any>
+  getKeys: (id: number, start_after?: number, limit?: number) => Promise<any>
 
   //Execute
-  mint: (senderAddress: string) => Promise<string>
-  purge: (senderAddress: string) => Promise<string>
-  updateMintPrice: (senderAddress: string, price: string) => Promise<string>
-  setWhitelist: (senderAddress: string, whitelist: string) => Promise<string>
-  updateStartTime: (senderAddress: string, time: Timestamp) => Promise<string>
-  updateStartTradingTime: (senderAddress: string, time?: Timestamp) => Promise<string>
-  updatePerAddressLimit: (senderAddress: string, perAddressLimit: number) => Promise<string>
-  mintTo: (senderAddress: string, recipient: string) => Promise<string>
-  mintFor: (senderAddress: string, recipient: string, tokenId: number) => Promise<string>
-  batchMintFor: (senderAddress: string, recipient: string, tokenIds: string) => Promise<string>
-  batchMint: (senderAddress: string, recipient: string, batchNumber: number) => Promise<string>
-  shuffle: (senderAddress: string) => Promise<string>
-  withdraw: (senderAddress: string) => Promise<string>
-  airdrop: (senderAddress: string, recipients: string[]) => Promise<string>
-  burnRemaining: (senderAddress: string) => Promise<string>
+  createBadge: (senderAddress: string, badge: Badge) => Promise<string>
+  editBadge: (senderAddress: string, id: number, metadata: Metadata) => Promise<string>
+  addKeys: (senderAddress: string, id: number, keys: string[]) => Promise<string>
+  purgeKeys: (senderAddress: string, id: number, limit?: number) => Promise<string>
+  purgeOwners: (senderAddress: string, id: number, limit?: number) => Promise<string>
+  mintByMinter: (senderAddress: string, id: number, owners: string[]) => Promise<string>
+  mintByKey: (senderAddress: string, id: number, owner: string, signature: string) => Promise<string>
+  mintByKeys: (senderAddress: string, id: number, owner: string, pubkey: string, signature: string) => Promise<string>
+  setNft: (senderAddress: string, nft: string) => Promise<string>
 }
 
 export interface BadgeHubMessages {
-  mint: () => MintMessage
-  purge: () => PurgeMessage
-  updateMintPrice: (price: string) => UpdateMintPriceMessage
-  setWhitelist: (whitelist: string) => SetWhitelistMessage
-  updateStartTime: (time: Timestamp) => UpdateStartTimeMessage
-  updateStartTradingTime: (time: Timestamp) => UpdateStartTradingTimeMessage
-  updatePerAddressLimit: (perAddressLimit: number) => UpdatePerAddressLimitMessage
-  mintTo: (recipient: string) => MintToMessage
-  mintFor: (recipient: string, tokenId: number) => MintForMessage
-  batchMintFor: (recipient: string, tokenIds: string) => BatchMintForMessage
-  batchMint: (recipient: string, batchNumber: number) => CustomMessage
-  shuffle: () => ShuffleMessage
-  withdraw: () => WithdrawMessage
-  airdrop: (recipients: string[]) => CustomMessage
-  burnRemaining: () => BurnRemainingMessage
+  createBadge: (badge: Badge) => CreateBadgeMessage
+  editBadge: (id: number, metadata: Metadata) => EditBadgeMessage
+  addKeys: (id: number, keys: string[]) => AddKeysMessage
+  purgeKeys: (id: number, limit?: number) => PurgeKeysMessage
+  purgeOwners: (id: number, limit?: number) => PurgeOwnersMessage
+  mintByMinter: (id: number, owners: string[]) => MintByMinterMessage
+  mintByKey: (id: number, owner: string, signature: string) => MintByKeyMessage
+  mintByKeys: (id: number, owner: string, pubkey: string, signature: string) => MintByKeysMessage
+  setNft: (nft: string) => SetNftMessage
 }
 
-export interface MintMessage {
+export interface CreateBadgeMessage {
   sender: string
   contract: string
   msg: {
-    mint: Record<string, never>
-  }
-  funds: Coin[]
-}
-
-export interface PurgeMessage {
-  sender: string
-  contract: string
-  msg: {
-    purge: Record<string, never>
-  }
-  funds: Coin[]
-}
-
-export interface UpdateMintPriceMessage {
-  sender: string
-  contract: string
-  msg: {
-    update_mint_price: {
-      price: string
+    create_badge: {
+      manager: string
+      metadata: Metadata
+      transferrable: boolean
+      rule: Rule
+      expiry?: Timestamp
+      max_supply?: number
     }
   }
   funds: Coin[]
 }
 
-export interface SetWhitelistMessage {
+export interface EditBadgeMessage {
   sender: string
   contract: string
   msg: {
-    set_whitelist: {
-      whitelist: string
+    edit_badge: {
+      id: number
+      metadata: Metadata
     }
   }
   funds: Coin[]
 }
 
-export interface UpdateStartTimeMessage {
+export interface AddKeysMessage {
   sender: string
   contract: string
   msg: {
-    update_start_time: string
-  }
-  funds: Coin[]
-}
-
-export interface UpdateStartTradingTimeMessage {
-  sender: string
-  contract: string
-  msg: {
-    update_start_trading_time: string
-  }
-  funds: Coin[]
-}
-
-export interface UpdatePerAddressLimitMessage {
-  sender: string
-  contract: string
-  msg: {
-    update_per_address_limit: {
-      per_address_limit: number
+    add_keys: {
+      id: number
+      keys: string[]
     }
   }
   funds: Coin[]
 }
 
-export interface MintToMessage {
+export interface PurgeKeysMessage {
   sender: string
   contract: string
   msg: {
-    mint_to: {
-      recipient: string
+    purge_keys: {
+      id: number
+      limit?: number
     }
   }
   funds: Coin[]
 }
 
-export interface MintForMessage {
+export interface PurgeOwnersMessage {
   sender: string
   contract: string
   msg: {
-    mint_for: {
-      recipient: string
-      token_id: number
+    purge_owners: {
+      id: number
+      limit?: number
     }
   }
   funds: Coin[]
 }
-export interface BatchMintForMessage {
-  sender: string
-  contract: string
-  msg: Record<string, unknown>[]
-  funds: Coin[]
-}
 
-export interface CustomMessage {
-  sender: string
-  contract: string
-  msg: Record<string, unknown>[]
-  funds: Coin[]
-}
-
-export interface ShuffleMessage {
+export interface MintByMinterMessage {
   sender: string
   contract: string
   msg: {
-    shuffle: Record<string, never>
+    mint_by_minter: {
+      id: number
+      owners: string[]
+    }
   }
   funds: Coin[]
 }
 
-export interface WithdrawMessage {
+export interface MintByKeyMessage {
   sender: string
   contract: string
   msg: {
-    withdraw: Record<string, never>
+    mint_by_key: {
+      id: number
+      owner: string
+      signature: string
+    }
   }
   funds: Coin[]
 }
 
-export interface BurnRemainingMessage {
+export interface MintByKeysMessage {
   sender: string
   contract: string
   msg: {
-    burn_remaining: Record<string, never>
+    mint_by_keys: {
+      id: number
+      owner: string
+      pubkey: string
+      signature: string
+    }
   }
   funds: Coin[]
 }
 
-export interface MintPriceMessage {
-  public_price: {
-    denom: string
-    amount: string
+export interface SetNftMessage {
+  sender: string
+  contract: string
+  msg: {
+    set_nft: {
+      nft: string
+    }
   }
-  airdrop_price: {
-    denom: string
-    amount: string
-  }
-  whitelist_price?: {
-    denom: string
-    amount: string
-  }
-  current_price: {
-    denom: string
-    amount: string
-  }
+  funds: Coin[]
 }
 
 export interface BadgeHubContract {
@@ -246,72 +232,65 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res
     }
 
-    const getMintableNumTokens = async (): Promise<any> => {
+    const getBadge = async (id: number): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
-        mintable_num_tokens: {},
+        badge: { id },
       })
       return res
     }
 
-    const getStartTime = async (): Promise<any> => {
+    const getBadges = async (start_after?: number, limit?: number): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
-        start_time: {},
+        badges: { start_after, limit },
       })
       return res
     }
 
-    const getMintPrice = async (): Promise<MintPriceMessage> => {
+    const getKey = async (id: number, key: string): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
-        mint_price: {},
+        key: { id, key },
       })
       return res
     }
 
-    const getMintCount = async (address: string): Promise<any> => {
+    const getKeys = async (id: number, start_after?: number, limit?: number): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
-        mint_count: { address },
+        keys: { id, start_after, limit },
       })
       return res
     }
 
     //Execute
-    const mint = async (senderAddress: string): Promise<string> => {
-      const price = (await getMintPrice()).public_price.amount
+    const createBadge = async (senderAddress: string, badge: Badge): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          mint: {},
+          create_badge: {
+            manager: badge.manager,
+            metadata: badge.metadata,
+            transferrable: badge.transferrable,
+            rule: badge.rule,
+            expiry: badge.expiry,
+            max_supply: badge.max_supply,
+          },
         },
         'auto',
         '',
-        [coin(price, 'ustars')],
+        [coin(315, 'ustars')],
       )
 
       return res.transactionHash
     }
 
-    const purge = async (senderAddress: string): Promise<string> => {
+    const editBadge = async (senderAddress: string, id: number, metadata: Metadata): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          purge: {},
-        },
-        'auto',
-        '',
-      )
-
-      return res.transactionHash
-    }
-
-    const updateMintPrice = async (senderAddress: string, price: string): Promise<string> => {
-      const res = await client.execute(
-        senderAddress,
-        contractAddress,
-        {
-          update_mint_price: {
-            price: (Number(price) * 1000000).toString(),
+          edit_badge: {
+            id,
+            metadata,
           },
         },
         'auto',
@@ -321,12 +300,15 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const setWhitelist = async (senderAddress: string, whitelist: string): Promise<string> => {
+    const addKeys = async (senderAddress: string, id: number, keys: string[]): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          set_whitelist: { whitelist },
+          add_keys: {
+            id,
+            keys,
+          },
         },
         'auto',
         '',
@@ -335,12 +317,15 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const updateStartTime = async (senderAddress: string, time: Timestamp): Promise<string> => {
+    const purgeKeys = async (senderAddress: string, id: number, limit?: number): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          update_start_time: time,
+          purge_keys: {
+            id,
+            limit,
+          },
         },
         'auto',
         '',
@@ -349,12 +334,15 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const updateStartTradingTime = async (senderAddress: string, time?: Timestamp): Promise<string> => {
+    const purgeOwners = async (senderAddress: string, id: number, limit?: number): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          update_start_trading_time: time || null,
+          purge_owners: {
+            id,
+            limit,
+          },
         },
         'auto',
         '',
@@ -363,12 +351,15 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const updatePerAddressLimit = async (senderAddress: string, perAddressLimit: number): Promise<string> => {
+    const mintByMinter = async (senderAddress: string, id: number, owners: string[]): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          update_per_address_limit: { per_address_limit: perAddressLimit },
+          mint_by_minter: {
+            id,
+            owners,
+          },
         },
         'auto',
         '',
@@ -377,12 +368,16 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const mintTo = async (senderAddress: string, recipient: string): Promise<string> => {
+    const mintByKey = async (senderAddress: string, id: number, owner: string, signature: string): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          mint_to: { recipient },
+          mint_by_key: {
+            id,
+            owner,
+            signature,
+          },
         },
         'auto',
         '',
@@ -391,12 +386,23 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const mintFor = async (senderAddress: string, recipient: string, tokenId: number): Promise<string> => {
+    const mintByKeys = async (
+      senderAddress: string,
+      id: number,
+      owner: string,
+      pubkey: string,
+      signature: string,
+    ): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          mint_for: { token_id: tokenId, recipient },
+          mint_by_keys: {
+            id,
+            owner,
+            pubkey,
+            signature,
+          },
         },
         'auto',
         '',
@@ -405,130 +411,14 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
-    const batchMintFor = async (senderAddress: string, recipient: string, tokenIds: string): Promise<string> => {
-      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
-      if (tokenIds.includes(':')) {
-        const [start, end] = tokenIds.split(':').map(Number)
-        for (let i = start; i <= end; i++) {
-          const msg = {
-            mint_for: { token_id: i, recipient },
-          }
-          const executeContractMsg: MsgExecuteContractEncodeObject = {
-            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-            value: MsgExecuteContract.fromPartial({
-              sender: txSigner,
-              contract: contractAddress,
-              msg: toUtf8(JSON.stringify(msg)),
-            }),
-          }
-
-          executeContractMsgs.push(executeContractMsg)
-        }
-      } else {
-        const tokenNumbers = tokenIds.split(',').map(Number)
-        for (let i = 0; i < tokenNumbers.length; i++) {
-          const msg = {
-            mint_for: { token_id: tokenNumbers[i], recipient },
-          }
-          const executeContractMsg: MsgExecuteContractEncodeObject = {
-            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-            value: MsgExecuteContract.fromPartial({
-              sender: txSigner,
-              contract: contractAddress,
-              msg: toUtf8(JSON.stringify(msg)),
-            }),
-          }
-
-          executeContractMsgs.push(executeContractMsg)
-        }
-      }
-
-      const res = await client.signAndBroadcast(txSigner, executeContractMsgs, 'auto', 'batch mint for')
-
-      return res.transactionHash
-    }
-
-    const batchMint = async (senderAddress: string, recipient: string, batchNumber: number): Promise<string> => {
-      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
-      for (let i = 0; i < batchNumber; i++) {
-        const msg = {
-          mint_to: { recipient },
-        }
-        const executeContractMsg: MsgExecuteContractEncodeObject = {
-          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-          value: MsgExecuteContract.fromPartial({
-            sender: senderAddress,
-            contract: contractAddress,
-            msg: toUtf8(JSON.stringify(msg)),
-          }),
-        }
-
-        executeContractMsgs.push(executeContractMsg)
-      }
-
-      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'batch mint')
-
-      return res.transactionHash
-    }
-
-    const airdrop = async (senderAddress: string, recipients: string[]): Promise<string> => {
-      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
-      for (let i = 0; i < recipients.length; i++) {
-        const msg = {
-          mint_to: { recipient: recipients[i] },
-        }
-        const executeContractMsg: MsgExecuteContractEncodeObject = {
-          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-          value: MsgExecuteContract.fromPartial({
-            sender: senderAddress,
-            contract: contractAddress,
-            msg: toUtf8(JSON.stringify(msg)),
-          }),
-        }
-
-        executeContractMsgs.push(executeContractMsg)
-      }
-
-      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'airdrop')
-
-      return res.transactionHash
-    }
-
-    const shuffle = async (senderAddress: string): Promise<string> => {
+    const setNft = async (senderAddress: string, nft: string): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
         {
-          shuffle: {},
-        },
-        'auto',
-        '',
-        [coin(500000000, 'ustars')],
-      )
-
-      return res.transactionHash
-    }
-
-    const withdraw = async (senderAddress: string): Promise<string> => {
-      const res = await client.execute(
-        senderAddress,
-        contractAddress,
-        {
-          withdraw: {},
-        },
-        'auto',
-        '',
-      )
-
-      return res.transactionHash
-    }
-
-    const burnRemaining = async (senderAddress: string): Promise<string> => {
-      const res = await client.execute(
-        senderAddress,
-        contractAddress,
-        {
-          burn_remaining: {},
+          set_nft: {
+            nft,
+          },
         },
         'auto',
         '',
@@ -540,25 +430,19 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
     return {
       contractAddress,
       getConfig,
-      getMintableNumTokens,
-      getStartTime,
-      getMintPrice,
-      getMintCount,
-      mint,
-      purge,
-      updateMintPrice,
-      setWhitelist,
-      updateStartTime,
-      updateStartTradingTime,
-      updatePerAddressLimit,
-      mintTo,
-      mintFor,
-      batchMintFor,
-      batchMint,
-      airdrop,
-      shuffle,
-      withdraw,
-      burnRemaining,
+      getBadge,
+      getBadges,
+      getKey,
+      getKeys,
+      createBadge,
+      editBadge,
+      addKeys,
+      purgeKeys,
+      purgeOwners,
+      mintByMinter,
+      mintByKey,
+      mintByKeys,
+      setNft,
     }
   }
 
@@ -581,9 +465,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
     initMsg: Record<string, unknown>,
     label: string,
   ): Promise<InstantiateResponse> => {
-    const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto', {
-      funds: [coin('3000000000', 'ustars')],
-    })
+    const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto')
 
     return {
       contractAddress: result.contractAddress,
@@ -593,215 +475,148 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
   }
 
   const messages = (contractAddress: string) => {
-    const mint = (): MintMessage => {
+    const createBadge = (badge: Badge): CreateBadgeMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          mint: {},
-        },
-        funds: [],
-      }
-    }
-
-    const purge = (): PurgeMessage => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          purge: {},
-        },
-        funds: [],
-      }
-    }
-
-    const updateMintPrice = (price: string): UpdateMintPriceMessage => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          update_mint_price: {
-            price: (Number(price) * 1000000).toString(),
+          create_badge: {
+            manager: badge.manager,
+            metadata: badge.metadata,
+            transferrable: badge.transferrable,
+            rule: badge.rule,
+            expiry: badge.expiry,
+            max_supply: badge.max_supply,
           },
         },
         funds: [],
       }
     }
 
-    const setWhitelist = (whitelist: string): SetWhitelistMessage => {
+    const editBadge = (id: number, metadata: Metadata): EditBadgeMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          set_whitelist: {
-            whitelist,
+          edit_badge: {
+            id,
+            metadata,
           },
         },
         funds: [],
       }
     }
 
-    const updateStartTime = (startTime: string): UpdateStartTimeMessage => {
+    const addKeys = (id: number, keys: string[]): AddKeysMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          update_start_time: startTime,
-        },
-        funds: [],
-      }
-    }
-
-    const updateStartTradingTime = (startTime: string): UpdateStartTradingTimeMessage => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          update_start_trading_time: startTime,
-        },
-        funds: [],
-      }
-    }
-
-    const updatePerAddressLimit = (limit: number): UpdatePerAddressLimitMessage => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          update_per_address_limit: {
-            per_address_limit: limit,
+          add_keys: {
+            id,
+            keys,
           },
         },
         funds: [],
       }
     }
 
-    const mintTo = (recipient: string): MintToMessage => {
+    const purgeKeys = (id: number, limit?: number): PurgeKeysMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          mint_to: {
-            recipient,
+          purge_keys: {
+            id,
+            limit,
           },
         },
         funds: [],
       }
     }
 
-    const mintFor = (recipient: string, tokenId: number): MintForMessage => {
+    const purgeOwners = (id: number, limit?: number): PurgeOwnersMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          mint_for: {
-            recipient,
-            token_id: tokenId,
+          purge_owners: {
+            id,
+            limit,
           },
         },
         funds: [],
       }
     }
 
-    const batchMintFor = (recipient: string, tokenIds: string): BatchMintForMessage => {
-      const msg: Record<string, unknown>[] = []
-      if (tokenIds.includes(':')) {
-        const [start, end] = tokenIds.split(':').map(Number)
-        for (let i = start; i <= end; i++) {
-          msg.push({
-            mint_for: { token_id: i.toString(), recipient },
-          })
-        }
-      } else {
-        const tokenNumbers = tokenIds.split(',').map(Number)
-        for (let i = 0; i < tokenNumbers.length; i++) {
-          msg.push({ mint_for: { token_id: tokenNumbers[i].toString(), recipient } })
-        }
-      }
-
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg,
-        funds: [],
-      }
-    }
-
-    const batchMint = (recipient: string, batchNumber: number): CustomMessage => {
-      const msg: Record<string, unknown>[] = []
-      for (let i = 0; i < batchNumber; i++) {
-        msg.push({ mint_to: { recipient } })
-      }
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg,
-        funds: [],
-      }
-    }
-
-    const airdrop = (recipients: string[]): CustomMessage => {
-      const msg: Record<string, unknown>[] = []
-      for (let i = 0; i < recipients.length; i++) {
-        msg.push({ mint_to: { recipient: recipients[i] } })
-      }
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg,
-        funds: [],
-      }
-    }
-
-    const shuffle = (): ShuffleMessage => {
+    const mintByMinter = (id: number, owners: string[]): MintByMinterMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          shuffle: {},
+          mint_by_minter: {
+            id,
+            owners,
+          },
         },
         funds: [],
       }
     }
 
-    const withdraw = (): WithdrawMessage => {
+    const mintByKey = (id: number, owner: string, signature: string): MintByKeyMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          withdraw: {},
+          mint_by_key: {
+            id,
+            owner,
+            signature,
+          },
         },
         funds: [],
       }
     }
 
-    const burnRemaining = (): BurnRemainingMessage => {
+    const mintByKeys = (id: number, owner: string, pubkey: string, signature: string): MintByKeysMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          burn_remaining: {},
+          mint_by_keys: {
+            id,
+            owner,
+            pubkey,
+            signature,
+          },
+        },
+        funds: [],
+      }
+    }
+
+    const setNft = (nft: string): SetNftMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          set_nft: {
+            nft,
+          },
         },
         funds: [],
       }
     }
 
     return {
-      mint,
-      purge,
-      updateMintPrice,
-      setWhitelist,
-      updateStartTime,
-      updateStartTradingTime,
-      updatePerAddressLimit,
-      mintTo,
-      mintFor,
-      batchMintFor,
-      batchMint,
-      airdrop,
-      shuffle,
-      withdraw,
-      burnRemaining,
+      createBadge,
+      editBadge,
+      addKeys,
+      purgeKeys,
+      purgeOwners,
+      mintByMinter,
+      mintByKey,
+      mintByKeys,
+      setNft,
     }
   }
 
