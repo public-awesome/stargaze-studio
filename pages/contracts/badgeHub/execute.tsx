@@ -26,6 +26,7 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { MetadataAttributes } from '../../../components/forms/MetadataAttributes'
 import { useMetadataAttributesState } from '../../../components/forms/MetadataAttributes.hooks'
 
 const BadgeHubExecutePage: NextPage = () => {
@@ -186,15 +187,20 @@ const BadgeHubExecutePage: NextPage = () => {
     badge: {
       manager: managerState.value,
       metadata: {
-        name: nameState.value,
-        description: descriptionState.value,
-        image: imageState.value,
-        image_data: imageDataState.value,
-        external_url: externalUrlState.value,
-        attributes: attributesState.values.map((attr) => ({
-          trait_type: attr.trait_type,
-          value: attr.value,
-        })),
+        name: nameState.value || undefined,
+        description: descriptionState.value || undefined,
+        image: imageState.value || undefined,
+        image_data: imageDataState.value || undefined,
+        external_url: externalUrlState.value || undefined,
+        attributes:
+          attributesState.values[0]?.trait_type && attributesState.values[0]?.value
+            ? attributesState.values
+                .map((attr) => ({
+                  trait_type: attr.trait_type,
+                  value: attr.value,
+                }))
+                .filter((attr) => attr.trait_type && attr.value)
+            : undefined,
         background_color: backgroundColorState.value,
         animation_url: animationUrlState.value,
         youtube_url: youtubeUrlState.value,
@@ -211,10 +217,15 @@ const BadgeHubExecutePage: NextPage = () => {
       image: imageState.value,
       image_data: imageDataState.value,
       external_url: externalUrlState.value,
-      attributes: attributesState.values.map((attr) => ({
-        trait_type: attr.trait_type,
-        value: attr.value,
-      })),
+      attributes:
+        attributesState.values[0]?.trait_type && attributesState.values[0]?.value
+          ? attributesState.values
+              .map((attr) => ({
+                trait_type: attr.trait_type,
+                value: attr.value,
+              }))
+              .filter((attr) => attr.trait_type && attr.value)
+          : undefined,
       background_color: backgroundColorState.value,
       animation_url: animationUrlState.value,
       youtube_url: youtubeUrlState.value,
@@ -268,9 +279,15 @@ const BadgeHubExecutePage: NextPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractAddress])
+
   useEffect(() => {
     const initial = new URL(document.URL).searchParams.get('contractAddress')
     if (initial && initial.length > 0) contractState.onChange(initial)
+    if (attributesState.values.length === 0)
+      attributesState.add({
+        trait_type: '',
+        value: '',
+      })
   }, [])
 
   return (
@@ -288,6 +305,17 @@ const BadgeHubExecutePage: NextPage = () => {
           <AddressInput {...contractState} />
           <ExecuteCombobox {...comboboxState} />
           {showBadgeField && <AddressInput {...managerState} />}
+          {showMetadataField && (
+            <div className="mt-2">
+              <MetadataAttributes
+                attributes={attributesState.entries}
+                onAdd={attributesState.add}
+                onChange={attributesState.update}
+                onRemove={attributesState.remove}
+                title="Traits"
+              />
+            </div>
+          )}
           {/* TODO: Fix address execute message */}
           <Conditional test={showBadgeField}>
             <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
