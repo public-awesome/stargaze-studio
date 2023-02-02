@@ -1,5 +1,5 @@
-import type { UseBadgeHubContractProps } from 'contracts/badge-hub'
-import { useBadgeHubContract } from 'contracts/badge-hub'
+import type { UseBadgeHubContractProps } from 'contracts/badgeHub'
+import { useBadgeHubContract } from 'contracts/badgeHub'
 import type { UseBaseFactoryContractProps } from 'contracts/baseFactory'
 import { useBaseFactoryContract } from 'contracts/baseFactory'
 import type { UseBaseMinterContractProps } from 'contracts/baseMinter'
