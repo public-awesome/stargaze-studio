@@ -34,7 +34,7 @@ export interface Trait {
 export interface Metadata {
   name?: string
   image?: string
-  image_date?: string
+  image_data?: string
   external_url?: string
   description?: string
   attributes?: Trait[]
