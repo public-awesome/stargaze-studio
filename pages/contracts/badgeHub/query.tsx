@@ -85,11 +85,11 @@ const BadgeHubQueryPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Query Vending Minter Contract" />
+      <NextSeo title="Query Badge Hub Contract" />
       <ContractPageHeader
-        description="Vending Minter contract facilitates primary market vending machine style minting."
+        description="The Badge Hub contract is where event organizers create, mint, or edit badges."
         link={links.Documentation}
-        title="Vending Minter Contract"
+        title="Badge Hub Contract"
       />
       <LinkTabs activeIndex={1} data={badgeHubLinkTabs} />
 
@@ -108,7 +108,7 @@ const BadgeHubQueryPage: NextPage = () => {
               onChange={(e) => setType(e.target.value as QueryType)}
             >
               {QUERY_LIST.map(({ id, name }) => (
-                <option key={`query-${id}`} value={id}>
+                <option key={`query-${id}`} className="mt-2 text-lg bg-[#1A1A1A]" value={id}>
                   {name}
                 </option>
               ))}
