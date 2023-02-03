@@ -292,11 +292,11 @@ const BadgeHubExecutePage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Execute Vending Minter Contract" />
+      <NextSeo title="Execute Badge Hub Contract" />
       <ContractPageHeader
-        description="Vending Minter contract facilitates primary market vending machine style minting."
+        description="The Badge Hub contract is where event organizers create, mint, or edit badges."
         link={links.Documentation}
-        title="Vending Minter Contract"
+        title="Badge Hub Contract"
       />
       <LinkTabs activeIndex={2} data={badgeHubLinkTabs} />
 
