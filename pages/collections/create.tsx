@@ -214,7 +214,7 @@ const CollectionCreationPage: NextPage = () => {
       setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error(error.message, { style: { maxWidth: 'none' } })
+      toast.error(error.message, { style: { maxWidth: 'none' }, duration: 10000 })
       setCreatingCollection(false)
       setUploading(false)
     }
@@ -276,7 +276,7 @@ const CollectionCreationPage: NextPage = () => {
       setCreatingCollection(false)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.error(error.message, { style: { maxWidth: 'none' } })
+      toast.error(error.message, { style: { maxWidth: 'none' }, duration: 10000 })
       setCreatingCollection(false)
       setUploading(false)
     }
