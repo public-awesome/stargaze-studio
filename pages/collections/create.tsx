@@ -676,9 +676,14 @@ const CollectionCreationPage: NextPage = () => {
     if (!uploadDetails) {
       throw new Error('Please select assets and metadata')
     }
-    // if (minterType === 'base' && uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length > 1) {
-    //   throw new Error('Base Minter can only mint one asset at a time. Please select only one asset.')
-    // }
+    if (
+      minterType === 'base' &&
+      uploadDetails.uploadMethod === 'new' &&
+      uploadDetails.assetFiles.length > 1 &&
+      uploadDetails.metadataFiles.length === 0
+    ) {
+      throw new Error('Please select metadata files')
+    }
     if (uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length === 0) {
       throw new Error('Please select the assets')
     }
