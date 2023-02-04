@@ -22,7 +22,6 @@ export const ACTION_TYPES = [
   'update_per_address_limit',
   'update_collection_info',
   'freeze_collection_info',
-  'withdraw',
   'transfer',
   'batch_transfer',
   'burn',
@@ -59,11 +58,6 @@ export const BASE_ACTION_LIST: ActionListItem[] = [
     id: 'freeze_collection_info',
     name: 'Freeze Collection Info',
     description: `Freeze collection info to prevent further updates`,
-  },
-  {
-    id: 'withdraw',
-    name: 'Withdraw Tokens',
-    description: `Withdraw tokens from the contract`,
   },
   {
     id: 'transfer',
@@ -154,11 +148,6 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     description: `Freeze collection info to prevent further updates`,
   },
   {
-    id: 'withdraw',
-    name: 'Withdraw Tokens',
-    description: `Withdraw tokens from the contract`,
-  },
-  {
     id: 'transfer',
     name: 'Transfer Tokens',
     description: `Transfer tokens from one address to another`,
@@ -224,7 +213,6 @@ export type DispatchExecuteArgs = {
   | { type: Select<'update_start_trading_time'>; startTime?: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'shuffle'> }
-  | { type: Select<'withdraw'> }
   | { type: Select<'transfer'>; recipient: string; tokenId: number }
   | { type: Select<'batch_transfer'>; recipient: string; tokenIds: string }
   | { type: Select<'burn'>; tokenId: number }
@@ -283,9 +271,6 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'shuffle': {
       return vendingMinterMessages.shuffle(txSigner)
-    }
-    case 'withdraw': {
-      return vendingMinterMessages.withdraw(txSigner)
     }
     case 'transfer': {
       return sg721Messages.transferNft(args.recipient, args.tokenId.toString())
@@ -364,9 +349,6 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'shuffle': {
       return vendingMinterMessages(minterContract)?.shuffle()
-    }
-    case 'withdraw': {
-      return vendingMinterMessages(minterContract)?.withdraw()
     }
     case 'transfer': {
       return sg721Messages(sg721Contract)?.transferNft(args.recipient, args.tokenId.toString())
