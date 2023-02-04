@@ -498,7 +498,7 @@ const CollectionCreationPage: NextPage = () => {
         setTransactionHash(data.transactionHash)
         setVendingMinterContractAddress(data.baseMinterAddress)
         setSg721ContractAddress(data.sg721Address)
-        if (uploadDetails?.assetFiles.length === 1) {
+        if (uploadDetails?.assetFiles.length === 1 || uploadDetails?.uploadMethod === 'existing') {
           await toast
             .promise(
               baseMinterContract.use(data.baseMinterAddress)?.mint(wallet.address, baseUri) as Promise<string>,
