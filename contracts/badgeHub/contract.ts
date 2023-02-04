@@ -6,7 +6,6 @@ import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -48,7 +47,7 @@ export interface Badge {
   metadata: Metadata
   transferrable: boolean
   rule: Rule
-  expiry?: Timestamp
+  expiry?: number
   max_supply?: number
 }
 
@@ -95,7 +94,7 @@ export interface CreateBadgeMessage {
       metadata: Metadata
       transferrable: boolean
       rule: Rule
-      expiry?: Timestamp
+      expiry?: number
       max_supply?: number
     }
   }
@@ -277,7 +276,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
-        [coin(315, 'ustars')],
+        [coin(912, 'ustars')],
       )
 
       return res.transactionHash

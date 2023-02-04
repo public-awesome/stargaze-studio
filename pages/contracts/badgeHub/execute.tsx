@@ -4,7 +4,7 @@ import { ContractPageHeader } from 'components/ContractPageHeader'
 import { ExecuteCombobox } from 'components/contracts/badgeHub/ExecuteCombobox'
 import { useExecuteComboboxState } from 'components/contracts/badgeHub/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
-import { AddressInput } from 'components/forms/FormInput'
+import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
@@ -26,6 +26,7 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { TextInput } from '../../../components/forms/FormInput'
 import { MetadataAttributes } from '../../../components/forms/MetadataAttributes'
 import { useMetadataAttributesState } from '../../../components/forms/MetadataAttributes.hooks'
 
@@ -209,6 +210,7 @@ const BadgeHubExecutePage: NextPage = () => {
       rule: {
         by_key: keyState.value,
       },
+      expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
       max_supply: maxSupplyState.value,
     },
     metadata: {
@@ -316,6 +318,8 @@ const BadgeHubExecutePage: NextPage = () => {
               />
             </div>
           )}
+          {showBadgeField && <TextInput {...keyState} />}
+          {showBadgeField && <NumberInput {...maxSupplyState} />}
           {/* TODO: Fix address execute message */}
           <Conditional test={showBadgeField}>
             <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
