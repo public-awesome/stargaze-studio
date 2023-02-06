@@ -202,9 +202,9 @@ const BadgeHubExecutePage: NextPage = () => {
                 }))
                 .filter((attr) => attr.trait_type && attr.value)
             : undefined,
-        background_color: backgroundColorState.value,
-        animation_url: animationUrlState.value,
-        youtube_url: youtubeUrlState.value,
+        background_color: backgroundColorState.value || undefined,
+        animation_url: animationUrlState.value || undefined,
+        youtube_url: youtubeUrlState.value || undefined,
       },
       transferrable,
       rule: {
@@ -214,11 +214,11 @@ const BadgeHubExecutePage: NextPage = () => {
       max_supply: maxSupplyState.value,
     },
     metadata: {
-      name: nameState.value,
-      description: descriptionState.value,
-      image: imageState.value,
-      image_data: imageDataState.value,
-      external_url: externalUrlState.value,
+      name: nameState.value || undefined,
+      description: descriptionState.value || undefined,
+      image: imageState.value || undefined,
+      image_data: imageDataState.value || undefined,
+      external_url: externalUrlState.value || undefined,
       attributes:
         attributesState.values[0]?.trait_type && attributesState.values[0]?.value
           ? attributesState.values
@@ -228,9 +228,9 @@ const BadgeHubExecutePage: NextPage = () => {
               }))
               .filter((attr) => attr.trait_type && attr.value)
           : undefined,
-      background_color: backgroundColorState.value,
-      animation_url: animationUrlState.value,
-      youtube_url: youtubeUrlState.value,
+      background_color: backgroundColorState.value || undefined,
+      animation_url: animationUrlState.value || undefined,
+      youtube_url: youtubeUrlState.value || undefined,
     },
     id: idState.value,
     owner: ownerState.value,
@@ -273,6 +273,12 @@ const BadgeHubExecutePage: NextPage = () => {
     },
   )
 
+  const handleGenerateKey = () => {
+    //generate public and private key pair
+
+    keyState.onChange('test')
+  }
+
   const router = useRouter()
 
   useEffect(() => {
@@ -307,25 +313,50 @@ const BadgeHubExecutePage: NextPage = () => {
           <AddressInput {...contractState} />
           <ExecuteCombobox {...comboboxState} />
           {showBadgeField && <AddressInput {...managerState} />}
+          {showBadgeField && <TextInput {...keyState} />}
+          {showBadgeField && <Button onClick={handleGenerateKey}>Generate Key</Button>}
           {showMetadataField && (
-            <div className="mt-2">
-              <MetadataAttributes
-                attributes={attributesState.entries}
-                onAdd={attributesState.add}
-                onChange={attributesState.update}
-                onRemove={attributesState.remove}
-                title="Traits"
-              />
+            <div className="p-4 rounded-md border-2 border-gray-800">
+              <TextInput className="mt-2" {...nameState} />
+              <TextInput className="mt-2" {...descriptionState} />
+              <TextInput className="mt-2" {...imageState} />
+              <TextInput className="mt-2" {...imageDataState} />
+              <TextInput className="mt-2" {...externalUrlState} />
+              <div className="mt-2">
+                <MetadataAttributes
+                  attributes={attributesState.entries}
+                  onAdd={attributesState.add}
+                  onChange={attributesState.update}
+                  onRemove={attributesState.remove}
+                  title="Traits"
+                />
+              </div>
+              <TextInput className="mt-2" {...backgroundColorState} />
+              <TextInput className="mt-2" {...animationUrlState} />
+              <TextInput className="mt-2" {...youtubeUrlState} />
             </div>
           )}
-          {showBadgeField && <TextInput {...keyState} />}
-          {showBadgeField && <NumberInput {...maxSupplyState} />}
-          {/* TODO: Fix address execute message */}
+
           <Conditional test={showBadgeField}>
             <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
             </FormControl>
           </Conditional>
+          {showBadgeField && <NumberInput {...maxSupplyState} />}
+          {showBadgeField && (
+            <div className="form-control">
+              <label className="justify-start cursor-pointer label">
+                <span className="mr-4">Transferrable</span>
+                <input
+                  checked={transferrable}
+                  className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
+                  onClick={() => setTransferrable(!transferrable)}
+                  type="checkbox"
+                />
+              </label>
+            </div>
+          )}
+          {/* TODO: Fix address execute message */}
         </div>
         <div className="space-y-8">
           <div className="relative">
