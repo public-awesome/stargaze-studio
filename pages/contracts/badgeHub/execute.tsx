@@ -15,6 +15,7 @@ import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/badgeHub/messages/execute'
+import * as crypto from 'crypto'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -23,6 +24,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import * as secp256k1 from 'secp256k1'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -211,7 +213,7 @@ const BadgeHubExecutePage: NextPage = () => {
         by_key: keyState.value,
       },
       expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
-      max_supply: maxSupplyState.value,
+      max_supply: maxSupplyState.value || undefined,
     },
     metadata: {
       name: nameState.value || undefined,
@@ -274,9 +276,17 @@ const BadgeHubExecutePage: NextPage = () => {
   )
 
   const handleGenerateKey = () => {
-    //generate public and private key pair
+    let privKey: Buffer
+    do {
+      privKey = crypto.randomBytes(32)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    } while (!secp256k1.privateKeyVerify(privKey))
 
-    keyState.onChange('test')
+    const privateKey = privKey.toString('hex')
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
+
+    keyState.onChange(publicKey)
   }
 
   const router = useRouter()
