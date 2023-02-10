@@ -1,11 +1,15 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable camelcase */
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import { toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
+import sizeof from 'object-sizeof'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -261,6 +265,19 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
 
     //Execute
     const createBadge = async (senderAddress: string, badge: Badge): Promise<string> => {
+      const feeRateRaw = await client.queryContractRaw(
+        contractAddress,
+        toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
+      )
+
+      const feeRate = JSON.parse(new TextDecoder().decode(feeRateRaw as Uint8Array))
+      console.log('Fee Rate:', feeRate)
+
+      console.log('badge size: ', sizeof(badge))
+      console.log('metadata size', sizeof(badge.metadata))
+      console.log('size of attributes ', sizeof(badge.metadata.attributes))
+
+      console.log('Total: ', Number(sizeof(badge)) + Number(sizeof(badge.metadata.attributes)))
       const res = await client.execute(
         senderAddress,
         contractAddress,
@@ -276,10 +293,25 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
-        [coin(912, 'ustars')],
+        [
+          coin(
+            (Number(sizeof(badge)) + Number(sizeof(badge.metadata.attributes))) * Number(feeRate.metadata),
+            'ustars',
+          ),
+        ],
+        //[coin(1, 'ustars')],
       )
 
-      return res.transactionHash
+      const events = res.logs
+        .map((log) => log.events)
+        .flat()
+        .find(
+          (event) =>
+            event.attributes.findIndex((attr) => attr.key === 'action' && attr.value === 'badges/hub/create_badge') > 0,
+        )!
+      const id = Number(events.attributes.find((attr) => attr.key === 'id')!.value)
+
+      return res.transactionHash.concat(`:${id}`)
     }
 
     const editBadge = async (senderAddress: string, id: number, metadata: Metadata): Promise<string> => {

@@ -72,6 +72,7 @@ const BadgeHubExecutePage: NextPage = () => {
     name: 'manager',
     title: 'Manager',
     subtitle: 'Badge Hub Manager',
+    defaultValue: wallet.address,
   })
 
   const nameState = useInputState({
@@ -262,10 +263,11 @@ const BadgeHubExecutePage: NextPage = () => {
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',
-        success: (tx) => `Transaction ${tx} success!`,
+        success: (tx) => `Transaction ${tx.split(':')[0]} success!`,
       })
       if (txHash) {
-        setLastTx(txHash)
+        setLastTx(txHash.split(':')[0])
+        console.log(txHash.split(':')[1])
       }
     },
     {
@@ -279,11 +281,11 @@ const BadgeHubExecutePage: NextPage = () => {
     let privKey: Buffer
     do {
       privKey = crypto.randomBytes(32)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     } while (!secp256k1.privateKeyVerify(privKey))
 
     const privateKey = privKey.toString('hex')
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    console.log('Private Key: ', privateKey)
+
     const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
 
     keyState.onChange(publicKey)
