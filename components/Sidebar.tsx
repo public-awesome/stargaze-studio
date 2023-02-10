@@ -14,11 +14,17 @@ const routes = [
   { text: 'Create a Collection', href: `/collections/create/`, isChild: true },
   { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
   { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
+  { text: 'Badges', href: `/badges/`, isChild: false },
+  { text: 'Create a Badge', href: `/collections/create/`, isChild: true },
+  { text: 'My Badges', href: `/collections/myCollections/`, isChild: true },
+  { text: 'Badge Actions', href: `/collections/actions/`, isChild: true },
   { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
   { text: 'Base Minter Contract', href: `/contracts/baseMinter/`, isChild: true },
   { text: 'Vending Minter Contract', href: `/contracts/vendingMinter/`, isChild: true },
   { text: 'SG721 Contract', href: `/contracts/sg721/`, isChild: true },
   { text: 'Whitelist Contract', href: `/contracts/whitelist/`, isChild: true },
+  { text: 'Badge Hub Contract', href: `/contracts/badgeHub/`, isChild: true },
+  { text: 'Badge NFT Contract', href: `/contracts/badgeNFT/`, isChild: true },
 ]
 
 export const Sidebar = () => {
@@ -44,9 +50,9 @@ export const Sidebar = () => {
         <Anchor
           key={href}
           className={clsx(
-            'px-2 -mx-5 font-extrabold uppercase rounded-lg', // styling
+            'px-2 -my-[1px] -mx-5 font-extrabold uppercase rounded-lg', // styling
             'hover:bg-white/5 transition-colors', // hover styling
-            { 'py-0 -ml-2 text-sm font-bold': isChild },
+            { 'py-0 -my-[3px] -ml-2 text-sm font-bold': isChild },
             {
               'text-gray hover:text-white':
                 !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
@@ -54,7 +60,10 @@ export const Sidebar = () => {
             {
               'text-stargaze': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
             }, // active route styling
-            // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
+            {
+              'py-0 -my-[3px] -ml-2 font-extrabold text-gray-500 opacity-50 pointer-events-none':
+                href.includes('badgeNFT'),
+            }, // disabled route styling
           )}
           href={href}
         >
