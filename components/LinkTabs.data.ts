@@ -90,7 +90,7 @@ export const badgeHubLinkTabs: LinkTabProps[] = [
   },
   {
     title: 'Query',
-    description: `Dispatch queries with your Badge Hub contract`,
+    description: `Dispatch queries for your Badge Hub contract`,
     href: '/contracts/badgeHub/query',
   },
   {

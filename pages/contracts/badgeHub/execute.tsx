@@ -16,15 +16,18 @@ import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/badgeHub/messages/execute'
 import * as crypto from 'crypto'
+import { toPng } from 'html-to-image'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
+import { QRCodeCanvas } from 'qrcode.react'
 import type { FormEvent } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
+import { NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -38,8 +41,10 @@ const BadgeHubExecutePage: NextPage = () => {
   const [lastTx, setLastTx] = useState('')
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
-  const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
   const [transferrable, setTransferrable] = useState<boolean>(false)
+  const [createdBadgeId, setCreatedBadgeId] = useState<string | undefined>(undefined)
+  const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
+  const qrRef = useRef<HTMLDivElement>(null)
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -267,6 +272,7 @@ const BadgeHubExecutePage: NextPage = () => {
       })
       if (txHash) {
         setLastTx(txHash.split(':')[0])
+        setCreatedBadgeId(txHash.split(':')[1])
         console.log(txHash.split(':')[1])
       }
     },
@@ -284,11 +290,22 @@ const BadgeHubExecutePage: NextPage = () => {
     } while (!secp256k1.privateKeyVerify(privKey))
 
     const privateKey = privKey.toString('hex')
+    setCreatedBadgeKey(privateKey)
     console.log('Private Key: ', privateKey)
 
     const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
 
     keyState.onChange(publicKey)
+  }
+
+  const handleDownloadQr = async () => {
+    const qrElement = qrRef.current
+    await toPng(qrElement as HTMLElement).then((dataUrl) => {
+      const link = document.createElement('a')
+      link.download = `badge-${createdBadgeId as string}.png`
+      link.href = dataUrl
+      link.click()
+    })
   }
 
   const router = useRouter()
@@ -320,6 +337,21 @@ const BadgeHubExecutePage: NextPage = () => {
       />
       <LinkTabs activeIndex={2} data={badgeHubLinkTabs} />
 
+      {showBadgeField && createdBadgeId && createdBadgeKey && (
+        <div className="ml-4">
+          <div className="w-[384px] h-[384px]" ref={qrRef}>
+            <QRCodeCanvas
+              size={384}
+              value={`${
+                NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+              }/?id=${createdBadgeId}&key=${createdBadgeKey}`}
+            />
+          </div>
+          <Button className="mt-2" onClick={() => void handleDownloadQr()}>
+            Download QR Code
+          </Button>
+        </div>
+      )}
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
           <AddressInput {...contractState} />
