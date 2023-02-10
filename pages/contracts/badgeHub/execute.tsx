@@ -24,7 +24,7 @@ import { QRCodeCanvas } from 'qrcode.react'
 import type { FormEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { FaArrowRight } from 'react-icons/fa'
+import { FaArrowRight, FaCopy, FaSave } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
 import { NETWORK } from 'utils/constants'
@@ -308,6 +308,14 @@ const BadgeHubExecutePage: NextPage = () => {
     })
   }
 
+  // copy claim url to clipboard
+  const copyClaimURL = async () => {
+    const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+    const claimURL = `${baseURL}/?id=${createdBadgeId as string}&key=${createdBadgeKey as string}`
+    await navigator.clipboard.writeText(claimURL)
+    toast.success('Copied claim URL to clipboard')
+  }
+
   const router = useRouter()
 
   useEffect(() => {
@@ -347,9 +355,25 @@ const BadgeHubExecutePage: NextPage = () => {
               }/?id=${createdBadgeId}&key=${createdBadgeKey}`}
             />
           </div>
-          <Button className="mt-2" onClick={() => void handleDownloadQr()}>
-            Download QR Code
-          </Button>
+          {/* <div className="flex flex-row items-center mt-2 space-x-2 w-[384px] h-12"> */}
+          <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
+            <Button
+              className="items-center w-full text-sm text-center rounded"
+              leftIcon={<FaSave />}
+              onClick={() => void handleDownloadQr()}
+            >
+              Download QR Code
+            </Button>
+            <Button
+              className="w-full text-sm text-center rounded"
+              isWide
+              leftIcon={<FaCopy />}
+              onClick={() => void copyClaimURL()}
+              variant="solid"
+            >
+              Copy Claim URL
+            </Button>
+          </div>
         </div>
       )}
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
@@ -361,6 +385,7 @@ const BadgeHubExecutePage: NextPage = () => {
           {showBadgeField && <Button onClick={handleGenerateKey}>Generate Key</Button>}
           {showMetadataField && (
             <div className="p-4 rounded-md border-2 border-gray-800">
+              <span className="text-gray-400">Metadata</span>
               <TextInput className="mt-2" {...nameState} />
               <TextInput className="mt-2" {...descriptionState} />
               <TextInput className="mt-2" {...imageState} />
@@ -380,28 +405,8 @@ const BadgeHubExecutePage: NextPage = () => {
               <TextInput className="mt-2" {...youtubeUrlState} />
             </div>
           )}
-
-          <Conditional test={showBadgeField}>
-            <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-            </FormControl>
-          </Conditional>
-          {showBadgeField && <NumberInput {...maxSupplyState} />}
-          {showBadgeField && (
-            <div className="form-control">
-              <label className="justify-start cursor-pointer label">
-                <span className="mr-4">Transferrable</span>
-                <input
-                  checked={transferrable}
-                  className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
-                  onClick={() => setTransferrable(!transferrable)}
-                  type="checkbox"
-                />
-              </label>
-            </div>
-          )}
-          {/* TODO: Fix address execute message */}
         </div>
+
         <div className="space-y-8">
           <div className="relative">
             <Button className="absolute top-0 right-0" isLoading={isLoading} rightIcon={<FaArrowRight />} type="submit">
@@ -414,6 +419,27 @@ const BadgeHubExecutePage: NextPage = () => {
           <FormControl subtitle="View current message to be sent" title="Payload Preview">
             <JsonPreview content={previewExecutePayload(payload)} isCopyable />
           </FormControl>
+          <div className="pt-9">
+            <Conditional test={showBadgeField}>
+              <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
+                <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+              </FormControl>
+            </Conditional>
+            {showBadgeField && <NumberInput className="mt-2" {...maxSupplyState} />}
+            {showBadgeField && (
+              <div className="mt-2 form-control">
+                <label className="justify-start cursor-pointer label">
+                  <span className="mr-4 font-bold">Transferrable</span>
+                  <input
+                    checked={transferrable}
+                    className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
+                    onClick={() => setTransferrable(!transferrable)}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+            )}
+          </div>
         </div>
       </form>
     </section>
