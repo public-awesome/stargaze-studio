@@ -2,11 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { coin } from '@cosmjs/proto-signing'
+//import { coin } from '@cosmjs/proto-signing'
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
-import { ImageUploadDetails, ImageUploadDetailsDataProps } from 'components/badges/creation/ImageUploadDetails'
+import type { BadgeDetailsDataProps } from 'components/badges/creation/BadgeDetails'
+import { BadgeDetails } from 'components/badges/creation/BadgeDetails'
+import type { ImageUploadDetailsDataProps, MintRule } from 'components/badges/creation/ImageUploadDetails'
+import { ImageUploadDetails } from 'components/badges/creation/ImageUploadDetails'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
@@ -24,11 +27,8 @@ import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK, STARGAZE_URL } from 'ut
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-import type { MintRule } from 'components/badges/creation/ImageUploadDetails'
-import type { UploadMethod } from '../../components/badges/creation/ImageUploadDetails'
-import { ConfirmationModal } from '../../components/ConfirmationModal'
+// import { ConfirmationModal } from '../../components/ConfirmationModal'
 // import { badgeHub } from '../../contracts/badgeHub/contract'
-// import { getAssetType } from '../../utils/getAssetType'
 // import { isValidAddress } from '../../utils/isValidAddress'
 
 const BadgeCreationPage: NextPage = () => {
@@ -39,7 +39,7 @@ const BadgeCreationPage: NextPage = () => {
   const badgeHubMessages = useMemo(() => badgeHubContract?.use(BADGE_HUB_ADDRESS), [badgeHubContract, wallet.address])
 
   const [imageUploadDetails, setImageUploadDetails] = useState<ImageUploadDetailsDataProps | null>(null)
-  // const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
+  const [badgeDetails, setBadgeDetails] = useState<BadgeDetailsDataProps | null>(null)
   // const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
@@ -58,7 +58,7 @@ const BadgeCreationPage: NextPage = () => {
     try {
       setReadyToCreateBadge(false)
       checkImageUploadDetails()
-      //checkMetadataDetails()
+      // checkMetadataDetails()
       setReadyToCreateBadge(true)
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
@@ -98,53 +98,42 @@ const BadgeCreationPage: NextPage = () => {
     }
   }
 
-  const createNewBadge = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
+  const createNewBadge = async () => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
     if (!badgeHubContract) throw new Error('Contract not found')
 
-    // const msg = {
-    //   create_minter: {
-    //     init_msg: {
-    //       base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}` : `${baseUri}`}`,
-    //       start_time: mintingDetails?.startTime,
-    //       num_tokens: mintingDetails?.numTokens,
-    //       mint_price: {
-    //         amount: mintingDetails?.unitPrice,
-    //         denom: 'ustars',
-    //       },
-    //       per_address_limit: mintingDetails?.perAddressLimit,
-    //       whitelist,
-    //     },
-    //     collection_params: {
-    //       code_id: SG721_CODE_ID,
-    //       name: collectionDetails?.name,
-    //       symbol: collectionDetails?.symbol,
-    //       info: {
-    //         creator: wallet.address,
-    //         description: collectionDetails?.description,
-    //         image: `${
-    //           uploadDetails?.uploadMethod === 'new'
-    //             ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
-    //             : `${coverImageUri}`
-    //         }`,
-    //         external_link: collectionDetails?.externalLink,
-    //         explicit_content: collectionDetails?.explicit,
-    //         royalty_info: royaltyInfo,
-    //         start_trading_time: collectionDetails?.startTradingTime || null,
-    //       },
-    //     },
-    //   },
-    // }
+    await handleImageUrl()
 
-    const msg = {}
+    const badge = {
+      manager: badgeDetails?.manager as string,
+      metadata: {
+        name: badgeDetails?.name || undefined,
+        description: badgeDetails?.description || undefined,
+        image: imageUrl || undefined,
+        image_data: badgeDetails?.image_data || undefined,
+        external_url: badgeDetails?.external_url || undefined,
+        attributes: badgeDetails?.attributes || undefined,
+        background_color: badgeDetails?.background_color || undefined,
+        animation_url: badgeDetails?.animation_url || undefined,
+        youtube_url: badgeDetails?.youtube_url || undefined,
+      },
+      transferrable: badgeDetails?.transferrable as boolean,
+      rule: {
+        by_key: '024d529b81a16c1310cbf9d26f2b8c57e9e03179ba68fdcd1824ae1dc5cb3cb02c',
+      },
+      expiry: badgeDetails?.expiry || undefined,
+      max_supply: badgeDetails?.max_supply || undefined,
+    }
+
     const payload: BadgeHubDispatchExecuteArgs = {
       contract: BADGE_HUB_ADDRESS,
       messages: badgeHubMessages,
       txSigner: wallet.address,
-      msg,
-      funds: [coin('3000000000', 'ustars')],
+      badge,
+      type: 'create_badge',
     }
     const data = await badgeHubDispatchExecute(payload)
+    console.log(data)
     // setTransactionHash(data.transactionHash)
     // setBadgeId(data.id)
   }
@@ -364,23 +353,22 @@ const BadgeCreationPage: NextPage = () => {
         <ImageUploadDetails mintRule={mintRule} onChange={setImageUploadDetails} />
 
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
-          <MetadataDetails
-            coverImageUrl={coverImageUrl as string}
-            minterType={minterType}
-            onChange={setCollectionDetails}
-            uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
+          <BadgeDetails
+            mintRule={mintRule}
+            onChange={setBadgeDetails}
+            uploadMethod={imageUploadDetails?.uploadMethod ? imageUploadDetails.uploadMethod : 'new'}
           />
         </div>
 
-        <Conditional test={readyToCreateBadge}>
+        {/* <Conditional test={readyToCreateBadge}>
           <ConfirmationModal confirm={createNewBadge} />
-        </Conditional>
+        </Conditional> */}
 
         <div className="flex justify-end w-full">
           <Button
             className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
             isLoading={creatingBadge}
-            onClick={performBadgeCreationChecks}
+            onClick={() => console.log('create badge')}
             variant="solid"
           >
             Create Badge

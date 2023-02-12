@@ -5,7 +5,6 @@
 
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
-import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { InputDateTime } from 'components/InputDateTime'
@@ -20,7 +19,7 @@ import type { MintRule, UploadMethod } from './ImageUploadDetails'
 
 interface BadgeDetailsProps {
   onChange: (data: BadgeDetailsDataProps) => void
-  uploadMethod: UploadMethod
+  uploadMethod: UploadMethod | undefined
   mintRule: MintRule
 }
 
@@ -30,7 +29,7 @@ export interface BadgeDetailsDataProps {
   description?: string
   attributes?: Trait[]
   expiry?: number
-  transferrable?: boolean
+  transferrable: boolean
   max_supply?: number
   image_data?: string
   external_url?: string
@@ -39,7 +38,7 @@ export interface BadgeDetailsDataProps {
   youtube_url?: string
 }
 
-export const BadgeDetails = ({ onChange, uploadMethod, mintRule }: BadgeDetailsProps) => {
+export const BadgeDetails = ({ onChange }: BadgeDetailsProps) => {
   const wallet = useWallet()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
@@ -49,7 +48,7 @@ export const BadgeDetails = ({ onChange, uploadMethod, mintRule }: BadgeDetailsP
     name: 'manager',
     title: 'Manager',
     subtitle: 'Badge Hub Manager',
-    defaultValue: wallet.address,
+    defaultValue: wallet.address ? wallet.address : '',
   })
 
   const nameState = useInputState({
@@ -127,6 +126,7 @@ export const BadgeDetails = ({ onChange, uploadMethod, mintRule }: BadgeDetailsP
             : undefined,
         expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
         max_supply: maxSupplyState.value || undefined,
+        transferrable,
         image_data: imageDataState.value || undefined,
         external_url: externalUrlState.value || undefined,
         background_color: backgroundColorState.value || undefined,
@@ -154,44 +154,51 @@ export const BadgeDetails = ({ onChange, uploadMethod, mintRule }: BadgeDetailsP
     youtubeUrlState.value,
   ])
 
+  useEffect(() => {
+    if (attributesState.values.length === 0)
+      attributesState.add({
+        trait_type: '',
+        value: '',
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <div>
-      <FormGroup subtitle="Information about your collection" title="Collection Details">
-        <div className={clsx('grid grid-cols-2 -ml-16 max-w-5xl')}>
-          <div className={clsx('ml-0')}>
-            <AddressInput {...managerState} isRequired />
-            <TextInput {...nameState} />
-            <TextInput className="mt-2" {...descriptionState} />
-            <NumberInput className="mt-2" {...maxSupplyState} />
-            <div>
-              <MetadataAttributes
-                attributes={attributesState.entries}
-                onAdd={attributesState.add}
-                onChange={attributesState.update}
-                onRemove={attributesState.remove}
-                title="Traits"
+      <div className={clsx('grid grid-cols-2 ml-4 max-w-5xl')}>
+        <div className={clsx('mt-2')}>
+          <AddressInput {...managerState} isRequired />
+          <TextInput className="mt-2" {...nameState} />
+          <TextInput className="mt-2" {...descriptionState} />
+          <NumberInput className="mt-2" {...maxSupplyState} />
+          <TextInput className="mt-2" {...externalUrlState} />
+          <FormControl className="mt-2" htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
+            <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+          </FormControl>
+          <div className="mt-2 form-control">
+            <label className="justify-start cursor-pointer label">
+              <span className="mr-4 font-bold">Transferrable</span>
+              <input
+                checked={transferrable}
+                className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
+                onClick={() => setTransferrable(!transferrable)}
+                type="checkbox"
               />
-            </div>
-          </div>
-          <div className={clsx('ml-10')}>
-            <TextInput {...externalUrlState} />
-            <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-            </FormControl>
-            <div className="mt-2 form-control">
-              <label className="justify-start cursor-pointer label">
-                <span className="mr-4 font-bold">Transferrable</span>
-                <input
-                  checked={transferrable}
-                  className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
-                  onClick={() => setTransferrable(!transferrable)}
-                  type="checkbox"
-                />
-              </label>
-            </div>
+            </label>
           </div>
         </div>
-      </FormGroup>
+        <div className={clsx('ml-10')}>
+          <div>
+            <MetadataAttributes
+              attributes={attributesState.entries}
+              onAdd={attributesState.add}
+              onChange={attributesState.update}
+              onRemove={attributesState.remove}
+              title="Traits"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
