@@ -72,25 +72,72 @@ const BadgeCreationPage: NextPage = () => {
       setTokenUri(null)
       setImageUrl(null)
       setBadgeId(null)
-      setBadgeNftContractAddress(null)
       setTransactionHash(null)
       if (imageUploadDetails?.uploadMethod === 'new') {
         setUploading(true)
-
-        const coverImageUrl = await upload(
+        const coverUrl = await upload(
           [imageUploadDetails.assetFile] as File[],
           imageUploadDetails.uploadService,
           'cover',
           imageUploadDetails.nftStorageApiKey as string,
           imageUploadDetails.pinataApiKey as string,
           imageUploadDetails.pinataSecretKey as string,
-        )
-
-        setUploading(false)
-        setImageUrl(coverImageUrl)
-      } else {
-        setImageUrl(imageUploadDetails?.imageUrl as string)
+        ).then((imageBaseUrl) => {
+          setUploading(false)
+          return `ipfs://${imageBaseUrl}/${imageUploadDetails.assetFile?.name as string}`
+        })
+        setImageUrl(coverUrl)
+        return coverUrl
       }
+      setImageUrl(imageUploadDetails?.imageUrl as string)
+      return imageUploadDetails?.imageUrl as string
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setCreatingBadge(false)
+      setUploading(false)
+      throw new Error("Couldn't upload the image.")
+    }
+  }
+
+  const createNewBadge = async () => {
+    try {
+      if (!wallet.initialized) throw new Error('Wallet not connected')
+      if (!badgeHubContract) throw new Error('Contract not found')
+
+      const coverUrl = await handleImageUrl()
+
+      const badge = {
+        manager: badgeDetails?.manager as string,
+        metadata: {
+          name: badgeDetails?.name || undefined,
+          description: badgeDetails?.description || undefined,
+          image: coverUrl || undefined,
+          image_data: badgeDetails?.image_data || undefined,
+          external_url: badgeDetails?.external_url || undefined,
+          attributes: badgeDetails?.attributes || undefined,
+          background_color: badgeDetails?.background_color || undefined,
+          animation_url: badgeDetails?.animation_url || undefined,
+          youtube_url: badgeDetails?.youtube_url || undefined,
+        },
+        transferrable: badgeDetails?.transferrable as boolean,
+        rule: {
+          by_key: '024d529b81a16c1310cbf9d26f2b8c57e9e03179ba68fdcd1824ae1dc5cb3cb02c',
+        },
+        expiry: badgeDetails?.expiry || undefined,
+        max_supply: badgeDetails?.max_supply || undefined,
+      }
+
+      const payload: BadgeHubDispatchExecuteArgs = {
+        contract: BADGE_HUB_ADDRESS,
+        messages: badgeHubMessages,
+        txSigner: wallet.address,
+        badge,
+        type: 'create_badge',
+      }
+      const data = await badgeHubDispatchExecute(payload)
+      console.log(data)
+      // setTransactionHash(data.transactionHash)
+      // setBadgeId(data.id)
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       setCreatingBadge(false)
@@ -98,54 +145,12 @@ const BadgeCreationPage: NextPage = () => {
     }
   }
 
-  const createNewBadge = async () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected')
-    if (!badgeHubContract) throw new Error('Contract not found')
-
-    await handleImageUrl()
-
-    const badge = {
-      manager: badgeDetails?.manager as string,
-      metadata: {
-        name: badgeDetails?.name || undefined,
-        description: badgeDetails?.description || undefined,
-        image: imageUrl || undefined,
-        image_data: badgeDetails?.image_data || undefined,
-        external_url: badgeDetails?.external_url || undefined,
-        attributes: badgeDetails?.attributes || undefined,
-        background_color: badgeDetails?.background_color || undefined,
-        animation_url: badgeDetails?.animation_url || undefined,
-        youtube_url: badgeDetails?.youtube_url || undefined,
-      },
-      transferrable: badgeDetails?.transferrable as boolean,
-      rule: {
-        by_key: '024d529b81a16c1310cbf9d26f2b8c57e9e03179ba68fdcd1824ae1dc5cb3cb02c',
-      },
-      expiry: badgeDetails?.expiry || undefined,
-      max_supply: badgeDetails?.max_supply || undefined,
-    }
-
-    const payload: BadgeHubDispatchExecuteArgs = {
-      contract: BADGE_HUB_ADDRESS,
-      messages: badgeHubMessages,
-      txSigner: wallet.address,
-      badge,
-      type: 'create_badge',
-    }
-    const data = await badgeHubDispatchExecute(payload)
-    console.log(data)
-    // setTransactionHash(data.transactionHash)
-    // setBadgeId(data.id)
-  }
-
   const checkImageUploadDetails = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     if (!imageUploadDetails) {
-      throw new Error('Please select assets and metadata')
+      throw new Error('Please specify the image related details.')
     }
-    // if (minterType === 'base' && uploadDetails.uploadMethod === 'new' && uploadDetails.assetFiles.length > 1) {
-    //   throw new Error('Base Minter can only mint one asset at a time. Please select only one asset.')
-    // }
+
     if (imageUploadDetails.uploadMethod === 'new' && imageUploadDetails.assetFile === undefined) {
       throw new Error('Please select the image file')
     }
@@ -163,7 +168,7 @@ const BadgeCreationPage: NextPage = () => {
     }
   }
 
-  // const checkMetadataDetails = () => {
+  // const checkBadgeDetails = () => {
   //   if (!metadataDetails) throw new Error('Please fill out the collection details')
   //   if (collectionDetails.name === '') throw new Error('Collection name is required')
   //   if (collectionDetails.description === '') throw new Error('Collection description is required')
@@ -303,7 +308,9 @@ const BadgeCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Key</h4>
-              <span className="text-sm text-white/80 line-clamp-2">TODO</span>
+              <span className="text-sm text-white/80 line-clamp-2">
+                Badges can be minted more than once with a badge specific message signed by a designated private key.
+              </span>
             </button>
           </div>
           <div
@@ -311,11 +318,12 @@ const BadgeCreationPage: NextPage = () => {
               'isolate space-y-1 border-2',
               'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
               mintRule === 'by_keys' ? 'border-stargaze' : 'border-transparent',
-              mintRule !== 'by_keys' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              mintRule !== 'by_keys' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
             )}
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
+              disabled
               onClick={() => {
                 setMintRule('by_keys')
                 setReadyToCreateBadge(false)
@@ -323,7 +331,9 @@ const BadgeCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Keys</h4>
-              <span className="text-sm text-white/80 line-clamp-2">To Do</span>
+              <span className="text-sm text-slate-500 line-clamp-2">
+                Similar to the By Key rule, however each designated private key can only be used once to mint a badge.
+              </span>
             </button>
           </div>
           <div
@@ -331,11 +341,12 @@ const BadgeCreationPage: NextPage = () => {
               'isolate space-y-1 border-2',
               'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
               mintRule === 'by_minter' ? 'border-stargaze' : 'border-transparent',
-              mintRule !== 'by_minter' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              mintRule !== 'by_minter' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
             )}
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
+              disabled
               onClick={() => {
                 setMintRule('by_minter')
                 setReadyToCreateBadge(false)
@@ -343,7 +354,9 @@ const BadgeCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Minter</h4>
-              <span className="text-sm text-white/80 line-clamp-2">To Do</span>
+              <span className="text-sm line-clamp-2 text-slate/500">
+                Badges can be minted by a designated minter account.
+              </span>
             </button>
           </div>
         </div>
@@ -368,7 +381,7 @@ const BadgeCreationPage: NextPage = () => {
           <Button
             className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
             isLoading={creatingBadge}
-            onClick={() => console.log('create badge')}
+            onClick={() => createNewBadge()}
             variant="solid"
           >
             Create Badge

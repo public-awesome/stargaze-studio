@@ -1,8 +1,8 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable no-nested-ternary */
+
 /* eslint-disable no-misleading-character-class */
 /* eslint-disable no-control-regex */
-/* eslint-disable @typescript-eslint/no-loop-func */
+
 import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
 import { Conditional } from 'components/Conditional'
@@ -146,7 +146,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio2"
           >
-            Upload New Asset
+            Upload New Image
           </label>
         </div>
         <div className="mt-3 ml-2 font-bold form-check form-check-inline">
@@ -165,7 +165,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio1"
           >
-            Use an existing asset URL
+            Use an existing Image URL
           </label>
         </div>
       </div>
@@ -256,7 +256,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
                       className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
                       htmlFor="assetFile"
                     >
-                      Asset Selection
+                      Image Selection
                     </label>
                     <div
                       className={clsx(
@@ -265,13 +265,12 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
                       )}
                     >
                       <input
-                        accept="image/*, audio/*, video/*, .html"
+                        accept="image/*"
                         className={clsx(
                           'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
                           'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
                         )}
                         id="assetFile"
-                        multiple
                         onChange={selectAsset}
                         ref={assetFileRef}
                         type="file"
