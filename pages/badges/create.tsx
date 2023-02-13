@@ -12,20 +12,25 @@ import type { ImageUploadDetailsDataProps, MintRule } from 'components/badges/cr
 import { ImageUploadDetails } from 'components/badges/creation/ImageUploadDetails'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
+import { useInputState } from 'components/forms/FormInput.hooks'
 import { LoadingModal } from 'components/LoadingModal'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute as badgeHubDispatchExecute } from 'contracts/badgeHub/messages/execute'
+import * as crypto from 'crypto'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import * as secp256k1 from 'secp256k1'
 import { upload } from 'services/upload'
-import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK, STARGAZE_URL } from 'utils/constants'
+import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+
+import { TextInput } from '../../components/forms/FormInput'
 
 // import { ConfirmationModal } from '../../components/ConfirmationModal'
 // import { badgeHub } from '../../contracts/badgeHub/contract'
@@ -43,16 +48,21 @@ const BadgeCreationPage: NextPage = () => {
   // const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
-  const [isCreationComplete, setIsCreationComplete] = useState(false)
   const [creatingBadge, setCreatingBadge] = useState(false)
   const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
   const [mintRule, setMintRule] = useState<MintRule>('by_key')
 
   const [badgeId, setBadgeId] = useState<string | null>(null)
-  const [badgeNftContractAddress, setBadgeNftContractAddress] = useState<string | null>(null)
-  const [tokenUri, setTokenUri] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+
+  const keyState = useInputState({
+    id: 'key',
+    name: 'key',
+    title: 'Key',
+    subtitle: 'The key generated for the badge',
+  })
 
   const performBadgeCreationChecks = () => {
     try {
@@ -69,7 +79,6 @@ const BadgeCreationPage: NextPage = () => {
 
   const handleImageUrl = async () => {
     try {
-      setTokenUri(null)
       setImageUrl(null)
       setBadgeId(null)
       setTransactionHash(null)
@@ -103,7 +112,7 @@ const BadgeCreationPage: NextPage = () => {
     try {
       if (!wallet.initialized) throw new Error('Wallet not connected')
       if (!badgeHubContract) throw new Error('Contract not found')
-
+      setCreatingBadge(true)
       const coverUrl = await handleImageUrl()
 
       const badge = {
@@ -121,7 +130,7 @@ const BadgeCreationPage: NextPage = () => {
         },
         transferrable: badgeDetails?.transferrable as boolean,
         rule: {
-          by_key: '024d529b81a16c1310cbf9d26f2b8c57e9e03179ba68fdcd1824ae1dc5cb3cb02c',
+          by_key: keyState.value,
         },
         expiry: badgeDetails?.expiry || undefined,
         max_supply: badgeDetails?.max_supply || undefined,
@@ -136,8 +145,8 @@ const BadgeCreationPage: NextPage = () => {
       }
       const data = await badgeHubDispatchExecute(payload)
       console.log(data)
-      // setTransactionHash(data.transactionHash)
-      // setBadgeId(data.id)
+      setTransactionHash(data.split(':')[0])
+      setBadgeId(data.split(':')[1])
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       setCreatingBadge(false)
@@ -195,6 +204,21 @@ const BadgeCreationPage: NextPage = () => {
   //   }
   // }
 
+  const handleGenerateKey = () => {
+    let privKey: Buffer
+    do {
+      privKey = crypto.randomBytes(32)
+    } while (!secp256k1.privateKeyVerify(privKey))
+
+    const privateKey = privKey.toString('hex')
+    setCreatedBadgeKey(privateKey)
+    console.log('Private Key: ', privateKey)
+
+    const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
+
+    keyState.onChange(publicKey)
+  }
+
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     // TODO: estimate creation cost and check wallet balance
@@ -210,7 +234,6 @@ const BadgeCreationPage: NextPage = () => {
   useEffect(() => {
     setBadgeId(null)
     setReadyToCreateBadge(false)
-    setIsCreationComplete(false)
   }, [imageUploadDetails?.uploadMethod])
 
   return (
@@ -235,24 +258,17 @@ const BadgeCreationPage: NextPage = () => {
       <div className="mx-10" ref={scrollRef}>
         <Conditional test={badgeId !== null}>
           <Alert className="mt-5" type="info">
+            <QRCodeSVG
+              className="mx-auto"
+              level="H"
+              size={256}
+              value={`${
+                NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+              }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+            />
+            <br />
             <div>
-              <Conditional test={isCreationComplete}>
-                Badge ID:{' '}
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`https://ipfs.stargaze.zone/ipfs/${badgeId as string}`}
-                >
-                  TODO://{badgeId as string}
-                </Anchor>
-                <br />
-              </Conditional>
-              <QRCodeSVG
-                className="mx-auto"
-                level="H"
-                size={256}
-                value={`https://ipfs.stargaze.zone/ipfs/${badgeId as string}`}
-              />
+              Badge ID:{` ${badgeId as string}`}
               <br />
               Transaction Hash: {'  '}
               <Conditional test={NETWORK === 'testnet'}>
@@ -273,9 +289,16 @@ const BadgeCreationPage: NextPage = () => {
                   {transactionHash}
                 </Anchor>
               </Conditional>
-              <Button className="mt-2">
-                <Anchor className="text-white" external href={`${STARGAZE_URL}/launchpad/${wallet.address}`}>
-                  TODO View on your profile
+              <br />
+              <Button>
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`${
+                    NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                  }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                >
+                  Claim Badge
                 </Anchor>
               </Button>
             </div>
@@ -365,6 +388,13 @@ const BadgeCreationPage: NextPage = () => {
       <div className="mx-10">
         <ImageUploadDetails mintRule={mintRule} onChange={setImageUploadDetails} />
 
+        <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+          <TextInput className="ml-4 w-full max-w-2xl" {...keyState} />
+          <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
+            Generate Key
+          </Button>
+        </div>
+
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
           <BadgeDetails
             mintRule={mintRule}
@@ -379,7 +409,7 @@ const BadgeCreationPage: NextPage = () => {
 
         <div className="flex justify-end w-full">
           <Button
-            className="relative justify-center p-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+            className="relative justify-center p-2 mt-4 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
             isLoading={creatingBadge}
             onClick={() => createNewBadge()}
             variant="solid"

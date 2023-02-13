@@ -76,11 +76,13 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
     let selectedFile: File
     const reader = new FileReader()
     reader.onload = (e) => {
-      if (!e.target?.result) return toast.error('Error parsing file.')
       if (!event.target.files) return toast.error('No file selected.')
+      if (!e.target?.result) return toast.error('Error parsing file.')
       selectedFile = new File([e.target.result], event.target.files[0].name, { type: 'image/jpg' })
     }
-    reader.readAsArrayBuffer(event.target.files[0])
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (event.target.files[0]) reader.readAsArrayBuffer(event.target.files[0])
+    else return toast.error('No file selected.')
     reader.onloadend = () => {
       if (!event.target.files) return toast.error('No file selected.')
       setAssetFile(selectedFile)
