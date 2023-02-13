@@ -269,7 +269,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         contractAddress,
         toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
       )
-
+      console.log('Fee Rate Raw: ', feeRateRaw)
       const feeRate = JSON.parse(new TextDecoder().decode(feeRateRaw as Uint8Array))
       console.log('Fee Rate:', feeRate)
 
