@@ -308,7 +308,6 @@ const BadgeHubExecutePage: NextPage = () => {
     })
   }
 
-  // copy claim url to clipboard
   const copyClaimURL = async () => {
     const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
     const claimURL = `${baseURL}/?id=${createdBadgeId as string}&key=${createdBadgeKey as string}`

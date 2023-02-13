@@ -124,7 +124,7 @@ export const BadgeDetails = ({ onChange }: BadgeDetailsProps) => {
                 }))
                 .filter((attr) => attr.trait_type && attr.value)
             : undefined,
-        expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
+        expiry: timestamp ? timestamp.getTime() / 1000 : undefined,
         max_supply: maxSupplyState.value || undefined,
         transferrable,
         image_data: imageDataState.value || undefined,

@@ -176,8 +176,8 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
         <Conditional test={uploadMethod === 'existing'}>
           <div className="ml-3 flex-column">
             <p className="mb-5 ml-5">
-              Though the Badge Hub contract allows for off-chain metadata storage, it is recommended to use a
-              decentralized storage solution, such as IPFS. <br /> You may head over to{' '}
+              Though the Badge Hub contract allows for off-chain image storage, it is recommended to use a decentralized
+              storage solution, such as IPFS. <br /> You may head over to{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
                 NFT.Storage
               </Anchor>{' '}
@@ -185,7 +185,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
                 Pinata
               </Anchor>{' '}
-              and upload your asset manually to get an image URL for your badge.
+              and upload your image manually to get an image URL for your badge.
             </p>
             <div>
               <TextInput {...imageUrlState} className="mt-2 ml-4 w-1/2" />

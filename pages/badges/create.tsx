@@ -19,11 +19,13 @@ import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute as badgeHubDispatchExecute } from 'contracts/badgeHub/messages/execute'
 import * as crypto from 'crypto'
+import { toPng } from 'html-to-image'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import { FaCopy, FaSave } from 'react-icons/fa'
 import * as secp256k1 from 'secp256k1'
 import { upload } from 'services/upload'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
@@ -45,7 +47,6 @@ const BadgeCreationPage: NextPage = () => {
 
   const [imageUploadDetails, setImageUploadDetails] = useState<ImageUploadDetailsDataProps | null>(null)
   const [badgeDetails, setBadgeDetails] = useState<BadgeDetailsDataProps | null>(null)
-  // const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
 
   const [uploading, setUploading] = useState(false)
   const [creatingBadge, setCreatingBadge] = useState(false)
@@ -56,6 +57,7 @@ const BadgeCreationPage: NextPage = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const qrRef = useRef<HTMLDivElement>(null)
 
   const keyState = useInputState({
     id: 'key',
@@ -145,6 +147,7 @@ const BadgeCreationPage: NextPage = () => {
       }
       const data = await badgeHubDispatchExecute(payload)
       console.log(data)
+      setCreatingBadge(false)
       setTransactionHash(data.split(':')[0])
       setBadgeId(data.split(':')[1])
     } catch (error: any) {
@@ -219,6 +222,24 @@ const BadgeCreationPage: NextPage = () => {
     keyState.onChange(publicKey)
   }
 
+  const handleDownloadQr = async () => {
+    const qrElement = qrRef.current
+    await toPng(qrElement as HTMLElement).then((dataUrl) => {
+      const link = document.createElement('a')
+      link.download = `badge-${badgeId as string}.png`
+      link.href = dataUrl
+      link.click()
+    })
+  }
+
+  // copy claim url to clipboard
+  const copyClaimURL = async () => {
+    const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+    const claimURL = `${baseURL}/?id=${badgeId as string}&key=${createdBadgeKey as string}`
+    await navigator.clipboard.writeText(claimURL)
+    toast.success('Copied claim URL to clipboard')
+  }
+
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     // TODO: estimate creation cost and check wallet balance
@@ -258,49 +279,81 @@ const BadgeCreationPage: NextPage = () => {
       <div className="mx-10" ref={scrollRef}>
         <Conditional test={badgeId !== null}>
           <Alert className="mt-5" type="info">
-            <QRCodeSVG
-              className="mx-auto"
-              level="H"
-              size={256}
-              value={`${
-                NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-              }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
-            />
-            <br />
-            <div>
-              Badge ID:{` ${badgeId as string}`}
-              <br />
-              Transaction Hash: {'  '}
-              <Conditional test={NETWORK === 'testnet'}>
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
-                >
-                  {transactionHash}
-                </Anchor>
-              </Conditional>
-              <Conditional test={NETWORK === 'mainnet'}>
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
-                >
-                  {transactionHash}
-                </Anchor>
-              </Conditional>
-              <br />
-              <Button>
-                <Anchor
-                  className="text-white"
-                  external
-                  href={`${
-                    NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-                  }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
-                >
-                  Claim Badge
-                </Anchor>
-              </Button>
+            <div className="flex flex-row">
+              <div>
+                <div className="w-[384px] h-[384px]" ref={qrRef}>
+                  <QRCodeSVG
+                    className="mx-auto"
+                    level="H"
+                    size={384}
+                    value={`${
+                      NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                    }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
+                  <Button
+                    className="items-center w-full text-sm text-center rounded"
+                    leftIcon={<FaSave />}
+                    onClick={() => void handleDownloadQr()}
+                  >
+                    Download QR Code
+                  </Button>
+                  <Button
+                    className="w-full text-sm text-center rounded"
+                    isWide
+                    leftIcon={<FaCopy />}
+                    onClick={() => void copyClaimURL()}
+                    variant="solid"
+                  >
+                    Copy Claim URL
+                  </Button>
+                </div>
+              </div>
+              <div className="ml-4 text-lg">
+                Badge ID:{` ${badgeId as string}`}
+                <br />
+                Transaction Hash: {'  '}
+                <Conditional test={NETWORK === 'testnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <Conditional test={NETWORK === 'mainnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <br />
+                <div className="text-base">
+                  <div className="flex-row pt-4 mt-4 border-t-2">
+                    <span>
+                      You may click{' '}
+                      <Anchor
+                        className="text-stargaze hover:underline"
+                        external
+                        href={`${
+                          NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                        }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                      >
+                        here
+                      </Anchor>{' '}
+                      or scan the QR code to claim a badge.
+                    </span>
+                  </div>
+                  <br />
+                  <span className="mt-4">You may download the QR code or copy the claim URL to share with others.</span>
+                </div>
+                <br />
+              </div>
             </div>
           </Alert>
         </Conditional>
@@ -409,7 +462,7 @@ const BadgeCreationPage: NextPage = () => {
 
         <div className="flex justify-end w-full">
           <Button
-            className="relative justify-center p-2 mt-4 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+            className="relative justify-center p-2 mt-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
             isLoading={creatingBadge}
             onClick={() => createNewBadge()}
             variant="solid"
