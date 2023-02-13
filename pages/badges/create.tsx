@@ -6,14 +6,16 @@
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
+import { BadgeConfirmationModal } from 'components/BadgeConfirmationModal'
+import { BadgeLoadingModal } from 'components/BadgeLoadingModal'
 import type { BadgeDetailsDataProps } from 'components/badges/creation/BadgeDetails'
 import { BadgeDetails } from 'components/badges/creation/BadgeDetails'
 import type { ImageUploadDetailsDataProps, MintRule } from 'components/badges/creation/ImageUploadDetails'
 import { ImageUploadDetails } from 'components/badges/creation/ImageUploadDetails'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
+import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
-import { LoadingModal } from 'components/LoadingModal'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
@@ -31,12 +33,6 @@ import { upload } from 'services/upload'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
-
-import { TextInput } from '../../components/forms/FormInput'
-
-// import { ConfirmationModal } from '../../components/ConfirmationModal'
-// import { badgeHub } from '../../contracts/badgeHub/contract'
-// import { isValidAddress } from '../../utils/isValidAddress'
 
 const BadgeCreationPage: NextPage = () => {
   const wallet = useWallet()
@@ -70,8 +66,10 @@ const BadgeCreationPage: NextPage = () => {
     try {
       setReadyToCreateBadge(false)
       checkImageUploadDetails()
-      // checkMetadataDetails()
-      setReadyToCreateBadge(true)
+      checkBadgeDetails()
+      setTimeout(() => {
+        setReadyToCreateBadge(true)
+      }, 100)
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       setUploading(false)
@@ -180,32 +178,17 @@ const BadgeCreationPage: NextPage = () => {
     }
   }
 
-  // const checkBadgeDetails = () => {
-  //   if (!metadataDetails) throw new Error('Please fill out the collection details')
-  //   if (collectionDetails.name === '') throw new Error('Collection name is required')
-  //   if (collectionDetails.description === '') throw new Error('Collection description is required')
-  //   if (collectionDetails.description.length > 512)
-  //     throw new Error('Collection description cannot exceed 512 characters')
-  //   if (uploadDetails?.uploadMethod === 'new' && collectionDetails.imageFile.length === 0)
-  //     throw new Error('Collection cover image is required')
-  //   if (
-  //     collectionDetails.startTradingTime &&
-  //     Number(collectionDetails.startTradingTime) < new Date().getTime() * 1000000
-  //   )
-  //     throw new Error('Invalid trading start time')
-  //   if (
-  //     collectionDetails.startTradingTime &&
-  //     Number(collectionDetails.startTradingTime) < Number(mintingDetails?.startTime)
-  //   )
-  //     throw new Error('Trading start time must be after minting start time')
-  //   if (collectionDetails.externalLink) {
-  //     try {
-  //       const url = new URL(collectionDetails.externalLink)
-  //     } catch (e: any) {
-  //       throw new Error(`Invalid external link: Make sure to include the protocol (e.g. https://)`)
-  //     }
-  //   }
-  // }
+  const checkBadgeDetails = () => {
+    if (!badgeDetails) throw new Error('Please fill out the required fields')
+    if (keyState.value === '' || !createdBadgeKey) throw new Error('Please generate a key')
+    if (badgeDetails.external_url) {
+      try {
+        const url = new URL(badgeDetails.external_url)
+      } catch (e: any) {
+        throw new Error(`Invalid external url: Make sure to include the protocol (e.g. https://)`)
+      }
+    }
+  }
 
   const handleGenerateKey = () => {
     let privKey: Buffer
@@ -218,7 +201,7 @@ const BadgeCreationPage: NextPage = () => {
     console.log('Private Key: ', privateKey)
 
     const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
-
+    setBadgeId(null)
     keyState.onChange(publicKey)
   }
 
@@ -265,7 +248,7 @@ const BadgeCreationPage: NextPage = () => {
         <h1 className="font-heading text-4xl font-bold">Create Badge</h1>
 
         <Conditional test={uploading}>
-          <LoadingModal />
+          <BadgeLoadingModal />
         </Conditional>
 
         <p>
@@ -442,7 +425,7 @@ const BadgeCreationPage: NextPage = () => {
         <ImageUploadDetails mintRule={mintRule} onChange={setImageUploadDetails} />
 
         <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
-          <TextInput className="ml-4 w-full max-w-2xl" {...keyState} />
+          <TextInput className="ml-4 w-full max-w-2xl" {...keyState} disabled required />
           <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
             Generate Key
           </Button>
@@ -456,15 +439,15 @@ const BadgeCreationPage: NextPage = () => {
           />
         </div>
 
-        {/* <Conditional test={readyToCreateBadge}>
-          <ConfirmationModal confirm={createNewBadge} />
-        </Conditional> */}
+        <Conditional test={readyToCreateBadge}>
+          <BadgeConfirmationModal confirm={createNewBadge} />
+        </Conditional>
 
         <div className="flex justify-end w-full">
           <Button
             className="relative justify-center p-2 mt-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
             isLoading={creatingBadge}
-            onClick={() => createNewBadge()}
+            onClick={() => performBadgeCreationChecks()}
             variant="solid"
           >
             Create Badge
