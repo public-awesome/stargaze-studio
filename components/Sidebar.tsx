@@ -1,40 +1,21 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
 import { useWallet } from 'contexts/wallet'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
-import { BASE_FACTORY_ADDRESS } from '../utils/constants'
+import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS } from '../utils/constants'
+import { Conditional } from './Conditional'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
-
-const routes = [
-  { text: 'Collections', href: `/collections/`, isChild: false },
-  { text: 'Create a Collection', href: `/collections/create/`, isChild: true },
-  { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
-  { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
-  { text: 'Badges', href: `/badges/`, isChild: false },
-  { text: 'Create a Badge', href: `/badges/create/`, isChild: true },
-  { text: 'My Badges', href: `/badges/myBadges/`, isChild: true },
-  { text: 'Badge Actions', href: `/badges/actions/`, isChild: true },
-  { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
-  { text: 'Base Minter Contract', href: `/contracts/baseMinter/`, isChild: true },
-  { text: 'Vending Minter Contract', href: `/contracts/vendingMinter/`, isChild: true },
-  { text: 'SG721 Contract', href: `/contracts/sg721/`, isChild: true },
-  { text: 'Whitelist Contract', href: `/contracts/whitelist/`, isChild: true },
-  { text: 'Badge Hub Contract', href: `/contracts/badgeHub/`, isChild: true },
-  { text: 'Badge NFT Contract', href: `/contracts/badgeNFT/`, isChild: true },
-]
 
 export const Sidebar = () => {
   const router = useRouter()
   const wallet = useWallet()
-
-  let tempRoutes = routes
-  if (BASE_FACTORY_ADDRESS === undefined) {
-    tempRoutes = routes.filter((route) => route.href !== '/contracts/baseMinter/')
-  }
 
   return (
     <SidebarLayout>
@@ -46,30 +27,158 @@ export const Sidebar = () => {
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
-      {tempRoutes.map(({ text, href, isChild }) => (
-        <Anchor
-          key={href}
-          className={clsx(
-            'px-2 -my-[1px] -mx-5 font-extrabold uppercase rounded-lg', // styling
-            'hover:bg-white/5 transition-colors', // hover styling
-            { 'py-0 -my-[3px] -ml-2 text-sm font-bold': isChild },
-            {
-              'text-gray hover:text-white':
-                !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
-            },
-            {
-              'text-stargaze': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
-            }, // active route styling
-            {
-              'py-0 -my-[3px] -ml-2 font-extrabold text-gray-500 opacity-50 pointer-events-none':
-                href.includes('badgeNFT'),
-            }, // disabled route styling
-          )}
-          href={href}
-        >
-          {text}
-        </Anchor>
-      ))}
+      <div className="absolute top-[20%] left-[5%]">
+        <ul className="p-2 w-full bg-transparent menu rounded-box">
+          <li tabIndex={0}>
+            <span
+              className={clsx(
+                'z-40 font-heading text-xl hover:text-white bg-transparent rounded-lg small-caps',
+                'hover:bg-white/5 transition-colors',
+                router.asPath.includes('/collections/') ? 'text-white' : 'text-gray',
+              )}
+            >
+              <Link href="/collections/"> Collections </Link>
+            </span>
+            <ul className="z-50 p-2 bg-base-200">
+              <li
+                className={clsx(
+                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/collections/create') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/collections/create/">Create a Collection</Link>
+              </li>
+              <li
+                className={clsx(
+                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/collections/myCollections/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/collections/myCollections/">My Collections</Link>
+              </li>
+              <li
+                className={clsx(
+                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/collections/actions/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/collections/actions/">Collection Actions</Link>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
+          <ul className="p-2 w-full bg-transparent menu rounded-box">
+            <li tabIndex={0}>
+              <span
+                className={clsx(
+                  'z-40 font-heading text-xl font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
+                  'hover:bg-white/5 transition-colors',
+                  router.asPath.includes('/badges/') ? 'text-white' : 'text-gray',
+                )}
+              >
+                <Link href="/badges/"> Badges </Link>
+              </span>
+              <ul className="z-50 p-2 rounded-box bg-base-200">
+                <li
+                  className={clsx(
+                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/badges/create/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/badges/create/">Create a Badge</Link>
+                </li>
+                <li
+                  className={clsx(
+                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/badges/myBadges/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/badges/myBadges/">My Badges</Link>
+                </li>
+                <li
+                  className={clsx(
+                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/badges/actions/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/badges/actions/">Badge Actions</Link>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </Conditional>
+        <ul className="p-2 w-full bg-transparent menu rounded-box">
+          <li tabIndex={0}>
+            <span
+              className={clsx(
+                'z-40 font-heading text-xl font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
+                'hover:bg-white/5 transition-colors',
+                router.asPath.includes('/contracts/') ? 'text-white' : 'text-gray',
+              )}
+            >
+              <Link href="/contracts/"> Contract Dashboards </Link>
+            </span>
+            <ul className="z-50 p-2 bg-base-200">
+              <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
+                <li
+                  className={clsx(
+                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/contracts/baseMinter/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/contracts/baseMinter/">Base Minter Contract</Link>
+                </li>
+              </Conditional>
+              <li
+                className={clsx(
+                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/contracts/vendingMinter/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/contracts/vendingMinter/">Vending Minter Contract</Link>
+              </li>
+              <li
+                className={clsx(
+                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/contracts/sg721/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/contracts/sg721/">SG721 Contract</Link>
+              </li>
+              <li
+                className={clsx(
+                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/contracts/whitelist/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/contracts/whitelist/">Whitelist Contract</Link>
+              </li>
+              <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
+                <li
+                  className={clsx(
+                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/contracts/badgeHub/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/contracts/badgeHub/">Badge Hub Contract</Link>
+                </li>
+              </Conditional>
+            </ul>
+          </li>
+        </ul>
+      </div>
 
       <div className="flex-grow" />
 

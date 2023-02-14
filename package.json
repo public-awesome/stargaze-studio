@@ -48,6 +48,7 @@
     "react-tracked": "^1",
     "scheduler": "^0",
     "secp256k1": "^4.0.3",
+    "tailwindcss-opentype": "1.1.0",
     "zustand": "^3"
   },
   "devDependencies": {

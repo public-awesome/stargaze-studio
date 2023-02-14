@@ -190,6 +190,7 @@ const BadgeHubExecutePage: NextPage = () => {
   const showBadgeField = type === 'create_badge'
   const showMetadataField = isEitherType(type, ['create_badge', 'edit_badge'])
   const showIdField = type === 'edit_badge'
+  const showNFTField = type === 'set_nft'
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -404,6 +405,7 @@ const BadgeHubExecutePage: NextPage = () => {
               <TextInput className="mt-2" {...youtubeUrlState} />
             </div>
           )}
+          {showNFTField && <AddressInput {...nftState} />}
         </div>
 
         <div className="space-y-8">
