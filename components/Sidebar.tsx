@@ -32,7 +32,7 @@ export const Sidebar = () => {
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 font-heading text-xl hover:text-white bg-transparent rounded-lg small-caps',
+                'z-40 font-heading text-lg hover:text-white bg-transparent rounded-lg small-caps',
                 'hover:bg-white/5 transition-colors',
                 router.asPath.includes('/collections/') ? 'text-white' : 'text-gray',
               )}
@@ -75,7 +75,7 @@ export const Sidebar = () => {
             <li tabIndex={0}>
               <span
                 className={clsx(
-                  'z-40 font-heading text-xl font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
+                  'z-40 font-heading text-lg font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
                   'hover:bg-white/5 transition-colors',
                   router.asPath.includes('/badges/') ? 'text-white' : 'text-gray',
                 )}
@@ -118,7 +118,7 @@ export const Sidebar = () => {
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 font-heading text-xl font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
+                'z-40 font-heading text-lg font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
                 'hover:bg-white/5 transition-colors',
                 router.asPath.includes('/contracts/') ? 'text-white' : 'text-gray',
               )}
