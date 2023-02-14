@@ -63,7 +63,7 @@ export interface BadgeHubInstance {
   getBadge: (id: number) => Promise<any>
   getBadges: (start_after?: number, limit?: number) => Promise<any>
   getKey: (id: number, pubkey: string) => Promise<any>
-  getKeys: (id: number, start_after?: number, limit?: number) => Promise<any>
+  getKeys: (id: number, start_after?: string, limit?: number) => Promise<any>
 
   //Execute
   createBadge: (senderAddress: string, badge: Badge) => Promise<string>
@@ -249,14 +249,14 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res
     }
 
-    const getKey = async (id: number, key: string): Promise<any> => {
+    const getKey = async (id: number, pubkey: string): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
-        key: { id, key },
+        key: { id, pubkey },
       })
       return res
     }
 
-    const getKeys = async (id: number, start_after?: number, limit?: number): Promise<any> => {
+    const getKeys = async (id: number, start_after?: string, limit?: number): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
         keys: { id, start_after, limit },
       })

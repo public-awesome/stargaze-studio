@@ -13,9 +13,9 @@ export interface QueryListItem {
 export const QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Config', description: 'View current config' },
   { id: 'getBadge', name: 'Query Badge', description: 'Query a badge by ID' },
-  { id: 'getBadges', name: 'Query a list of Badges', description: 'Query the list of badges' },
-  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID' },
-  { id: 'getKeys', name: 'Query a list of Keys', description: 'Query the list of keys' },
+  { id: 'getBadges', name: 'Query Badges', description: 'Query a list of badges' },
+  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID to see if it&apos;s whitelisted' },
+  { id: 'getKeys', name: 'Query Keys', description: 'Query the list of whitelisted keys' },
 ]
 
 export interface DispatchQueryProps {
@@ -23,10 +23,13 @@ export interface DispatchQueryProps {
   pubkey: string
   messages: BadgeHubInstance | undefined
   type: QueryType
+  startAfterNumber: number
+  startAfterString: string
+  limit: number
 }
 
 export const dispatchQuery = (props: DispatchQueryProps) => {
-  const { id, pubkey, messages, type } = props
+  const { id, pubkey, messages, type, startAfterNumber, startAfterString, limit } = props
   switch (type) {
     case 'config': {
       return messages?.getConfig()
@@ -35,13 +38,13 @@ export const dispatchQuery = (props: DispatchQueryProps) => {
       return messages?.getBadge(id)
     }
     case 'getBadges': {
-      return messages?.getBadges()
+      return messages?.getBadges(startAfterNumber, limit)
     }
     case 'getKey': {
       return messages?.getKey(id, pubkey)
     }
     case 'getKeys': {
-      return messages?.getKeys(id)
+      return messages?.getKeys(id, startAfterString, limit)
     }
     default: {
       throw new Error('unknown query type')

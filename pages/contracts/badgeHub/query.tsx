@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
-import { AddressInput, NumberInput } from 'components/forms/FormInput'
+import { AddressInput, NumberInput, TextInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
@@ -20,6 +20,8 @@ import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { BADGE_HUB_ADDRESS } from '../../../utils/constants'
+
 const BadgeHubQueryPage: NextPage = () => {
   const { badgeHub: contract } = useContracts()
   const wallet = useWallet()
@@ -29,6 +31,7 @@ const BadgeHubQueryPage: NextPage = () => {
     name: 'contract-address',
     title: 'Badge Hub Address',
     subtitle: 'Address of the Badge Hub contract',
+    defaultValue: BADGE_HUB_ADDRESS,
   })
   const contractAddress = contractState.value
 
@@ -42,22 +45,57 @@ const BadgeHubQueryPage: NextPage = () => {
   const pubkeyState = useInputState({
     id: 'pubkey',
     name: 'pubkey',
-    title: 'Pubkey',
-    subtitle: 'The public key for the badge',
+    title: 'Public Key',
+    subtitle: 'The public key to check whether it can be used to mint a badge',
+  })
+
+  const startAfterNumberState = useNumberInputState({
+    id: 'start-after-number',
+    name: 'start-after-number',
+    title: 'Start After (optional)',
+    subtitle: 'The id to start the pagination after',
+  })
+
+  const startAfterStringState = useInputState({
+    id: 'start-after-string',
+    name: 'start-after-string',
+    title: 'Start After (optional)',
+    subtitle: 'The public key to start the pagination after',
+  })
+
+  const paginationLimitState = useNumberInputState({
+    id: 'pagination-limit',
+    name: 'pagination-limit',
+    title: 'Pagination Limit (optional)',
+    subtitle: 'The number of items to return (max: 30)',
   })
 
   const [type, setType] = useState<QueryType>('config')
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, idState.value, pubkeyState.value] as const,
+    [
+      contractAddress,
+      type,
+      contract,
+      wallet,
+      idState.value,
+      pubkeyState.value,
+      startAfterNumberState.value,
+      startAfterStringState.value,
+      paginationLimitState.value,
+    ] as const,
     async ({ queryKey }) => {
-      const [_contractAddress, _type, _contract, _wallet, id, pubkey] = queryKey
+      const [_contractAddress, _type, _contract, _wallet, id, pubkey, startAfterNumber, startAfterString, limit] =
+        queryKey
       const messages = contract?.use(_contractAddress)
       const result = await dispatchQuery({
         id,
         pubkey,
         messages,
         type,
+        startAfterNumber,
+        startAfterString,
+        limit,
       })
       return result
     },
@@ -114,8 +152,20 @@ const BadgeHubQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional test={type === 'getBadge'}>
+          <Conditional test={type === 'getBadge' || type === 'getKey'}>
             <NumberInput {...idState} />
+          </Conditional>
+          <Conditional test={type === 'getKey'}>
+            <TextInput {...pubkeyState} />
+          </Conditional>
+          <Conditional test={type === 'getBadges'}>
+            <NumberInput {...startAfterNumberState} />
+          </Conditional>
+          <Conditional test={type === 'getBadges' || type === 'getKeys'}>
+            <NumberInput {...paginationLimitState} />
+          </Conditional>
+          <Conditional test={type === 'getKeys'}>
+            <TextInput {...startAfterStringState} />
           </Conditional>
         </div>
         <JsonPreview content={contractAddress ? { type, response } : null} title="Query Response" />
