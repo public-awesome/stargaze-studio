@@ -28,11 +28,11 @@ export const Sidebar = () => {
       <WalletLoader />
       {/* main navigation routes */}
       <div className="absolute top-[20%] left-[5%]">
-        <ul className="p-2 w-full bg-transparent menu rounded-box">
+        <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 font-heading text-lg hover:text-white bg-transparent rounded-lg small-caps',
+                'z-40 text-2xl font-extrabold group-hover:text-white bg-transparent rounded-lg small-caps',
                 'hover:bg-white/5 transition-colors',
                 router.asPath.includes('/collections/') ? 'text-white' : 'text-gray',
               )}
@@ -42,7 +42,7 @@ export const Sidebar = () => {
             <ul className="z-50 p-2 bg-base-200">
               <li
                 className={clsx(
-                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/collections/create') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
@@ -51,7 +51,7 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/collections/myCollections/') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
@@ -60,7 +60,7 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/collections/actions/') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
@@ -71,11 +71,11 @@ export const Sidebar = () => {
           </li>
         </ul>
         <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
-          <ul className="p-2 w-full bg-transparent menu rounded-box">
+          <ul className="group p-2 w-full bg-transparent menu rounded-box">
             <li tabIndex={0}>
               <span
                 className={clsx(
-                  'z-40 font-heading text-lg font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
+                  'z-40 text-2xl font-extrabold group-hover:text-white bg-transparent rounded-lg small-caps',
                   'hover:bg-white/5 transition-colors',
                   router.asPath.includes('/badges/') ? 'text-white' : 'text-gray',
                 )}
@@ -85,7 +85,7 @@ export const Sidebar = () => {
               <ul className="z-50 p-2 rounded-box bg-base-200">
                 <li
                   className={clsx(
-                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                     router.asPath.includes('/badges/create/') ? 'text-white' : 'text-gray',
                   )}
                   tabIndex={-1}
@@ -94,7 +94,7 @@ export const Sidebar = () => {
                 </li>
                 <li
                   className={clsx(
-                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                     router.asPath.includes('/badges/myBadges/') ? 'text-white' : 'text-gray',
                   )}
                   tabIndex={-1}
@@ -103,7 +103,7 @@ export const Sidebar = () => {
                 </li>
                 <li
                   className={clsx(
-                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                     router.asPath.includes('/badges/actions/') ? 'text-white' : 'text-gray',
                   )}
                   tabIndex={-1}
@@ -114,11 +114,11 @@ export const Sidebar = () => {
             </li>
           </ul>
         </Conditional>
-        <ul className="p-2 w-full bg-transparent menu rounded-box">
+        <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 font-heading text-lg font-extrabold hover:text-white bg-transparent rounded-lg small-caps',
+                'z-40 text-2xl font-extrabold group-hover:text-white bg-transparent rounded-lg small-caps',
                 'hover:bg-white/5 transition-colors',
                 router.asPath.includes('/contracts/') ? 'text-white' : 'text-gray',
               )}
@@ -129,7 +129,7 @@ export const Sidebar = () => {
               <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
                 <li
                   className={clsx(
-                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                     router.asPath.includes('/contracts/baseMinter/') ? 'text-white' : 'text-gray',
                   )}
                   tabIndex={-1}
@@ -139,7 +139,7 @@ export const Sidebar = () => {
               </Conditional>
               <li
                 className={clsx(
-                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/contracts/vendingMinter/') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
@@ -148,7 +148,7 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/contracts/sg721/') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
@@ -157,7 +157,7 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/contracts/whitelist/') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
@@ -167,7 +167,7 @@ export const Sidebar = () => {
               <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
                 <li
                   className={clsx(
-                    'font-heading hover:text-white hover:bg-stargaze-80 rounded',
+                    'text-lg font-extrabold hover:text-white hover:bg-stargaze-80 rounded',
                     router.asPath.includes('/contracts/badgeHub/') ? 'text-white' : 'text-gray',
                   )}
                   tabIndex={-1}
