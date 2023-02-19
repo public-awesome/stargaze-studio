@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable react-hooks/exhaustive-deps */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -56,7 +57,13 @@ const CollectionList: NextPage = () => {
                           <div className="w-28 h-28 mask mask-squircle">
                             <img
                               alt="Cover"
-                              src={`https://ipfs.stargaze.zone/ipfs/${(collection.image as string).substring(7)}`}
+                              src={
+                                (collection?.image as string).startsWith('ipfs')
+                                  ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(collection?.image as string).substring(
+                                      7,
+                                    )}`
+                                  : collection?.image
+                              }
                             />
                           </div>
                         </div>
