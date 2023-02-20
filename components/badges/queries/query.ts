@@ -16,22 +16,18 @@ export const BY_KEY_QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Config', description: 'View current config' },
   { id: 'getBadge', name: 'Query Badge', description: 'Query a badge by ID' },
   { id: 'getBadges', name: 'Query Badges', description: 'Query a list of badges' },
-  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID to see if it&apos;s whitelisted' },
-  { id: 'getKeys', name: 'Query Keys', description: 'Query the list of whitelisted keys' },
 ]
 export const BY_KEYS_QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Config', description: 'View current config' },
   { id: 'getBadge', name: 'Query Badge', description: 'Query a badge by ID' },
   { id: 'getBadges', name: 'Query Badges', description: 'Query a list of badges' },
-  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID to see if it&apos;s whitelisted' },
+  { id: 'getKey', name: 'Query Key', description: "Query a key by ID to see if it's whitelisted" },
   { id: 'getKeys', name: 'Query Keys', description: 'Query the list of whitelisted keys' },
 ]
 export const BY_MINTER_QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Config', description: 'View current config' },
   { id: 'getBadge', name: 'Query Badge', description: 'Query a badge by ID' },
   { id: 'getBadges', name: 'Query Badges', description: 'Query a list of badges' },
-  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID to see if it&apos;s whitelisted' },
-  { id: 'getKeys', name: 'Query Keys', description: 'Query the list of whitelisted keys' },
 ]
 
 export interface DispatchExecuteProps {
