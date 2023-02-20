@@ -120,17 +120,27 @@ const BadgeActionsPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Collection Actions" />
+      <NextSeo title="Badge Actions" />
       <ContractPageHeader
-        description="Here you can execute various actions on a collection."
+        description="Here you can execute various actions and queries for a badge."
         link={links.Documentation}
-        title="Collection Actions"
+        title="Badge Actions"
       />
 
       <form className="p-4">
         <div className="grid grid-cols-2">
           <AddressInput {...badgeHubContractState} className="mr-2" />
-          <NumberInput className="w-1/2" {...badgeIdState} />
+          <div className="flex-row">
+            <NumberInput className="w-1/2" {...badgeIdState} />
+            <span className="mt-1 font-bold">Mint Rule: </span>
+            <span>
+              {mintRule
+                .toString()
+                .split('_')
+                .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                .join(' ')}
+            </span>
+          </div>
         </div>
         <div className="mt-4">
           <div className="mr-2">
