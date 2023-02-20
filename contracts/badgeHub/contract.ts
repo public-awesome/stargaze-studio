@@ -67,7 +67,7 @@ export interface BadgeHubInstance {
 
   //Execute
   createBadge: (senderAddress: string, badge: Badge) => Promise<string>
-  editBadge: (senderAddress: string, id: number, metadata: Metadata) => Promise<string>
+  editBadge: (senderAddress: string, id: number, metadata: Metadata, editFee?: number) => Promise<string>
   addKeys: (senderAddress: string, id: number, keys: string[]) => Promise<string>
   purgeKeys: (senderAddress: string, id: number, limit?: number) => Promise<string>
   purgeOwners: (senderAddress: string, id: number, limit?: number) => Promise<string>
@@ -79,7 +79,7 @@ export interface BadgeHubInstance {
 
 export interface BadgeHubMessages {
   createBadge: (badge: Badge) => CreateBadgeMessage
-  editBadge: (id: number, metadata: Metadata) => EditBadgeMessage
+  editBadge: (id: number, metadata: Metadata, editFee?: number) => EditBadgeMessage
   addKeys: (id: number, keys: string[]) => AddKeysMessage
   purgeKeys: (id: number, limit?: number) => PurgeKeysMessage
   purgeOwners: (id: number, limit?: number) => PurgeOwnersMessage
@@ -314,7 +314,12 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash.concat(`:${id}`)
     }
 
-    const editBadge = async (senderAddress: string, id: number, metadata: Metadata): Promise<string> => {
+    const editBadge = async (
+      senderAddress: string,
+      id: number,
+      metadata: Metadata,
+      editFee?: number,
+    ): Promise<string> => {
       const res = await client.execute(
         senderAddress,
         contractAddress,
@@ -326,6 +331,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
+        editFee ? [coin(editFee, 'ustars')] : [],
       )
 
       return res.transactionHash
@@ -524,7 +530,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       }
     }
 
-    const editBadge = (id: number, metadata: Metadata): EditBadgeMessage => {
+    const editBadge = (id: number, metadata: Metadata, editFee?: number): EditBadgeMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
@@ -534,7 +540,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
             metadata,
           },
         },
-        funds: [],
+        funds: editFee ? [coin(editFee, 'ustars')] : [],
       }
     }
 

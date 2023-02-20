@@ -1,4 +1,5 @@
 // import { AirdropUpload } from 'components/AirdropUpload'
+import { toUtf8 } from '@cosmjs/encoding'
 import type { DispatchExecuteArgs } from 'components/badges/actions/actions'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'components/badges/actions/actions'
 import { ActionsCombobox } from 'components/badges/actions/Combobox'
@@ -18,6 +19,7 @@ import { useWallet } from 'contexts/wallet'
 import type { Badge, BadgeHubInstance } from 'contracts/badgeHub'
 import * as crypto from 'crypto'
 import { toPng } from 'html-to-image'
+import sizeof from 'object-sizeof'
 import { QRCodeCanvas } from 'qrcode.react'
 import type { FormEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -51,6 +53,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const [badge, setBadge] = useState<Badge>()
   const [transferrable, setTransferrable] = useState<TransferrableType>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
+  const [editFee, setEditFee] = useState<number | undefined>(undefined)
+  const [dispatch, setDispatch] = useState<boolean>(false)
 
   const [createdBadgeId, setCreatedBadgeId] = useState<string | undefined>(undefined)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
@@ -229,6 +233,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
       youtube_url: youtubeUrlState.value || undefined,
     },
     id: badgeId,
+    editFee,
     owner: resolvedOwnerAddress,
     pubkey: pubkeyState.value,
     signature: signatureState.value,
@@ -241,6 +246,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     txSigner: wallet.address,
     type,
   }
+
   const resolveOwnerAddress = async () => {
     await resolveAddress(ownerState.value.trim(), wallet).then((resolvedAddress) => {
       setResolvedOwnerAddress(resolvedAddress)
@@ -334,6 +340,20 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   ])
 
   useEffect(() => {
+    if (attributesState.values.length === 0)
+      attributesState.add({
+        trait_type: '',
+        value: '',
+      })
+  }, [])
+
+  useEffect(() => {
+    void dispatchEditBadge().catch((err) => {
+      toast.error(String(err), { style: { maxWidth: 'none' } })
+    })
+  }, [dispatch])
+
+  useEffect(() => {
     const addresses: string[] = []
     airdropAllocationArray.forEach((allocation) => {
       for (let i = 0; i < Number(allocation.amount); i++) {
@@ -358,53 +378,56 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
         throw new Error('Please enter the Badge Hub contract addresses.')
       }
 
-      // if (wallet.client && type === 'update_mint_price') {
-      //   const contractConfig = wallet.client.queryContractSmart(minterContractAddress, {
-      //     config: {},
-      //   })
-      //   await toast
-      //     .promise(
-      //       wallet.client.queryContractSmart(minterContractAddress, {
-      //         mint_price: {},
-      //       }),
-      //       {
-      //         error: `Querying mint price failed!`,
-      //         loading: 'Querying current mint price...',
-      //         success: (price) => {
-      //           console.log('Current mint price: ', price)
-      //           return `Current mint price is ${Number(price.public_price.amount) / 1000000} STARS`
-      //         },
-      //       },
-      //     )
-      //     .then(async (price) => {
-      //       if (Number(price.public_price.amount) / 1000000 <= priceState.value) {
-      //         await contractConfig
-      //           .then((config) => {
-      //             console.log(config.start_time, Date.now() * 1000000)
-      //             if (Number(config.start_time) < Date.now() * 1000000) {
-      //               throw new Error(
-      //                 `Minting has already started on ${new Date(
-      //                   Number(config.start_time) / 1000000,
-      //                 ).toLocaleString()}. Updated mint price cannot be higher than the current price of ${
-      //                   Number(price.public_price.amount) / 1000000
-      //                 } STARS`,
-      //               )
-      //             }
-      //           })
-      //           .catch((error) => {
-      //             throw new Error(String(error).substring(String(error).lastIndexOf('Error:') + 7))
-      //           })
-      //       }
-      //     })
-      // }
+      if (wallet.client && type === 'edit_badge') {
+        const feeRateRaw = await wallet.client.queryContractRaw(
+          badgeHubContractAddress,
+          toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
+        )
+        const feeRate = JSON.parse(new TextDecoder().decode(feeRateRaw as Uint8Array))
 
-      const txHash = await toast.promise(dispatchExecute(payload), {
-        error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
-        loading: 'Executing message...',
-        success: (tx) => `Transaction ${tx} success!`,
-      })
-      if (txHash) {
-        setLastTx(txHash)
+        await toast
+          .promise(
+            wallet.client.queryContractSmart(badgeHubContractAddress, {
+              badge: { id: badgeId },
+            }),
+            {
+              error: `Edit Fee calculation failed!`,
+              loading: 'Calculating Edit Fee...',
+              success: (currentBadge) => {
+                console.log('Current badge: ', currentBadge)
+                return `Current metadata is ${
+                  Number(sizeof(currentBadge.metadata)) + Number(sizeof(currentBadge.metadata.attributes))
+                } bytes in size.`
+              },
+            },
+          )
+          .then((currentBadge) => {
+            const currentBadgeMetadataSize =
+              Number(sizeof(currentBadge.metadata)) + Number(sizeof(currentBadge.metadata.attributes))
+            console.log('Current badge metadata size: ', currentBadgeMetadataSize)
+            const newBadgeMetadataSize = Number(sizeof(badge?.metadata)) + Number(sizeof(badge?.metadata.attributes))
+            console.log('New badge metadata size: ', newBadgeMetadataSize)
+            if (newBadgeMetadataSize > currentBadgeMetadataSize) {
+              const calculatedFee = ((newBadgeMetadataSize - currentBadgeMetadataSize) * Number(feeRate.metadata)) / 2
+              setEditFee(calculatedFee)
+              setDispatch(!dispatch)
+            } else {
+              setEditFee(undefined)
+              setDispatch(!dispatch)
+            }
+          })
+          .catch((error) => {
+            throw new Error(String(error).substring(String(error).lastIndexOf('Error:') + 7))
+          })
+      } else {
+        const txHash = await toast.promise(dispatchExecute(payload), {
+          error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
+          loading: 'Executing message...',
+          success: (tx) => `Transaction ${tx} success!`,
+        })
+        if (txHash) {
+          setLastTx(txHash)
+        }
       }
     },
     {
@@ -413,6 +436,19 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
       },
     },
   )
+
+  const dispatchEditBadge = async () => {
+    if (type) {
+      const txHash = await toast.promise(dispatchExecute(payload), {
+        error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
+        loading: 'Executing message...',
+        success: (tx) => `Transaction ${tx} success!`,
+      })
+      if (txHash) {
+        setLastTx(txHash)
+      }
+    }
+  }
 
   const airdropFileOnChange = (data: AirdropAllocation[]) => {
     setAirdropAllocationArray(data)

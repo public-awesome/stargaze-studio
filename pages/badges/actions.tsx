@@ -113,7 +113,7 @@ const BadgeActionsPage: NextPage = () => {
       })
       .catch((err) => {
         console.log(err)
-        setMintRule('by_key')
+        setMintRule('not_resolved')
         console.log('Unable to retrieve Mint Rule. Defaulting to "by_key".')
       })
   }, [debouncedBadgeHubContractState, debouncedBadgeIdState, wallet.client])
@@ -132,14 +132,16 @@ const BadgeActionsPage: NextPage = () => {
           <AddressInput {...badgeHubContractState} className="mr-2" />
           <div className="flex-row">
             <NumberInput className="w-1/2" {...badgeIdState} />
-            <span className="mt-1 font-bold">Mint Rule: </span>
-            <span>
-              {mintRule
-                .toString()
-                .split('_')
-                .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-                .join(' ')}
-            </span>
+            <div className="mt-2">
+              <span className="font-bold">Mint Rule: </span>
+              <span>
+                {mintRule
+                  .toString()
+                  .split('_')
+                  .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                  .join(' ')}
+              </span>
+            </div>
           </div>
         </div>
         <div className="mt-4">

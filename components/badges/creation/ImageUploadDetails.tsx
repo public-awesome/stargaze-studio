@@ -15,7 +15,7 @@ import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
 
 export type UploadMethod = 'new' | 'existing'
-export type MintRule = 'by_key' | 'by_minter' | 'by_keys'
+export type MintRule = 'by_key' | 'by_minter' | 'by_keys' | 'not_resolved'
 
 interface ImageUploadDetailsProps {
   onChange: (value: ImageUploadDetailsDataProps) => void

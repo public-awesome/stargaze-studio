@@ -100,7 +100,7 @@ export type DispatchExecuteArgs = {
 } & (
   | { type: undefined }
   | { type: Select<'create_badge'>; badge: Badge }
-  | { type: Select<'edit_badge'>; id: number; metadata: Metadata }
+  | { type: Select<'edit_badge'>; id: number; metadata: Metadata; editFee?: number }
   | { type: Select<'add_keys'>; id: number; keys: string[] }
   | { type: Select<'purge_keys'>; id: number; limit?: number }
   | { type: Select<'purge_owners'>; id: number; limit?: number }
@@ -120,7 +120,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return badgeHubMessages.createBadge(txSigner, args.badge)
     }
     case 'edit_badge': {
-      return badgeHubMessages.editBadge(txSigner, args.id, args.metadata)
+      return badgeHubMessages.editBadge(txSigner, args.id, args.metadata, args.editFee)
     }
     case 'add_keys': {
       return badgeHubMessages.addKeys(txSigner, args.id, args.keys)
