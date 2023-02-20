@@ -23,24 +23,9 @@ export interface ActionListItem {
 
 export const BY_KEY_ACTION_LIST: ActionListItem[] = [
   {
-    id: 'create_badge',
-    name: 'Create Badge',
-    description: `Create a new badge with the specified mint rule and metadata`,
-  },
-  {
     id: 'edit_badge',
     name: 'Edit Badge',
     description: `Edit the badge with the specified ID`,
-  },
-  {
-    id: 'add_keys',
-    name: 'Add Keys',
-    description: `Add keys to the badge with the specified ID`,
-  },
-  {
-    id: 'purge_keys',
-    name: 'Purge Keys',
-    description: `Purge keys from the badge with the specified ID`,
   },
   {
     id: 'purge_owners',
@@ -48,34 +33,14 @@ export const BY_KEY_ACTION_LIST: ActionListItem[] = [
     description: `Purge owners from the badge with the specified ID`,
   },
   {
-    id: 'mint_by_minter',
-    name: 'Mint by Minter',
-    description: `Mint a new token by the minter with the specified ID`,
-  },
-  {
     id: 'mint_by_key',
     name: 'Mint by Key',
     description: `Mint a new token by the key with the specified ID`,
-  },
-  {
-    id: 'mint_by_keys',
-    name: 'Mint by Keys',
-    description: `Mint a new token by the keys with the specified ID`,
-  },
-  {
-    id: 'set_nft',
-    name: 'Set NFT',
-    description: `Set the Badge NFT contract address for the Badge Hub contract`,
   },
 ]
 
 export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
   {
-    id: 'create_badge',
-    name: 'Create Badge',
-    description: `Create a new badge with the specified mint rule and metadata`,
-  },
-  {
     id: 'edit_badge',
     name: 'Edit Badge',
     description: `Edit the badge with the specified ID`,
@@ -96,47 +61,17 @@ export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
     description: `Purge owners from the badge with the specified ID`,
   },
   {
-    id: 'mint_by_minter',
-    name: 'Mint by Minter',
-    description: `Mint a new token by the minter with the specified ID`,
-  },
-  {
-    id: 'mint_by_key',
-    name: 'Mint by Key',
-    description: `Mint a new token by the key with the specified ID`,
-  },
-  {
     id: 'mint_by_keys',
     name: 'Mint by Keys',
-    description: `Mint a new token by the keys with the specified ID`,
-  },
-  {
-    id: 'set_nft',
-    name: 'Set NFT',
-    description: `Set the Badge NFT contract address for the Badge Hub contract`,
+    description: `Mint a new badge with a whitelisted public key and corresponding signature`,
   },
 ]
 
 export const BY_MINTER_ACTION_LIST: ActionListItem[] = [
   {
-    id: 'create_badge',
-    name: 'Create Badge',
-    description: `Create a new badge with the specified mint rule and metadata`,
-  },
-  {
     id: 'edit_badge',
     name: 'Edit Badge',
     description: `Edit the badge with the specified ID`,
-  },
-  {
-    id: 'add_keys',
-    name: 'Add Keys',
-    description: `Add keys to the badge with the specified ID`,
-  },
-  {
-    id: 'purge_keys',
-    name: 'Purge Keys',
-    description: `Purge keys from the badge with the specified ID`,
   },
   {
     id: 'purge_owners',
@@ -146,22 +81,7 @@ export const BY_MINTER_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_by_minter',
     name: 'Mint by Minter',
-    description: `Mint a new token by the minter with the specified ID`,
-  },
-  {
-    id: 'mint_by_key',
-    name: 'Mint by Key',
-    description: `Mint a new token by the key with the specified ID`,
-  },
-  {
-    id: 'mint_by_keys',
-    name: 'Mint by Keys',
-    description: `Mint a new token by the keys with the specified ID`,
-  },
-  {
-    id: 'set_nft',
-    name: 'Set NFT',
-    description: `Set the Badge NFT contract address for the Badge Hub contract`,
+    description: `Mint a new badge to the specified addresses`,
   },
 ]
 
