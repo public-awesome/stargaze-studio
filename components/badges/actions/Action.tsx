@@ -5,29 +5,22 @@ import { dispatchExecute, isEitherType, previewExecutePayload } from 'components
 import { ActionsCombobox } from 'components/badges/actions/Combobox'
 import { useActionsComboboxState } from 'components/badges/actions/Combobox.hooks'
 import { Button } from 'components/Button'
-import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
-// import { FormGroup } from 'components/FormGroup'
-import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { MetadataAttributes } from 'components/forms/MetadataAttributes'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
-import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
 import { useWallet } from 'contexts/wallet'
 import type { Badge, BadgeHubInstance } from 'contracts/badgeHub'
 import * as crypto from 'crypto'
-import { toPng } from 'html-to-image'
 import sizeof from 'object-sizeof'
-import { QRCodeCanvas } from 'qrcode.react'
 import type { FormEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { FaArrowRight, FaCopy, FaSave } from 'react-icons/fa'
+import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
-import { NETWORK } from 'utils/constants'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 import { resolveAddress } from 'utils/resolveAddress'
 
@@ -54,11 +47,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const [transferrable, setTransferrable] = useState<TransferrableType>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
-  const [dispatch, setDispatch] = useState<boolean>(false)
-
-  const [createdBadgeId, setCreatedBadgeId] = useState<string | undefined>(undefined)
-  const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
-  const qrRef = useRef<HTMLDivElement>(null)
+  const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
+  const [keyPairs, setKeyPairs] = useState<string[]>([])
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -179,10 +169,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     subtitle: 'Number of keys/owners to execute the action for',
   })
 
-  const showBadgeField = type === 'create_badge'
-  const showMetadataField = isEitherType(type, ['create_badge', 'edit_badge'])
-  const showIdField = type === 'edit_badge'
-  const showNFTField = type === 'set_nft'
+  const showMetadataField = isEitherType(type, ['edit_badge'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -348,10 +335,10 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   }, [])
 
   useEffect(() => {
-    void dispatchEditBadge().catch((err) => {
+    void dispatchEditBadgeMessage().catch((err) => {
       toast.error(String(err), { style: { maxWidth: 'none' } })
     })
-  }, [dispatch])
+  }, [triggerDispatch])
 
   useEffect(() => {
     const addresses: string[] = []
@@ -402,18 +389,20 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
             },
           )
           .then((currentBadge) => {
+            // TODO - Go over the calculation
             const currentBadgeMetadataSize =
-              Number(sizeof(currentBadge.metadata)) + Number(sizeof(currentBadge.metadata.attributes))
+              Number(sizeof(currentBadge.metadata)) + Number(sizeof(currentBadge.metadata.attributes) * 2)
             console.log('Current badge metadata size: ', currentBadgeMetadataSize)
-            const newBadgeMetadataSize = Number(sizeof(badge?.metadata)) + Number(sizeof(badge?.metadata.attributes))
+            const newBadgeMetadataSize =
+              Number(sizeof(badge?.metadata)) + Number(sizeof(badge?.metadata.attributes)) * 2
             console.log('New badge metadata size: ', newBadgeMetadataSize)
             if (newBadgeMetadataSize > currentBadgeMetadataSize) {
               const calculatedFee = ((newBadgeMetadataSize - currentBadgeMetadataSize) * Number(feeRate.metadata)) / 2
               setEditFee(calculatedFee)
-              setDispatch(!dispatch)
+              setTriggerDispatch(!triggerDispatch)
             } else {
               setEditFee(undefined)
-              setDispatch(!dispatch)
+              setTriggerDispatch(!triggerDispatch)
             }
           })
           .catch((error) => {
@@ -437,7 +426,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     },
   )
 
-  const dispatchEditBadge = async () => {
+  const dispatchEditBadgeMessage = async () => {
     if (type) {
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
@@ -454,36 +443,17 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     setAirdropAllocationArray(data)
   }
 
-  const handleGenerateKey = () => {
-    let privKey: Buffer
-    do {
-      privKey = crypto.randomBytes(32)
-    } while (!secp256k1.privateKeyVerify(privKey))
+  const handleGenerateKeys = (amount: number) => {
+    for (let i = 0; i < amount; i++) {
+      let privKey: Buffer
+      do {
+        privKey = crypto.randomBytes(32)
+      } while (!secp256k1.privateKeyVerify(privKey))
 
-    const privateKey = privKey.toString('hex')
-    setCreatedBadgeKey(privateKey)
-    console.log('Private Key: ', privateKey)
-
-    const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
-
-    keyState.onChange(publicKey)
-  }
-
-  const handleDownloadQr = async () => {
-    const qrElement = qrRef.current
-    await toPng(qrElement as HTMLElement).then((dataUrl) => {
-      const link = document.createElement('a')
-      link.download = `badge-${createdBadgeId as string}.png`
-      link.href = dataUrl
-      link.click()
-    })
-  }
-
-  const copyClaimURL = async () => {
-    const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-    const claimURL = `${baseURL}/?id=${createdBadgeId as string}&key=${createdBadgeKey as string}`
-    await navigator.clipboard.writeText(claimURL)
-    toast.success('Copied claim URL to clipboard')
+      const privateKey = privKey.toString('hex')
+      const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
+      keyPairs.push(publicKey.concat(',', privateKey))
+    }
   }
 
   return (
@@ -491,43 +461,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
       <div className="grid grid-cols-2 mt-4">
         <div className="mr-2">
           <ActionsCombobox mintRule={mintRule} {...actionComboboxState} />
-          {showBadgeField && createdBadgeId && createdBadgeKey && (
-            <div className="ml-4">
-              <div className="w-[384px] h-[384px]" ref={qrRef}>
-                <QRCodeCanvas
-                  size={384}
-                  value={`${
-                    NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-                  }/?id=${createdBadgeId}&key=${createdBadgeKey}`}
-                />
-              </div>
-              {/* <div className="flex flex-row items-center mt-2 space-x-2 w-[384px] h-12"> */}
-              <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
-                <Button
-                  className="items-center w-full text-sm text-center rounded"
-                  leftIcon={<FaSave />}
-                  onClick={() => void handleDownloadQr()}
-                >
-                  Download QR Code
-                </Button>
-                <Button
-                  className="w-full text-sm text-center rounded"
-                  isWide
-                  leftIcon={<FaCopy />}
-                  onClick={() => void copyClaimURL()}
-                  variant="solid"
-                >
-                  Copy Claim URL
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {showBadgeField && <AddressInput {...managerState} />}
-          {showBadgeField && <TextInput {...keyState} />}
-          {showBadgeField && <Button onClick={handleGenerateKey}>Generate Key</Button>}
           {showMetadataField && (
-            <div className="p-4 rounded-md border-2 border-gray-800">
+            <div className="p-4 mt-2 rounded-md border-2 border-gray-800">
               <span className="text-gray-400">Metadata</span>
               <TextInput className="mt-2" {...nameState} />
               <TextInput className="mt-2" {...descriptionState} />
@@ -548,7 +483,6 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
               <TextInput className="mt-2" {...youtubeUrlState} />
             </div>
           )}
-          {showNFTField && <AddressInput {...nftState} />}
 
           {/* {showAirdropFileField && (
             <FormGroup
@@ -558,31 +492,6 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
               <AirdropUpload onChange={airdropFileOnChange} />
             </FormGroup>
           )} */}
-          <Conditional test={showBadgeField}>
-            <FormControl className="mt-2" htmlId="start-date" title="Start Time">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-            </FormControl>
-          </Conditional>
-
-          <Conditional test={showBadgeField}>
-            <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-            </FormControl>
-          </Conditional>
-          {showBadgeField && <NumberInput className="mt-2" {...maxSupplyState} />}
-          {showBadgeField && (
-            <div className="mt-2 form-control">
-              <label className="justify-start cursor-pointer label">
-                <span className="mr-4 font-bold">Transferrable</span>
-                <input
-                  checked={transferrable}
-                  className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
-                  onClick={() => setTransferrable(!transferrable)}
-                  type="checkbox"
-                />
-              </label>
-            </div>
-          )}
         </div>
         <div className="-mt-6">
           <div className="relative mb-2">
