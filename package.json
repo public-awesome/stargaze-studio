@@ -21,6 +21,7 @@
     "@fontsource/jetbrains-mono": "^4",
     "@fontsource/roboto": "^4",
     "@headlessui/react": "^1",
+    "jscrypto": "^1.0.3",
     "@keplr-wallet/cosmos": "^0.9.16",
     "@pinata/sdk": "^1.1.26",
     "@popperjs/core": "^2",

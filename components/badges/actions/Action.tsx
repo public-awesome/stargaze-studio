@@ -21,10 +21,11 @@ import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
+import { sha256 } from 'utils/hash'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 import { resolveAddress } from 'utils/resolveAddress'
 
-import { TextInput } from '../../forms/FormInput'
+import { AddressInput, TextInput } from '../../forms/FormInput'
 import type { MintRule } from '../creation/ImageUploadDetails'
 
 interface BadgeActionsProps {
@@ -49,6 +50,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
   const [keyPairs, setKeyPairs] = useState<string[]>([])
+  const [signature, setSignature] = useState<string>('')
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -139,6 +141,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     name: 'owner',
     title: 'Owner',
     subtitle: 'The owner of the badge',
+    defaultValue: wallet.address,
   })
 
   const pubkeyState = useInputState({
@@ -148,11 +151,11 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     subtitle: 'The public key for the badge',
   })
 
-  const signatureState = useInputState({
-    id: 'signature',
-    name: 'signature',
-    title: 'Signature',
-    subtitle: 'The signature for the badge',
+  const privateKeyState = useInputState({
+    id: 'privateKey',
+    name: 'privateKey',
+    title: 'Private Key',
+    subtitle: 'The private key to claim the badge with',
   })
 
   const nftState = useInputState({
@@ -170,6 +173,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   })
 
   const showMetadataField = isEitherType(type, ['edit_badge'])
+  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
+  const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -223,7 +228,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     editFee,
     owner: resolvedOwnerAddress,
     pubkey: pubkeyState.value,
-    signature: signatureState.value,
+    signature,
     keys: [],
     limit: limitState.value,
     owners: [],
@@ -340,6 +345,11 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   }, [triggerDispatch])
 
   useEffect(() => {
+    if (privateKeyState.value.length === 64 && resolvedOwnerAddress)
+      handleGenerateSignature(badgeId, resolvedOwnerAddress, privateKeyState.value)
+  }, [privateKeyState.value, resolvedOwnerAddress])
+
+  useEffect(() => {
     const addresses: string[] = []
     airdropAllocationArray.forEach((allocation) => {
       for (let i = 0; i < Number(allocation.amount); i++) {
@@ -356,12 +366,19 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
 
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
+      if (!wallet.client) {
+        throw new Error('Please connect your wallet.')
+      }
       event.preventDefault()
       if (!type) {
         throw new Error('Please select an action.')
       }
       if (badgeHubContractAddress === '') {
         throw new Error('Please enter the Badge Hub contract addresses.')
+      }
+
+      if (type === 'mint_by_key' && privateKeyState.value.length !== 64) {
+        throw new Error('Please enter a valid private key.')
       }
 
       if (wallet.client && type === 'edit_badge') {
@@ -442,6 +459,22 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     setAirdropAllocationArray(data)
   }
 
+  const handleGenerateSignature = (id: number, owner: string, privateKey: string) => {
+    try {
+      const message = `claim badge ${id} for user ${owner}`
+
+      const privKey = Buffer.from(privateKey, 'hex')
+      // const pubKey = Buffer.from(secp256k1.publicKeyCreate(privKey, true))
+      const msgBytes = Buffer.from(message, 'utf8')
+      const msgHashBytes = sha256(msgBytes)
+      const signedMessage = secp256k1.ecdsaSign(msgHashBytes, privKey)
+      setSignature(Buffer.from(signedMessage.signature).toString('hex'))
+    } catch (error) {
+      console.log(error)
+      toast.error('Error generating signature.')
+    }
+  }
+
   const handleGenerateKeys = (amount: number) => {
     for (let i = 0; i < amount; i++) {
       let privKey: Buffer
@@ -482,6 +515,15 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
               <TextInput className="mt-2" {...youtubeUrlState} />
             </div>
           )}
+          {showOwnerField && (
+            <AddressInput
+              className="mt-2"
+              {...ownerState}
+              subtitle="The address that the badge will be minted to"
+              title="Owner"
+            />
+          )}
+          {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
 
           {/* {showAirdropFileField && (
             <FormGroup
