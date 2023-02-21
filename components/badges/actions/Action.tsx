@@ -173,7 +173,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
 
   const payload: DispatchExecuteArgs = {
     badge: {
-      manager: managerState.value,
+      manager: badge?.manager || managerState.value,
       metadata: {
         name: nameState.value || undefined,
         description: descriptionState.value || undefined,
@@ -310,7 +310,6 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
       max_supply: maxSupplyState.value || undefined,
     })
   }, [
-    managerState.value,
     nameState.value,
     descriptionState.value,
     imageState.value,

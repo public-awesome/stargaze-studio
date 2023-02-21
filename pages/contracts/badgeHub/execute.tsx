@@ -199,7 +199,7 @@ const BadgeHubExecutePage: NextPage = () => {
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
     badge: {
-      manager: managerState.value,
+      manager: badge?.manager || managerState.value,
       metadata: {
         name: nameState.value || undefined,
         description: descriptionState.value || undefined,
