@@ -11,6 +11,7 @@ export const ACTION_TYPES = [
   'purge_owners',
   'mint_by_minter',
   'mint_by_key',
+  'airdrop_by_key',
   'mint_by_keys',
   'set_nft',
 ] as const
@@ -35,7 +36,12 @@ export const BY_KEY_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_by_key',
     name: 'Mint by Key',
-    description: `Mint a new token by the key with the specified ID`,
+    description: `Mint a badge to a specified address`,
+  },
+  {
+    id: 'airdrop_by_key',
+    name: 'Airdrop by Key',
+    description: `Mint badges to a list of specified addresses`,
   },
 ]
 
@@ -106,6 +112,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'purge_owners'>; id: number; limit?: number }
   | { type: Select<'mint_by_minter'>; id: number; owners: string[] }
   | { type: Select<'mint_by_key'>; id: number; owner: string; signature: string }
+  | { type: Select<'airdrop_by_key'>; id: number; recipients: string[]; privateKey: string }
   | { type: Select<'mint_by_keys'>; id: number; owner: string; pubkey: string; signature: string }
   | { type: Select<'set_nft'>; nft: string }
 )
@@ -136,6 +143,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'mint_by_key': {
       return badgeHubMessages.mintByKey(txSigner, args.id, args.owner, args.signature)
+    }
+    case 'airdrop_by_key': {
+      return badgeHubMessages.airdropByKey(txSigner, args.id, args.recipients, args.privateKey)
     }
     case 'mint_by_keys': {
       return badgeHubMessages.mintByKeys(txSigner, args.id, args.owner, args.pubkey, args.signature)
@@ -175,6 +185,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'mint_by_key': {
       return badgeHubMessages(badgeHubContract)?.mintByKey(args.id, args.owner, args.signature)
+    }
+    case 'airdrop_by_key': {
+      return badgeHubMessages(badgeHubContract)?.airdropByKey(args.id, args.recipients, args.privateKey)
     }
     case 'mint_by_keys': {
       return badgeHubMessages(badgeHubContract)?.mintByKeys(args.id, args.owner, args.pubkey, args.signature)

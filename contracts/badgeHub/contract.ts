@@ -4,12 +4,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable camelcase */
-import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
+import type { MsgExecuteContractEncodeObject, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
+import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 import sizeof from 'object-sizeof'
+
+import { generateSignature } from '../../utils/hash'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -73,6 +76,7 @@ export interface BadgeHubInstance {
   purgeOwners: (senderAddress: string, id: number, limit?: number) => Promise<string>
   mintByMinter: (senderAddress: string, id: number, owners: string[]) => Promise<string>
   mintByKey: (senderAddress: string, id: number, owner: string, signature: string) => Promise<string>
+  airdropByKey: (senderAddress: string, id: number, recipients: string[], privateKey: string) => Promise<string>
   mintByKeys: (senderAddress: string, id: number, owner: string, pubkey: string, signature: string) => Promise<string>
   setNft: (senderAddress: string, nft: string) => Promise<string>
 }
@@ -85,6 +89,7 @@ export interface BadgeHubMessages {
   purgeOwners: (id: number, limit?: number) => PurgeOwnersMessage
   mintByMinter: (id: number, owners: string[]) => MintByMinterMessage
   mintByKey: (id: number, owner: string, signature: string) => MintByKeyMessage
+  airdropByKey: (id: number, recipients: string[], privateKey: string) => CustomMessage
   mintByKeys: (id: number, owner: string, pubkey: string, signature: string) => MintByKeysMessage
   setNft: (nft: string) => SetNftMessage
 }
@@ -178,6 +183,12 @@ export interface MintByKeyMessage {
   funds: Coin[]
 }
 
+export interface CustomMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
+  funds: Coin[]
+}
 export interface MintByKeysMessage {
   sender: string
   contract: string
@@ -423,6 +434,34 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       return res.transactionHash
     }
 
+    const airdropByKey = async (
+      senderAddress: string,
+      id: number,
+      recipients: string[],
+      privateKey: string,
+    ): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        const msg = {
+          mint_by_key: { id, owner: recipients[i], signature: generateSignature(id, recipients[i], privateKey) },
+        }
+        const executeContractMsg: MsgExecuteContractEncodeObject = {
+          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+          value: MsgExecuteContract.fromPartial({
+            sender: senderAddress,
+            contract: contractAddress,
+            msg: toUtf8(JSON.stringify(msg)),
+          }),
+        }
+
+        executeContractMsgs.push(executeContractMsg)
+      }
+
+      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'airdrop_by_key')
+
+      return res.transactionHash
+    }
+
     const mintByKeys = async (
       senderAddress: string,
       id: number,
@@ -478,6 +517,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       purgeOwners,
       mintByMinter,
       mintByKey,
+      airdropByKey,
       mintByKeys,
       setNft,
     }
@@ -615,6 +655,22 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       }
     }
 
+    const airdropByKey = (id: number, recipients: string[], privateKey: string): CustomMessage => {
+      const msg: Record<string, unknown>[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        const signature = generateSignature(id, recipients[i], privateKey)
+        msg.push({
+          mint_by_key: { id, owner: recipients[i], signature },
+        })
+      }
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
     const mintByKeys = (id: number, owner: string, pubkey: string, signature: string): MintByKeysMessage => {
       return {
         sender: txSigner,
@@ -652,6 +708,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
       purgeOwners,
       mintByMinter,
       mintByKey,
+      airdropByKey,
       mintByKeys,
       setNft,
     }

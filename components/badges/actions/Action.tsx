@@ -1,3 +1,6 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // import { AirdropUpload } from 'components/AirdropUpload'
 import { toUtf8 } from '@cosmjs/encoding'
 import type { DispatchExecuteArgs } from 'components/badges/actions/actions'
@@ -6,6 +9,7 @@ import { ActionsCombobox } from 'components/badges/actions/Combobox'
 import { useActionsComboboxState } from 'components/badges/actions/Combobox.hooks'
 import { Button } from 'components/Button'
 import { FormControl } from 'components/FormControl'
+import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { MetadataAttributes } from 'components/forms/MetadataAttributes'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
@@ -22,9 +26,9 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
 import { sha256 } from 'utils/hash'
-import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 import { resolveAddress } from 'utils/resolveAddress'
 
+import { BadgeAirdropListUpload } from '../../BadgeAirdropListUpload'
 import { AddressInput, TextInput } from '../../forms/FormInput'
 import type { MintRule } from '../creation/ImageUploadDetails'
 
@@ -42,8 +46,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const [lastTx, setLastTx] = useState('')
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
-  const [airdropAllocationArray, setAirdropAllocationArray] = useState<AirdropAllocation[]>([])
-  const [airdropArray, setAirdropArray] = useState<string[]>([])
+  const [airdropAllocationArray, setAirdropAllocationArray] = useState<string[]>([])
   const [badge, setBadge] = useState<Badge>()
   const [transferrable, setTransferrable] = useState<TransferrableType>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
@@ -174,7 +177,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
 
   const showMetadataField = isEitherType(type, ['edit_badge'])
   const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
-  const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
+  const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'airdrop_by_key'])
+  const showAirdropFileField = isEitherType(type, ['airdrop_by_key'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -232,6 +236,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     keys: [],
     limit: limitState.value,
     owners: [],
+    recipients: airdropAllocationArray,
+    privateKey: privateKeyState.value,
     nft: nftState.value,
     badgeHubMessages,
     badgeHubContract: badgeHubContractAddress,
@@ -349,21 +355,6 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
       handleGenerateSignature(badgeId, resolvedOwnerAddress, privateKeyState.value)
   }, [privateKeyState.value, resolvedOwnerAddress])
 
-  useEffect(() => {
-    const addresses: string[] = []
-    airdropAllocationArray.forEach((allocation) => {
-      for (let i = 0; i < Number(allocation.amount); i++) {
-        addresses.push(allocation.address)
-      }
-    })
-    //shuffle the addresses array
-    for (let i = addresses.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[addresses[i], addresses[j]] = [addresses[j], addresses[i]]
-    }
-    setAirdropArray(addresses)
-  }, [airdropAllocationArray])
-
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
       if (!wallet.client) {
@@ -455,7 +446,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     }
   }
 
-  const airdropFileOnChange = (data: AirdropAllocation[]) => {
+  const airdropFileOnChange = (data: string[]) => {
+    console.log(data)
     setAirdropAllocationArray(data)
   }
 
@@ -525,14 +517,14 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
           )}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
 
-          {/* {showAirdropFileField && (
+          {showAirdropFileField && (
             <FormGroup
-              subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: address,amount"
-              title="Airdrop File"
+              subtitle="TXT file that contains the addresses to airdrop a badge for"
+              title="Badge Airdrop List File"
             >
-              <AirdropUpload onChange={airdropFileOnChange} />
+              <BadgeAirdropListUpload onChange={airdropFileOnChange} />
             </FormGroup>
-          )} */}
+          )}
         </div>
         <div className="-mt-6">
           <div className="relative mb-2">
