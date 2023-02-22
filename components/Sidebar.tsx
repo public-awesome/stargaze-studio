@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
 import { useWallet } from 'contexts/wallet'
@@ -5,7 +7,8 @@ import { useRouter } from 'next/router'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
-import { BASE_FACTORY_ADDRESS } from '../utils/constants'
+import { BASE_FACTORY_ADDRESS, NETWORK } from '../utils/constants'
+import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
@@ -14,6 +17,7 @@ const routes = [
   { text: 'Create a Collection', href: `/collections/create/`, isChild: true },
   { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
   { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
+  { text: 'Creator Income Dashboard', href: `/collections/actions/`, isChild: true },
   { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
   { text: 'Base Minter Contract', href: `/contracts/baseMinter/`, isChild: true },
   { text: 'Vending Minter Contract', href: `/contracts/vendingMinter/`, isChild: true },
@@ -40,27 +44,49 @@ export const Sidebar = () => {
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
-      {tempRoutes.map(({ text, href, isChild }) => (
-        <Anchor
-          key={href}
-          className={clsx(
-            'px-2 -mx-5 font-extrabold uppercase rounded-lg', // styling
-            'hover:bg-white/5 transition-colors', // hover styling
-            { 'py-0 -ml-2 text-sm font-bold': isChild },
-            {
-              'text-gray hover:text-white':
-                !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
-            },
-            {
-              'text-stargaze': router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
-            }, // active route styling
-            // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
-          )}
-          href={href}
-        >
-          {text}
-        </Anchor>
-      ))}
+      {tempRoutes.map(({ text, href, isChild }) =>
+        text !== 'Creator Income Dashboard' ? (
+          <Anchor
+            key={href}
+            className={clsx(
+              'px-2 -mx-5 font-extrabold uppercase rounded-lg', // styling
+              'hover:bg-white/5 transition-colors', // hover styling
+              { 'py-0 -ml-2 text-sm font-bold': isChild },
+              {
+                'text-gray hover:text-white':
+                  !router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
+              },
+              {
+                'text-stargaze':
+                  router.asPath.substring(0, router.asPath.lastIndexOf('/') + 1).includes(href) && isChild,
+              }, // active route styling
+              // { 'text-gray-500 pointer-events-none': disabled }, // disabled route styling
+            )}
+            href={href}
+          >
+            {text === 'Creator Income Dashboard' && <div className="text-sm font-bold">{text}</div>}
+            {text}
+          </Anchor>
+        ) : NETWORK === 'mainnet' ? (
+          <button
+            className={clsx(
+              'font-extrabold uppercase bg-clip-text border-none', // styling
+              'text-gray hover:text-white hover:bg-white/5 transition-colors', // hover styling
+              'py-0 -mt-3 -ml-11 text-sm font-bold',
+            )}
+            type="button"
+          >
+            <label
+              className="w-full h-full text-gray hover:text-white bg-clip-text bg-transparent hover:bg-white/5 border-none btn modal-button"
+              htmlFor="my-modal-2"
+            >
+              Income Dashboard
+            </label>
+          </button>
+        ) : null,
+      )}
+
+      <IncomeDashboardDisclaimer creatorAddress={wallet.address ? wallet.address : ''} />
 
       <div className="flex-grow" />
 
