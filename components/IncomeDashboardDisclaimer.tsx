@@ -15,8 +15,8 @@ export const IncomeDashboardDisclaimer = (props: IncomeDashboardDisclaimerProps)
 
   return (
     <div>
-      <input className="modal-toggle" defaultChecked={false} id="my-modal-2" ref={checkBoxRef} type="checkbox" />
-      <label className="cursor-pointer modal" htmlFor="my-modal-2">
+      <input className="modal-toggle" defaultChecked={false} id="my-modal-1" ref={checkBoxRef} type="checkbox" />
+      <label className="cursor-pointer modal" htmlFor="my-modal-1">
         <label
           className="absolute top-[25%] bottom-5 left-1/3 max-w-[600px] max-h-[450px] border-2 no-scrollbar modal-box"
           htmlFor="temp"
@@ -56,7 +56,7 @@ export const IncomeDashboardDisclaimer = (props: IncomeDashboardDisclaimerProps)
             <Button className="px-0 mt-4 mr-5 mb-4 max-h-12 bg-gray-600 hover:bg-gray-600">
               <label
                 className="w-full h-full text-white bg-gray-600 hover:bg-gray-500 border-0 btn modal-button"
-                htmlFor="my-modal-2"
+                htmlFor="my-modal-1"
               >
                 Go Back
               </label>
