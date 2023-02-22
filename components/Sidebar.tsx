@@ -17,7 +17,7 @@ const routes = [
   { text: 'Create a Collection', href: `/collections/create/`, isChild: true },
   { text: 'My Collections', href: `/collections/myCollections/`, isChild: true },
   { text: 'Collection Actions', href: `/collections/actions/`, isChild: true },
-  { text: 'Creator Income Dashboard', href: `/collections/actions/`, isChild: true },
+  { text: 'Creator Income Dashboard', href: `/`, isChild: true },
   { text: 'Contract Dashboards', href: `/contracts/`, isChild: false },
   { text: 'Base Minter Contract', href: `/contracts/baseMinter/`, isChild: true },
   { text: 'Vending Minter Contract', href: `/contracts/vendingMinter/`, isChild: true },
@@ -64,7 +64,6 @@ export const Sidebar = () => {
             )}
             href={href}
           >
-            {text === 'Creator Income Dashboard' && <div className="text-sm font-bold">{text}</div>}
             {text}
           </Anchor>
         ) : NETWORK === 'mainnet' ? (
