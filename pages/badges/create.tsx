@@ -16,6 +16,7 @@ import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
+import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
@@ -30,9 +31,11 @@ import { toast } from 'react-hot-toast'
 import { FaCopy, FaSave } from 'react-icons/fa'
 import * as secp256k1 from 'secp256k1'
 import { upload } from 'services/upload'
+import { copy } from 'utils/clipboard'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { truncateMiddle } from 'utils/text'
 
 const BadgeCreationPage: NextPage = () => {
   const wallet = useWallet()
@@ -58,8 +61,8 @@ const BadgeCreationPage: NextPage = () => {
   const keyState = useInputState({
     id: 'key',
     name: 'key',
-    title: 'Key',
-    subtitle: 'The key generated for the badge',
+    title: 'Public Key',
+    subtitle: 'The public key generated for the badge',
   })
 
   const performBadgeCreationChecks = () => {
@@ -295,6 +298,18 @@ const BadgeCreationPage: NextPage = () => {
               </div>
               <div className="ml-4 text-lg">
                 Badge ID:{` ${badgeId as string}`}
+                <br />
+                Private Key:
+                <Tooltip label="Click to copy the private key">
+                  <button
+                    className="group flex space-x-2 font-mono text-base text-white/50 hover:underline"
+                    onClick={() => void copy(createdBadgeKey as string)}
+                    type="button"
+                  >
+                    <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
+                    <FaCopy className="opacity-50 group-hover:opacity-100" />
+                  </button>
+                </Tooltip>
                 <br />
                 Transaction Hash: {'  '}
                 <Conditional test={NETWORK === 'testnet'}>
