@@ -67,7 +67,7 @@ export const IncomeDashboardDisclaimer = (props: IncomeDashboardDisclaimerProps)
               rel="noopener"
               target="_blank"
             >
-              <Button className="w-full h-full" isDisabled={!isChecked} isWide onClick={() => handleCheckBox()}>
+              <Button className="px-5 w-full h-full" isDisabled={!isChecked} onClick={() => handleCheckBox()}>
                 Confirm
               </Button>
             </a>
