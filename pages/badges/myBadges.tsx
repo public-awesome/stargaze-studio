@@ -11,7 +11,7 @@ import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useCallback, useEffect, useState } from 'react'
-import { FaSlidersH, FaStar } from 'react-icons/fa'
+import { FaSlidersH, FaUser } from 'react-icons/fa'
 import { API_URL, BADGE_HUB_ADDRESS, STARGAZE_URL } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -90,7 +90,7 @@ const BadgeList: NextPage = () => {
                           external
                           href={`${STARGAZE_URL}/profile/${wallet.address}`}
                         >
-                          <FaStar />
+                          <FaUser />
                         </Anchor>
                       </div>
                     </th>
