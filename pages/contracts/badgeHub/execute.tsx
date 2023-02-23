@@ -165,7 +165,7 @@ const BadgeHubExecutePage: NextPage = () => {
     id: 'key',
     name: 'key',
     title: 'Public Key',
-    subtitle: 'One part of the key pair to be utilized for post-creation access control',
+    subtitle: 'Part of the key pair to be utilized for post-creation access control',
   })
 
   const ownerState = useInputState({
