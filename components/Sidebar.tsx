@@ -78,7 +78,7 @@ export const Sidebar = () => {
                     className="w-full h-full text-lg font-bold text-gray hover:text-white normal-case bg-clip-text bg-transparent border-none animate-none btn modal-button"
                     htmlFor="my-modal-1"
                   >
-                    Income Dashboard
+                    Revenue Dashboard
                   </label>
                 </li>
               </Conditional>
