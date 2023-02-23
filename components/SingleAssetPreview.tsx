@@ -7,7 +7,7 @@ import { getAssetType } from 'utils/getAssetType'
 export interface SingleAssetPreviewProps {
   subtitle: ReactNode
   relatedAsset?: File
-  updateMetadataFileIndex: (index: number) => void
+  updateMetadataFileIndex?: (index: number) => void
   children?: ReactNode
 }
 

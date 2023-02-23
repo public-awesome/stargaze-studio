@@ -56,6 +56,7 @@ module.exports = {
       strategy: 'class',
     }),
     require('@tailwindcss/line-clamp'),
+    require('tailwindcss-opentype'),
 
     // custom gradient background
     plugin(({ addUtilities }) => {

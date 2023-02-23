@@ -1,3 +1,5 @@
+import type { UseBadgeHubContractProps } from 'contracts/badgeHub'
+import { useBadgeHubContract } from 'contracts/badgeHub'
 import type { UseBaseFactoryContractProps } from 'contracts/baseFactory'
 import { useBaseFactoryContract } from 'contracts/baseFactory'
 import type { UseBaseMinterContractProps } from 'contracts/baseMinter'
@@ -25,6 +27,7 @@ export interface ContractsStore extends State {
   whitelist: UseWhiteListContractProps | null
   vendingFactory: UseVendingFactoryContractProps | null
   baseFactory: UseBaseFactoryContractProps | null
+  badgeHub: UseBadgeHubContractProps | null
 }
 
 /**
@@ -37,6 +40,7 @@ export const defaultValues: ContractsStore = {
   whitelist: null,
   vendingFactory: null,
   baseFactory: null,
+  badgeHub: null,
 }
 
 /**
@@ -66,6 +70,7 @@ const ContractsSubscription: VFC = () => {
   const whitelist = useWhiteListContract()
   const vendingFactory = useVendingFactoryContract()
   const baseFactory = useBaseFactoryContract()
+  const badgeHub = useBadgeHubContract()
 
   useEffect(() => {
     useContracts.setState({
@@ -75,8 +80,9 @@ const ContractsSubscription: VFC = () => {
       whitelist,
       vendingFactory,
       baseFactory,
+      badgeHub,
     })
-  }, [sg721, vendingMinter, baseMinter, whitelist, vendingFactory, baseFactory])
+  }, [sg721, vendingMinter, baseMinter, whitelist, vendingFactory, baseFactory, badgeHub])
 
   return null
 }

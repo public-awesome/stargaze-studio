@@ -53,9 +53,9 @@ export const IncomeDashboardDisclaimer = (props: IncomeDashboardDisclaimerProps)
             Are you sure to proceed to the Creator Income Dashboard?
           </div>
           <div className="flex justify-end w-full">
-            <Button className="px-0 mt-4 mr-5 mb-4 max-h-12 bg-gray-600 hover:bg-gray-600">
+            <Button className="px-0 mt-4 mr-5 mb-4 max-h-12 bg-gray-600 hover:bg-gray-700">
               <label
-                className="w-full h-full text-white bg-gray-600 hover:bg-gray-500 border-0 btn modal-button"
+                className="w-full h-full text-white bg-gray-600 hover:bg-gray-700 rounded border-0 btn modal-button"
                 htmlFor="my-modal-1"
               >
                 Go Back

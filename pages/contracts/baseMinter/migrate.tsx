@@ -70,7 +70,7 @@ const BaseMinterMigratePage: NextPage = () => {
     },
     {
       onError: (error) => {
-        toast.error(String(error))
+        toast.error(String(error), { style: { maxWidth: 'none' } })
       },
     },
   )

@@ -81,3 +81,26 @@ export const whitelistLinkTabs: LinkTabProps[] = [
     href: '/contracts/whitelist/execute',
   },
 ]
+
+export const badgeHubLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Instantiate',
+    description: `Initialize a new Badge Hub contract`,
+    href: '/contracts/badgeHub/instantiate',
+  },
+  {
+    title: 'Query',
+    description: `Dispatch queries for your Badge Hub contract`,
+    href: '/contracts/badgeHub/query',
+  },
+  {
+    title: 'Execute',
+    description: `Execute Badge Hub contract actions`,
+    href: '/contracts/badgeHub/execute',
+  },
+  {
+    title: 'Migrate',
+    description: `Migrate Badge Hub contract`,
+    href: '/contracts/badgeHub/migrate',
+  },
+]
