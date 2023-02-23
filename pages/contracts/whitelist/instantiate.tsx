@@ -25,7 +25,7 @@ import { WHITELIST_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const Sg721InstantiatePage: NextPage = () => {
+const WhitelistInstantiatePage: NextPage = () => {
   const wallet = useWallet()
   const { whitelist: contract } = useContracts()
 
@@ -148,4 +148,4 @@ const Sg721InstantiatePage: NextPage = () => {
   )
 }
 
-export default withMetadata(Sg721InstantiatePage, { center: false })
+export default withMetadata(WhitelistInstantiatePage, { center: false })

@@ -22,11 +22,14 @@ const HomePage: NextPage = () => {
       <br />
 
       <div className="grid gap-8 md:grid-cols-2">
-        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/collections/create" title="Create">
-          Upload your assets, enter collection metadata and deploy your collection.
+        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/collections/" title="Collections">
+          Create a collection, view a list of your collections or execute collection actions and queries.
         </HomeCard>
-        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/collections" title="My Collections">
-          Manage your collections with available actions and queries.
+        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/badges" title="Badges">
+          Create badges, view a list of them or execute badge related actions and queries.
+        </HomeCard>
+        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts" title="Contract Dashboards">
+          Execute actions and queries for a variety of contracts.
         </HomeCard>
       </div>
     </section>

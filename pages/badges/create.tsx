@@ -1,0 +1,477 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+//import { coin } from '@cosmjs/proto-signing'
+import clsx from 'clsx'
+import { Alert } from 'components/Alert'
+import { Anchor } from 'components/Anchor'
+import { BadgeConfirmationModal } from 'components/BadgeConfirmationModal'
+import { BadgeLoadingModal } from 'components/BadgeLoadingModal'
+import type { BadgeDetailsDataProps } from 'components/badges/creation/BadgeDetails'
+import { BadgeDetails } from 'components/badges/creation/BadgeDetails'
+import type { ImageUploadDetailsDataProps, MintRule } from 'components/badges/creation/ImageUploadDetails'
+import { ImageUploadDetails } from 'components/badges/creation/ImageUploadDetails'
+import { Button } from 'components/Button'
+import { Conditional } from 'components/Conditional'
+import { TextInput } from 'components/forms/FormInput'
+import { useInputState } from 'components/forms/FormInput.hooks'
+import { Tooltip } from 'components/Tooltip'
+import { useContracts } from 'contexts/contracts'
+import { useWallet } from 'contexts/wallet'
+import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
+import { dispatchExecute as badgeHubDispatchExecute } from 'contracts/badgeHub/messages/execute'
+import * as crypto from 'crypto'
+import { toPng } from 'html-to-image'
+import type { NextPage } from 'next'
+import { NextSeo } from 'next-seo'
+import { QRCodeSVG } from 'qrcode.react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { FaCopy, FaSave } from 'react-icons/fa'
+import * as secp256k1 from 'secp256k1'
+import { upload } from 'services/upload'
+import { copy } from 'utils/clipboard'
+import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
+import { withMetadata } from 'utils/layout'
+import { links } from 'utils/links'
+import { truncateMiddle } from 'utils/text'
+
+const BadgeCreationPage: NextPage = () => {
+  const wallet = useWallet()
+  const { badgeHub: badgeHubContract } = useContracts()
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const badgeHubMessages = useMemo(() => badgeHubContract?.use(BADGE_HUB_ADDRESS), [badgeHubContract, wallet.address])
+
+  const [imageUploadDetails, setImageUploadDetails] = useState<ImageUploadDetailsDataProps | null>(null)
+  const [badgeDetails, setBadgeDetails] = useState<BadgeDetailsDataProps | null>(null)
+
+  const [uploading, setUploading] = useState(false)
+  const [creatingBadge, setCreatingBadge] = useState(false)
+  const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
+  const [mintRule, setMintRule] = useState<MintRule>('by_key')
+
+  const [badgeId, setBadgeId] = useState<string | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const qrRef = useRef<HTMLDivElement>(null)
+
+  const keyState = useInputState({
+    id: 'key',
+    name: 'key',
+    title: 'Public Key',
+    subtitle: 'Part of the key pair to be utilized for post-creation access control',
+  })
+
+  const performBadgeCreationChecks = () => {
+    try {
+      setReadyToCreateBadge(false)
+      checkImageUploadDetails()
+      checkBadgeDetails()
+      setTimeout(() => {
+        setReadyToCreateBadge(true)
+      }, 100)
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setUploading(false)
+      setReadyToCreateBadge(false)
+    }
+  }
+
+  const handleImageUrl = async () => {
+    try {
+      setImageUrl(null)
+      setBadgeId(null)
+      setTransactionHash(null)
+      if (imageUploadDetails?.uploadMethod === 'new') {
+        setUploading(true)
+        const coverUrl = await upload(
+          [imageUploadDetails.assetFile] as File[],
+          imageUploadDetails.uploadService,
+          'cover',
+          imageUploadDetails.nftStorageApiKey as string,
+          imageUploadDetails.pinataApiKey as string,
+          imageUploadDetails.pinataSecretKey as string,
+        ).then((imageBaseUrl) => {
+          setUploading(false)
+          return `ipfs://${imageBaseUrl}/${imageUploadDetails.assetFile?.name as string}`
+        })
+        setImageUrl(coverUrl)
+        return coverUrl
+      }
+      setImageUrl(imageUploadDetails?.imageUrl as string)
+      return imageUploadDetails?.imageUrl as string
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setCreatingBadge(false)
+      setUploading(false)
+      throw new Error("Couldn't upload the image.")
+    }
+  }
+
+  const createNewBadge = async () => {
+    try {
+      if (!wallet.initialized) throw new Error('Wallet not connected')
+      if (!badgeHubContract) throw new Error('Contract not found')
+      setCreatingBadge(true)
+      const coverUrl = await handleImageUrl()
+
+      const badge = {
+        manager: badgeDetails?.manager as string,
+        metadata: {
+          name: badgeDetails?.name || undefined,
+          description: badgeDetails?.description || undefined,
+          image: coverUrl || undefined,
+          image_data: badgeDetails?.image_data || undefined,
+          external_url: badgeDetails?.external_url || undefined,
+          attributes: badgeDetails?.attributes || undefined,
+          background_color: badgeDetails?.background_color || undefined,
+          animation_url: badgeDetails?.animation_url || undefined,
+          youtube_url: badgeDetails?.youtube_url || undefined,
+        },
+        transferrable: badgeDetails?.transferrable as boolean,
+        rule: {
+          by_key: keyState.value,
+        },
+        expiry: badgeDetails?.expiry || undefined,
+        max_supply: badgeDetails?.max_supply || undefined,
+      }
+
+      const payload: BadgeHubDispatchExecuteArgs = {
+        contract: BADGE_HUB_ADDRESS,
+        messages: badgeHubMessages,
+        txSigner: wallet.address,
+        badge,
+        type: 'create_badge',
+      }
+      const data = await badgeHubDispatchExecute(payload)
+      console.log(data)
+      setCreatingBadge(false)
+      setTransactionHash(data.split(':')[0])
+      setBadgeId(data.split(':')[1])
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      setCreatingBadge(false)
+      setUploading(false)
+    }
+  }
+
+  const checkImageUploadDetails = () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (!imageUploadDetails) {
+      throw new Error('Please specify the image related details.')
+    }
+
+    if (imageUploadDetails.uploadMethod === 'new' && imageUploadDetails.assetFile === undefined) {
+      throw new Error('Please select the image file')
+    }
+    if (imageUploadDetails.uploadMethod === 'new') {
+      if (imageUploadDetails.uploadService === 'nft-storage') {
+        if (imageUploadDetails.nftStorageApiKey === '') {
+          throw new Error('Please enter a valid NFT.Storage API key')
+        }
+      } else if (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '') {
+        throw new Error('Please enter Pinata API and secret keys')
+      }
+    }
+    if (imageUploadDetails.uploadMethod === 'existing' && !imageUploadDetails.imageUrl?.includes('ipfs://')) {
+      throw new Error('Please specify a valid image URL')
+    }
+  }
+
+  const checkBadgeDetails = () => {
+    if (!badgeDetails) throw new Error('Please fill out the required fields')
+    if (keyState.value === '' || !createdBadgeKey) throw new Error('Please generate a public key')
+    if (badgeDetails.external_url) {
+      try {
+        const url = new URL(badgeDetails.external_url)
+      } catch (e: any) {
+        throw new Error(`Invalid external url: Make sure to include the protocol (e.g. https://)`)
+      }
+    }
+  }
+
+  const handleGenerateKey = () => {
+    let privKey: Buffer
+    do {
+      privKey = crypto.randomBytes(32)
+    } while (!secp256k1.privateKeyVerify(privKey))
+
+    const privateKey = privKey.toString('hex')
+    setCreatedBadgeKey(privateKey)
+    console.log('Private Key: ', privateKey)
+
+    const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
+    setBadgeId(null)
+    keyState.onChange(publicKey)
+  }
+
+  const handleDownloadQr = async () => {
+    const qrElement = qrRef.current
+    await toPng(qrElement as HTMLElement).then((dataUrl) => {
+      const link = document.createElement('a')
+      link.download = `badge-${badgeId as string}.png`
+      link.href = dataUrl
+      link.click()
+    })
+  }
+
+  // copy claim url to clipboard
+  const copyClaimURL = async () => {
+    const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+    const claimURL = `${baseURL}/?id=${badgeId as string}&key=${createdBadgeKey as string}`
+    await navigator.clipboard.writeText(claimURL)
+    toast.success('Copied claim URL to clipboard')
+  }
+
+  const checkwalletBalance = () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    // TODO: estimate creation cost and check wallet balance
+  }
+  useEffect(() => {
+    if (badgeId !== null) scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [badgeId])
+
+  useEffect(() => {
+    setImageUrl(imageUploadDetails?.imageUrl as string)
+  }, [imageUploadDetails?.imageUrl])
+
+  useEffect(() => {
+    setBadgeId(null)
+    setReadyToCreateBadge(false)
+  }, [imageUploadDetails?.uploadMethod])
+
+  return (
+    <div>
+      <NextSeo title="Create Badge" />
+
+      <div className="mt-5 space-y-5 text-center">
+        <h1 className="font-heading text-4xl font-bold">Create Badge</h1>
+
+        <Conditional test={uploading}>
+          <BadgeLoadingModal />
+        </Conditional>
+
+        <p>
+          Make sure you check our{' '}
+          <Anchor className="font-bold text-plumbus hover:underline" external href={links['Docs']}>
+            documentation
+          </Anchor>{' '}
+          on how to create a new badge.
+        </p>
+      </div>
+      <div className="mx-10" ref={scrollRef}>
+        <Conditional test={badgeId !== null}>
+          <Alert className="mt-5" type="info">
+            <div className="flex flex-row">
+              <div>
+                <div className="w-[384px] h-[384px]" ref={qrRef}>
+                  <QRCodeSVG
+                    className="mx-auto"
+                    level="H"
+                    size={384}
+                    value={`${
+                      NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                    }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
+                  <Button
+                    className="items-center w-full text-sm text-center rounded"
+                    leftIcon={<FaSave />}
+                    onClick={() => void handleDownloadQr()}
+                  >
+                    Download QR Code
+                  </Button>
+                  <Button
+                    className="w-full text-sm text-center rounded"
+                    isWide
+                    leftIcon={<FaCopy />}
+                    onClick={() => void copyClaimURL()}
+                    variant="solid"
+                  >
+                    Copy Claim URL
+                  </Button>
+                </div>
+              </div>
+              <div className="ml-4 text-lg">
+                Badge ID:{` ${badgeId as string}`}
+                <br />
+                Private Key:
+                <Tooltip label="Click to copy the private key">
+                  <button
+                    className="group flex space-x-2 font-mono text-base text-white/50 hover:underline"
+                    onClick={() => void copy(createdBadgeKey as string)}
+                    type="button"
+                  >
+                    <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
+                    <FaCopy className="opacity-50 group-hover:opacity-100" />
+                  </button>
+                </Tooltip>
+                <br />
+                Transaction Hash: {'  '}
+                <Conditional test={NETWORK === 'testnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <Conditional test={NETWORK === 'mainnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <br />
+                <div className="text-base">
+                  <div className="flex-row pt-4 mt-4 border-t-2">
+                    <span>
+                      You may click{' '}
+                      <Anchor
+                        className="text-stargaze hover:underline"
+                        external
+                        href={`${
+                          NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                        }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                      >
+                        here
+                      </Anchor>{' '}
+                      or scan the QR code to claim a badge.
+                    </span>
+                  </div>
+                  <br />
+                  <span className="mt-4">You may download the QR code or copy the claim URL to share with others.</span>
+                </div>
+                <br />
+              </div>
+            </div>
+          </Alert>
+        </Conditional>
+      </div>
+
+      <div>
+        <div
+          className={clsx(
+            'mx-10 mt-5',
+            'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
+            'before:inset-x-0 before:bottom-0 before:border-white/25',
+          )}
+        >
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              mintRule === 'by_key' ? 'border-stargaze' : 'border-transparent',
+              mintRule !== 'by_key' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => {
+                setMintRule('by_key')
+                setReadyToCreateBadge(false)
+              }}
+              type="button"
+            >
+              <h4 className="font-bold">Mint Rule: By Key</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                Badges can be minted more than once with a badge specific message signed by a designated private key.
+              </span>
+            </button>
+          </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              mintRule === 'by_keys' ? 'border-stargaze' : 'border-transparent',
+              mintRule !== 'by_keys' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              disabled
+              onClick={() => {
+                setMintRule('by_keys')
+                setReadyToCreateBadge(false)
+              }}
+              type="button"
+            >
+              <h4 className="font-bold">Mint Rule: By Keys</h4>
+              <span className="text-sm text-slate-500 line-clamp-2">
+                Similar to the By Key rule, however each designated private key can only be used once to mint a badge.
+              </span>
+            </button>
+          </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              mintRule === 'by_minter' ? 'border-stargaze' : 'border-transparent',
+              mintRule !== 'by_minter' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              disabled
+              onClick={() => {
+                setMintRule('by_minter')
+                setReadyToCreateBadge(false)
+              }}
+              type="button"
+            >
+              <h4 className="font-bold">Mint Rule: By Minter</h4>
+              <span className="text-sm line-clamp-2 text-slate/500">
+                Badges can be minted by a designated minter account.
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-10">
+        <ImageUploadDetails mintRule={mintRule} onChange={setImageUploadDetails} />
+
+        <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+          <TextInput className="ml-4 w-full max-w-2xl" {...keyState} disabled required />
+          <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
+            Generate Key
+          </Button>
+        </div>
+
+        <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
+          <BadgeDetails
+            mintRule={mintRule}
+            onChange={setBadgeDetails}
+            uploadMethod={imageUploadDetails?.uploadMethod ? imageUploadDetails.uploadMethod : 'new'}
+          />
+        </div>
+
+        <Conditional test={readyToCreateBadge}>
+          <BadgeConfirmationModal confirm={createNewBadge} />
+        </Conditional>
+
+        <div className="flex justify-end w-full">
+          <Button
+            className="relative justify-center p-2 mt-2 mb-6 max-h-12 text-white bg-plumbus hover:bg-plumbus-light border-0"
+            isLoading={creatingBadge}
+            onClick={() => performBadgeCreationChecks()}
+            variant="solid"
+          >
+            Create Badge
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default withMetadata(BadgeCreationPage, { center: false })

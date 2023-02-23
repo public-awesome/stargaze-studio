@@ -16,7 +16,7 @@ export const WalletLoader = () => {
   const displayName = useWalletStore((store) => store.name || getShortAddress(store.address))
 
   return (
-    <Popover className="my-8">
+    <Popover className="mt-8 mb-2">
       {({ close }) => (
         <>
           <div className="grid -mx-4">
@@ -44,7 +44,7 @@ export const WalletLoader = () => {
           >
             <Popover.Panel
               className={clsx(
-                'absolute inset-x-4 mt-2',
+                'absolute inset-x-4 z-50 mt-2',
                 'bg-stone-800/80 rounded shadow-lg shadow-black/90 backdrop-blur-sm',
                 'flex flex-col items-stretch text-sm divide-y divide-white/10',
               )}

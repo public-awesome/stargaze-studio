@@ -1,16 +1,16 @@
 import { Button } from 'components/Button'
 import { ContractPageHeader } from 'components/ContractPageHeader'
-import { useExecuteComboboxState } from 'components/contracts/sg721/ExecuteCombobox.hooks'
+import { useExecuteComboboxState } from 'components/contracts/badgeHub/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { sg721LinkTabs } from 'components/LinkTabs.data'
+import { badgeHubLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { MigrateResponse } from 'contracts/sg721'
+import type { MigrateResponse } from 'contracts/badgeHub'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -22,8 +22,8 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const Sg721MigratePage: NextPage = () => {
-  const { sg721: contract } = useContracts()
+const BadgeHubMigratePage: NextPage = () => {
+  const { badgeHub: contract } = useContracts()
   const wallet = useWallet()
 
   const [lastTx, setLastTx] = useState('')
@@ -34,15 +34,15 @@ const Sg721MigratePage: NextPage = () => {
     id: 'code-id',
     name: 'code-id',
     title: 'Code ID',
-    subtitle: 'Code ID of the New Sg721 contract',
+    subtitle: 'Code ID of the New Badge Hub contract',
     placeholder: '1',
   })
 
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Sg721 Address',
-    subtitle: 'Address of the Sg721 contract',
+    title: 'Badge Hub Contract Address',
+    subtitle: 'Address of the Badge Hub contract',
   })
   const contractAddress = contractState.value
 
@@ -90,13 +90,13 @@ const Sg721MigratePage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Migrate Sg721 Contract" />
+      <NextSeo title="Migrate Badge Hub Contract" />
       <ContractPageHeader
-        description="Sg721 contract is a wrapper contract that has a set of optional extensions on top of cw721-base."
+        description="The Badge Hub contract dashboard is where event organizers create, mint, or edit badges."
         link={links.Documentation}
-        title="Sg721 Contract"
+        title="Badge Hub Contract"
       />
-      <LinkTabs activeIndex={2} data={sg721LinkTabs} />
+      <LinkTabs activeIndex={3} data={badgeHubLinkTabs} />
 
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
@@ -129,4 +129,4 @@ const Sg721MigratePage: NextPage = () => {
   )
 }
 
-export default withMetadata(Sg721MigratePage, { center: false })
+export default withMetadata(BadgeHubMigratePage, { center: false })

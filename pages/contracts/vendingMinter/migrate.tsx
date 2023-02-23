@@ -70,7 +70,7 @@ const VendingMinterMigratePage: NextPage = () => {
     },
     {
       onError: (error) => {
-        toast.error(String(error))
+        toast.error(String(error), { style: { maxWidth: 'none' } })
       },
     },
   )
