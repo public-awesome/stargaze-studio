@@ -9,7 +9,6 @@ import { useRouter } from 'next/router'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
-
 import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS } from '../utils/constants'
 import { Conditional } from './Conditional'
 import { SidebarLayout } from './SidebarLayout'
