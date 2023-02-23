@@ -9,8 +9,9 @@ import { useRouter } from 'next/router'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS } from '../utils/constants'
+import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK } from '../utils/constants'
 import { Conditional } from './Conditional'
+import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
@@ -71,6 +72,18 @@ export const Sidebar = () => {
               >
                 <Link href="/collections/actions/">Collection Actions</Link>
               </li>
+              <Conditional test={NETWORK === 'mainnet'}>
+                <li className={clsx('text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded')} tabIndex={-1}>
+                  <label
+                    className="w-full h-full text-lg font-bold text-gray hover:text-white bg-clip-text bg-transparent border-none animate-none btn modal-button"
+                    htmlFor="my-modal-1"
+                  >
+                    <button className="text-lg font-bold" type="button">
+                      Income Dashboard
+                    </button>
+                  </label>
+                </li>
+              </Conditional>
             </ul>
           </li>
         </ul>
@@ -183,6 +196,8 @@ export const Sidebar = () => {
           </li>
         </ul>
       </div>
+
+      <IncomeDashboardDisclaimer creatorAddress={wallet.address ? wallet.address : ''} />
 
       <div className="flex-grow" />
 
