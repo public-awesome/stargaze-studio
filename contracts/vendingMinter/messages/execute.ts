@@ -14,7 +14,6 @@ export const EXECUTE_TYPES = [
   'mint_to',
   'mint_for',
   'shuffle',
-  'withdraw',
   'burn_remaining',
 ] as const
 
@@ -106,7 +105,6 @@ export type DispatchExecuteArgs = {
   | { type: Select<'mint_to'>; recipient: string }
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
   | { type: Select<'shuffle'> }
-  | { type: Select<'withdraw'> }
   | { type: Select<'burn_remaining'> }
 )
 
@@ -145,9 +143,6 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'shuffle': {
       return messages.shuffle(txSigner)
-    }
-    case 'withdraw': {
-      return messages.withdraw(txSigner)
     }
     case 'burn_remaining': {
       return messages.burnRemaining(txSigner)
@@ -192,9 +187,6 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'shuffle': {
       return messages(contract)?.shuffle()
-    }
-    case 'withdraw': {
-      return messages(contract)?.withdraw()
     }
     case 'burn_remaining': {
       return messages(contract)?.burnRemaining()

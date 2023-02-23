@@ -1,5 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
+
 import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
 import { useWallet } from 'contexts/wallet'
@@ -7,6 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
+
 
 import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS } from '../utils/constants'
 import { Conditional } from './Conditional'
@@ -27,6 +29,7 @@ export const Sidebar = () => {
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
+
       <div className="absolute top-[20%] left-[5%]">
         <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
