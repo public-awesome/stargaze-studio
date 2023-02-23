@@ -40,6 +40,7 @@ import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
 import { copy } from 'utils/clipboard'
 import { NETWORK } from 'utils/constants'
+import { sha256 } from 'utils/hash'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
@@ -61,6 +62,7 @@ const BadgeHubExecutePage: NextPage = () => {
   const [createdBadgeId, setCreatedBadgeId] = useState<string | null>(null)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
+  const [signature, setSignature] = useState<string>('')
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
   const qrRef = useRef<HTMLDivElement>(null)
@@ -180,11 +182,11 @@ const BadgeHubExecutePage: NextPage = () => {
     subtitle: 'The public key for the badge',
   })
 
-  const signatureState = useInputState({
-    id: 'signature',
-    name: 'signature',
-    title: 'Signature',
-    subtitle: 'The signature for the badge',
+  const privateKeyState = useInputState({
+    id: 'privateKey',
+    name: 'privateKey',
+    title: 'Private Key',
+    subtitle: 'The private key generated during badge creation',
   })
 
   const nftState = useInputState({
@@ -203,8 +205,10 @@ const BadgeHubExecutePage: NextPage = () => {
 
   const showBadgeField = type === 'create_badge'
   const showMetadataField = isEitherType(type, ['create_badge', 'edit_badge'])
-  const showIdField = type === 'edit_badge'
+  const showIdField = isEitherType(type, ['edit_badge', 'mint_by_key'])
   const showNFTField = type === 'set_nft'
+  const showOwnerField = type === 'mint_by_key'
+  const showPrivateKeyField = type === 'mint_by_key'
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -258,7 +262,7 @@ const BadgeHubExecutePage: NextPage = () => {
     id: badgeIdState.value,
     owner: ownerState.value,
     pubkey: pubkeyState.value,
-    signature: signatureState.value,
+    signature,
     keys: [],
     limit: limitState.value,
     owners: [],
@@ -359,6 +363,22 @@ const BadgeHubExecutePage: NextPage = () => {
     setCreatedBadgeId(null)
   }
 
+  const handleGenerateSignature = (id: number, owner: string, privateKey: string) => {
+    try {
+      const message = `claim badge ${id} for user ${owner}`
+
+      const privKey = Buffer.from(privateKey, 'hex')
+      // const pubKey = Buffer.from(secp256k1.publicKeyCreate(privKey, true))
+      const msgBytes = Buffer.from(message, 'utf8')
+      const msgHashBytes = sha256(msgBytes)
+      const signedMessage = secp256k1.ecdsaSign(msgHashBytes, privKey)
+      setSignature(Buffer.from(signedMessage.signature).toString('hex'))
+    } catch (error) {
+      console.log(error)
+      toast.error('Error generating signature.')
+    }
+  }
+
   const handleDownloadQr = async () => {
     const qrElement = qrRef.current
     await toPng(qrElement as HTMLElement).then((dataUrl) => {
@@ -388,6 +408,11 @@ const BadgeHubExecutePage: NextPage = () => {
       }
     }
   }
+
+  useEffect(() => {
+    if (privateKeyState.value.length === 64 && resolvedOwnerAddress)
+      handleGenerateSignature(badgeIdState.value, resolvedOwnerAddress, privateKeyState.value)
+  }, [privateKeyState.value, resolvedOwnerAddress])
 
   const router = useRouter()
 
@@ -603,6 +628,15 @@ const BadgeHubExecutePage: NextPage = () => {
               <TextInput className="mt-2" {...youtubeUrlState} />
             </div>
           )}
+          {showOwnerField && (
+            <AddressInput
+              className="mt-2"
+              {...ownerState}
+              subtitle="The address that the badge will be minted to"
+              title="Owner"
+            />
+          )}
+          {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
           {showNFTField && <AddressInput {...nftState} />}
         </div>
 
