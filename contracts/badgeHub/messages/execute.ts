@@ -30,7 +30,7 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
   {
     id: 'edit_badge',
     name: 'Edit Badge',
-    description: `Edit the badge with the specified ID`,
+    description: ` Edit badge metadata for the badge with the specified ID`,
   },
   // {
   //   id: 'add_keys',

@@ -92,7 +92,7 @@ const BadgeHubMigratePage: NextPage = () => {
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Migrate Badge Hub Contract" />
       <ContractPageHeader
-        description="The Badge Hub contract is where event organizers create, mint, or edit badges."
+        description="The Badge Hub contract dashboard is where event organizers create, mint, or edit badges."
         link={links.Documentation}
         title="Badge Hub Contract"
       />

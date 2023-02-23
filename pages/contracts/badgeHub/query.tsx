@@ -40,6 +40,7 @@ const BadgeHubQueryPage: NextPage = () => {
     name: 'id',
     title: 'ID',
     subtitle: 'The ID of the badge',
+    defaultValue: 1,
   })
 
   const pubkeyState = useInputState({
@@ -68,6 +69,7 @@ const BadgeHubQueryPage: NextPage = () => {
     name: 'pagination-limit',
     title: 'Pagination Limit (optional)',
     subtitle: 'The number of items to return (max: 30)',
+    defaultValue: 5,
   })
 
   const [type, setType] = useState<QueryType>('config')
@@ -125,7 +127,7 @@ const BadgeHubQueryPage: NextPage = () => {
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Query Badge Hub Contract" />
       <ContractPageHeader
-        description="The Badge Hub contract is where event organizers create, mint, or edit badges."
+        description="The Badge Hub contract dashboard is where event organizers create, mint, or edit badges."
         link={links.Documentation}
         title="Badge Hub Contract"
       />

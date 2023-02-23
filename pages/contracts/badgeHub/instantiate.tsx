@@ -86,7 +86,7 @@ const BadgeHubInstantiatePage: NextPage = () => {
     <form className="py-6 px-12 space-y-4" onSubmit={mutate}>
       <NextSeo title="Instantiate Badge Hub Contract" />
       <ContractPageHeader
-        description="The badge-hub contract is where event organizers create, mint, or edit badges."
+        description="The badge-hub contract dashboard is where event organizers create, mint, or edit badges."
         link={links.Documentation}
         title="Badge Hub Contract"
       />

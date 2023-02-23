@@ -26,7 +26,7 @@ export const BY_KEY_ACTION_LIST: ActionListItem[] = [
   {
     id: 'edit_badge',
     name: 'Edit Badge',
-    description: `Edit the badge with the specified ID`,
+    description: `Edit badge metadata for the badge with the specified ID`,
   },
   {
     id: 'purge_owners',
@@ -41,7 +41,7 @@ export const BY_KEY_ACTION_LIST: ActionListItem[] = [
   {
     id: 'airdrop_by_key',
     name: 'Airdrop by Key',
-    description: `Mint badges to a list of specified addresses`,
+    description: `Airdrop badges to a list of specified addresses`,
   },
 ]
 
@@ -49,7 +49,7 @@ export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
   {
     id: 'edit_badge',
     name: 'Edit Badge',
-    description: `Edit the badge with the specified ID`,
+    description: `Edit badge metadata for the badge with the specified ID`,
   },
   {
     id: 'add_keys',
@@ -69,7 +69,7 @@ export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_by_keys',
     name: 'Mint by Keys',
-    description: `Mint a new badge with a whitelisted public key and corresponding signature`,
+    description: `Mint a new badge with a whitelisted private key`,
   },
 ]
 
@@ -77,7 +77,7 @@ export const BY_MINTER_ACTION_LIST: ActionListItem[] = [
   {
     id: 'edit_badge',
     name: 'Edit Badge',
-    description: `Edit the badge with the specified ID`,
+    description: `Edit badge metadata for the badge with the specified ID`,
   },
   {
     id: 'purge_owners',

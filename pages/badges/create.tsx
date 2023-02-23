@@ -63,7 +63,7 @@ const BadgeCreationPage: NextPage = () => {
     id: 'key',
     name: 'key',
     title: 'Public Key',
-    subtitle: 'The public key generated for the badge',
+    subtitle: 'One part of the key pair to be utilized for post-creation access control',
   })
 
   const performBadgeCreationChecks = () => {
@@ -184,7 +184,7 @@ const BadgeCreationPage: NextPage = () => {
 
   const checkBadgeDetails = () => {
     if (!badgeDetails) throw new Error('Please fill out the required fields')
-    if (keyState.value === '' || !createdBadgeKey) throw new Error('Please generate a key')
+    if (keyState.value === '' || !createdBadgeKey) throw new Error('Please generate a public key')
     if (badgeDetails.external_url) {
       try {
         const url = new URL(badgeDetails.external_url)

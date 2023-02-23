@@ -151,14 +151,14 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     id: 'pubkey',
     name: 'pubkey',
     title: 'Pubkey',
-    subtitle: 'The public key for the badge',
+    subtitle: 'The public key to check whether it can be used to mint a badge',
   })
 
   const privateKeyState = useInputState({
     id: 'privateKey',
     name: 'privateKey',
     title: 'Private Key',
-    subtitle: 'The private key to claim the badge with',
+    subtitle: 'The private key that was generated during badge creation',
   })
 
   const nftState = useInputState({

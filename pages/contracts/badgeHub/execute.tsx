@@ -164,8 +164,8 @@ const BadgeHubExecutePage: NextPage = () => {
   const keyState = useInputState({
     id: 'key',
     name: 'key',
-    title: 'Key',
-    subtitle: 'The key generated for the badge',
+    title: 'Public Key',
+    subtitle: 'One part of the key pair to be utilized for post-creation access control',
   })
 
   const ownerState = useInputState({
@@ -535,7 +535,7 @@ const BadgeHubExecutePage: NextPage = () => {
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Execute Badge Hub Contract" />
       <ContractPageHeader
-        description="The Badge Hub contract is where event organizers create, mint, or edit badges."
+        description="The Badge Hub contract dashboard is where event organizers create, mint, or edit badges."
         link={links.Documentation}
         title="Badge Hub Contract"
       />
