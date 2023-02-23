@@ -1,4 +1,11 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { toUtf8 } from '@cosmjs/encoding'
+import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -11,6 +18,7 @@ import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { badgeHubLinkTabs } from 'components/LinkTabs.data'
+import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
@@ -30,10 +38,12 @@ import { toast } from 'react-hot-toast'
 import { FaArrowRight, FaCopy, FaSave } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
+import { copy } from 'utils/clipboard'
 import { NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { truncateMiddle } from 'utils/text'
 
 import { TextInput } from '../../../components/forms/FormInput'
 import { MetadataAttributes } from '../../../components/forms/MetadataAttributes'
@@ -48,7 +58,7 @@ const BadgeHubExecutePage: NextPage = () => {
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
-  const [createdBadgeId, setCreatedBadgeId] = useState<string | undefined>(undefined)
+  const [createdBadgeId, setCreatedBadgeId] = useState<string | null>(null)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
@@ -318,10 +328,11 @@ const BadgeHubExecutePage: NextPage = () => {
         const txHash = await toast.promise(dispatchExecute(payload), {
           error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
           loading: 'Executing message...',
-          success: (tx) => `Transaction ${tx} success!`,
+          success: (tx) => `Transaction ${tx.split(':')[0]} success!`,
         })
         if (txHash) {
-          setLastTx(txHash)
+          setLastTx(txHash.split(':')[0])
+          setCreatedBadgeId(txHash.split(':')[1])
         }
       }
     },
@@ -345,6 +356,7 @@ const BadgeHubExecutePage: NextPage = () => {
     const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
 
     keyState.onChange(publicKey)
+    setCreatedBadgeId(null)
   }
 
   const handleDownloadQr = async () => {
@@ -505,33 +517,59 @@ const BadgeHubExecutePage: NextPage = () => {
       <LinkTabs activeIndex={2} data={badgeHubLinkTabs} />
 
       {showBadgeField && createdBadgeId && createdBadgeKey && (
-        <div className="ml-4">
-          <div className="w-[384px] h-[384px]" ref={qrRef}>
-            <QRCodeCanvas
-              size={384}
-              value={`${
-                NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-              }/?id=${createdBadgeId}&key=${createdBadgeKey}`}
-            />
+        <div className="flex flex-row">
+          <div className="ml-4">
+            <div className="w-[384px] h-[384px]" ref={qrRef}>
+              <QRCodeCanvas
+                size={384}
+                value={`${
+                  NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                }/?id=${createdBadgeId}&key=${createdBadgeKey}`}
+              />
+            </div>
+            {/* <div className="flex flex-row items-center mt-2 space-x-2 w-[384px] h-12"> */}
+            <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
+              <Button
+                className="items-center w-full text-sm text-center rounded"
+                leftIcon={<FaSave />}
+                onClick={() => void handleDownloadQr()}
+              >
+                Download QR Code
+              </Button>
+              <Button
+                className="w-full text-sm text-center rounded"
+                isWide
+                leftIcon={<FaCopy />}
+                onClick={() => void copyClaimURL()}
+                variant="solid"
+              >
+                Copy Claim URL
+              </Button>
+            </div>
           </div>
-          {/* <div className="flex flex-row items-center mt-2 space-x-2 w-[384px] h-12"> */}
-          <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
-            <Button
-              className="items-center w-full text-sm text-center rounded"
-              leftIcon={<FaSave />}
-              onClick={() => void handleDownloadQr()}
-            >
-              Download QR Code
-            </Button>
-            <Button
-              className="w-full text-sm text-center rounded"
-              isWide
-              leftIcon={<FaCopy />}
-              onClick={() => void copyClaimURL()}
-              variant="solid"
-            >
-              Copy Claim URL
-            </Button>
+          <div className="ml-4">
+            <Alert className="text-white" type="info">
+              <div>
+                <span className="font-bold text-white">Badge ID: </span>
+                <span className="text-white/80">{createdBadgeId} </span>
+              </div>
+
+              <span className="font-bold text-white">Private Key:</span>
+              <Tooltip label="Click to copy the private key">
+                <button
+                  className="group flex space-x-2 font-mono text-base text-white/80 hover:underline"
+                  onClick={() => void copy(createdBadgeKey as string)}
+                  type="button"
+                >
+                  <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
+                  <FaCopy className="opacity-50 group-hover:opacity-100" />
+                </button>
+              </Tooltip>
+            </Alert>
+            <br />
+            <Alert className="text-white" type="warning">
+              Please make sure to save the Badge ID and the Private Key.
+            </Alert>
           </div>
         </div>
       )}

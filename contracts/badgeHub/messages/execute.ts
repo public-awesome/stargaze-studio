@@ -22,11 +22,11 @@ export interface ExecuteListItem {
 }
 
 export const EXECUTE_LIST: ExecuteListItem[] = [
-  // {
-  //   id: 'create_badge',
-  //   name: 'Create Badge',
-  //   description: `Create a new badge with the specified mint rule and metadata`,
-  // },
+  {
+    id: 'create_badge',
+    name: 'Create Badge',
+    description: `Create a new badge with the specified mint rule and metadata`,
+  },
   {
     id: 'edit_badge',
     name: 'Edit Badge',
