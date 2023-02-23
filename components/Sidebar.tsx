@@ -75,12 +75,10 @@ export const Sidebar = () => {
               <Conditional test={NETWORK === 'mainnet'}>
                 <li className={clsx('text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded')} tabIndex={-1}>
                   <label
-                    className="w-full h-full text-lg font-bold text-gray hover:text-white bg-clip-text bg-transparent border-none animate-none btn modal-button"
+                    className="w-full h-full text-lg font-bold text-gray hover:text-white normal-case bg-clip-text bg-transparent border-none animate-none btn modal-button"
                     htmlFor="my-modal-1"
                   >
-                    <button className="text-lg font-bold" type="button">
-                      Income Dashboard
-                    </button>
+                    Income Dashboard
                   </label>
                 </li>
               </Conditional>
