@@ -50,7 +50,7 @@ export const IncomeDashboardDisclaimer = (props: IncomeDashboardDisclaimerProps)
               />
             </div>
             <br />
-            Are you sure to proceed to the Creator Income Dashboard?
+            Are you sure to proceed to the Creator Revenue Dashboard?
           </div>
           <div className="flex justify-end w-full">
             <Button className="px-0 mt-4 mr-5 mb-4 max-h-12 bg-gray-600 hover:bg-gray-700">
