@@ -15,7 +15,7 @@ import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-import type { MinterType } from '../../components/collections/actions/Combobox'
+import type { MinterType, Sg721Type } from '../../components/collections/actions/Combobox'
 
 const CollectionActionsPage: NextPage = () => {
   const { baseMinter: baseMinterContract, vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
@@ -23,6 +23,7 @@ const CollectionActionsPage: NextPage = () => {
 
   const [action, setAction] = useState<boolean>(false)
   const [minterType, setMinterType] = useState<MinterType>('vending')
+  const [sg721Type, setSg721Type] = useState<Sg721Type>('base')
 
   const sg721ContractState = useInputState({
     id: 'sg721-contract-address',
@@ -39,6 +40,7 @@ const CollectionActionsPage: NextPage = () => {
   })
 
   const debouncedMinterContractState = useDebounce(minterContractState.value, 300)
+  const debouncedSg721ContractState = useDebounce(sg721ContractState.value, 300)
 
   const vendingMinterMessages = useMemo(
     () => vendingMinterContract?.use(minterContractState.value),
@@ -109,9 +111,44 @@ const CollectionActionsPage: NextPage = () => {
       .catch((err) => {
         console.log(err)
         setMinterType('vending')
-        console.log('Unable to retrieve contract version')
+        console.log('Unable to retrieve contract type. Defaulting to "vending".')
       })
   }, [debouncedMinterContractState, wallet.client])
+
+  useEffect(() => {
+    async function getSg721ContractType() {
+      if (wallet.client && debouncedSg721ContractState.length > 0) {
+        const client = wallet.client
+        const data = await toast.promise(
+          client.queryContractRaw(
+            debouncedSg721ContractState,
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          ),
+          {
+            loading: 'Retrieving SG721 type...',
+            error: 'SG721 type retrieval failed.',
+            success: 'SG721 type retrieved.',
+          },
+        )
+        const contract: string = JSON.parse(new TextDecoder().decode(data as Uint8Array)).contract
+        console.log(contract)
+        return contract
+      }
+    }
+    void getSg721ContractType()
+      .then((contract) => {
+        if (contract?.includes('sg721-updatable')) {
+          setSg721Type('updatable')
+        } else {
+          setSg721Type('base')
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+        setMinterType('base')
+        console.log('Unable to retrieve contract type. Defaulting to "base".')
+      })
+  }, [debouncedSg721ContractState, wallet.client])
 
   return (
     <section className="py-6 px-12 space-y-4">

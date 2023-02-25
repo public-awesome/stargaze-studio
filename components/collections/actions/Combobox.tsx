@@ -9,6 +9,7 @@ import type { ActionListItem } from './actions'
 import { BASE_ACTION_LIST, VENDING_ACTION_LIST } from './actions'
 
 export type MinterType = 'base' | 'vending'
+export type Sg721Type = 'updatable' | 'base'
 
 export interface ActionsComboboxProps {
   value: ActionListItem | null
