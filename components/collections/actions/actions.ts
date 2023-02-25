@@ -30,6 +30,9 @@ export const ACTION_TYPES = [
   'shuffle',
   'airdrop',
   'burn_remaining',
+  'update_token_metadata',
+  'batch_update_token_metadata',
+  'freeze_metadata',
 ] as const
 
 export interface ActionListItem {
@@ -184,6 +187,24 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
   },
 ]
 
+export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
+  {
+    id: 'update_token_metadata',
+    name: 'Update Token Metadata',
+    description: `Update the metadata URI for a token`,
+  },
+  {
+    id: 'batch_update_token_metadata',
+    name: 'Batch Update Token Metadata',
+    description: `Update the metadata URI for a range of tokens`,
+  },
+  {
+    id: 'freeze_metadata',
+    name: 'Freeze Metadata',
+    description: `Render the metadata  for the collection no longer updatable`,
+  },
+]
+
 export interface DispatchExecuteProps {
   type: ActionType
   [k: string]: unknown
@@ -222,6 +243,9 @@ export type DispatchExecuteArgs = {
   | { type: Select<'burn_remaining'> }
   | { type: Select<'update_collection_info'>; collectionInfo: CollectionInfo | undefined }
   | { type: Select<'freeze_collection_info'> }
+  | { type: Select<'update_token_metadata'> }
+  | { type: Select<'batch_update_token_metadata'> }
+  | { type: Select<'freeze_metadata'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {

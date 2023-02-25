@@ -23,7 +23,7 @@ const CollectionActionsPage: NextPage = () => {
 
   const [action, setAction] = useState<boolean>(false)
   const [minterType, setMinterType] = useState<MinterType>('vending')
-  const [sg721Type, setSg721Type] = useState<Sg721Type>('base')
+  const [sg721Type, setSg721Type] = useState<Sg721Type>('updatable')
 
   const sg721ContractState = useInputState({
     id: 'sg721-contract-address',
@@ -215,6 +215,7 @@ const CollectionActionsPage: NextPage = () => {
                   minterType={minterType}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
+                  sg721Type={sg721Type}
                   vendingMinterMessages={vendingMinterMessages}
                 />
               )) || (

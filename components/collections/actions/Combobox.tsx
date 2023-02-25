@@ -6,7 +6,7 @@ import { Fragment, useEffect, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
 import type { ActionListItem } from './actions'
-import { BASE_ACTION_LIST, VENDING_ACTION_LIST } from './actions'
+import { BASE_ACTION_LIST, SG721_UPDATABLE_ACTION_LIST, VENDING_ACTION_LIST } from './actions'
 
 export type MinterType = 'base' | 'vending'
 export type Sg721Type = 'updatable' | 'base'
@@ -15,19 +15,22 @@ export interface ActionsComboboxProps {
   value: ActionListItem | null
   onChange: (item: ActionListItem) => void
   minterType?: MinterType
+  sg721Type?: Sg721Type
 }
 
-export const ActionsCombobox = ({ value, onChange, minterType }: ActionsComboboxProps) => {
+export const ActionsCombobox = ({ value, onChange, minterType, sg721Type }: ActionsComboboxProps) => {
   const [search, setSearch] = useState('')
   const [ACTION_LIST, SET_ACTION_LIST] = useState<ActionListItem[]>(VENDING_ACTION_LIST)
 
   useEffect(() => {
     if (minterType === 'base') {
-      SET_ACTION_LIST(BASE_ACTION_LIST)
-    } else {
-      SET_ACTION_LIST(VENDING_ACTION_LIST)
-    }
-  }, [minterType])
+      if (sg721Type === 'updatable') SET_ACTION_LIST(BASE_ACTION_LIST.concat(SG721_UPDATABLE_ACTION_LIST))
+      else SET_ACTION_LIST(BASE_ACTION_LIST)
+    } else if (minterType === 'vending') {
+      if (sg721Type === 'updatable') SET_ACTION_LIST(VENDING_ACTION_LIST.concat(SG721_UPDATABLE_ACTION_LIST))
+      else SET_ACTION_LIST(VENDING_ACTION_LIST)
+    } else SET_ACTION_LIST(VENDING_ACTION_LIST.concat(SG721_UPDATABLE_ACTION_LIST))
+  }, [minterType, sg721Type])
 
   const filtered =
     search === '' ? ACTION_LIST : matchSorter(ACTION_LIST, search, { keys: ['id', 'name', 'description'] })

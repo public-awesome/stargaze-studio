@@ -26,7 +26,7 @@ import { resolveAddress } from 'utils/resolveAddress'
 
 import type { CollectionInfo } from '../../../contracts/sg721/contract'
 import { TextInput } from '../../forms/FormInput'
-import type { MinterType } from './Combobox'
+import type { MinterType, Sg721Type } from './Combobox'
 
 interface CollectionActionsProps {
   minterContractAddress: string
@@ -35,6 +35,7 @@ interface CollectionActionsProps {
   vendingMinterMessages: VendingMinterInstance | undefined
   baseMinterMessages: BaseMinterInstance | undefined
   minterType: MinterType
+  sg721Type: Sg721Type
 }
 
 type ExplicitContentType = true | false | undefined
@@ -46,6 +47,7 @@ export const CollectionActions = ({
   vendingMinterMessages,
   baseMinterMessages,
   minterType,
+  sg721Type,
 }: CollectionActionsProps) => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
@@ -350,7 +352,7 @@ export const CollectionActions = ({
     <form>
       <div className="grid grid-cols-2 mt-4">
         <div className="mr-2">
-          <ActionsCombobox minterType={minterType} {...actionComboboxState} />
+          <ActionsCombobox minterType={minterType} sg721Type={sg721Type} {...actionComboboxState} />
           {showRecipientField && <AddressInput {...recipientState} />}
           {showTokenUriField && <TextInput className="mt-2" {...tokenURIState} />}
           {showWhitelistField && <AddressInput {...whitelistState} />}
