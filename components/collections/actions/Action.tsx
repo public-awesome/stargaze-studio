@@ -102,7 +102,15 @@ export const CollectionActions = ({
     id: 'token-uri',
     name: 'tokenURI',
     title: 'Token URI',
-    subtitle: 'URI for the token to be minted',
+    subtitle: 'URI for the token',
+    placeholder: 'ipfs://',
+  })
+
+  const baseURIState = useInputState({
+    id: 'base-uri',
+    name: 'baseURI',
+    title: 'Base URI',
+    subtitle: 'Base URI to batch update token metadata with',
     placeholder: 'ipfs://',
   })
 
@@ -156,13 +164,18 @@ export const CollectionActions = ({
     placeholder: '8%',
   })
 
-  const showTokenUriField = type === 'mint_token_uri'
+  const showTokenUriField = isEitherType(type, ['mint_token_uri', 'update_token_metadata'])
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
-  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
+  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn', 'update_token_metadata'])
   const showNumberOfTokensField = type === 'batch_mint'
-  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer', 'batch_mint_for'])
+  const showTokenIdListField = isEitherType(type, [
+    'batch_burn',
+    'batch_transfer',
+    'batch_mint_for',
+    'batch_update_token_metadata',
+  ])
   const showRecipientField = isEitherType(type, [
     'transfer',
     'mint_to',
@@ -178,6 +191,7 @@ export const CollectionActions = ({
   const showExternalLinkField = type === 'update_collection_info'
   const showRoyaltyRelatedFields = type === 'update_collection_info'
   const showExplicitContentField = type === 'update_collection_info'
+  const showBaseUriField = type === 'batch_update_token_metadata'
 
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
@@ -187,7 +201,9 @@ export const CollectionActions = ({
     sg721Contract: sg721ContractAddress,
     tokenId: tokenIdState.value,
     tokenIds: tokenIdListState.value,
-    tokenUri: tokenURIState.value,
+    tokenUri: tokenURIState.value.trim().endsWith('/')
+      ? tokenURIState.value.trim().slice(0, -1)
+      : tokenURIState.value.trim(),
     batchNumber: batchNumberState.value,
     vendingMinterMessages,
     baseMinterMessages,
@@ -197,6 +213,9 @@ export const CollectionActions = ({
     txSigner: wallet.address,
     type,
     price: priceState.value.toString(),
+    baseUri: baseURIState.value.trim().endsWith('/')
+      ? baseURIState.value.trim().slice(0, -1)
+      : baseURIState.value.trim(),
     collectionInfo,
   }
   const resolveRecipientAddress = async () => {
@@ -357,8 +376,9 @@ export const CollectionActions = ({
           {showTokenUriField && <TextInput className="mt-2" {...tokenURIState} />}
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
-          {showTokenIdField && <NumberInput {...tokenIdState} />}
+          {showTokenIdField && <NumberInput className="mt-2" {...tokenIdState} />}
           {showTokenIdListField && <TextInput className="mt-2" {...tokenIdListState} />}
+          {showBaseUriField && <TextInput className="mt-2" {...baseURIState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showPriceField && <NumberInput {...priceState} />}
           {showDescriptionField && <TextInput className="my-2" {...descriptionState} />}
