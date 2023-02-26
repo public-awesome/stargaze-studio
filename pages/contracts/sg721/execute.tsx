@@ -85,11 +85,19 @@ const Sg721ExecutePage: NextPage = () => {
     placeholder: 'ipfs://xyz...',
   })
 
-  const showTokenIdField = isEitherType(type, ['transfer_nft', 'send_nft', 'approve', 'revoke', 'mint', 'burn'])
+  const showTokenIdField = isEitherType(type, [
+    'transfer_nft',
+    'send_nft',
+    'approve',
+    'revoke',
+    'mint',
+    'burn',
+    'update_token_metadata',
+  ])
   const showRecipientField = isEitherType(type, ['transfer_nft', 'send_nft', 'approve', 'revoke', 'mint'])
   const showOperatorField = isEitherType(type, ['approve_all', 'revoke_all'])
   const showMessageField = type === 'send_nft'
-  const showTokenURIField = type === 'mint'
+  const showTokenURIField = isEitherType(type, ['mint', 'update_token_metadata'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -99,7 +107,7 @@ const Sg721ExecutePage: NextPage = () => {
     recipient: resolvedRecipientAddress,
     operator: resolvedOperatorAddress,
     type,
-    tokenURI: tokenURIState.value,
+    tokenURI: tokenURIState.value.trim(),
     msg: parseJson(messageState.value) || {},
   }
   const { isLoading, mutate } = useMutation(
