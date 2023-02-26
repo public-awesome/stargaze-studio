@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -828,11 +829,20 @@ const CollectionCreationPage: NextPage = () => {
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     if (minterType === 'vending' && whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
-      const amountNeeded = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + 3000000000
+      const amountNeeded =
+        Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
+        (collectionDetails?.updatable ? 5000000000 : 3000000000)
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     } else {
-      const amountNeeded = minterType === 'vending' ? 3000000000 : 1000000000
+      const amountNeeded =
+        minterType === 'vending'
+          ? collectionDetails?.updatable
+            ? 5000000000
+            : 3000000000
+          : collectionDetails?.updatable
+          ? 3000000000
+          : 1000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     }
