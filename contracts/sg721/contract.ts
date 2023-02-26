@@ -88,7 +88,7 @@ export interface SG721Instance {
   batchTransfer: (recipient: string, tokenIds: string) => Promise<string>
   updateTokenMetadata: (tokenId: string, tokenURI: string) => Promise<string>
   batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => Promise<string>
-  freezeMetadata: () => Promise<string>
+  freezeTokenMetadata: () => Promise<string>
 }
 
 export interface Sg721Messages {
@@ -106,7 +106,7 @@ export interface Sg721Messages {
   freezeCollectionInfo: () => FreezeCollectionInfoMessage
   updateTokenMetadata: (tokenId: string, tokenURI: string) => UpdateTokenMetadataMessage
   batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => BatchUpdateTokenMetadataMessage
-  freezeMetadata: () => FreezeMetadataMessage
+  freezeTokenMetadata: () => FreezeTokenMetadataMessage
 }
 
 export interface TransferNFTMessage {
@@ -240,10 +240,10 @@ export interface BatchUpdateTokenMetadataMessage {
   funds: Coin[]
 }
 
-export interface FreezeMetadataMessage {
+export interface FreezeTokenMetadataMessage {
   sender: string
   contract: string
-  msg: { freeze_metadata: Record<string, never> }
+  msg: { freeze_token_metadata: Record<string, never> }
   funds: Coin[]
 }
 
@@ -674,12 +674,12 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
-    const freezeMetadata = async (): Promise<string> => {
+    const freezeTokenMetadata = async (): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
-          freeze_metadata: {},
+          freeze_token_metadata: {},
         },
         'auto',
         '',
@@ -715,7 +715,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       freezeCollectionInfo,
       updateTokenMetadata,
       batchUpdateTokenMetadata,
-      freezeMetadata,
+      freezeTokenMetadata,
     }
   }
 
@@ -952,12 +952,12 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
-    const freezeMetadata = () => {
+    const freezeTokenMetadata = () => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          freeze_metadata: {},
+          freeze_token_metadata: {},
         },
         funds: [],
       }
@@ -1000,7 +1000,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       freezeCollectionInfo,
       updateTokenMetadata,
       batchUpdateTokenMetadata,
-      freezeMetadata,
+      freezeTokenMetadata,
     }
   }
 

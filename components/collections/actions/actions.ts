@@ -32,7 +32,7 @@ export const ACTION_TYPES = [
   'burn_remaining',
   'update_token_metadata',
   'batch_update_token_metadata',
-  'freeze_metadata',
+  'freeze_token_metadata',
 ] as const
 
 export interface ActionListItem {
@@ -199,9 +199,9 @@ export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
     description: `Update the metadata URI for a range of tokens`,
   },
   {
-    id: 'freeze_metadata',
-    name: 'Freeze Metadata',
-    description: `Render the metadata  for the collection no longer updatable`,
+    id: 'freeze_token_metadata',
+    name: 'Freeze Token Metadata',
+    description: `Render the metadata for tokens no longer updatable`,
   },
 ]
 
@@ -243,9 +243,9 @@ export type DispatchExecuteArgs = {
   | { type: Select<'burn_remaining'> }
   | { type: Select<'update_collection_info'>; collectionInfo: CollectionInfo | undefined }
   | { type: Select<'freeze_collection_info'> }
-  | { type: Select<'update_token_metadata'> }
-  | { type: Select<'batch_update_token_metadata'> }
-  | { type: Select<'freeze_metadata'> }
+  | { type: Select<'update_token_metadata'>; tokenId: number; tokenUri: string }
+  | { type: Select<'batch_update_token_metadata'>; tokenIds: string; baseUri: string }
+  | { type: Select<'freeze_token_metadata'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -292,6 +292,15 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'freeze_collection_info': {
       return sg721Messages.freezeCollectionInfo()
+    }
+    case 'update_token_metadata': {
+      return sg721Messages.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
+    }
+    case 'batch_update_token_metadata': {
+      return sg721Messages.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+    }
+    case 'freeze_token_metadata': {
+      return sg721Messages.freezeTokenMetadata()
     }
     case 'shuffle': {
       return vendingMinterMessages.shuffle(txSigner)
@@ -370,6 +379,15 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'freeze_collection_info': {
       return sg721Messages(sg721Contract)?.freezeCollectionInfo()
+    }
+    case 'update_token_metadata': {
+      return sg721Messages(sg721Contract)?.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
+    }
+    case 'batch_update_token_metadata': {
+      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+    }
+    case 'freeze_token_metadata': {
+      return sg721Messages(sg721Contract)?.freezeTokenMetadata()
     }
     case 'shuffle': {
       return vendingMinterMessages(minterContract)?.shuffle()
