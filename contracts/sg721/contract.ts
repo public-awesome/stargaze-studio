@@ -86,6 +86,9 @@ export interface SG721Instance {
   burn: (tokenId: string) => Promise<string>
   batchBurn: (tokenIds: string) => Promise<string>
   batchTransfer: (recipient: string, tokenIds: string) => Promise<string>
+  updateTokenMetadata: (tokenId: string, tokenURI: string) => Promise<string>
+  batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => Promise<string>
+  freezeMetadata: () => Promise<string>
 }
 
 export interface Sg721Messages {
@@ -101,6 +104,9 @@ export interface Sg721Messages {
   batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
   updateCollectionInfo: (collectionInfo: CollectionInfo) => UpdateCollectionInfoMessage
   freezeCollectionInfo: () => FreezeCollectionInfoMessage
+  updateTokenMetadata: (tokenId: string, tokenURI: string) => UpdateTokenMetadataMessage
+  batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => BatchUpdateTokenMetadataMessage
+  freezeMetadata: () => FreezeMetadataMessage
 }
 
 export interface TransferNFTMessage {
@@ -212,6 +218,32 @@ export interface BatchTransferMessage {
   sender: string
   contract: string
   msg: Record<string, unknown>[]
+  funds: Coin[]
+}
+
+export interface UpdateTokenMetadataMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_token_metadata: {
+      token_id: string
+      token_uri: string
+    }
+  }
+  funds: Coin[]
+}
+
+export interface BatchUpdateTokenMetadataMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
+  funds: Coin[]
+}
+
+export interface FreezeMetadataMessage {
+  sender: string
+  contract: string
+  msg: { freeze_metadata: Record<string, never> }
   funds: Coin[]
 }
 
@@ -570,12 +602,84 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    const batchUpdateTokenMetadata = async (tokenIds: string, baseURI: string): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          const msg = {
+            update_token_metadata: { token_id: i.toString(), token_uri: `${baseURI}/${i}` },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          const msg = {
+            update_token_metadata: { token_id: tokenNumbers[i].toString(), token_uri: `${baseURI}/${tokenNumbers[i]}` },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: txSigner,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+      }
+
+      const res = await client.signAndBroadcast(txSigner, executeContractMsgs, 'auto', 'batch update metadata')
+
+      return res.transactionHash
+    }
+
+    const updateTokenMetadata = async (tokenId: string, tokenURI: string): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          update_token_metadata: {
+            token_id: tokenId,
+            token_uri: tokenURI,
+          },
+        },
+        'auto',
+        '',
+      )
+      return res.transactionHash
+    }
+
     const freezeCollectionInfo = async (): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
           freeze_collection_info: {},
+        },
+        'auto',
+        '',
+      )
+      return res.transactionHash
+    }
+
+    const freezeMetadata = async (): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          freeze_metadata: {},
         },
         'auto',
         '',
@@ -609,6 +713,9 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       batchTransfer,
       updateCollectionInfo,
       freezeCollectionInfo,
+      updateTokenMetadata,
+      batchUpdateTokenMetadata,
+      freezeMetadata,
     }
   }
 
@@ -804,6 +911,58 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         funds: [],
       }
     }
+
+    const batchUpdateTokenMetadata = (tokenIds: string, baseURI: string): BatchUpdateTokenMetadataMessage => {
+      const msg: Record<string, unknown>[] = []
+      if (tokenIds.includes(':')) {
+        const [start, end] = tokenIds.split(':').map(Number)
+        for (let i = start; i <= end; i++) {
+          msg.push({
+            update_token_metadata: { token_id: i.toString(), token_uri: `${baseURI}/${i}` },
+          })
+        }
+      } else {
+        const tokenNumbers = tokenIds.split(',').map(Number)
+        for (let i = 0; i < tokenNumbers.length; i++) {
+          msg.push({
+            update_token_metadata: { token_id: tokenNumbers[i].toString(), token_uri: `${baseURI}/${tokenNumbers[i]}` },
+          })
+        }
+      }
+
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
+    const updateTokenMetadata = (tokenId: string, tokenURI: string) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_token_metadata: {
+            token_id: tokenId,
+            token_uri: tokenURI,
+          },
+        },
+        funds: [],
+      }
+    }
+
+    const freezeMetadata = () => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          freeze_metadata: {},
+        },
+        funds: [],
+      }
+    }
+
     const updateCollectionInfo = (collectionInfo: CollectionInfo) => {
       return {
         sender: txSigner,
@@ -814,6 +973,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         funds: [],
       }
     }
+
     const freezeCollectionInfo = () => {
       return {
         sender: txSigner,
@@ -838,6 +998,9 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       batchTransfer,
       updateCollectionInfo,
       freezeCollectionInfo,
+      updateTokenMetadata,
+      batchUpdateTokenMetadata,
+      freezeMetadata,
     }
   }
 
