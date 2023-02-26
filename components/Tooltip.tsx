@@ -6,6 +6,7 @@ import { usePopper } from 'react-popper'
 export interface TooltipProps extends ComponentProps<'div'> {
   label: ReactNode
   children: ReactElement
+  placement?: 'top' | 'bottom' | 'left' | 'right'
 }
 
 export const Tooltip = ({ label, children, ...props }: TooltipProps) => {
@@ -14,7 +15,7 @@ export const Tooltip = ({ label, children, ...props }: TooltipProps) => {
   const [show, setShow] = useState(false)
 
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: 'top',
+    placement: props.placement ? props.placement : 'top',
   })
 
   return (

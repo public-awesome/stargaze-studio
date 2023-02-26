@@ -8,6 +8,7 @@ import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
+import { Tooltip } from 'components/Tooltip'
 import type { ChangeEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -31,12 +32,14 @@ export interface CollectionDetailsDataProps {
   externalLink?: string
   startTradingTime?: string
   explicit: boolean
+  updatable: boolean
 }
 
 export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minterType }: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
+  const [updatable, setUpdatable] = useState<boolean>(false)
 
   const nameState = useInputState({
     id: 'name',
@@ -76,6 +79,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
         externalLink: externalLinkState.value || undefined,
         startTradingTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
         explicit,
+        updatable,
       }
       onChange(data)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,6 +95,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
     coverImage,
     timestamp,
     explicit,
+    updatable,
   ])
 
   const selectCoverImage = (event: ChangeEvent<HTMLInputElement>) => {
@@ -174,7 +179,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
         <div className={clsx(minterType === 'base' ? 'flex flex-col -ml-16 space-y-2' : 'flex flex-col space-y-2')}>
           <div>
             <div className="flex">
-              <span className="mt-1 text-sm first-letter:capitalize">
+              <span className="mt-1 ml-[2px] text-sm first-letter:capitalize">
                 Does the collection contain explicit content?
               </span>
               <div className="ml-2 font-bold form-check form-check-inline">
@@ -216,6 +221,35 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             </div>
           </div>
         </div>
+        <Tooltip
+          label={
+            <div className="grid grid-flow-row">
+              <span>
+                ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until the
+                metadata is frozen by the creator.
+              </span>
+            </div>
+          }
+          placement="bottom"
+        >
+          <div
+            className={clsx(
+              minterType === 'base'
+                ? 'flex flex-col -ml-16 space-y-2 form-control'
+                : 'flex flex-col space-y-2 form-control',
+            )}
+          >
+            <label className="justify-start cursor-pointer label">
+              <span className="mr-4 font-bold">Updatable Token Metadata</span>
+              <input
+                checked={updatable}
+                className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
+                onClick={() => setUpdatable(!updatable)}
+                type="checkbox"
+              />
+            </label>
+          </div>
+        </Tooltip>
       </FormGroup>
     </div>
   )

@@ -39,11 +39,14 @@ import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
 import {
   BASE_FACTORY_ADDRESS,
+  BASE_FACTORY_UPDATABLE_ADDRESS,
   BLOCK_EXPLORER_URL,
   NETWORK,
   SG721_CODE_ID,
+  SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
   VENDING_FACTORY_ADDRESS,
+  VENDING_FACTORY_UPDATABLE_ADDRESS,
   WHITELIST_CODE_ID,
 } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
@@ -416,7 +419,7 @@ const CollectionCreationPage: NextPage = () => {
           whitelist,
         },
         collection_params: {
-          code_id: SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -437,11 +440,11 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const payload: VendingFactoryDispatchExecuteArgs = {
-      contract: VENDING_FACTORY_ADDRESS,
+      contract: collectionDetails?.updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
       messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin('3000000000', 'ustars')],
+      funds: [coin(collectionDetails?.updatable ? '5000000000' : '3000000000', 'ustars')],
     }
     const data = await vendingFactoryDispatchExecute(payload)
     setTransactionHash(data.transactionHash)
@@ -466,7 +469,7 @@ const CollectionCreationPage: NextPage = () => {
       create_minter: {
         init_msg: null,
         collection_params: {
-          code_id: SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -487,11 +490,11 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const payload: BaseFactoryDispatchExecuteArgs = {
-      contract: BASE_FACTORY_ADDRESS,
+      contract: collectionDetails?.updatable ? BASE_FACTORY_UPDATABLE_ADDRESS : BASE_FACTORY_ADDRESS,
       messages: baseFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin('1000000000', 'ustars')],
+      funds: [coin(collectionDetails?.updatable ? '3000000000' : '1000000000', 'ustars')],
     }
     await baseFactoryDispatchExecute(payload)
       .then(async (data) => {
