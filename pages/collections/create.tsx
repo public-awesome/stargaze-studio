@@ -446,6 +446,7 @@ const CollectionCreationPage: NextPage = () => {
       txSigner: wallet.address,
       msg,
       funds: [coin(collectionDetails?.updatable ? '5000000000' : '3000000000', 'ustars')],
+      updatable: collectionDetails?.updatable,
     }
     const data = await vendingFactoryDispatchExecute(payload)
     setTransactionHash(data.transactionHash)
@@ -496,6 +497,7 @@ const CollectionCreationPage: NextPage = () => {
       txSigner: wallet.address,
       msg,
       funds: [coin(collectionDetails?.updatable ? '3000000000' : '1000000000', 'ustars')],
+      updatable: collectionDetails?.updatable,
     }
     await baseFactoryDispatchExecute(payload)
       .then(async (data) => {
