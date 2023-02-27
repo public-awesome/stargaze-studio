@@ -17,8 +17,8 @@ import type { ImageUploadDetailsDataProps, MintRule } from 'components/badges/cr
 import { ImageUploadDetails } from 'components/badges/creation/ImageUploadDetails'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
-import { NumberInput, TextInput } from 'components/forms/FormInput'
-import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
+import { TextInput } from 'components/forms/FormInput'
+import { useInputState } from 'components/forms/FormInput.hooks'
 import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
@@ -63,6 +63,7 @@ const BadgeCreationPage: NextPage = () => {
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [keyPairs, setKeyPairs] = useState<{ publicKey: string; privateKey: string }[]>([])
+  const [numberOfKeys, setNumberOfKeys] = useState(1)
   const qrRef = useRef<HTMLDivElement>(null)
 
   const keyState = useInputState({
@@ -70,14 +71,6 @@ const BadgeCreationPage: NextPage = () => {
     name: 'key',
     title: 'Public Key',
     subtitle: 'Part of the key pair to be utilized for post-creation access control',
-  })
-
-  const numberOfKeysState = useNumberInputState({
-    id: 'numberOfKeys',
-    name: 'numberOfKeys',
-    title: 'Number of Keys',
-    subtitle: 'The number of key pairs to be generated for post-creation access control',
-    defaultValue: 1,
   })
 
   const designatedMinterState = useInputState({
@@ -177,14 +170,18 @@ const BadgeCreationPage: NextPage = () => {
         type: 'create_badge',
       }
       if (mintRule !== 'by_keys') {
+        setBadgeId(null)
+        setIsAddingKeysComplete(false)
         const data = await badgeHubDispatchExecute(payload)
         console.log(data)
         setCreatingBadge(false)
         setTransactionHash(data.split(':')[0])
         setBadgeId(data.split(':')[1])
       } else {
+        setBadgeId(null)
+        setIsAddingKeysComplete(false)
         setKeyPairs([])
-        const generatedKeyPairs = generateKeyPairs(numberOfKeysState.value)
+        const generatedKeyPairs = generateKeyPairs(numberOfKeys)
         setKeyPairs(generatedKeyPairs)
         await badgeHubDispatchExecute(payload)
           .then(async (data) => {
@@ -282,7 +279,15 @@ const BadgeCreationPage: NextPage = () => {
     })
   }
 
-  // copy claim url to clipboard
+  const handleDownloadKeys = () => {
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(keyPairs)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `badge-${badgeId as string}-keys.json`
+    document.body.appendChild(element)
+    element.click()
+  }
+
   const copyClaimURL = async () => {
     const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
     const claimURL = `${baseURL}/?id=${badgeId as string}&key=${createdBadgeKey as string}`
@@ -428,6 +433,65 @@ const BadgeCreationPage: NextPage = () => {
               </div>
             </Alert>
           </Conditional>
+
+          <Conditional test={mintRule === 'by_keys'}>
+            <Alert className="mt-5" type="info">
+              <div className="ml-4 text-lg">
+                Badge ID:{` ${badgeId as string}`}
+                <br />
+                Transaction Hash: {'  '}
+                <Conditional test={NETWORK === 'testnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <Conditional test={NETWORK === 'mainnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <br />
+                <div className="text-base">
+                  <div className="flex-row pt-4 mt-4 border-t-2">
+                    <span>
+                      You may click{' '}
+                      <Anchor
+                        className="text-stargaze hover:underline"
+                        external
+                        href={`/badges/actions/?badgeHubContractAddress=${BADGE_HUB_ADDRESS}&badgeId=${
+                          badgeId as string
+                        }`}
+                      >
+                        here
+                      </Anchor>{' '}
+                      and select Actions {'>'} Add Keys to add (additional) whitelisted keys or select Actions {'>'}{' '}
+                      Mint by Keys to use one of the keys to mint a badge.
+                    </span>
+                    <br />
+                    <Conditional test={isAddingKeysComplete}>
+                      <div className="pt-2 mt-4 border-t-2">
+                        <span className="mt-2">
+                          Make sure to download the whitelisted keys added during badge creation.
+                        </span>
+                        <Button className="mt-2" onClick={() => handleDownloadKeys()}>
+                          Download Keys
+                        </Button>
+                      </div>
+                    </Conditional>
+                  </div>
+                </div>
+              </div>
+            </Alert>
+          </Conditional>
+
           <Conditional test={mintRule === 'by_minter'}>
             <Alert className="mt-5" type="info">
               <div className="ml-4 text-lg">
@@ -499,6 +563,7 @@ const BadgeCreationPage: NextPage = () => {
               onClick={() => {
                 setMintRule('by_key')
                 setReadyToCreateBadge(false)
+                setBadgeId(null)
               }}
               type="button"
             >
@@ -521,6 +586,7 @@ const BadgeCreationPage: NextPage = () => {
               onClick={() => {
                 setMintRule('by_keys')
                 setReadyToCreateBadge(false)
+                setBadgeId(null)
               }}
               type="button"
             >
@@ -543,6 +609,7 @@ const BadgeCreationPage: NextPage = () => {
               onClick={() => {
                 setMintRule('by_minter')
                 setReadyToCreateBadge(false)
+                setBadgeId(null)
               }}
               type="button"
             >
@@ -568,7 +635,21 @@ const BadgeCreationPage: NextPage = () => {
 
         <Conditional test={mintRule === 'by_keys'}>
           <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
-            <NumberInput className="ml-4 w-full max-w-2xl" {...numberOfKeysState} required />
+            <div className="grid grid-cols-2 gap-24">
+              <div className="flex flex-col ml-4">
+                <span className="font-bold">Number of Keys</span>
+                <span className="text-sm text-white/80">
+                  The number of key pairs to be whitelisted for post-creation access control
+                </span>
+              </div>
+              <input
+                className="p-2 ml-1 w-1/4 max-w-2xl bg-white/10 rounded border-2 border-white/20"
+                onChange={(e) => setNumberOfKeys(Number(e.target.value))}
+                required
+                type="number"
+                value={numberOfKeys}
+              />
+            </div>
           </div>
         </Conditional>
 
