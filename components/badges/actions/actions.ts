@@ -87,7 +87,7 @@ export const BY_MINTER_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_by_minter',
     name: 'Mint by Minter',
-    description: `Mint a new badge to the specified addresses`,
+    description: `Mint a new badge to specified owner addresses`,
   },
 ]
 

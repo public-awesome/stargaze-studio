@@ -3,18 +3,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // import { AirdropUpload } from 'components/AirdropUpload'
 import { toUtf8 } from '@cosmjs/encoding'
+import { Alert } from 'components/Alert'
 import type { DispatchExecuteArgs } from 'components/badges/actions/actions'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'components/badges/actions/actions'
 import { ActionsCombobox } from 'components/badges/actions/Combobox'
 import { useActionsComboboxState } from 'components/badges/actions/Combobox.hooks'
 import { Button } from 'components/Button'
+import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
+import { AddressList } from 'components/forms/AddressList'
+import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { MetadataAttributes } from 'components/forms/MetadataAttributes'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useWallet } from 'contexts/wallet'
 import type { Badge, BadgeHubInstance } from 'contracts/badgeHub'
 import * as crypto from 'crypto'
@@ -26,6 +31,7 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
 import { sha256 } from 'utils/hash'
+import { isValidAddress } from 'utils/isValidAddress'
 import { resolveAddress } from 'utils/resolveAddress'
 
 import { BadgeAirdropListUpload } from '../../BadgeAirdropListUpload'
@@ -54,6 +60,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
   const [keyPairs, setKeyPairs] = useState<string[]>([])
   const [signature, setSignature] = useState<string>('')
+  const [ownerList, setOwnerList] = useState<string[]>([])
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -147,6 +154,8 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     defaultValue: wallet.address,
   })
 
+  const ownerListState = useAddressListState()
+
   const pubkeyState = useInputState({
     id: 'pubkey',
     name: 'pubkey',
@@ -179,6 +188,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
   const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'airdrop_by_key'])
   const showAirdropFileField = isEitherType(type, ['airdrop_by_key'])
+  const showOwnerList = isEitherType(type, ['mint_by_minter'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -235,7 +245,14 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     signature,
     keys: [],
     limit: limitState.value,
-    owners: [],
+    owners: [
+      ...new Set(
+        ownerListState.values
+          .map((a) => a.address.trim())
+          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+          .concat(ownerList),
+      ),
+    ],
     recipients: airdropAllocationArray,
     privateKey: privateKeyState.value,
     nft: nftState.value,
@@ -516,6 +533,24 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
             />
           )}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
+
+          <Conditional test={showOwnerList}>
+            <div className="mt-4">
+              <AddressList
+                entries={ownerListState.entries}
+                isRequired
+                onAdd={ownerListState.add}
+                onChange={ownerListState.update}
+                onRemove={ownerListState.remove}
+                subtitle="Enter the owner addresses"
+                title="Addresses"
+              />
+              <Alert className="mt-8" type="info">
+                You may optionally choose a text file of additional owner addresses.
+              </Alert>
+              <WhitelistUpload onChange={setOwnerList} />
+            </div>
+          </Conditional>
 
           {showAirdropFileField && (
             <FormGroup
