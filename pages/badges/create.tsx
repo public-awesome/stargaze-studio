@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -16,8 +17,8 @@ import type { ImageUploadDetailsDataProps, MintRule } from 'components/badges/cr
 import { ImageUploadDetails } from 'components/badges/creation/ImageUploadDetails'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
-import { TextInput } from 'components/forms/FormInput'
-import { useInputState } from 'components/forms/FormInput.hooks'
+import { NumberInput, TextInput } from 'components/forms/FormInput'
+import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
@@ -39,6 +40,8 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { truncateMiddle } from 'utils/text'
 
+import { generateKeyPairs } from '../../utils/hash'
+
 const BadgeCreationPage: NextPage = () => {
   const wallet = useWallet()
   const { badgeHub: badgeHubContract } = useContracts()
@@ -51,6 +54,7 @@ const BadgeCreationPage: NextPage = () => {
 
   const [uploading, setUploading] = useState(false)
   const [creatingBadge, setCreatingBadge] = useState(false)
+  const [isAddingKeysComplete, setIsAddingKeysComplete] = useState(false)
   const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
   const [mintRule, setMintRule] = useState<MintRule>('by_key')
 
@@ -58,6 +62,7 @@ const BadgeCreationPage: NextPage = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const [keyPairs, setKeyPairs] = useState<{ publicKey: string; privateKey: string }[]>([])
   const qrRef = useRef<HTMLDivElement>(null)
 
   const keyState = useInputState({
@@ -65,6 +70,14 @@ const BadgeCreationPage: NextPage = () => {
     name: 'key',
     title: 'Public Key',
     subtitle: 'Part of the key pair to be utilized for post-creation access control',
+  })
+
+  const numberOfKeysState = useNumberInputState({
+    id: 'numberOfKeys',
+    name: 'numberOfKeys',
+    title: 'Number of Keys',
+    subtitle: 'The number of key pairs to be generated for post-creation access control',
+    defaultValue: 1,
   })
 
   const designatedMinterState = useInputState({
@@ -151,9 +164,7 @@ const BadgeCreationPage: NextPage = () => {
             ? {
                 by_minter: designatedMinterState.value.trim(),
               }
-            : {
-                by_keys: [keyState.value],
-              },
+            : 'by_keys',
         expiry: badgeDetails?.expiry || undefined,
         max_supply: badgeDetails?.max_supply || undefined,
       }
@@ -165,13 +176,46 @@ const BadgeCreationPage: NextPage = () => {
         badge,
         type: 'create_badge',
       }
-      const data = await badgeHubDispatchExecute(payload)
-      console.log(data)
-      setCreatingBadge(false)
-      setTransactionHash(data.split(':')[0])
-      setBadgeId(data.split(':')[1])
-    } catch (error: any) {
-      toast.error(error.message, { style: { maxWidth: 'none' } })
+      if (mintRule !== 'by_keys') {
+        const data = await badgeHubDispatchExecute(payload)
+        console.log(data)
+        setCreatingBadge(false)
+        setTransactionHash(data.split(':')[0])
+        setBadgeId(data.split(':')[1])
+      } else {
+        setKeyPairs([])
+        const generatedKeyPairs = generateKeyPairs(numberOfKeysState.value)
+        setKeyPairs(generatedKeyPairs)
+        await badgeHubDispatchExecute(payload)
+          .then(async (data) => {
+            setCreatingBadge(false)
+            setTransactionHash(data.split(':')[0])
+            setBadgeId(data.split(':')[1])
+            const res = await toast.promise(
+              badgeHubContract.use(BADGE_HUB_ADDRESS)?.addKeys(
+                wallet.address,
+                Number(data.split(':')[1]),
+                generatedKeyPairs.map((key) => key.publicKey),
+              ) as Promise<string>,
+              {
+                loading: 'Adding keys...',
+                success: (result) => {
+                  setIsAddingKeysComplete(true)
+                  return `Keys added successfully! Tx Hash: ${result}`
+                },
+                error: (error: { message: any }) => `Failed to add keys: ${error.message}`,
+              },
+            )
+          })
+          .catch((error: { message: any }) => {
+            toast.error(error.message, { style: { maxWidth: 'none' } })
+            setUploading(false)
+            setIsAddingKeysComplete(false)
+            setCreatingBadge(false)
+          })
+      }
+    } catch (err: any) {
+      toast.error(err.message, { style: { maxWidth: 'none' } })
       setCreatingBadge(false)
       setUploading(false)
     }
@@ -262,6 +306,12 @@ const BadgeCreationPage: NextPage = () => {
     setBadgeId(null)
     setReadyToCreateBadge(false)
   }, [imageUploadDetails?.uploadMethod])
+
+  useEffect(() => {
+    if (keyPairs.length > 0) {
+      toast.success('Key pairs generated successfully.')
+    }
+  }, [keyPairs])
 
   return (
     <div>
@@ -463,12 +513,11 @@ const BadgeCreationPage: NextPage = () => {
               'isolate space-y-1 border-2',
               'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
               mintRule === 'by_keys' ? 'border-stargaze' : 'border-transparent',
-              mintRule !== 'by_keys' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
+              mintRule !== 'by_keys' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
-              disabled
               onClick={() => {
                 setMintRule('by_keys')
                 setReadyToCreateBadge(false)
@@ -476,7 +525,7 @@ const BadgeCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Keys</h4>
-              <span className="text-sm text-slate-500 line-clamp-2">
+              <span className="text-sm text-white/80 line-clamp-2">
                 Similar to the By Key rule, however each designated private key can only be used once to mint a badge.
               </span>
             </button>
@@ -498,7 +547,7 @@ const BadgeCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Minter</h4>
-              <span className="text-sm line-clamp-2 text-slate/500">
+              <span className="text-sm text-white/80 line-clamp-2">
                 Badges can be minted by a designated minter account.
               </span>
             </button>
@@ -514,6 +563,12 @@ const BadgeCreationPage: NextPage = () => {
             <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
               Generate Key
             </Button>
+          </div>
+        </Conditional>
+
+        <Conditional test={mintRule === 'by_keys'}>
+          <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+            <NumberInput className="ml-4 w-full max-w-2xl" {...numberOfKeysState} required />
           </div>
         </Conditional>
 

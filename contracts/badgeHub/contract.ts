@@ -28,7 +28,7 @@ export interface MigrateResponse {
 export interface Rule {
   by_key?: string
   by_minter?: string
-  by_keys?: string[]
+  by_keys?: string
 }
 
 export interface Trait {
@@ -53,7 +53,7 @@ export interface Badge {
   manager: string
   metadata: Metadata
   transferrable: boolean
-  rule: Rule
+  rule: Rule | string
   expiry?: number
   max_supply?: number
 }
@@ -102,7 +102,7 @@ export interface CreateBadgeMessage {
       manager: string
       metadata: Metadata
       transferrable: boolean
-      rule: Rule
+      rule: Rule | string
       expiry?: number
       max_supply?: number
     }
@@ -349,6 +349,16 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
     }
 
     const addKeys = async (senderAddress: string, id: number, keys: string[]): Promise<string> => {
+      const feeRateRaw = await client.queryContractRaw(
+        contractAddress,
+        toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
+      )
+      console.log('Fee Rate Raw: ', feeRateRaw)
+      const feeRate = JSON.parse(new TextDecoder().decode(feeRateRaw as Uint8Array))
+      console.log('Fee Rate:', feeRate)
+
+      console.log('keys size: ', sizeof(keys))
+      console.log(keys)
       const res = await client.execute(
         senderAddress,
         contractAddress,
@@ -360,6 +370,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
+        [coin(Math.ceil((Number(sizeof(keys)) * 1.1 * Number(feeRate.key)) / 2), 'ustars')],
       )
 
       return res.transactionHash
