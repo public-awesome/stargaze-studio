@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -64,6 +65,14 @@ const BadgeCreationPage: NextPage = () => {
     name: 'key',
     title: 'Public Key',
     subtitle: 'Part of the key pair to be utilized for post-creation access control',
+  })
+
+  const designatedMinterState = useInputState({
+    id: 'designatedMinter',
+    name: 'designatedMinter',
+    title: 'Minter Address',
+    subtitle: 'The address of the designated minter for this badge',
+    defaultValue: wallet.address,
   })
 
   const performBadgeCreationChecks = () => {
@@ -133,9 +142,18 @@ const BadgeCreationPage: NextPage = () => {
           youtube_url: badgeDetails?.youtube_url || undefined,
         },
         transferrable: badgeDetails?.transferrable as boolean,
-        rule: {
-          by_key: keyState.value,
-        },
+        rule:
+          mintRule === 'by_key'
+            ? {
+                by_key: keyState.value,
+              }
+            : mintRule === 'by_minter'
+            ? {
+                by_minter: designatedMinterState.value,
+              }
+            : {
+                by_keys: [keyState.value],
+              },
         expiry: badgeDetails?.expiry || undefined,
         max_supply: badgeDetails?.max_supply || undefined,
       }
@@ -184,7 +202,8 @@ const BadgeCreationPage: NextPage = () => {
 
   const checkBadgeDetails = () => {
     if (!badgeDetails) throw new Error('Please fill out the required fields')
-    if (keyState.value === '' || !createdBadgeKey) throw new Error('Please generate a public key')
+    if (mintRule === 'by_key' && (keyState.value === '' || !createdBadgeKey))
+      throw new Error('Please generate a public key')
     if (badgeDetails.external_url) {
       try {
         const url = new URL(badgeDetails.external_url)
@@ -416,12 +435,11 @@ const BadgeCreationPage: NextPage = () => {
               'isolate space-y-1 border-2',
               'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
               mintRule === 'by_minter' ? 'border-stargaze' : 'border-transparent',
-              mintRule !== 'by_minter' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
+              mintRule !== 'by_minter' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
-              disabled
               onClick={() => {
                 setMintRule('by_minter')
                 setReadyToCreateBadge(false)
@@ -439,13 +457,20 @@ const BadgeCreationPage: NextPage = () => {
 
       <div className="mx-10">
         <ImageUploadDetails mintRule={mintRule} onChange={setImageUploadDetails} />
+        <Conditional test={mintRule === 'by_key'}>
+          <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+            <TextInput className="ml-4 w-full max-w-2xl" {...keyState} disabled required />
+            <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
+              Generate Key
+            </Button>
+          </div>
+        </Conditional>
 
-        <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
-          <TextInput className="ml-4 w-full max-w-2xl" {...keyState} disabled required />
-          <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
-            Generate Key
-          </Button>
-        </div>
+        <Conditional test={mintRule === 'by_minter'}>
+          <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+            <TextInput className="ml-4 w-full max-w-2xl" {...designatedMinterState} required />
+          </div>
+        </Conditional>
 
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
           <BadgeDetails
