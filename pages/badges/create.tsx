@@ -149,7 +149,7 @@ const BadgeCreationPage: NextPage = () => {
               }
             : mintRule === 'by_minter'
             ? {
-                by_minter: designatedMinterState.value,
+                by_minter: designatedMinterState.value.trim(),
               }
             : {
                 by_keys: [keyState.value],
@@ -284,52 +284,106 @@ const BadgeCreationPage: NextPage = () => {
       </div>
       <div className="mx-10" ref={scrollRef}>
         <Conditional test={badgeId !== null}>
-          <Alert className="mt-5" type="info">
-            <div className="flex flex-row">
-              <div>
-                <div className="w-[384px] h-[384px]" ref={qrRef}>
-                  <QRCodeSVG
-                    className="mx-auto"
-                    level="H"
-                    size={384}
-                    value={`${
-                      NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-                    }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
-                  />
+          <Conditional test={mintRule === 'by_key'}>
+            <Alert className="mt-5" type="info">
+              <div className="flex flex-row">
+                <div>
+                  <div className="w-[384px] h-[384px]" ref={qrRef}>
+                    <QRCodeSVG
+                      className="mx-auto"
+                      level="H"
+                      size={384}
+                      value={`${
+                        NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                      }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
+                    <Button
+                      className="items-center w-full text-sm text-center rounded"
+                      leftIcon={<FaSave />}
+                      onClick={() => void handleDownloadQr()}
+                    >
+                      Download QR Code
+                    </Button>
+                    <Button
+                      className="w-full text-sm text-center rounded"
+                      isWide
+                      leftIcon={<FaCopy />}
+                      onClick={() => void copyClaimURL()}
+                      variant="solid"
+                    >
+                      Copy Claim URL
+                    </Button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
-                  <Button
-                    className="items-center w-full text-sm text-center rounded"
-                    leftIcon={<FaSave />}
-                    onClick={() => void handleDownloadQr()}
-                  >
-                    Download QR Code
-                  </Button>
-                  <Button
-                    className="w-full text-sm text-center rounded"
-                    isWide
-                    leftIcon={<FaCopy />}
-                    onClick={() => void copyClaimURL()}
-                    variant="solid"
-                  >
-                    Copy Claim URL
-                  </Button>
+                <div className="ml-4 text-lg">
+                  Badge ID:{` ${badgeId as string}`}
+                  <br />
+                  Private Key:
+                  <Tooltip label="Click to copy the private key">
+                    <button
+                      className="group flex space-x-2 font-mono text-base text-white/50 hover:underline"
+                      onClick={() => void copy(createdBadgeKey as string)}
+                      type="button"
+                    >
+                      <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
+                      <FaCopy className="opacity-50 group-hover:opacity-100" />
+                    </button>
+                  </Tooltip>
+                  <br />
+                  Transaction Hash: {'  '}
+                  <Conditional test={NETWORK === 'testnet'}>
+                    <Anchor
+                      className="text-stargaze hover:underline"
+                      external
+                      href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                    >
+                      {transactionHash}
+                    </Anchor>
+                  </Conditional>
+                  <Conditional test={NETWORK === 'mainnet'}>
+                    <Anchor
+                      className="text-stargaze hover:underline"
+                      external
+                      href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                    >
+                      {transactionHash}
+                    </Anchor>
+                  </Conditional>
+                  <br />
+                  <div className="text-base">
+                    <div className="flex-row pt-4 mt-4 border-t-2">
+                      <span>
+                        You may click{' '}
+                        <Anchor
+                          className="text-stargaze hover:underline"
+                          external
+                          href={`${
+                            NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                          }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                        >
+                          here
+                        </Anchor>{' '}
+                        or scan the QR code to claim a badge.
+                      </span>
+                    </div>
+                    <br />
+                    <span className="mt-4">
+                      You may download the QR code or copy the claim URL to share with others.
+                    </span>
+                  </div>
+                  <br />
                 </div>
               </div>
+            </Alert>
+          </Conditional>
+          <Conditional test={mintRule === 'by_minter'}>
+            <Alert className="mt-5" type="info">
               <div className="ml-4 text-lg">
                 Badge ID:{` ${badgeId as string}`}
                 <br />
-                Private Key:
-                <Tooltip label="Click to copy the private key">
-                  <button
-                    className="group flex space-x-2 font-mono text-base text-white/50 hover:underline"
-                    onClick={() => void copy(createdBadgeKey as string)}
-                    type="button"
-                  >
-                    <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
-                    <FaCopy className="opacity-50 group-hover:opacity-100" />
-                  </button>
-                </Tooltip>
+                Designated Minter Address: {` ${designatedMinterState.value}`}
                 <br />
                 Transaction Hash: {'  '}
                 <Conditional test={NETWORK === 'testnet'}>
@@ -358,22 +412,19 @@ const BadgeCreationPage: NextPage = () => {
                       <Anchor
                         className="text-stargaze hover:underline"
                         external
-                        href={`${
-                          NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-                        }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                        href={`/badges/actions/?badgeHubContractAddress=${BADGE_HUB_ADDRESS}&badgeId=${
+                          badgeId as string
+                        }`}
                       >
                         here
                       </Anchor>{' '}
-                      or scan the QR code to claim a badge.
+                      and select Actions {'>'} Mint By Minter to mint a badge.
                     </span>
                   </div>
-                  <br />
-                  <span className="mt-4">You may download the QR code or copy the claim URL to share with others.</span>
                 </div>
-                <br />
               </div>
-            </div>
-          </Alert>
+            </Alert>
+          </Conditional>
         </Conditional>
       </div>
 
