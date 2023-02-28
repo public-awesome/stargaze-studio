@@ -12,6 +12,8 @@ import { ContractPageHeader } from 'components/ContractPageHeader'
 import { ExecuteCombobox } from 'components/contracts/badgeHub/ExecuteCombobox'
 import { useExecuteComboboxState } from 'components/contracts/badgeHub/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
+import { AddressList } from 'components/forms/AddressList'
+import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
@@ -20,6 +22,7 @@ import { LinkTabs } from 'components/LinkTabs'
 import { badgeHubLinkTabs } from 'components/LinkTabs.data'
 import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { Badge } from 'contracts/badgeHub'
@@ -41,6 +44,7 @@ import * as secp256k1 from 'secp256k1'
 import { copy } from 'utils/clipboard'
 import { NETWORK } from 'utils/constants'
 import { generateKeyPairs, sha256 } from 'utils/hash'
+import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
@@ -63,6 +67,7 @@ const BadgeHubExecutePage: NextPage = () => {
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
   const [signature, setSignature] = useState<string>('')
+  const [ownerList, setOwnerList] = useState<string[]>([])
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
   const qrRef = useRef<HTMLDivElement>(null)
@@ -178,6 +183,8 @@ const BadgeHubExecutePage: NextPage = () => {
     defaultValue: wallet.address,
   })
 
+  const ownerListState = useAddressListState()
+
   const pubkeyState = useInputState({
     id: 'pubkey',
     name: 'pubkey',
@@ -222,7 +229,8 @@ const BadgeHubExecutePage: NextPage = () => {
   ])
   const showLimitField = isEitherType(type, ['purge_keys', 'purge_owners'])
   const showNFTField = type === 'set_nft'
-  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'mint_by_minter'])
+  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
+  const showOwnerListField = isEitherType(type, ['mint_by_minter'])
   const showPubkeyField = isEitherType(type, ['mint_by_keys'])
   const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
 
@@ -281,7 +289,14 @@ const BadgeHubExecutePage: NextPage = () => {
     signature,
     keys: keyPairs.map((keyPair) => keyPair.publicKey),
     limit: limitState.value || undefined,
-    owners: [],
+    owners: [
+      ...new Set(
+        ownerListState.values
+          .map((a) => a.address.trim())
+          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+          .concat(ownerList),
+      ),
+    ],
     nft: nftState.value,
     editFee,
     contract: contractState.value,
@@ -666,6 +681,23 @@ const BadgeHubExecutePage: NextPage = () => {
               title="Owner"
             />
           )}
+          <Conditional test={showOwnerListField}>
+            <div className="mt-4">
+              <AddressList
+                entries={ownerListState.entries}
+                isRequired
+                onAdd={ownerListState.add}
+                onChange={ownerListState.update}
+                onRemove={ownerListState.remove}
+                subtitle="Enter the owner addresses"
+                title="Addresses"
+              />
+              <Alert className="mt-8" type="info">
+                You may optionally choose a text file of additional owner addresses.
+              </Alert>
+              <WhitelistUpload onChange={setOwnerList} />
+            </div>
+          </Conditional>
           <Conditional test={type === 'add_keys'}>
             <div className="flex flex-row justify-start py-3 mt-4 mb-3 w-full rounded border-2 border-white/20">
               <div className="grid grid-cols-2 gap-24">
