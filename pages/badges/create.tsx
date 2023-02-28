@@ -459,6 +459,16 @@ const BadgeCreationPage: NextPage = () => {
                   </Anchor>
                 </Conditional>
                 <br />
+                <Conditional test={isAddingKeysComplete}>
+                  <div className="pt-2 mt-4 border-t-2">
+                    <span className="mt-2">
+                      Make sure to download the whitelisted keys added during badge creation.
+                    </span>
+                    <Button className="mt-2" onClick={() => handleDownloadKeys()}>
+                      Download Keys
+                    </Button>
+                  </div>
+                </Conditional>
                 <div className="text-base">
                   <div className="flex-row pt-4 mt-4 border-t-2">
                     <span>
@@ -475,17 +485,6 @@ const BadgeCreationPage: NextPage = () => {
                       and select Actions {'>'} Add Keys to add (additional) whitelisted keys or select Actions {'>'}{' '}
                       Mint by Keys to use one of the keys to mint a badge.
                     </span>
-                    <br />
-                    <Conditional test={isAddingKeysComplete}>
-                      <div className="pt-2 mt-4 border-t-2">
-                        <span className="mt-2">
-                          Make sure to download the whitelisted keys added during badge creation.
-                        </span>
-                        <Button className="mt-2" onClick={() => handleDownloadKeys()}>
-                          Download Keys
-                        </Button>
-                      </div>
-                    </Conditional>
                   </div>
                 </div>
               </div>
@@ -643,7 +642,7 @@ const BadgeCreationPage: NextPage = () => {
                 </span>
               </div>
               <input
-                className="p-2 ml-1 w-1/4 max-w-2xl bg-white/10 rounded border-2 border-white/20"
+                className="p-2 w-1/4 max-w-2xl bg-white/10 rounded border-2 border-white/20"
                 onChange={(e) => setNumberOfKeys(Number(e.target.value))}
                 required
                 type="number"
