@@ -38,6 +38,7 @@ import { copy } from 'utils/clipboard'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 import { truncateMiddle } from 'utils/text'
 
 import { generateKeyPairs } from '../../utils/hash'
@@ -57,6 +58,7 @@ const BadgeCreationPage: NextPage = () => {
   const [isAddingKeysComplete, setIsAddingKeysComplete] = useState(false)
   const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
   const [mintRule, setMintRule] = useState<MintRule>('by_key')
+  const [resolvedMinterAddress, setResolvedMinterAddress] = useState<string>('')
 
   const [badgeId, setBadgeId] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -127,6 +129,15 @@ const BadgeCreationPage: NextPage = () => {
     }
   }
 
+  const resolveMinterAddress = async () => {
+    await resolveAddress(designatedMinterState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedMinterAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveMinterAddress()
+  }, [designatedMinterState.value])
+
   const createNewBadge = async () => {
     try {
       if (!wallet.initialized) throw new Error('Wallet not connected')
@@ -155,7 +166,7 @@ const BadgeCreationPage: NextPage = () => {
               }
             : mintRule === 'by_minter'
             ? {
-                by_minter: designatedMinterState.value.trim(),
+                by_minter: resolvedMinterAddress,
               }
             : 'by_keys',
         expiry: badgeDetails?.expiry || undefined,
@@ -496,7 +507,7 @@ const BadgeCreationPage: NextPage = () => {
               <div className="ml-4 text-lg">
                 Badge ID:{` ${badgeId as string}`}
                 <br />
-                Designated Minter Address: {` ${designatedMinterState.value}`}
+                Designated Minter Address: {` ${resolvedMinterAddress}`}
                 <br />
                 Transaction Hash: {'  '}
                 <Conditional test={NETWORK === 'testnet'}>
@@ -654,7 +665,7 @@ const BadgeCreationPage: NextPage = () => {
 
         <Conditional test={mintRule === 'by_minter'}>
           <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
-            <TextInput className="ml-4 w-full max-w-2xl" {...designatedMinterState} required />
+            <TextInput className="ml-4 w-full max-w-lg" {...designatedMinterState} required />
           </div>
         </Conditional>
 
