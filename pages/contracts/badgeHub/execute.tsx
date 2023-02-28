@@ -202,7 +202,7 @@ const BadgeHubExecutePage: NextPage = () => {
     id: 'limit',
     name: 'limit',
     title: 'Limit',
-    subtitle: 'Number of keys/owners to execute the action for',
+    subtitle: 'Number of keys/owners to execute the action for (0 for all)',
   })
 
   const showBadgeField = type === 'create_badge'
@@ -216,6 +216,7 @@ const BadgeHubExecutePage: NextPage = () => {
     'mint_by_keys',
     'mint_by_minter',
   ])
+  const showLimitField = isEitherType(type, ['purge_keys', 'purge_owners'])
   const showNFTField = type === 'set_nft'
   const showOwnerField = type === 'mint_by_key'
   const showPrivateKeyField = type === 'mint_by_key'
@@ -274,7 +275,7 @@ const BadgeHubExecutePage: NextPage = () => {
     pubkey: pubkeyState.value,
     signature,
     keys: keyPairs.map((keyPair) => keyPair.publicKey),
-    limit: limitState.value,
+    limit: limitState.value || undefined,
     owners: [],
     nft: nftState.value,
     editFee,
@@ -692,6 +693,7 @@ const BadgeHubExecutePage: NextPage = () => {
               </div>
             </Alert>
           </Conditional>
+          {showLimitField && <NumberInput {...limitState} />}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
           {showNFTField && <AddressInput {...nftState} />}
         </div>
