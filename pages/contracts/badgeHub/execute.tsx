@@ -40,7 +40,7 @@ import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
 import { copy } from 'utils/clipboard'
 import { NETWORK } from 'utils/constants'
-import { sha256 } from 'utils/hash'
+import { generateKeyPairs, sha256 } from 'utils/hash'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
@@ -66,6 +66,8 @@ const BadgeHubExecutePage: NextPage = () => {
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
   const qrRef = useRef<HTMLDivElement>(null)
+  const [numberOfKeys, setNumberOfKeys] = useState(0)
+  const [keyPairs, setKeyPairs] = useState<{ publicKey: string; privateKey: string }[]>([])
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -205,7 +207,15 @@ const BadgeHubExecutePage: NextPage = () => {
 
   const showBadgeField = type === 'create_badge'
   const showMetadataField = isEitherType(type, ['create_badge', 'edit_badge'])
-  const showIdField = isEitherType(type, ['edit_badge', 'mint_by_key'])
+  const showIdField = isEitherType(type, [
+    'edit_badge',
+    'add_keys',
+    'purge_keys',
+    'purge_owners',
+    'mint_by_key',
+    'mint_by_keys',
+    'mint_by_minter',
+  ])
   const showNFTField = type === 'set_nft'
   const showOwnerField = type === 'mint_by_key'
   const showPrivateKeyField = type === 'mint_by_key'
@@ -263,7 +273,7 @@ const BadgeHubExecutePage: NextPage = () => {
     owner: ownerState.value,
     pubkey: pubkeyState.value,
     signature,
-    keys: [],
+    keys: keyPairs.map((keyPair) => keyPair.publicKey),
     limit: limitState.value,
     owners: [],
     nft: nftState.value,
@@ -388,6 +398,14 @@ const BadgeHubExecutePage: NextPage = () => {
       link.click()
     })
   }
+  const handleDownloadKeys = () => {
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(keyPairs)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `badge-${badgeIdState.value}-keys.json`
+    document.body.appendChild(element)
+    element.click()
+  }
 
   const copyClaimURL = async () => {
     const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
@@ -408,6 +426,12 @@ const BadgeHubExecutePage: NextPage = () => {
       }
     }
   }
+
+  useEffect(() => {
+    if (numberOfKeys > 0) {
+      setKeyPairs(generateKeyPairs(numberOfKeys))
+    }
+  }, [numberOfKeys])
 
   useEffect(() => {
     if (privateKeyState.value.length === 64 && resolvedOwnerAddress)
@@ -636,6 +660,38 @@ const BadgeHubExecutePage: NextPage = () => {
               title="Owner"
             />
           )}
+          <Conditional test={type === 'add_keys'}>
+            <div className="flex flex-row justify-start py-3 mt-4 mb-3 w-full rounded border-2 border-white/20">
+              <div className="grid grid-cols-2 gap-24">
+                <div className="flex flex-col ml-4">
+                  <span className="font-bold">Number of Keys</span>
+                  <span className="text-sm text-white/80">
+                    The number of public keys to be whitelisted for minting badges
+                  </span>
+                </div>
+                <input
+                  className="p-2 mt-4 w-1/2 max-w-2xl h-1/2 bg-white/10 rounded border-2 border-white/20"
+                  onChange={(e) => setNumberOfKeys(Number(e.target.value))}
+                  required
+                  type="number"
+                  value={numberOfKeys}
+                />
+              </div>
+            </div>
+          </Conditional>
+
+          <Conditional test={numberOfKeys > 0 && type === 'add_keys'}>
+            <Alert type="info">
+              <div className="pt-2">
+                <span className="mt-2">
+                  Make sure to download the whitelisted public keys together with their private key counterparts.
+                </span>
+                <Button className="mt-2" onClick={() => handleDownloadKeys()}>
+                  Download Key Pairs
+                </Button>
+              </div>
+            </Alert>
+          </Conditional>
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
           {showNFTField && <AddressInput {...nftState} />}
         </div>
