@@ -32,36 +32,36 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     name: 'Edit Badge',
     description: ` Edit badge metadata for the badge with the specified ID`,
   },
-  // {
-  //   id: 'add_keys',
-  //   name: 'Add Keys',
-  //   description: `Add keys to the badge with the specified ID`,
-  // },
-  // {
-  //   id: 'purge_keys',
-  //   name: 'Purge Keys',
-  //   description: `Purge keys from the badge with the specified ID`,
-  // },
+  {
+    id: 'add_keys',
+    name: 'Add Keys',
+    description: `Add keys to the badge with the specified ID`,
+  },
+  {
+    id: 'purge_keys',
+    name: 'Purge Keys',
+    description: `Purge keys from the badge with the specified ID`,
+  },
   {
     id: 'purge_owners',
     name: 'Purge Owners',
     description: `Purge owners from the badge with the specified ID`,
   },
-  // {
-  //   id: 'mint_by_minter',
-  //   name: 'Mint by Minter',
-  //   description: `Mint a new token by the minter with the specified ID`,
-  // },
+  {
+    id: 'mint_by_minter',
+    name: 'Mint by Minter',
+    description: `Mint a new token by the minter with the specified ID`,
+  },
   {
     id: 'mint_by_key',
     name: 'Mint by Key',
     description: `Mint a new token by the key with the specified ID`,
   },
-  // {
-  //   id: 'mint_by_keys',
-  //   name: 'Mint by Keys',
-  //   description: `Mint a new token by the keys with the specified ID`,
-  // },
+  {
+    id: 'mint_by_keys',
+    name: 'Mint by Keys',
+    description: `Mint a new token by the keys with the specified ID`,
+  },
   {
     id: 'set_nft',
     name: 'Set NFT',
