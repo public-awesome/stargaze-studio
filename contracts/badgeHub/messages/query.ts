@@ -14,8 +14,8 @@ export const QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Config', description: 'View current config' },
   { id: 'getBadge', name: 'Query Badge', description: 'Query a badge by ID' },
   { id: 'getBadges', name: 'Query Badges', description: 'Query a list of badges' },
-  // { id: 'getKey', name: 'Query Key', description: 'Query a key by ID to see if it&apos;s whitelisted' },
-  // { id: 'getKeys', name: 'Query Keys', description: 'Query the list of whitelisted keys' },
+  { id: 'getKey', name: 'Query Key', description: 'Query a key by ID to see if it&apos;s whitelisted' },
+  { id: 'getKeys', name: 'Query Keys', description: 'Query the list of whitelisted keys' },
 ]
 
 export interface DispatchQueryProps {
