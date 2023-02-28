@@ -22,7 +22,6 @@ import { TransactionHash } from 'components/TransactionHash'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useWallet } from 'contexts/wallet'
 import type { Badge, BadgeHubInstance } from 'contracts/badgeHub'
-import * as crypto from 'crypto'
 import sizeof from 'object-sizeof'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
@@ -156,18 +155,24 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
 
   const ownerListState = useAddressListState()
 
-  const pubkeyState = useInputState({
-    id: 'pubkey',
-    name: 'pubkey',
-    title: 'Pubkey',
-    subtitle: 'The public key to check whether it can be used to mint a badge',
+  const pubKeyState = useInputState({
+    id: 'pubKey',
+    name: 'pubKey',
+    title: 'Public Key',
+    subtitle:
+      type === 'mint_by_keys'
+        ? 'The whitelisted public key authorized to mint a badge'
+        : 'The public key to check whether it can be used to mint a badge',
   })
 
   const privateKeyState = useInputState({
     id: 'privateKey',
     name: 'privateKey',
     title: 'Private Key',
-    subtitle: 'The private key that was generated during badge creation',
+    subtitle:
+      type === 'mint_by_keys'
+        ? 'The corresponding private key for the whitelisted public key'
+        : 'The private key that was generated during badge creation',
   })
 
   const nftState = useInputState({
@@ -185,10 +190,11 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   })
 
   const showMetadataField = isEitherType(type, ['edit_badge'])
-  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
+  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'mint_by_minter'])
   const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'airdrop_by_key'])
   const showAirdropFileField = isEitherType(type, ['airdrop_by_key'])
   const showOwnerList = isEitherType(type, ['mint_by_minter'])
+  const showPubKeyField = isEitherType(type, ['mint_by_keys'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -241,7 +247,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     id: badgeId,
     editFee,
     owner: resolvedOwnerAddress,
-    pubkey: pubkeyState.value,
+    pubkey: pubKeyState.value,
     signature,
     keys: [],
     limit: limitState.value,
@@ -484,19 +490,6 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     }
   }
 
-  const handleGenerateKeys = (amount: number) => {
-    for (let i = 0; i < amount; i++) {
-      let privKey: Buffer
-      do {
-        privKey = crypto.randomBytes(32)
-      } while (!secp256k1.privateKeyVerify(privKey))
-
-      const privateKey = privKey.toString('hex')
-      const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
-      keyPairs.push(publicKey.concat(',', privateKey))
-    }
-  }
-
   return (
     <form>
       <div className="grid grid-cols-2 mt-4">
@@ -532,6 +525,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
               title="Owner"
             />
           )}
+          {showPubKeyField && <TextInput className="mt-2" {...pubKeyState} />}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
 
           <Conditional test={showOwnerList}>
