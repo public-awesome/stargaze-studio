@@ -1,4 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -36,7 +38,10 @@ import { copy } from 'utils/clipboard'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
 import { truncateMiddle } from 'utils/text'
+
+import { generateKeyPairs } from '../../utils/hash'
 
 const BadgeCreationPage: NextPage = () => {
   const wallet = useWallet()
@@ -50,13 +55,17 @@ const BadgeCreationPage: NextPage = () => {
 
   const [uploading, setUploading] = useState(false)
   const [creatingBadge, setCreatingBadge] = useState(false)
+  const [isAddingKeysComplete, setIsAddingKeysComplete] = useState(false)
   const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
   const [mintRule, setMintRule] = useState<MintRule>('by_key')
+  const [resolvedMinterAddress, setResolvedMinterAddress] = useState<string>('')
 
   const [badgeId, setBadgeId] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const [keyPairs, setKeyPairs] = useState<{ publicKey: string; privateKey: string }[]>([])
+  const [numberOfKeys, setNumberOfKeys] = useState(1)
   const qrRef = useRef<HTMLDivElement>(null)
 
   const keyState = useInputState({
@@ -64,6 +73,14 @@ const BadgeCreationPage: NextPage = () => {
     name: 'key',
     title: 'Public Key',
     subtitle: 'Part of the key pair to be utilized for post-creation access control',
+  })
+
+  const designatedMinterState = useInputState({
+    id: 'designatedMinter',
+    name: 'designatedMinter',
+    title: 'Minter Address',
+    subtitle: 'The address of the designated minter for this badge',
+    defaultValue: wallet.address,
   })
 
   const performBadgeCreationChecks = () => {
@@ -112,6 +129,15 @@ const BadgeCreationPage: NextPage = () => {
     }
   }
 
+  const resolveMinterAddress = async () => {
+    await resolveAddress(designatedMinterState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedMinterAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveMinterAddress()
+  }, [designatedMinterState.value])
+
   const createNewBadge = async () => {
     try {
       if (!wallet.initialized) throw new Error('Wallet not connected')
@@ -133,9 +159,16 @@ const BadgeCreationPage: NextPage = () => {
           youtube_url: badgeDetails?.youtube_url || undefined,
         },
         transferrable: badgeDetails?.transferrable as boolean,
-        rule: {
-          by_key: keyState.value,
-        },
+        rule:
+          mintRule === 'by_key'
+            ? {
+                by_key: keyState.value,
+              }
+            : mintRule === 'by_minter'
+            ? {
+                by_minter: resolvedMinterAddress,
+              }
+            : 'by_keys',
         expiry: badgeDetails?.expiry || undefined,
         max_supply: badgeDetails?.max_supply || undefined,
       }
@@ -147,13 +180,50 @@ const BadgeCreationPage: NextPage = () => {
         badge,
         type: 'create_badge',
       }
-      const data = await badgeHubDispatchExecute(payload)
-      console.log(data)
-      setCreatingBadge(false)
-      setTransactionHash(data.split(':')[0])
-      setBadgeId(data.split(':')[1])
-    } catch (error: any) {
-      toast.error(error.message, { style: { maxWidth: 'none' } })
+      if (mintRule !== 'by_keys') {
+        setBadgeId(null)
+        setIsAddingKeysComplete(false)
+        const data = await badgeHubDispatchExecute(payload)
+        console.log(data)
+        setCreatingBadge(false)
+        setTransactionHash(data.split(':')[0])
+        setBadgeId(data.split(':')[1])
+      } else {
+        setBadgeId(null)
+        setIsAddingKeysComplete(false)
+        setKeyPairs([])
+        const generatedKeyPairs = generateKeyPairs(numberOfKeys)
+        setKeyPairs(generatedKeyPairs)
+        await badgeHubDispatchExecute(payload)
+          .then(async (data) => {
+            setCreatingBadge(false)
+            setTransactionHash(data.split(':')[0])
+            setBadgeId(data.split(':')[1])
+            const res = await toast.promise(
+              badgeHubContract.use(BADGE_HUB_ADDRESS)?.addKeys(
+                wallet.address,
+                Number(data.split(':')[1]),
+                generatedKeyPairs.map((key) => key.publicKey),
+              ) as Promise<string>,
+              {
+                loading: 'Adding keys...',
+                success: (result) => {
+                  setIsAddingKeysComplete(true)
+                  return `Keys added successfully! Tx Hash: ${result}`
+                },
+                error: (error: { message: any }) => `Failed to add keys: ${error.message}`,
+              },
+            )
+          })
+          .catch((error: { message: any }) => {
+            toast.error(error.message, { style: { maxWidth: 'none' } })
+            setUploading(false)
+            setIsAddingKeysComplete(false)
+            setCreatingBadge(false)
+          })
+      }
+    } catch (err: any) {
+      toast.error(err.message, { style: { maxWidth: 'none' } })
       setCreatingBadge(false)
       setUploading(false)
     }
@@ -184,7 +254,8 @@ const BadgeCreationPage: NextPage = () => {
 
   const checkBadgeDetails = () => {
     if (!badgeDetails) throw new Error('Please fill out the required fields')
-    if (keyState.value === '' || !createdBadgeKey) throw new Error('Please generate a public key')
+    if (mintRule === 'by_key' && (keyState.value === '' || !createdBadgeKey))
+      throw new Error('Please generate a public key')
     if (badgeDetails.external_url) {
       try {
         const url = new URL(badgeDetails.external_url)
@@ -219,7 +290,15 @@ const BadgeCreationPage: NextPage = () => {
     })
   }
 
-  // copy claim url to clipboard
+  const handleDownloadKeys = () => {
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(keyPairs)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `badge-${badgeId as string}-keys.json`
+    document.body.appendChild(element)
+    element.click()
+  }
+
   const copyClaimURL = async () => {
     const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
     const claimURL = `${baseURL}/?id=${badgeId as string}&key=${createdBadgeKey as string}`
@@ -244,6 +323,12 @@ const BadgeCreationPage: NextPage = () => {
     setReadyToCreateBadge(false)
   }, [imageUploadDetails?.uploadMethod])
 
+  useEffect(() => {
+    if (keyPairs.length > 0) {
+      toast.success('Key pairs generated successfully.')
+    }
+  }, [keyPairs])
+
   return (
     <div>
       <NextSeo title="Create Badge" />
@@ -265,52 +350,164 @@ const BadgeCreationPage: NextPage = () => {
       </div>
       <div className="mx-10" ref={scrollRef}>
         <Conditional test={badgeId !== null}>
-          <Alert className="mt-5" type="info">
-            <div className="flex flex-row">
-              <div>
-                <div className="w-[384px] h-[384px]" ref={qrRef}>
-                  <QRCodeSVG
-                    className="mx-auto"
-                    level="H"
-                    size={384}
-                    value={`${
-                      NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-                    }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
-                  />
+          <Conditional test={mintRule === 'by_key'}>
+            <Alert className="mt-5" type="info">
+              <div className="flex flex-row">
+                <div>
+                  <div className="w-[384px] h-[384px]" ref={qrRef}>
+                    <QRCodeSVG
+                      className="mx-auto"
+                      level="H"
+                      size={384}
+                      value={`${
+                        NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                      }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
+                    <Button
+                      className="items-center w-full text-sm text-center rounded"
+                      leftIcon={<FaSave />}
+                      onClick={() => void handleDownloadQr()}
+                    >
+                      Download QR Code
+                    </Button>
+                    <Button
+                      className="w-full text-sm text-center rounded"
+                      isWide
+                      leftIcon={<FaCopy />}
+                      onClick={() => void copyClaimURL()}
+                      variant="solid"
+                    >
+                      Copy Claim URL
+                    </Button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 mt-2 w-[384px]">
-                  <Button
-                    className="items-center w-full text-sm text-center rounded"
-                    leftIcon={<FaSave />}
-                    onClick={() => void handleDownloadQr()}
-                  >
-                    Download QR Code
-                  </Button>
-                  <Button
-                    className="w-full text-sm text-center rounded"
-                    isWide
-                    leftIcon={<FaCopy />}
-                    onClick={() => void copyClaimURL()}
-                    variant="solid"
-                  >
-                    Copy Claim URL
-                  </Button>
+                <div className="ml-4 text-lg">
+                  Badge ID:{` ${badgeId as string}`}
+                  <br />
+                  Private Key:
+                  <Tooltip label="Click to copy the private key">
+                    <button
+                      className="group flex space-x-2 font-mono text-base text-white/50 hover:underline"
+                      onClick={() => void copy(createdBadgeKey as string)}
+                      type="button"
+                    >
+                      <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
+                      <FaCopy className="opacity-50 group-hover:opacity-100" />
+                    </button>
+                  </Tooltip>
+                  <br />
+                  Transaction Hash: {'  '}
+                  <Conditional test={NETWORK === 'testnet'}>
+                    <Anchor
+                      className="text-stargaze hover:underline"
+                      external
+                      href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                    >
+                      {transactionHash}
+                    </Anchor>
+                  </Conditional>
+                  <Conditional test={NETWORK === 'mainnet'}>
+                    <Anchor
+                      className="text-stargaze hover:underline"
+                      external
+                      href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                    >
+                      {transactionHash}
+                    </Anchor>
+                  </Conditional>
+                  <br />
+                  <div className="text-base">
+                    <div className="flex-row pt-4 mt-4 border-t-2">
+                      <span>
+                        You may click{' '}
+                        <Anchor
+                          className="text-stargaze hover:underline"
+                          external
+                          href={`${
+                            NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
+                          }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                        >
+                          here
+                        </Anchor>{' '}
+                        or scan the QR code to claim a badge.
+                      </span>
+                    </div>
+                    <br />
+                    <span className="mt-4">
+                      You may download the QR code or copy the claim URL to share with others.
+                    </span>
+                  </div>
+                  <br />
                 </div>
               </div>
+            </Alert>
+          </Conditional>
+
+          <Conditional test={mintRule === 'by_keys'}>
+            <Alert className="mt-5" type="info">
               <div className="ml-4 text-lg">
                 Badge ID:{` ${badgeId as string}`}
                 <br />
-                Private Key:
-                <Tooltip label="Click to copy the private key">
-                  <button
-                    className="group flex space-x-2 font-mono text-base text-white/50 hover:underline"
-                    onClick={() => void copy(createdBadgeKey as string)}
-                    type="button"
+                Transaction Hash: {'  '}
+                <Conditional test={NETWORK === 'testnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
                   >
-                    <span>{truncateMiddle(createdBadgeKey ? createdBadgeKey : '', 32)}</span>
-                    <FaCopy className="opacity-50 group-hover:opacity-100" />
-                  </button>
-                </Tooltip>
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <Conditional test={NETWORK === 'mainnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <br />
+                <Conditional test={isAddingKeysComplete}>
+                  <div className="pt-2 mt-4 border-t-2">
+                    <span className="mt-2">
+                      Make sure to download the whitelisted keys added during badge creation.
+                    </span>
+                    <Button className="mt-2" onClick={() => handleDownloadKeys()}>
+                      Download Keys
+                    </Button>
+                  </div>
+                </Conditional>
+                <div className="text-base">
+                  <div className="flex-row pt-4 mt-4 border-t-2">
+                    <span>
+                      You may click{' '}
+                      <Anchor
+                        className="text-stargaze hover:underline"
+                        external
+                        href={`/badges/actions/?badgeHubContractAddress=${BADGE_HUB_ADDRESS}&badgeId=${
+                          badgeId as string
+                        }`}
+                      >
+                        here
+                      </Anchor>{' '}
+                      and select Actions {'>'} Add Keys to add (additional) whitelisted keys or select Actions {'>'}{' '}
+                      Mint by Keys to use one of the keys to mint a badge.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Alert>
+          </Conditional>
+
+          <Conditional test={mintRule === 'by_minter'}>
+            <Alert className="mt-5" type="info">
+              <div className="ml-4 text-lg">
+                Badge ID:{` ${badgeId as string}`}
+                <br />
+                Designated Minter Address: {` ${resolvedMinterAddress}`}
                 <br />
                 Transaction Hash: {'  '}
                 <Conditional test={NETWORK === 'testnet'}>
@@ -339,22 +536,19 @@ const BadgeCreationPage: NextPage = () => {
                       <Anchor
                         className="text-stargaze hover:underline"
                         external
-                        href={`${
-                          NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
-                        }/?id=${badgeId as string}&key=${createdBadgeKey as string}`}
+                        href={`/badges/actions/?badgeHubContractAddress=${BADGE_HUB_ADDRESS}&badgeId=${
+                          badgeId as string
+                        }`}
                       >
                         here
                       </Anchor>{' '}
-                      or scan the QR code to claim a badge.
+                      and select Actions {'>'} Mint By Minter to mint a badge.
                     </span>
                   </div>
-                  <br />
-                  <span className="mt-4">You may download the QR code or copy the claim URL to share with others.</span>
                 </div>
-                <br />
               </div>
-            </div>
-          </Alert>
+            </Alert>
+          </Conditional>
         </Conditional>
       </div>
 
@@ -379,6 +573,7 @@ const BadgeCreationPage: NextPage = () => {
               onClick={() => {
                 setMintRule('by_key')
                 setReadyToCreateBadge(false)
+                setBadgeId(null)
               }}
               type="button"
             >
@@ -393,20 +588,20 @@ const BadgeCreationPage: NextPage = () => {
               'isolate space-y-1 border-2',
               'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
               mintRule === 'by_keys' ? 'border-stargaze' : 'border-transparent',
-              mintRule !== 'by_keys' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
+              mintRule !== 'by_keys' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
-              disabled
               onClick={() => {
                 setMintRule('by_keys')
                 setReadyToCreateBadge(false)
+                setBadgeId(null)
               }}
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Keys</h4>
-              <span className="text-sm text-slate-500 line-clamp-2">
+              <span className="text-sm text-white/80 line-clamp-2">
                 Similar to the By Key rule, however each designated private key can only be used once to mint a badge.
               </span>
             </button>
@@ -416,20 +611,20 @@ const BadgeCreationPage: NextPage = () => {
               'isolate space-y-1 border-2',
               'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
               mintRule === 'by_minter' ? 'border-stargaze' : 'border-transparent',
-              mintRule !== 'by_minter' ? 'text-slate-500 bg-stargaze/5 hover:bg-gray/20' : 'hover:bg-white/5',
+              mintRule !== 'by_minter' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
             <button
               className="p-4 w-full h-full text-left bg-transparent"
-              disabled
               onClick={() => {
                 setMintRule('by_minter')
                 setReadyToCreateBadge(false)
+                setBadgeId(null)
               }}
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Minter</h4>
-              <span className="text-sm line-clamp-2 text-slate/500">
+              <span className="text-sm text-white/80 line-clamp-2">
                 Badges can be minted by a designated minter account.
               </span>
             </button>
@@ -439,13 +634,40 @@ const BadgeCreationPage: NextPage = () => {
 
       <div className="mx-10">
         <ImageUploadDetails mintRule={mintRule} onChange={setImageUploadDetails} />
+        <Conditional test={mintRule === 'by_key'}>
+          <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+            <TextInput className="ml-4 w-full max-w-2xl" {...keyState} disabled required />
+            <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
+              Generate Key
+            </Button>
+          </div>
+        </Conditional>
 
-        <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
-          <TextInput className="ml-4 w-full max-w-2xl" {...keyState} disabled required />
-          <Button className="mt-14 ml-4" isDisabled={creatingBadge} onClick={handleGenerateKey}>
-            Generate Key
-          </Button>
-        </div>
+        <Conditional test={mintRule === 'by_keys'}>
+          <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+            <div className="grid grid-cols-2 gap-24">
+              <div className="flex flex-col ml-4">
+                <span className="font-bold">Number of Keys</span>
+                <span className="text-sm text-white/80">
+                  The number of key pairs to be whitelisted for post-creation access control
+                </span>
+              </div>
+              <input
+                className="p-2 w-1/4 max-w-2xl bg-white/10 rounded border-2 border-white/20"
+                onChange={(e) => setNumberOfKeys(Number(e.target.value))}
+                required
+                type="number"
+                value={numberOfKeys}
+              />
+            </div>
+          </div>
+        </Conditional>
+
+        <Conditional test={mintRule === 'by_minter'}>
+          <div className="flex flex-row justify-start py-3 px-8 mb-3 w-full rounded border-2 border-white/20">
+            <TextInput className="ml-4 w-full max-w-lg" {...designatedMinterState} required />
+          </div>
+        </Conditional>
 
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
           <BadgeDetails

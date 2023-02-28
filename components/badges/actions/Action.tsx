@@ -3,21 +3,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 // import { AirdropUpload } from 'components/AirdropUpload'
 import { toUtf8 } from '@cosmjs/encoding'
+import { Alert } from 'components/Alert'
 import type { DispatchExecuteArgs } from 'components/badges/actions/actions'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'components/badges/actions/actions'
 import { ActionsCombobox } from 'components/badges/actions/Combobox'
 import { useActionsComboboxState } from 'components/badges/actions/Combobox.hooks'
 import { Button } from 'components/Button'
+import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
+import { AddressList } from 'components/forms/AddressList'
+import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { MetadataAttributes } from 'components/forms/MetadataAttributes'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useWallet } from 'contexts/wallet'
 import type { Badge, BadgeHubInstance } from 'contracts/badgeHub'
-import * as crypto from 'crypto'
 import sizeof from 'object-sizeof'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
@@ -25,11 +29,12 @@ import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
-import { sha256 } from 'utils/hash'
+import { generateKeyPairs, sha256 } from 'utils/hash'
+import { isValidAddress } from 'utils/isValidAddress'
 import { resolveAddress } from 'utils/resolveAddress'
 
 import { BadgeAirdropListUpload } from '../../BadgeAirdropListUpload'
-import { AddressInput, TextInput } from '../../forms/FormInput'
+import { AddressInput, NumberInput, TextInput } from '../../forms/FormInput'
 import type { MintRule } from '../creation/ImageUploadDetails'
 
 interface BadgeActionsProps {
@@ -52,8 +57,10 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
-  const [keyPairs, setKeyPairs] = useState<string[]>([])
+  const [keyPairs, setKeyPairs] = useState<{ publicKey: string; privateKey: string }[]>([])
   const [signature, setSignature] = useState<string>('')
+  const [ownerList, setOwnerList] = useState<string[]>([])
+  const [numberOfKeys, setNumberOfKeys] = useState(0)
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -147,18 +154,26 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     defaultValue: wallet.address,
   })
 
-  const pubkeyState = useInputState({
-    id: 'pubkey',
-    name: 'pubkey',
-    title: 'Pubkey',
-    subtitle: 'The public key to check whether it can be used to mint a badge',
+  const ownerListState = useAddressListState()
+
+  const pubKeyState = useInputState({
+    id: 'pubKey',
+    name: 'pubKey',
+    title: 'Public Key',
+    subtitle:
+      type === 'mint_by_keys'
+        ? 'The whitelisted public key authorized to mint a badge'
+        : 'The public key to check whether it can be used to mint a badge',
   })
 
   const privateKeyState = useInputState({
     id: 'privateKey',
     name: 'privateKey',
     title: 'Private Key',
-    subtitle: 'The private key that was generated during badge creation',
+    subtitle:
+      type === 'mint_by_keys'
+        ? 'The corresponding private key for the whitelisted public key'
+        : 'The private key that was generated during badge creation',
   })
 
   const nftState = useInputState({
@@ -172,13 +187,16 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     id: 'limit',
     name: 'limit',
     title: 'Limit',
-    subtitle: 'Number of keys/owners to execute the action for',
+    subtitle: 'Number of keys/owners to execute the action for (0 for all)',
   })
 
   const showMetadataField = isEitherType(type, ['edit_badge'])
-  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
+  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'mint_by_minter'])
   const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'airdrop_by_key'])
   const showAirdropFileField = isEitherType(type, ['airdrop_by_key'])
+  const showOwnerList = isEitherType(type, ['mint_by_minter'])
+  const showPubKeyField = isEitherType(type, ['mint_by_keys'])
+  const showLimitState = isEitherType(type, ['purge_keys', 'purge_owners'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -231,11 +249,18 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     id: badgeId,
     editFee,
     owner: resolvedOwnerAddress,
-    pubkey: pubkeyState.value,
+    pubkey: pubKeyState.value,
     signature,
-    keys: [],
-    limit: limitState.value,
-    owners: [],
+    keys: keyPairs.map((keyPair) => keyPair.publicKey),
+    limit: limitState.value || undefined,
+    owners: [
+      ...new Set(
+        ownerListState.values
+          .map((a) => a.address.trim())
+          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+          .concat(ownerList),
+      ),
+    ],
     recipients: airdropAllocationArray,
     privateKey: privateKeyState.value,
     nft: nftState.value,
@@ -355,6 +380,21 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
       handleGenerateSignature(badgeId, resolvedOwnerAddress, privateKeyState.value)
   }, [privateKeyState.value, resolvedOwnerAddress])
 
+  useEffect(() => {
+    if (numberOfKeys > 0) {
+      setKeyPairs(generateKeyPairs(numberOfKeys))
+    }
+  }, [numberOfKeys])
+
+  const handleDownloadKeys = () => {
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(keyPairs)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `badge-${badgeId.toString()}-keys.json`
+    document.body.appendChild(element)
+    element.click()
+  }
+
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
       if (!wallet.client) {
@@ -467,19 +507,6 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     }
   }
 
-  const handleGenerateKeys = (amount: number) => {
-    for (let i = 0; i < amount; i++) {
-      let privKey: Buffer
-      do {
-        privKey = crypto.randomBytes(32)
-      } while (!secp256k1.privateKeyVerify(privKey))
-
-      const privateKey = privKey.toString('hex')
-      const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
-      keyPairs.push(publicKey.concat(',', privateKey))
-    }
-  }
-
   return (
     <form>
       <div className="grid grid-cols-2 mt-4">
@@ -515,7 +542,65 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
               title="Owner"
             />
           )}
+          {showPubKeyField && <TextInput className="mt-2" {...pubKeyState} />}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
+          {showLimitState && <NumberInput className="mt-2" {...limitState} />}
+          <Conditional test={isEitherType(type, ['purge_owners', 'purge_keys'])}>
+            <Alert className="mt-4" type="info">
+              This action is only available if the badge with the specified id is either minted out or expired.
+            </Alert>
+          </Conditional>
+
+          <Conditional test={type === 'add_keys'}>
+            <div className="flex flex-row justify-start py-3 mt-4 mb-3 w-full rounded border-2 border-white/20">
+              <div className="grid grid-cols-2 gap-24">
+                <div className="flex flex-col ml-4">
+                  <span className="font-bold">Number of Keys</span>
+                  <span className="text-sm text-white/80">
+                    The number of public keys to be whitelisted for minting badges
+                  </span>
+                </div>
+                <input
+                  className="p-2 mt-4 w-1/2 max-w-2xl h-1/2 bg-white/10 rounded border-2 border-white/20"
+                  onChange={(e) => setNumberOfKeys(Number(e.target.value))}
+                  required
+                  type="number"
+                  value={numberOfKeys}
+                />
+              </div>
+            </div>
+          </Conditional>
+
+          <Conditional test={numberOfKeys > 0 && type === 'add_keys'}>
+            <Alert type="info">
+              <div className="pt-2">
+                <span className="mt-2">
+                  Make sure to download the whitelisted public keys together with their private key counterparts.
+                </span>
+                <Button className="mt-2" onClick={() => handleDownloadKeys()}>
+                  Download Key Pairs
+                </Button>
+              </div>
+            </Alert>
+          </Conditional>
+
+          <Conditional test={showOwnerList}>
+            <div className="mt-4">
+              <AddressList
+                entries={ownerListState.entries}
+                isRequired
+                onAdd={ownerListState.add}
+                onChange={ownerListState.update}
+                onRemove={ownerListState.remove}
+                subtitle="Enter the owner addresses"
+                title="Addresses"
+              />
+              <Alert className="mt-8" type="info">
+                You may optionally choose a text file of additional owner addresses.
+              </Alert>
+              <WhitelistUpload onChange={setOwnerList} />
+            </div>
+          </Conditional>
 
           {showAirdropFileField && (
             <FormGroup

@@ -1,17 +1,22 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { toUtf8 } from '@cosmjs/encoding'
+import clsx from 'clsx'
 import { Alert } from 'components/Alert'
+import type { MintRule } from 'components/badges/creation/ImageUploadDetails'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { ExecuteCombobox } from 'components/contracts/badgeHub/ExecuteCombobox'
 import { useExecuteComboboxState } from 'components/contracts/badgeHub/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
+import { AddressList } from 'components/forms/AddressList'
+import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
@@ -20,6 +25,7 @@ import { LinkTabs } from 'components/LinkTabs'
 import { badgeHubLinkTabs } from 'components/LinkTabs.data'
 import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
+import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { Badge } from 'contracts/badgeHub'
@@ -40,7 +46,8 @@ import { useMutation } from 'react-query'
 import * as secp256k1 from 'secp256k1'
 import { copy } from 'utils/clipboard'
 import { NETWORK } from 'utils/constants'
-import { sha256 } from 'utils/hash'
+import { generateKeyPairs, sha256 } from 'utils/hash'
+import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
@@ -62,10 +69,15 @@ const BadgeHubExecutePage: NextPage = () => {
   const [createdBadgeId, setCreatedBadgeId] = useState<string | null>(null)
   const [createdBadgeKey, setCreatedBadgeKey] = useState<string | undefined>(undefined)
   const [resolvedOwnerAddress, setResolvedOwnerAddress] = useState<string>('')
+  const [resolvedMinterAddress, setResolvedMinterAddress] = useState<string>('')
   const [signature, setSignature] = useState<string>('')
+  const [ownerList, setOwnerList] = useState<string[]>([])
   const [editFee, setEditFee] = useState<number | undefined>(undefined)
   const [triggerDispatch, setTriggerDispatch] = useState<boolean>(false)
   const qrRef = useRef<HTMLDivElement>(null)
+  const [numberOfKeys, setNumberOfKeys] = useState(0)
+  const [keyPairs, setKeyPairs] = useState<{ publicKey: string; privateKey: string }[]>([])
+  const [mintRule, setMintRule] = useState<MintRule>('by_key')
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -173,20 +185,26 @@ const BadgeHubExecutePage: NextPage = () => {
     name: 'owner',
     title: 'Owner',
     subtitle: 'The owner of the badge',
+    defaultValue: wallet.address,
   })
+
+  const ownerListState = useAddressListState()
 
   const pubkeyState = useInputState({
     id: 'pubkey',
     name: 'pubkey',
     title: 'Pubkey',
-    subtitle: 'The public key for the badge',
+    subtitle: 'The whitelisted public key authorized to mint a badge',
   })
 
   const privateKeyState = useInputState({
     id: 'privateKey',
     name: 'privateKey',
     title: 'Private Key',
-    subtitle: 'The private key generated during badge creation',
+    subtitle:
+      type === 'mint_by_keys'
+        ? 'The corresponding private key for the whitelisted public key'
+        : 'The private key that was generated during badge creation',
   })
 
   const nftState = useInputState({
@@ -200,15 +218,34 @@ const BadgeHubExecutePage: NextPage = () => {
     id: 'limit',
     name: 'limit',
     title: 'Limit',
-    subtitle: 'Number of keys/owners to execute the action for',
+    subtitle: 'Number of keys/owners to execute the action for (0 for all)',
+  })
+
+  const designatedMinterState = useInputState({
+    id: 'designatedMinter',
+    name: 'designatedMinter',
+    title: 'Minter Address',
+    subtitle: 'The address of the designated minter for this badge',
+    defaultValue: wallet.address,
   })
 
   const showBadgeField = type === 'create_badge'
   const showMetadataField = isEitherType(type, ['create_badge', 'edit_badge'])
-  const showIdField = isEitherType(type, ['edit_badge', 'mint_by_key'])
+  const showIdField = isEitherType(type, [
+    'edit_badge',
+    'add_keys',
+    'purge_keys',
+    'purge_owners',
+    'mint_by_key',
+    'mint_by_keys',
+    'mint_by_minter',
+  ])
+  const showLimitField = isEitherType(type, ['purge_keys', 'purge_owners'])
   const showNFTField = type === 'set_nft'
-  const showOwnerField = type === 'mint_by_key'
-  const showPrivateKeyField = type === 'mint_by_key'
+  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
+  const showOwnerListField = isEitherType(type, ['mint_by_minter'])
+  const showPubkeyField = isEitherType(type, ['mint_by_keys'])
+  const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -234,9 +271,16 @@ const BadgeHubExecutePage: NextPage = () => {
         youtube_url: youtubeUrlState.value || undefined,
       },
       transferrable,
-      rule: {
-        by_key: keyState.value,
-      },
+      rule:
+        mintRule === 'by_key'
+          ? {
+              by_key: keyState.value,
+            }
+          : mintRule === 'by_minter'
+          ? {
+              by_minter: resolvedMinterAddress,
+            }
+          : 'by_keys',
       expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
       max_supply: maxSupplyState.value || undefined,
     },
@@ -260,12 +304,19 @@ const BadgeHubExecutePage: NextPage = () => {
       youtube_url: youtubeUrlState.value || undefined,
     },
     id: badgeIdState.value,
-    owner: ownerState.value,
+    owner: resolvedOwnerAddress,
     pubkey: pubkeyState.value,
     signature,
-    keys: [],
-    limit: limitState.value,
-    owners: [],
+    keys: keyPairs.map((keyPair) => keyPair.publicKey),
+    limit: limitState.value || undefined,
+    owners: [
+      ...new Set(
+        ownerListState.values
+          .map((a) => a.address.trim())
+          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+          .concat(ownerList),
+      ),
+    ],
     nft: nftState.value,
     editFee,
     contract: contractState.value,
@@ -337,6 +388,7 @@ const BadgeHubExecutePage: NextPage = () => {
         if (txHash) {
           setLastTx(txHash.split(':')[0])
           setCreatedBadgeId(txHash.split(':')[1])
+          badgeIdState.onChange(!isNaN(Number(txHash.split(':')[1])) ? Number(txHash.split(':')[1]) : 1)
         }
       }
     },
@@ -388,6 +440,14 @@ const BadgeHubExecutePage: NextPage = () => {
       link.click()
     })
   }
+  const handleDownloadKeys = () => {
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(keyPairs)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `badge-${badgeIdState.value}-keys.json`
+    document.body.appendChild(element)
+    element.click()
+  }
 
   const copyClaimURL = async () => {
     const baseURL = NETWORK === 'testnet' ? 'https://badges.publicawesome.dev' : 'https://badges.stargaze.zone'
@@ -408,6 +468,12 @@ const BadgeHubExecutePage: NextPage = () => {
       }
     }
   }
+
+  useEffect(() => {
+    if (numberOfKeys > 0) {
+      setKeyPairs(generateKeyPairs(numberOfKeys))
+    }
+  }, [numberOfKeys])
 
   useEffect(() => {
     if (privateKeyState.value.length === 64 && resolvedOwnerAddress)
@@ -448,6 +514,15 @@ const BadgeHubExecutePage: NextPage = () => {
     void resolveOwnerAddress()
   }, [ownerState.value])
 
+  const resolveMinterAddress = async () => {
+    await resolveAddress(designatedMinterState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedMinterAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveMinterAddress()
+  }, [designatedMinterState.value])
+
   const resolveManagerAddress = async () => {
     await resolveAddress(managerState.value.trim(), wallet).then((resolvedAddress) => {
       setBadge({
@@ -472,9 +547,16 @@ const BadgeHubExecutePage: NextPage = () => {
           youtube_url: youtubeUrlState.value || undefined,
         },
         transferrable,
-        rule: {
-          by_key: keyState.value,
-        },
+        rule:
+          mintRule === 'by_key'
+            ? {
+                by_key: keyState.value,
+              }
+            : mintRule === 'by_minter'
+            ? {
+                by_minter: resolvedMinterAddress,
+              }
+            : 'by_keys',
         expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
         max_supply: maxSupplyState.value || undefined,
       })
@@ -508,9 +590,16 @@ const BadgeHubExecutePage: NextPage = () => {
         youtube_url: youtubeUrlState.value || undefined,
       },
       transferrable,
-      rule: {
-        by_key: keyState.value,
-      },
+      rule:
+        mintRule === 'by_key'
+          ? {
+              by_key: keyState.value,
+            }
+          : mintRule === 'by_minter'
+          ? {
+              by_minter: resolvedMinterAddress,
+            }
+          : 'by_keys',
       expiry: timestamp ? timestamp.getTime() * 1000000 : undefined,
       max_supply: maxSupplyState.value || undefined,
     })
@@ -541,7 +630,7 @@ const BadgeHubExecutePage: NextPage = () => {
       />
       <LinkTabs activeIndex={2} data={badgeHubLinkTabs} />
 
-      {showBadgeField && createdBadgeId && createdBadgeKey && (
+      {showBadgeField && createdBadgeId && createdBadgeKey && mintRule === 'by_key' && (
         <div className="flex flex-row">
           <div className="ml-4">
             <div className="w-[384px] h-[384px]" ref={qrRef}>
@@ -598,14 +687,116 @@ const BadgeHubExecutePage: NextPage = () => {
           </div>
         </div>
       )}
+
+      {showBadgeField && createdBadgeId && mintRule === 'by_keys' && (
+        <Alert className="mt-5" type="info">
+          <div className="ml-4 text-lg">
+            Badge ID:{` ${createdBadgeId as string}`}
+            <br />
+            <div className="text-base">
+              <div className="flex-row pt-4 mt-4 border-t-2">
+                <span>
+                  You may select Message Type {'>'} Add Keys to add whitelisted keys authorized to mint a badge.
+                </span>
+              </div>
+            </div>
+          </div>
+        </Alert>
+      )}
+
+      {showBadgeField && createdBadgeId && mintRule === 'by_minter' && (
+        <Alert className="mt-5" type="info">
+          <div className="ml-4 text-lg">
+            Badge successfully created with ID:{` ${createdBadgeId as string}`}
+            <br />
+            Designated Minter Address: {` ${resolvedMinterAddress}`}
+            <br />
+            <div className="text-base">
+              <div className="flex-row pt-4 mt-4 border-t-2">
+                <span>
+                  You may select Message Type {'>'} Mint by Minter to mint badges using the designated minter wallet.
+                </span>
+              </div>
+            </div>
+          </div>
+        </Alert>
+      )}
+
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
           <AddressInput {...contractState} />
           <ExecuteCombobox {...comboboxState} />
+          <Conditional test={type === 'create_badge'}>
+            <div className={clsx('flex flex-col space-y-2')}>
+              <div>
+                <div className="flex">
+                  <span className="mt-1 text-base font-bold first-letter:capitalize">Mint Rule: </span>
+                  <div className="ml-2 font-bold form-check form-check-inline">
+                    <input
+                      checked={mintRule === 'by_key'}
+                      className="peer sr-only"
+                      id="ruleRadio1"
+                      name="ruletRadio1"
+                      onClick={() => {
+                        setMintRule('by_key')
+                        setCreatedBadgeId(null)
+                      }}
+                      type="radio"
+                    />
+                    <label
+                      className="inline-block py-1 px-2 text-base text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                      htmlFor="ruleRadio1"
+                    >
+                      By Key
+                    </label>
+                  </div>
+                  <div className="ml-2 font-bold form-check form-check-inline">
+                    <input
+                      checked={mintRule === 'by_keys'}
+                      className="peer sr-only"
+                      id="ruleRadio2"
+                      name="ruletRadio2"
+                      onClick={() => {
+                        setMintRule('by_keys')
+                        setCreatedBadgeId(null)
+                      }}
+                      type="radio"
+                    />
+                    <label
+                      className="inline-block py-1 px-2 text-base text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                      htmlFor="ruleRadio2"
+                    >
+                      By Keys
+                    </label>
+                  </div>
+                  <div className="ml-2 font-bold form-check form-check-inline">
+                    <input
+                      checked={mintRule === 'by_minter'}
+                      className="peer sr-only"
+                      id="ruleRadio3"
+                      name="ruletRadio3"
+                      onClick={() => {
+                        setMintRule('by_minter')
+                        setCreatedBadgeId(null)
+                      }}
+                      type="radio"
+                    />
+                    <label
+                      className="inline-block py-1 px-2 text-base text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                      htmlFor="ruleRadio3"
+                    >
+                      By Minter
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Conditional>
           {showIdField && <NumberInput {...badgeIdState} />}
           {showBadgeField && <AddressInput {...managerState} />}
-          {showBadgeField && <TextInput {...keyState} />}
-          {showBadgeField && <Button onClick={handleGenerateKey}>Generate Key</Button>}
+          {showBadgeField && mintRule === 'by_key' && <TextInput {...keyState} />}
+          {showBadgeField && mintRule === 'by_key' && <Button onClick={handleGenerateKey}>Generate Key</Button>}
+          {showBadgeField && mintRule === 'by_minter' && <TextInput {...designatedMinterState} />}
           {showMetadataField && (
             <div className="p-4 rounded-md border-2 border-gray-800">
               <span className="text-gray-400">Metadata</span>
@@ -636,6 +827,57 @@ const BadgeHubExecutePage: NextPage = () => {
               title="Owner"
             />
           )}
+          <Conditional test={showOwnerListField}>
+            <div className="mt-4">
+              <AddressList
+                entries={ownerListState.entries}
+                isRequired
+                onAdd={ownerListState.add}
+                onChange={ownerListState.update}
+                onRemove={ownerListState.remove}
+                subtitle="Enter the owner addresses"
+                title="Addresses"
+              />
+              <Alert className="mt-8" type="info">
+                You may optionally choose a text file of additional owner addresses.
+              </Alert>
+              <WhitelistUpload onChange={setOwnerList} />
+            </div>
+          </Conditional>
+          <Conditional test={type === 'add_keys'}>
+            <div className="flex flex-row justify-start py-3 mt-4 mb-3 w-full rounded border-2 border-white/20">
+              <div className="grid grid-cols-2 gap-24">
+                <div className="flex flex-col ml-4">
+                  <span className="font-bold">Number of Keys</span>
+                  <span className="text-sm text-white/80">
+                    The number of public keys to be whitelisted for minting badges
+                  </span>
+                </div>
+                <input
+                  className="p-2 mt-4 w-1/2 max-w-2xl h-1/2 bg-white/10 rounded border-2 border-white/20"
+                  onChange={(e) => setNumberOfKeys(Number(e.target.value))}
+                  required
+                  type="number"
+                  value={numberOfKeys}
+                />
+              </div>
+            </div>
+          </Conditional>
+
+          <Conditional test={numberOfKeys > 0 && type === 'add_keys'}>
+            <Alert type="info">
+              <div className="pt-2">
+                <span className="mt-2">
+                  Make sure to download the whitelisted public keys together with their private key counterparts.
+                </span>
+                <Button className="mt-2" onClick={() => handleDownloadKeys()}>
+                  Download Key Pairs
+                </Button>
+              </div>
+            </Alert>
+          </Conditional>
+          {showLimitField && <NumberInput {...limitState} />}
+          {showPubkeyField && <TextInput className="mt-2" {...pubkeyState} />}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
           {showNFTField && <AddressInput {...nftState} />}
         </div>
