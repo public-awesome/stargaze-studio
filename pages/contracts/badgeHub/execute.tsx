@@ -175,20 +175,24 @@ const BadgeHubExecutePage: NextPage = () => {
     name: 'owner',
     title: 'Owner',
     subtitle: 'The owner of the badge',
+    defaultValue: wallet.address,
   })
 
   const pubkeyState = useInputState({
     id: 'pubkey',
     name: 'pubkey',
     title: 'Pubkey',
-    subtitle: 'The public key for the badge',
+    subtitle: 'The whitelisted public key authorized to mint a badge',
   })
 
   const privateKeyState = useInputState({
     id: 'privateKey',
     name: 'privateKey',
     title: 'Private Key',
-    subtitle: 'The private key generated during badge creation',
+    subtitle:
+      type === 'mint_by_keys'
+        ? 'The corresponding private key for the whitelisted public key'
+        : 'The private key that was generated during badge creation',
   })
 
   const nftState = useInputState({
@@ -218,8 +222,9 @@ const BadgeHubExecutePage: NextPage = () => {
   ])
   const showLimitField = isEitherType(type, ['purge_keys', 'purge_owners'])
   const showNFTField = type === 'set_nft'
-  const showOwnerField = type === 'mint_by_key'
-  const showPrivateKeyField = type === 'mint_by_key'
+  const showOwnerField = isEitherType(type, ['mint_by_key', 'mint_by_keys', 'mint_by_minter'])
+  const showPubkeyField = isEitherType(type, ['mint_by_keys'])
+  const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -694,6 +699,7 @@ const BadgeHubExecutePage: NextPage = () => {
             </Alert>
           </Conditional>
           {showLimitField && <NumberInput {...limitState} />}
+          {showPubkeyField && <TextInput className="mt-2" {...pubkeyState} />}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
           {showNFTField && <AddressInput {...nftState} />}
         </div>
