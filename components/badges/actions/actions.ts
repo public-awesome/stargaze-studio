@@ -29,11 +29,6 @@ export const BY_KEY_ACTION_LIST: ActionListItem[] = [
     description: `Edit badge metadata for the badge with the specified ID`,
   },
   {
-    id: 'purge_owners',
-    name: 'Purge Owners',
-    description: `Purge owners from the badge with the specified ID`,
-  },
-  {
     id: 'mint_by_key',
     name: 'Mint by Key',
     description: `Mint a badge to a specified address`,
@@ -43,6 +38,11 @@ export const BY_KEY_ACTION_LIST: ActionListItem[] = [
     name: 'Airdrop by Key',
     description: `Airdrop badges to a list of specified addresses`,
   },
+  {
+    id: 'purge_owners',
+    name: 'Purge Owners',
+    description: `Purge owners from the badge with the specified ID`,
+  },
 ]
 
 export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
@@ -50,6 +50,11 @@ export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
     id: 'edit_badge',
     name: 'Edit Badge',
     description: `Edit badge metadata for the badge with the specified ID`,
+  },
+  {
+    id: 'mint_by_keys',
+    name: 'Mint by Keys',
+    description: `Mint a new badge with a whitelisted private key`,
   },
   {
     id: 'add_keys',
@@ -66,11 +71,6 @@ export const BY_KEYS_ACTION_LIST: ActionListItem[] = [
     name: 'Purge Owners',
     description: `Purge owners from the badge with the specified ID`,
   },
-  {
-    id: 'mint_by_keys',
-    name: 'Mint by Keys',
-    description: `Mint a new badge with a whitelisted private key`,
-  },
 ]
 
 export const BY_MINTER_ACTION_LIST: ActionListItem[] = [
@@ -80,14 +80,14 @@ export const BY_MINTER_ACTION_LIST: ActionListItem[] = [
     description: `Edit badge metadata for the badge with the specified ID`,
   },
   {
-    id: 'purge_owners',
-    name: 'Purge Owners',
-    description: `Purge owners from the badge with the specified ID`,
-  },
-  {
     id: 'mint_by_minter',
     name: 'Mint by Minter',
     description: `Mint a new badge to specified owner addresses`,
+  },
+  {
+    id: 'purge_owners',
+    name: 'Purge Owners',
+    description: `Purge owners from the badge with the specified ID`,
   },
 ]
 
