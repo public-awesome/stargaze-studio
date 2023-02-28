@@ -34,7 +34,7 @@ import { isValidAddress } from 'utils/isValidAddress'
 import { resolveAddress } from 'utils/resolveAddress'
 
 import { BadgeAirdropListUpload } from '../../BadgeAirdropListUpload'
-import { AddressInput, TextInput } from '../../forms/FormInput'
+import { AddressInput, NumberInput, TextInput } from '../../forms/FormInput'
 import type { MintRule } from '../creation/ImageUploadDetails'
 
 interface BadgeActionsProps {
@@ -186,7 +186,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     id: 'limit',
     name: 'limit',
     title: 'Limit',
-    subtitle: 'Number of keys/owners to execute the action for',
+    subtitle: 'Number of keys/owners to execute the action for (0 for all)',
   })
 
   const showMetadataField = isEitherType(type, ['edit_badge'])
@@ -195,6 +195,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
   const showAirdropFileField = isEitherType(type, ['airdrop_by_key'])
   const showOwnerList = isEitherType(type, ['mint_by_minter'])
   const showPubKeyField = isEitherType(type, ['mint_by_keys'])
+  const showLimitState = isEitherType(type, ['purge_keys', 'purge_owners'])
 
   const payload: DispatchExecuteArgs = {
     badge: {
@@ -250,7 +251,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     pubkey: pubKeyState.value,
     signature,
     keys: [],
-    limit: limitState.value,
+    limit: limitState.value || undefined,
     owners: [
       ...new Set(
         ownerListState.values
@@ -527,6 +528,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
           )}
           {showPubKeyField && <TextInput className="mt-2" {...pubKeyState} />}
           {showPrivateKeyField && <TextInput className="mt-2" {...privateKeyState} />}
+          {showLimitState && <NumberInput className="mt-2" {...limitState} />}
 
           <Conditional test={showOwnerList}>
             <div className="mt-4">
