@@ -55,8 +55,8 @@ const VendingMinterExecutePage: NextPage = () => {
   const priceState = useNumberInputState({
     id: 'price',
     name: 'price',
-    title: 'Price',
-    subtitle: 'Enter the token price',
+    title: type === 'update_discount_price' ? 'Discount Price' : 'Price',
+    subtitle: type === 'update_discount_price' ? 'New discount price in STARS' : 'Enter the token price',
   })
 
   const contractState = useInputState({
@@ -86,7 +86,7 @@ const VendingMinterExecutePage: NextPage = () => {
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = type === 'mint_for'
   const showRecipientField = isEitherType(type, ['mint_to', 'mint_for'])
-  const showPriceField = type === 'update_mint_price'
+  const showPriceField = isEitherType(type, ['update_mint_price', 'update_discount_price'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {

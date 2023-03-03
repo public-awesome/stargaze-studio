@@ -48,6 +48,8 @@ export interface VendingMinterInstance {
   withdraw: (senderAddress: string) => Promise<string>
   airdrop: (senderAddress: string, recipients: string[]) => Promise<string>
   burnRemaining: (senderAddress: string) => Promise<string>
+  updateDiscountPrice: (senderAddress: string, price: string) => Promise<string>
+  removeDiscountPrice: (senderAddress: string) => Promise<string>
 }
 
 export interface VendingMinterMessages {
@@ -66,6 +68,8 @@ export interface VendingMinterMessages {
   withdraw: () => WithdrawMessage
   airdrop: (recipients: string[]) => CustomMessage
   burnRemaining: () => BurnRemainingMessage
+  updateDiscountPrice: (price: string) => UpdateDiscountPriceMessage
+  removeDiscountPrice: () => RemoveDiscountPriceMessage
 }
 
 export interface MintMessage {
@@ -93,6 +97,26 @@ export interface UpdateMintPriceMessage {
     update_mint_price: {
       price: string
     }
+  }
+  funds: Coin[]
+}
+
+export interface UpdateDiscountPriceMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_discount_price: {
+      price: string
+    }
+  }
+  funds: Coin[]
+}
+
+export interface RemoveDiscountPriceMessage {
+  sender: string
+  contract: string
+  msg: {
+    remove_discount_price: Record<string, never>
   }
   funds: Coin[]
 }
@@ -318,6 +342,36 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
           update_mint_price: {
             price: (Number(price) * 1000000).toString(),
           },
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const updateDiscountPrice = async (senderAddress: string, price: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_discount_price: {
+            price: (Number(price) * 1000000).toString(),
+          },
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const removeDiscountPrice = async (senderAddress: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          remove_discount_price: {},
         },
         'auto',
         '',
@@ -552,6 +606,8 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
       mint,
       purge,
       updateMintPrice,
+      updateDiscountPrice,
+      removeDiscountPrice,
       setWhitelist,
       updateStartTime,
       updateStartTradingTime,
@@ -628,6 +684,30 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
           update_mint_price: {
             price: (Number(price) * 1000000).toString(),
           },
+        },
+        funds: [],
+      }
+    }
+
+    const updateDiscountPrice = (price: string): UpdateDiscountPriceMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_discount_price: {
+            price: (Number(price) * 1000000).toString(),
+          },
+        },
+        funds: [],
+      }
+    }
+
+    const removeDiscountPrice = (): RemoveDiscountPriceMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          remove_discount_price: {},
         },
         funds: [],
       }
@@ -795,6 +875,8 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
       mint,
       purge,
       updateMintPrice,
+      updateDiscountPrice,
+      removeDiscountPrice,
       setWhitelist,
       updateStartTime,
       updateStartTradingTime,
