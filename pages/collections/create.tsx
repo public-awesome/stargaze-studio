@@ -775,15 +775,25 @@ const CollectionCreationPage: NextPage = () => {
           const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
           throw Error(`Whitelist start time (${whitelistStartDate.toLocaleString()}) does not match minting start time`)
         }
-        if (
-          mintingDetails?.numTokens &&
-          config?.per_address_limit &&
-          mintingDetails.numTokens > 100 &&
-          Number(config.per_address_limit) > mintingDetails.numTokens / 100
-        )
-          throw Error(
-            `Invalid limit for tokens per address (${config.per_address_limit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
-          )
+
+        if (mintingDetails?.numTokens && config?.per_address_limit) {
+          if (mintingDetails.numTokens >= 100 && Number(config.per_address_limit) > 50) {
+            throw Error(
+              `Invalid limit for tokens per address (${config.per_address_limit} tokens). Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
+            )
+          } else if (
+            mintingDetails.numTokens >= 100 &&
+            Number(config.per_address_limit) > Math.ceil((mintingDetails.numTokens / 100) * 3)
+          ) {
+            throw Error(
+              `Invalid limit for tokens per address (${config.per_address_limit} tokens). Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
+            )
+          } else if (mintingDetails.numTokens < 100 && Number(config.per_address_limit) > 3) {
+            throw Error(
+              `Invalid limit for tokens per address (${config.per_address_limit} tokens). Tokens per address limit cannot exceed 3 for collections with less than 100 tokens in total.`,
+            )
+          }
+        }
       }
     } else if (whitelistDetails.whitelistType === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
@@ -800,15 +810,24 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Whitelist start time cannot be later than whitelist end time')
       if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
         throw new Error('Whitelist start time must be the same as the minting start time')
-      if (
-        mintingDetails?.numTokens &&
-        whitelistDetails.perAddressLimit &&
-        mintingDetails.numTokens > 100 &&
-        whitelistDetails.perAddressLimit > mintingDetails.numTokens / 100
-      )
-        throw Error(
-          `Invalid limit for tokens per address (${whitelistDetails.perAddressLimit} tokens). The limit cannot exceed 1% of the total number of tokens.`,
-        )
+      if (whitelistDetails.perAddressLimit && mintingDetails?.numTokens) {
+        if (mintingDetails.numTokens >= 100 && whitelistDetails.perAddressLimit > 50) {
+          throw Error(
+            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
+          )
+        } else if (
+          mintingDetails.numTokens >= 100 &&
+          whitelistDetails.perAddressLimit > Math.ceil((mintingDetails.numTokens / 100) * 3)
+        ) {
+          throw Error(
+            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
+          )
+        } else if (mintingDetails.numTokens < 100 && whitelistDetails.perAddressLimit > 3) {
+          throw Error(
+            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3 for collections with less than 100 tokens in total.`,
+          )
+        }
+      }
     }
   }
 
