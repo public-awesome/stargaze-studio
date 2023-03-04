@@ -15,8 +15,8 @@ const HomePage: NextPage = () => {
         Looking for a fast and efficient way to build an NFT collection? Stargaze Studio is the solution.
         <br />
         <br />
-        Stargaze Studio is built to provide useful smart contract interfaces that helps you build and deploy your own
-        NFT collections in no time.
+        Stargaze Studio is built to provide useful smart contract interfaces that help you build and deploy your own NFT
+        collections in no time.
       </p>
 
       <br />
