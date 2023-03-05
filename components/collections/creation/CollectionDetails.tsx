@@ -253,8 +253,8 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
           <div
             className={clsx(
               minterType === 'base'
-                ? 'flex flex-col -ml-16 space-y-2 form-control'
-                : 'flex flex-col space-y-2 form-control',
+                ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
+                : 'flex flex-col space-y-2 w-3/4 form-control',
             )}
           >
             <label className="justify-start cursor-pointer label">
