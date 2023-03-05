@@ -10,7 +10,7 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { Tooltip } from 'components/Tooltip'
 import type { ChangeEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 
 import { TextInput } from '../../forms/FormInput'
@@ -40,6 +40,8 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
   const [updatable, setUpdatable] = useState<boolean>(false)
+
+  const initialRender = useRef(true)
 
   const nameState = useInputState({
     id: 'name',
@@ -113,6 +115,22 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
     }
     reader.readAsArrayBuffer(event.target.files[0])
   }
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false
+    } else if (updatable) {
+      toast.success('Token metadata will be updatable upon collection creation.', {
+        style: { maxWidth: 'none' },
+        icon: '✅📝',
+      })
+    } else {
+      toast.error('Token metadata will not be updatable upon collection creation.', {
+        style: { maxWidth: 'none' },
+        icon: '⛔🔏',
+      })
+    }
+  }, [updatable])
 
   return (
     <div>
