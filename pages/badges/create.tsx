@@ -23,12 +23,14 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
+import type { Badge } from 'contracts/badgeHub'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute as badgeHubDispatchExecute } from 'contracts/badgeHub/messages/execute'
 import * as crypto from 'crypto'
 import { toPng } from 'html-to-image'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import sizeof from 'object-sizeof'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -60,6 +62,7 @@ const BadgeCreationPage: NextPage = () => {
   const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
   const [mintRule, setMintRule] = useState<MintRule>('by_key')
   const [resolvedMinterAddress, setResolvedMinterAddress] = useState<string>('')
+  const [tempBadge, setTempBadge] = useState<Badge>()
 
   const [badgeId, setBadgeId] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -138,6 +141,37 @@ const BadgeCreationPage: NextPage = () => {
   useEffect(() => {
     void resolveMinterAddress()
   }, [designatedMinterState.value])
+
+  useEffect(() => {
+    const badge = {
+      manager: badgeDetails?.manager as string,
+      metadata: {
+        name: badgeDetails?.name || undefined,
+        description: badgeDetails?.description || undefined,
+        image: imageUrl || undefined,
+        image_data: badgeDetails?.image_data || undefined,
+        external_url: badgeDetails?.external_url || undefined,
+        attributes: badgeDetails?.attributes || undefined,
+        background_color: badgeDetails?.background_color || undefined,
+        animation_url: badgeDetails?.animation_url || undefined,
+        youtube_url: badgeDetails?.youtube_url || undefined,
+      },
+      transferrable: badgeDetails?.transferrable as boolean,
+      rule:
+        mintRule === 'by_key'
+          ? {
+              by_key: keyState.value,
+            }
+          : mintRule === 'by_minter'
+          ? {
+              by_minter: resolvedMinterAddress,
+            }
+          : 'by_keys',
+      expiry: badgeDetails?.expiry || undefined,
+      max_supply: badgeDetails?.max_supply || undefined,
+    }
+    setTempBadge(badge)
+  }, [badgeDetails, keyState.value, mintRule, resolvedMinterAddress, imageUrl])
 
   const createNewBadge = async () => {
     try {
@@ -672,6 +706,11 @@ const BadgeCreationPage: NextPage = () => {
 
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
           <BadgeDetails
+            metadataSize={
+              tempBadge?.metadata.image === undefined
+                ? Number(sizeof(tempBadge)) + Number(sizeof(tempBadge?.metadata.attributes)) + 150
+                : Number(sizeof(tempBadge)) + Number(sizeof(tempBadge.metadata.attributes))
+            }
             mintRule={mintRule}
             onChange={setBadgeDetails}
             uploadMethod={imageUploadDetails?.uploadMethod ? imageUploadDetails.uploadMethod : 'new'}

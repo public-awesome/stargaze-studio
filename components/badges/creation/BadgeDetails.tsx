@@ -3,7 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+import { toUtf8 } from '@cosmjs/encoding'
 import clsx from 'clsx'
+import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
@@ -13,6 +15,7 @@ import type { Trait } from 'contracts/badgeHub'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import { BADGE_HUB_ADDRESS } from 'utils/constants'
 
 import { AddressInput, NumberInput, TextInput } from '../../forms/FormInput'
 import { MetadataAttributes } from '../../forms/MetadataAttributes'
@@ -22,6 +25,7 @@ interface BadgeDetailsProps {
   onChange: (data: BadgeDetailsDataProps) => void
   uploadMethod: UploadMethod | undefined
   mintRule: MintRule
+  metadataSize: number
 }
 
 export interface BadgeDetailsDataProps {
@@ -39,11 +43,12 @@ export interface BadgeDetailsDataProps {
   youtube_url?: string
 }
 
-export const BadgeDetails = ({ onChange }: BadgeDetailsProps) => {
+export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
   const wallet = useWallet()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
   const [metadataFile, setMetadataFile] = useState<File>()
+  const [metadataFeeRate, setMetadataFeeRate] = useState<number>(0)
 
   const metadataFileRef = useRef<HTMLInputElement | null>(null)
 
@@ -259,6 +264,26 @@ export const BadgeDetails = ({ onChange }: BadgeDetailsProps) => {
     youtubeUrlState.value,
   ])
 
+  useEffect(() => {
+    const retrieveFeeRate = async () => {
+      try {
+        if (wallet.client) {
+          const feeRateRaw = await wallet.client.queryContractRaw(
+            BADGE_HUB_ADDRESS,
+            toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
+          )
+          console.log('Fee Rate Raw: ', feeRateRaw)
+          const feeRate = JSON.parse(new TextDecoder().decode(feeRateRaw as Uint8Array))
+          setMetadataFeeRate(Number(feeRate.metadata))
+        }
+      } catch (error) {
+        toast.error('Error retrieving metadata fee rate.')
+        console.log('Error retrieving fee rate: ', error)
+      }
+    }
+    void retrieveFeeRate()
+  }, [wallet.client])
+
   return (
     <div>
       <div className={clsx('grid grid-cols-2 ml-4 max-w-5xl')}>
@@ -272,16 +297,24 @@ export const BadgeDetails = ({ onChange }: BadgeDetailsProps) => {
           <FormControl className="mt-2" htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
             <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
           </FormControl>
-          <div className="mt-2 form-control">
-            <label className="justify-start cursor-pointer label">
-              <span className="mr-4 font-bold">Transferrable</span>
-              <input
-                checked={transferrable}
-                className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
-                onClick={() => setTransferrable(!transferrable)}
-                type="checkbox"
-              />
-            </label>
+          <div className="grid grid-cols-2">
+            <div className="mt-2 w-1/3 form-control">
+              <label className="justify-start cursor-pointer label">
+                <span className="mr-4 font-bold">Transferrable</span>
+                <input
+                  checked={transferrable}
+                  className={`toggle ${transferrable ? `bg-stargaze` : `bg-gray-600`}`}
+                  onClick={() => setTransferrable(!transferrable)}
+                  type="checkbox"
+                />
+              </label>
+            </div>
+            <Conditional test={managerState.value !== ''}>
+              <div className="grid grid-cols-2 ml-12 w-full">
+                <div className="mt-4 font-bold">Fee Estimate:</div>
+                <span className="mt-4">{(metadataSize * Number(metadataFeeRate)) / 1000000} stars</span>
+              </div>
+            </Conditional>
           </div>
         </div>
         <div className={clsx('ml-10')}>
