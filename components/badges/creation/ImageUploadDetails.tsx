@@ -172,7 +172,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
         </div>
       </div>
 
-      <div className="p-3 py-5 pb-8">
+      <div className="p-3 py-5 pb-4">
         <Conditional test={uploadMethod === 'existing'}>
           <div className="ml-3 flex-column">
             <p className="mb-5 ml-5">
@@ -187,8 +187,17 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
               </Anchor>{' '}
               and upload your image manually to get an image URL for your badge.
             </p>
-            <div>
-              <TextInput {...imageUrlState} className="mt-2 ml-4 w-1/2" />
+            <div className="flex flex-row w-full">
+              <TextInput {...imageUrlState} className="mt-2 ml-6 w-full max-w-2xl" />
+              <Conditional test={imageUrlState.value !== ''}>
+                <div className="mt-2 ml-4 w-1/4 border-2 border-dashed">
+                  <img
+                    alt="badge-preview"
+                    className="w-full"
+                    src={imageUrlState.value.replace('IPFS://', 'ipfs://').replace(/,/g, '').replace(/"/g, '').trim()}
+                  />
+                </div>
+              </Conditional>
             </div>
           </div>
         </Conditional>

@@ -278,6 +278,7 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
         }
       } catch (error) {
         toast.error('Error retrieving metadata fee rate.')
+        setMetadataFeeRate(0)
         console.log('Error retrieving fee rate: ', error)
       }
     }
