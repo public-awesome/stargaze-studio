@@ -33,7 +33,7 @@ export const Tooltip = ({ label, children, ...props }: TooltipProps) => {
         <div
           {...props}
           {...attributes.popper}
-          className={clsx('py-1 px-2 m-1 text-sm bg-black/80 rounded shadow-md', props.className)}
+          className={clsx('py-1 px-2 m-1 text-sm bg-slate-900 rounded shadow-md', props.className)}
           ref={setPopperElement}
           style={{ ...styles.popper, ...props.style }}
         >

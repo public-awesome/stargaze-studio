@@ -659,21 +659,26 @@ const BadgeCreationPage: NextPage = () => {
               mintRule !== 'by_minter' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMintRule('by_minter')
-                setReadyToCreateBadge(false)
-                setBadgeId(null)
-              }}
-              type="button"
+            <Tooltip
+              label="Caveat: With only a single designated minter, there will be no practical way to share badge minting authority."
+              placement="bottom"
             >
-              <h4 className="font-bold">Mint Rule: By Minter</h4>
-              <span className="text-sm text-white/80 line-clamp-4">
-                No key designation. Multiple badges can be minted to different addresses by a pre-determined minter
-                address.
-              </span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMintRule('by_minter')
+                  setReadyToCreateBadge(false)
+                  setBadgeId(null)
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Mint Rule: By Minter</h4>
+                <span className="text-sm text-white/80 line-clamp-4">
+                  No key designation. Multiple badges can be minted to different addresses by a pre-determined minter
+                  address.
+                </span>
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>
