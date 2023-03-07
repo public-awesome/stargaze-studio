@@ -660,7 +660,7 @@ const BadgeCreationPage: NextPage = () => {
             )}
           >
             <Tooltip
-              label="Caveat: With only a single designated minter, there will be no practical way to share badge minting authority."
+              label="The most basic approach. However, having only a single designated minter address may restrict your ability to distribute authority for badge minting."
               placement="bottom"
             >
               <button
