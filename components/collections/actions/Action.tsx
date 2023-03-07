@@ -151,7 +151,7 @@ export const CollectionActions = ({
     name: 'royaltyShare',
     title: 'Share Percentage',
     subtitle: 'Percentage of royalties to be paid',
-    placeholder: '8%',
+    placeholder: '5%',
   })
 
   const showTokenUriField = type === 'mint_token_uri'

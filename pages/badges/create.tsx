@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-nested-ternary */
 
@@ -22,12 +23,14 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
+import type { Badge } from 'contracts/badgeHub'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute as badgeHubDispatchExecute } from 'contracts/badgeHub/messages/execute'
 import * as crypto from 'crypto'
 import { toPng } from 'html-to-image'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import sizeof from 'object-sizeof'
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -59,6 +62,7 @@ const BadgeCreationPage: NextPage = () => {
   const [readyToCreateBadge, setReadyToCreateBadge] = useState(false)
   const [mintRule, setMintRule] = useState<MintRule>('by_key')
   const [resolvedMinterAddress, setResolvedMinterAddress] = useState<string>('')
+  const [tempBadge, setTempBadge] = useState<Badge>()
 
   const [badgeId, setBadgeId] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -137,6 +141,37 @@ const BadgeCreationPage: NextPage = () => {
   useEffect(() => {
     void resolveMinterAddress()
   }, [designatedMinterState.value])
+
+  useEffect(() => {
+    const badge = {
+      manager: badgeDetails?.manager as string,
+      metadata: {
+        name: badgeDetails?.name || undefined,
+        description: badgeDetails?.description || undefined,
+        image: imageUrl || undefined,
+        image_data: badgeDetails?.image_data || undefined,
+        external_url: badgeDetails?.external_url || undefined,
+        attributes: badgeDetails?.attributes || undefined,
+        background_color: badgeDetails?.background_color || undefined,
+        animation_url: badgeDetails?.animation_url || undefined,
+        youtube_url: badgeDetails?.youtube_url || undefined,
+      },
+      transferrable: badgeDetails?.transferrable as boolean,
+      rule:
+        mintRule === 'by_key'
+          ? {
+              by_key: keyState.value,
+            }
+          : mintRule === 'by_minter'
+          ? {
+              by_minter: resolvedMinterAddress,
+            }
+          : 'by_keys',
+      expiry: badgeDetails?.expiry || undefined,
+      max_supply: badgeDetails?.max_supply || undefined,
+    }
+    setTempBadge(badge)
+  }, [badgeDetails, keyState.value, mintRule, resolvedMinterAddress, imageUrl])
 
   const createNewBadge = async () => {
     try {
@@ -568,20 +603,26 @@ const BadgeCreationPage: NextPage = () => {
               mintRule !== 'by_key' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMintRule('by_key')
-                setReadyToCreateBadge(false)
-                setBadgeId(null)
-              }}
-              type="button"
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              label="The same single private key can be utilized by multiple users to share badge minting authority."
+              placement="bottom"
             >
-              <h4 className="font-bold">Mint Rule: By Key</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Badges can be minted more than once with a badge specific message signed by a designated private key.
-              </span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMintRule('by_key')
+                  setReadyToCreateBadge(false)
+                  setBadgeId(null)
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Mint Rule: By Key</h4>
+                <span className="text-sm text-white/80 line-clamp-4">
+                  Multiple badges can be minted to different addresses by the owner of a single designated key.
+                </span>
+              </button>
+            </Tooltip>
           </div>
           <div
             className={clsx(
@@ -591,20 +632,26 @@ const BadgeCreationPage: NextPage = () => {
               mintRule !== 'by_keys' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMintRule('by_keys')
-                setReadyToCreateBadge(false)
-                setBadgeId(null)
-              }}
-              type="button"
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              label="The key pairs are meant to be saved and distributed. Badges can be claimed individually by different users with the key pair they received."
+              placement="bottom"
             >
-              <h4 className="font-bold">Mint Rule: By Keys</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Similar to the By Key rule, however each designated private key can only be used once to mint a badge.
-              </span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMintRule('by_keys')
+                  setReadyToCreateBadge(false)
+                  setBadgeId(null)
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Mint Rule: By Keys</h4>
+                <span className="text-sm text-white/80 line-clamp-4">
+                  Multiple key pairs are generated and designated to be only used once to mint a single badge.
+                </span>
+              </button>
+            </Tooltip>
           </div>
           <div
             className={clsx(
@@ -614,20 +661,27 @@ const BadgeCreationPage: NextPage = () => {
               mintRule !== 'by_minter' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMintRule('by_minter')
-                setReadyToCreateBadge(false)
-                setBadgeId(null)
-              }}
-              type="button"
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              label="The most basic approach. However, having only a single designated minter address may restrict your ability to distribute authority for badge minting."
+              placement="bottom"
             >
-              <h4 className="font-bold">Mint Rule: By Minter</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Badges can be minted by a designated minter account.
-              </span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMintRule('by_minter')
+                  setReadyToCreateBadge(false)
+                  setBadgeId(null)
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Mint Rule: By Minter</h4>
+                <span className="text-sm text-white/80 line-clamp-4">
+                  No key designation. Multiple badges can be minted to different addresses by a pre-determined minter
+                  address.
+                </span>
+              </button>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -671,6 +725,11 @@ const BadgeCreationPage: NextPage = () => {
 
         <div className="flex justify-between py-3 px-8 rounded border-2 border-white/20 grid-col-2">
           <BadgeDetails
+            metadataSize={
+              tempBadge?.metadata.image === undefined
+                ? Number(sizeof(tempBadge)) + Number(sizeof(tempBadge?.metadata.attributes)) + 150
+                : Number(sizeof(tempBadge)) + Number(sizeof(tempBadge.metadata.attributes))
+            }
             mintRule={mintRule}
             onChange={setBadgeDetails}
             uploadMethod={imageUploadDetails?.uploadMethod ? imageUploadDetails.uploadMethod : 'new'}

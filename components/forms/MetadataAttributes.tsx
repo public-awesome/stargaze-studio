@@ -73,9 +73,10 @@ export function MetadataAttribute({ id, isLast, onAdd, onChange, onRemove, defau
   }, [traitTypeState.value, traitValueState.value, id])
 
   return (
-    <div className="grid relative grid-cols-[1fr_1fr_auto] space-x-2">
+    <div className="grid relative 2xl:grid-cols-[1fr_1fr_auto] 2xl:space-x-2">
       <TraitTypeInput {...traitTypeState} />
       <TraitValueInput {...traitValueState} />
+
       <div className="flex justify-end items-end pb-2 w-8">
         <button
           className="flex justify-center items-center p-2 bg-stargaze-80 hover:bg-plumbus-60 rounded-full"
