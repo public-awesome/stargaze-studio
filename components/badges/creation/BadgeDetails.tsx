@@ -139,13 +139,13 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
             })
           }
         }
-        nameState.onChange(parsedMetadata.name)
-        descriptionState.onChange(parsedMetadata.description)
-        externalUrlState.onChange(parsedMetadata.external_url)
-        youtubeUrlState.onChange(parsedMetadata.youtube_url)
-        animationUrlState.onChange(parsedMetadata.animation_url)
-        backgroundColorState.onChange(parsedMetadata.background_color)
-        imageDataState.onChange(parsedMetadata.image_data)
+        nameState.onChange(parsedMetadata.name ? parsedMetadata.name : '')
+        descriptionState.onChange(parsedMetadata.description ? parsedMetadata.description : '')
+        externalUrlState.onChange(parsedMetadata.external_url ? parsedMetadata.external_url : '')
+        youtubeUrlState.onChange(parsedMetadata.youtube_url ? parsedMetadata.youtube_url : '')
+        animationUrlState.onChange(parsedMetadata.animation_url ? parsedMetadata.animation_url : '')
+        backgroundColorState.onChange(parsedMetadata.background_color ? parsedMetadata.background_color : '')
+        imageDataState.onChange(parsedMetadata.image_data ? parsedMetadata.image_data : '')
       } else {
         attributesState.reset()
         nameState.onChange('')
