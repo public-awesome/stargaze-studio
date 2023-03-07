@@ -603,20 +603,25 @@ const BadgeCreationPage: NextPage = () => {
               mintRule !== 'by_key' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMintRule('by_key')
-                setReadyToCreateBadge(false)
-                setBadgeId(null)
-              }}
-              type="button"
+            <Tooltip
+              label="The same single private key can be utilized by multiple users to share badge minting authority."
+              placement="bottom"
             >
-              <h4 className="font-bold">Mint Rule: By Key</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Badges can be minted more than once with a badge specific message signed by a designated private key.
-              </span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMintRule('by_key')
+                  setReadyToCreateBadge(false)
+                  setBadgeId(null)
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Mint Rule: By Key</h4>
+                <span className="text-sm text-white/80 line-clamp-4">
+                  Multiple badges can be minted to different addresses by the owner of a single designated key.
+                </span>
+              </button>
+            </Tooltip>
           </div>
           <div
             className={clsx(
@@ -626,20 +631,25 @@ const BadgeCreationPage: NextPage = () => {
               mintRule !== 'by_keys' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <button
-              className="p-4 w-full h-full text-left bg-transparent"
-              onClick={() => {
-                setMintRule('by_keys')
-                setReadyToCreateBadge(false)
-                setBadgeId(null)
-              }}
-              type="button"
+            <Tooltip
+              label="The key pairs are meant to be saved and distributed. Badges can be claimed individually by different users with the key pair they received."
+              placement="bottom"
             >
-              <h4 className="font-bold">Mint Rule: By Keys</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Similar to the By Key rule, however each designated private key can only be used once to mint a badge.
-              </span>
-            </button>
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMintRule('by_keys')
+                  setReadyToCreateBadge(false)
+                  setBadgeId(null)
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Mint Rule: By Keys</h4>
+                <span className="text-sm text-white/80 line-clamp-4">
+                  Multiple key pairs are generated and designated to be only used once to mint a single badge.
+                </span>
+              </button>
+            </Tooltip>
           </div>
           <div
             className={clsx(
@@ -659,8 +669,9 @@ const BadgeCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Mint Rule: By Minter</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
-                Badges can be minted by a designated minter account.
+              <span className="text-sm text-white/80 line-clamp-4">
+                No key designation. Multiple badges can be minted to different addresses by a pre-determined minter
+                address.
               </span>
             </button>
           </div>
