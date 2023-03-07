@@ -19,6 +19,7 @@ import { BADGE_HUB_ADDRESS } from 'utils/constants'
 
 import { AddressInput, NumberInput, TextInput } from '../../forms/FormInput'
 import { MetadataAttributes } from '../../forms/MetadataAttributes'
+import { Tooltip } from '../../Tooltip'
 import type { MintRule, UploadMethod } from './ImageUploadDetails'
 
 interface BadgeDetailsProps {
@@ -311,10 +312,17 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
               </label>
             </div>
             <Conditional test={managerState.value !== ''}>
-              <div className="grid grid-cols-2 ml-12 w-full">
-                <div className="mt-4 font-bold">Fee Estimate:</div>
-                <span className="mt-4">{(metadataSize * Number(metadataFeeRate)) / 1000000} stars</span>
-              </div>
+              <Tooltip
+                backgroundColor="bg-stargaze"
+                className="bg-yellow-600"
+                label="This is only an estimate. Be sure to check the final amount before signing the transaction."
+                placement="bottom"
+              >
+                <div className="grid grid-cols-2 ml-12 w-full">
+                  <div className="mt-4 font-bold">Fee Estimate:</div>
+                  <span className="mt-4">{(metadataSize * Number(metadataFeeRate)) / 1000000} stars</span>
+                </div>
+              </Tooltip>
             </Conditional>
           </div>
         </div>
