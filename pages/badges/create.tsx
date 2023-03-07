@@ -605,7 +605,8 @@ const BadgeCreationPage: NextPage = () => {
           >
             <Tooltip
               backgroundColor="bg-blue-500"
-              label="The same single private key can be utilized by multiple users to share badge minting authority."
+              className="m-0 w-1/3"
+              label="The same single private key can be utilized by multiple users to share badge minting authority. Ideal for projects with multiple administrators."
               placement="bottom"
             >
               <button
@@ -634,7 +635,8 @@ const BadgeCreationPage: NextPage = () => {
           >
             <Tooltip
               backgroundColor="bg-blue-500"
-              label="The key pairs are meant to be saved and distributed. Badges can be claimed individually by different users with the key pair they received."
+              className="m-0 w-1/3"
+              label="The key pairs are intended to be saved and shared with others. Each user can claim a badge separately using the key pair that they received."
               placement="bottom"
             >
               <button
@@ -663,7 +665,8 @@ const BadgeCreationPage: NextPage = () => {
           >
             <Tooltip
               backgroundColor="bg-blue-500"
-              label="The most basic approach. However, having only a single designated minter address may restrict your ability to distribute authority for badge minting."
+              className="m-0 w-1/3"
+              label="The most basic approach. However, having just one authorized address for minting badges might limit your ability to delegate that responsibility."
               placement="bottom"
             >
               <button
