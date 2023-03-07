@@ -7,6 +7,8 @@ export const EXECUTE_TYPES = [
   'mint',
   'purge',
   'update_mint_price',
+  'update_discount_price',
+  'remove_discount_price',
   'set_whitelist',
   'update_start_time',
   'update_start_trading_time',
@@ -38,6 +40,16 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     id: 'update_mint_price',
     name: 'Update Mint Price',
     description: `Update mint price`,
+  },
+  {
+    id: 'update_discount_price',
+    name: 'Update Discount Price',
+    description: `Update discount price`,
+  },
+  {
+    id: 'remove_discount_price',
+    name: 'Remove Discount Price',
+    description: `Remove discount price`,
   },
   {
     id: 'set_whitelist',
@@ -98,6 +110,8 @@ export type DispatchExecuteArgs = {
   | { type: Select<'mint'> }
   | { type: Select<'purge'> }
   | { type: Select<'update_mint_price'>; price: string }
+  | { type: Select<'update_discount_price'>; price: string }
+  | { type: Select<'remove_discount_price'> }
   | { type: Select<'set_whitelist'>; whitelist: string }
   | { type: Select<'update_start_time'>; startTime: string }
   | { type: Select<'update_start_trading_time'>; startTime?: string }
@@ -122,6 +136,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'update_mint_price': {
       return messages.updateMintPrice(txSigner, args.price)
+    }
+    case 'update_discount_price': {
+      return messages.updateDiscountPrice(txSigner, args.price)
+    }
+    case 'remove_discount_price': {
+      return messages.removeDiscountPrice(txSigner)
     }
     case 'set_whitelist': {
       return messages.setWhitelist(txSigner, args.whitelist)
@@ -166,6 +186,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'update_mint_price': {
       return messages(contract)?.updateMintPrice(args.price)
+    }
+    case 'update_discount_price': {
+      return messages(contract)?.updateDiscountPrice(args.price)
+    }
+    case 'remove_discount_price': {
+      return messages(contract)?.removeDiscountPrice()
     }
     case 'set_whitelist': {
       return messages(contract)?.setWhitelist(args.whitelist)

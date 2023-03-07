@@ -154,7 +154,7 @@ const BadgeHubQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional test={type === 'getBadge' || type === 'getKey'}>
+          <Conditional test={type === 'getBadge' || type === 'getKey' || type === 'getKeys'}>
             <NumberInput {...idState} />
           </Conditional>
           <Conditional test={type === 'getKey'}>

@@ -172,7 +172,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
         </div>
       </div>
 
-      <div className="p-3 py-5 pb-8">
+      <div className="p-3 py-5 pb-4">
         <Conditional test={uploadMethod === 'existing'}>
           <div className="ml-3 flex-column">
             <p className="mb-5 ml-5">
@@ -187,8 +187,17 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
               </Anchor>{' '}
               and upload your image manually to get an image URL for your badge.
             </p>
-            <div>
-              <TextInput {...imageUrlState} className="mt-2 ml-4 w-1/2" />
+            <div className="flex flex-row w-full">
+              <TextInput {...imageUrlState} className="mt-2 ml-6 w-full max-w-2xl" />
+              <Conditional test={imageUrlState.value !== ''}>
+                <div className="mt-2 ml-4 w-1/4 border-2 border-dashed">
+                  <img
+                    alt="badge-preview"
+                    className="w-full"
+                    src={imageUrlState.value.replace('IPFS://', 'ipfs://').replace(/,/g, '').replace(/"/g, '').trim()}
+                  />
+                </div>
+              </Conditional>
             </div>
           </div>
         </Conditional>
@@ -252,31 +261,33 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
 
             <div className="mt-6">
               <div className="grid grid-cols-2">
-                <div className="w-full">
-                  <div>
-                    <label
-                      className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
-                      htmlFor="assetFile"
-                    >
-                      Image Selection
-                    </label>
-                    <div
-                      className={clsx(
-                        'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
-                        'rounded border-2 border-white/20 border-dashed',
-                      )}
-                    >
-                      <input
-                        accept="image/*"
+                <div>
+                  <div className="w-full">
+                    <div>
+                      <label
+                        className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
+                        htmlFor="assetFile"
+                      >
+                        Image Selection
+                      </label>
+                      <div
                         className={clsx(
-                          'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                          'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                          'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
+                          'rounded border-2 border-white/20 border-dashed',
                         )}
-                        id="assetFile"
-                        onChange={selectAsset}
-                        ref={assetFileRef}
-                        type="file"
-                      />
+                      >
+                        <input
+                          accept="image/*"
+                          className={clsx(
+                            'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                            'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                          )}
+                          id="assetFile"
+                          onChange={selectAsset}
+                          ref={assetFileRef}
+                          type="file"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -124,8 +124,8 @@ export const CollectionActions = ({
   const priceState = useNumberInputState({
     id: 'update-mint-price',
     name: 'updateMintPrice',
-    title: 'Update Mint Price',
-    subtitle: 'New minting price in STARS',
+    title: type === 'update_discount_price' ? 'Discount Price' : 'Update Mint Price',
+    subtitle: type === 'update_discount_price' ? 'New discount price in STARS' : 'New minting price in STARS',
   })
 
   const descriptionState = useInputState({
@@ -161,7 +161,7 @@ export const CollectionActions = ({
     name: 'royaltyShare',
     title: 'Share Percentage',
     subtitle: 'Percentage of royalties to be paid',
-    placeholder: '8%',
+    placeholder: '5%',
   })
 
   const showTokenUriField = isEitherType(type, ['mint_token_uri', 'update_token_metadata'])
@@ -185,7 +185,7 @@ export const CollectionActions = ({
     'batch_mint_for',
   ])
   const showAirdropFileField = type === 'airdrop'
-  const showPriceField = type === 'update_mint_price'
+  const showPriceField = isEitherType(type, ['update_mint_price', 'update_discount_price'])
   const showDescriptionField = type === 'update_collection_info'
   const showImageField = type === 'update_collection_info'
   const showExternalLinkField = type === 'update_collection_info'
@@ -379,8 +379,8 @@ export const CollectionActions = ({
           {showTokenIdField && <NumberInput className="mt-2" {...tokenIdState} />}
           {showTokenIdListField && <TextInput className="mt-2" {...tokenIdListState} />}
           {showBaseUriField && <TextInput className="mt-2" {...baseURIState} />}
-          {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
-          {showPriceField && <NumberInput {...priceState} />}
+          {showNumberOfTokensField && <NumberInput className="mt-2" {...batchNumberState} />}
+          {showPriceField && <NumberInput className="mt-2" {...priceState} />}
           {showDescriptionField && <TextInput className="my-2" {...descriptionState} />}
           {showImageField && <TextInput className="mb-2" {...imageState} />}
           {showExternalLinkField && <TextInput className="mb-2" {...externalLinkState} />}

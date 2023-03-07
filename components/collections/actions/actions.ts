@@ -13,6 +13,8 @@ export const ACTION_TYPES = [
   'mint_token_uri',
   'purge',
   'update_mint_price',
+  'update_discount_price',
+  'remove_discount_price',
   'mint_to',
   'mint_for',
   'batch_mint',
@@ -91,14 +93,19 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     description: `Mint a token`,
   },
   {
-    id: 'purge',
-    name: 'Purge',
-    description: `Purge`,
-  },
-  {
     id: 'update_mint_price',
     name: 'Update Mint Price',
     description: `Update mint price`,
+  },
+  {
+    id: 'update_discount_price',
+    name: 'Update Discount Price',
+    description: `Update discount price`,
+  },
+  {
+    id: 'remove_discount_price',
+    name: 'Remove Discount Price',
+    description: `Remove discount price`,
   },
   {
     id: 'mint_to',
@@ -185,6 +192,11 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     name: 'Burn Remaining Tokens',
     description: 'Burn remaining tokens',
   },
+  {
+    id: 'purge',
+    name: 'Purge',
+    description: `Purge`,
+  },
 ]
 
 export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
@@ -226,6 +238,8 @@ export type DispatchExecuteArgs = {
   | { type: Select<'mint_token_uri'>; tokenUri: string }
   | { type: Select<'purge'> }
   | { type: Select<'update_mint_price'>; price: string }
+  | { type: Select<'update_discount_price'>; price: string }
+  | { type: Select<'remove_discount_price'> }
   | { type: Select<'mint_to'>; recipient: string }
   | { type: Select<'mint_for'>; recipient: string; tokenId: number }
   | { type: Select<'batch_mint'>; recipient: string; batchNumber: number }
@@ -265,6 +279,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'update_mint_price': {
       return vendingMinterMessages.updateMintPrice(txSigner, args.price)
+    }
+    case 'update_discount_price': {
+      return vendingMinterMessages.updateDiscountPrice(txSigner, args.price)
+    }
+    case 'remove_discount_price': {
+      return vendingMinterMessages.removeDiscountPrice(txSigner)
     }
     case 'mint_to': {
       return vendingMinterMessages.mintTo(txSigner, args.recipient)
@@ -352,6 +372,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'update_mint_price': {
       return vendingMinterMessages(minterContract)?.updateMintPrice(args.price)
+    }
+    case 'update_discount_price': {
+      return vendingMinterMessages(minterContract)?.updateDiscountPrice(args.price)
+    }
+    case 'remove_discount_price': {
+      return vendingMinterMessages(minterContract)?.removeDiscountPrice()
     }
     case 'mint_to': {
       return vendingMinterMessages(minterContract)?.mintTo(args.recipient)
