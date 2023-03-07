@@ -309,32 +309,38 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
             />
           </div>
           <div className="w-full">
-            <div>
-              <label
-                className="block mt-2 mr-1 mb-1 w-full font-bold text-white dark:text-gray-300"
-                htmlFor="assetFile"
-              >
-                Metadata File Selection (optional)
-              </label>
-              <div
-                className={clsx(
-                  'flex relative justify-center items-center mt-2 space-y-4 w-full h-32',
-                  'rounded border-2 border-white/20 border-dashed',
-                )}
-              >
-                <input
-                  accept="application/json"
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              label="A metadata file can be selected to automatically fill in the related fields."
+              placement="bottom"
+            >
+              <div>
+                <label
+                  className="block mt-2 mr-1 mb-1 w-full font-bold text-white dark:text-gray-300"
+                  htmlFor="assetFile"
+                >
+                  Metadata File Selection (optional)
+                </label>
+                <div
                   className={clsx(
-                    'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-                    'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                    'flex relative justify-center items-center mt-2 space-y-4 w-full h-32',
+                    'rounded border-2 border-white/20 border-dashed',
                   )}
-                  id="metadataFile"
-                  onChange={selectMetadata}
-                  ref={metadataFileRef}
-                  type="file"
-                />
+                >
+                  <input
+                    accept="application/json"
+                    className={clsx(
+                      'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                      'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                    )}
+                    id="metadataFile"
+                    onChange={selectMetadata}
+                    ref={metadataFileRef}
+                    type="file"
+                  />
+                </div>
               </div>
-            </div>
+            </Tooltip>
           </div>
         </div>
       </div>
