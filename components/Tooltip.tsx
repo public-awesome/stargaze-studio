@@ -6,6 +6,8 @@ import { usePopper } from 'react-popper'
 export interface TooltipProps extends ComponentProps<'div'> {
   label: ReactNode
   children: ReactElement
+  placement?: 'top' | 'bottom' | 'left' | 'right'
+  backgroundColor?: string
 }
 
 export const Tooltip = ({ label, children, ...props }: TooltipProps) => {
@@ -14,7 +16,7 @@ export const Tooltip = ({ label, children, ...props }: TooltipProps) => {
   const [show, setShow] = useState(false)
 
   const { styles, attributes } = usePopper(referenceElement, popperElement, {
-    placement: 'top',
+    placement: props.placement ? props.placement : 'top',
   })
 
   return (
@@ -32,7 +34,11 @@ export const Tooltip = ({ label, children, ...props }: TooltipProps) => {
         <div
           {...props}
           {...attributes.popper}
-          className={clsx('py-1 px-2 m-1 text-sm bg-black/80 rounded shadow-md', props.className)}
+          className={clsx(
+            'py-1 px-2 m-1 text-sm rounded shadow-md',
+            props.backgroundColor ? props.backgroundColor : 'bg-slate-900',
+            props.className,
+          )}
           ref={setPopperElement}
           style={{ ...styles.popper, ...props.style }}
         >

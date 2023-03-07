@@ -49,12 +49,12 @@ const BadgeList: NextPage = () => {
               {myBadges.map((badge: any, index: any) => {
                 return (
                   <tr key={index}>
-                    <td className="w-[55%] bg-black">
+                    <td className="w-[35%] bg-black">
                       <div className="flex items-center space-x-3">
                         <div className="avatar">
                           <div className="w-28 h-28 mask mask-squircle">
                             <img
-                              alt="Cover"
+                              alt="badge-preview"
                               src={
                                 (badge?.image as string).startsWith('ipfs')
                                   ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(badge?.image as string).substring(7)}`
@@ -64,13 +64,15 @@ const BadgeList: NextPage = () => {
                           </div>
                         </div>
                         <div className="pl-2">
-                          <p className="overflow-auto max-w-xs font-bold no-scrollbar ">{badge.name}</p>
+                          <p className="overflow-auto max-w-xs font-bold no-scrollbar ">
+                            {badge.name ? badge.name : 'No name provided.'}
+                          </p>
                           <p className="max-w-xs text-sm truncate opacity-50">Badge ID: {badge.tokenId}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="overflow-auto w-[35%] max-w-xl bg-black no-scrollbar">
-                      {badge.description}
+                    <td className="overflow-auto w-[55%] max-w-xl bg-black no-scrollbar">
+                      {badge.description ? badge.description : 'No description provided.'}
                       {/* <br /> */}
                       {/* <span className="badge badge-ghost badge-sm"></span> */}
                     </td>

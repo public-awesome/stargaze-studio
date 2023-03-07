@@ -103,7 +103,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
     name: 'royaltyShare',
     title: 'Share Percentage',
     subtitle: 'Percentage of royalties to be paid',
-    placeholder: '8%',
+    placeholder: '5%',
   })
 
   const unitPriceState = useNumberInputState({
