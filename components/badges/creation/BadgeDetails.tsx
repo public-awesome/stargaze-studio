@@ -139,41 +139,13 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
             })
           }
         }
-        if (!parsedMetadata.name) {
-          nameState.onChange('')
-        } else {
-          nameState.onChange(parsedMetadata.name)
-        }
-        if (!parsedMetadata.description) {
-          descriptionState.onChange('')
-        } else {
-          descriptionState.onChange(parsedMetadata.description)
-        }
-        if (!parsedMetadata.external_url) {
-          externalUrlState.onChange('')
-        } else {
-          externalUrlState.onChange(parsedMetadata.external_url)
-        }
-        if (!parsedMetadata.youtube_url) {
-          youtubeUrlState.onChange('')
-        } else {
-          youtubeUrlState.onChange(parsedMetadata.youtube_url)
-        }
-        if (!parsedMetadata.animation_url) {
-          animationUrlState.onChange('')
-        } else {
-          animationUrlState.onChange(parsedMetadata.animation_url)
-        }
-        if (!parsedMetadata.background_color) {
-          backgroundColorState.onChange('')
-        } else {
-          backgroundColorState.onChange(parsedMetadata.background_color)
-        }
-        if (!parsedMetadata.image_data) {
-          imageDataState.onChange('')
-        } else {
-          imageDataState.onChange(parsedMetadata.image_data)
-        }
+        nameState.onChange(parsedMetadata.name)
+        descriptionState.onChange(parsedMetadata.description)
+        externalUrlState.onChange(parsedMetadata.external_url)
+        youtubeUrlState.onChange(parsedMetadata.youtube_url)
+        animationUrlState.onChange(parsedMetadata.animation_url)
+        backgroundColorState.onChange(parsedMetadata.background_color)
+        imageDataState.onChange(parsedMetadata.image_data)
       } else {
         attributesState.reset()
         nameState.onChange('')
