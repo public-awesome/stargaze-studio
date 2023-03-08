@@ -85,12 +85,12 @@ const WhitelistInstantiatePage: NextPage = () => {
         per_address_limit: perAddressLimitState.value,
         member_limit: memberLimitState.value,
         admins: [
-          ...(new Set(
+          ...new Set(
             addressListState.values
               .map((a) => a.address.trim())
               .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
-          ) || [wallet.address]),
-        ],
+          ),
+        ] || [wallet.address],
         admins_mutable: adminsMutable,
       }
       return toast.promise(contract.instantiate(1835, msg, 'Stargaze Whitelist Contract', wallet.address), {

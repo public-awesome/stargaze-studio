@@ -33,6 +33,7 @@ export interface WhiteListInstance {
   removeMembers: (memberList: string[]) => Promise<string>
   updatePerAddressLimit: (limit: number) => Promise<string>
   increaseMemberLimit: (limit: number) => Promise<string>
+  updateAdmins: (admins: string[]) => Promise<string>
 }
 
 export interface WhitelistMessages {
@@ -42,6 +43,7 @@ export interface WhitelistMessages {
   removeMembers: (memberList: string[]) => RemoveMembersMessage
   updatePerAddressLimit: (limit: number) => UpdatePerAddressLimitMessage
   increaseMemberLimit: (limit: number) => IncreaseMemberLimitMessage
+  updateAdmins: (admins: string[]) => UpdateAdminsMessage
 }
 
 export interface UpdateStartTimeMessage {
@@ -62,6 +64,14 @@ export interface UpdateEndTimeMessage {
   funds: Coin[]
 }
 
+export interface UpdateAdminsMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_admins: { admins: string[] }
+  }
+  funds: Coin[]
+}
 export interface AddMembersMessage {
   sender: string
   contract: string
@@ -170,6 +180,20 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       return res.transactionHash
     }
 
+    const updateAdmins = async (admins: string[]): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          update_admins: {
+            admins,
+          },
+        },
+        'auto',
+      )
+      return res.transactionHash
+    }
+
     const removeMembers = async (memberList: string[]): Promise<string> => {
       const res = await client.execute(
         txSigner,
@@ -199,6 +223,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       contractAddress,
       updateStartTime,
       updateEndTime,
+      updateAdmins,
       addMembers,
       removeMembers,
       updatePerAddressLimit,
@@ -263,6 +288,17 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
+    const updateAdmins = (admins: string[]) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_admins: { admins },
+        },
+        funds: [],
+      }
+    }
+
     const removeMembers = (memberList: string[]) => {
       return {
         sender: txSigner,
@@ -299,6 +335,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
     return {
       updateStartTime,
       updateEndTime,
+      updateAdmins,
       addMembers,
       removeMembers,
       updatePerAddressLimit,
