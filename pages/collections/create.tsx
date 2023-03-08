@@ -377,6 +377,8 @@ const CollectionCreationPage: NextPage = () => {
       mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
+      admins: [wallet.address],
+      admins_mutable: true,
     }
 
     const data = await whitelistContract.instantiate(1835, msg, 'Stargaze Whitelist Contract', wallet.address)
