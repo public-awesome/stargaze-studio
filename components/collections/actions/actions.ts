@@ -9,9 +9,7 @@ import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
 export type ActionType = typeof ACTION_TYPES[number]
 
 export const ACTION_TYPES = [
-  'mint',
   'mint_token_uri',
-  'purge',
   'update_mint_price',
   'update_discount_price',
   'remove_discount_price',
@@ -88,11 +86,6 @@ export const BASE_ACTION_LIST: ActionListItem[] = [
 
 export const VENDING_ACTION_LIST: ActionListItem[] = [
   {
-    id: 'mint',
-    name: 'Mint',
-    description: `Mint a token`,
-  },
-  {
     id: 'update_mint_price',
     name: 'Update Mint Price',
     description: `Update mint price`,
@@ -114,7 +107,7 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
   },
   {
     id: 'batch_mint',
-    name: 'Batch Mint',
+    name: 'Batch Mint To',
     description: `Mint multiple tokens to a user`,
   },
   {
@@ -192,11 +185,6 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     name: 'Burn Remaining Tokens',
     description: 'Burn remaining tokens',
   },
-  {
-    id: 'purge',
-    name: 'Purge',
-    description: `Purge`,
-  },
 ]
 
 export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
@@ -234,9 +222,7 @@ export type DispatchExecuteArgs = {
   txSigner: string
 } & (
   | { type: undefined }
-  | { type: Select<'mint'> }
   | { type: Select<'mint_token_uri'>; tokenUri: string }
-  | { type: Select<'purge'> }
   | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'update_discount_price'>; price: string }
   | { type: Select<'remove_discount_price'> }
@@ -268,14 +254,8 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
-    case 'mint': {
-      return vendingMinterMessages.mint(txSigner)
-    }
     case 'mint_token_uri': {
       return baseMinterMessages.mint(txSigner, args.tokenUri)
-    }
-    case 'purge': {
-      return vendingMinterMessages.purge(txSigner)
     }
     case 'update_mint_price': {
       return vendingMinterMessages.updateMintPrice(txSigner, args.price)
@@ -361,14 +341,8 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages: baseMinterMessages } = useBaseMinterContract()
   const { minterContract, sg721Contract } = args
   switch (args.type) {
-    case 'mint': {
-      return vendingMinterMessages(minterContract)?.mint()
-    }
     case 'mint_token_uri': {
       return baseMinterMessages(minterContract)?.mint(args.tokenUri)
-    }
-    case 'purge': {
-      return vendingMinterMessages(minterContract)?.purge()
     }
     case 'update_mint_price': {
       return vendingMinterMessages(minterContract)?.updateMintPrice(args.price)
