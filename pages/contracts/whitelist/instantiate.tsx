@@ -21,7 +21,6 @@ import { type FormEvent, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaAsterisk } from 'react-icons/fa'
 import { useMutation } from 'react-query'
-import { WHITELIST_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -80,14 +79,11 @@ const WhitelistInstantiatePage: NextPage = () => {
         per_address_limit: perAddressLimitState.value,
         member_limit: memberLimitState.value,
       }
-      return toast.promise(
-        contract.instantiate(WHITELIST_CODE_ID, msg, 'Stargaze Whitelist Contract', wallet.address),
-        {
-          loading: 'Instantiating contract...',
-          error: 'Instantiation failed!',
-          success: 'Instantiation success!',
-        },
-      )
+      return toast.promise(contract.instantiate(1835, msg, 'Stargaze Whitelist Contract', wallet.address), {
+        loading: 'Instantiating contract...',
+        error: 'Instantiation failed!',
+        success: 'Instantiation success!',
+      })
     },
     {
       onError: (error) => {

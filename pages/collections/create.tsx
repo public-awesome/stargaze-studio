@@ -44,7 +44,6 @@ import {
   SG721_CODE_ID,
   STARGAZE_URL,
   VENDING_FACTORY_ADDRESS,
-  WHITELIST_CODE_ID,
 } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -380,12 +379,7 @@ const CollectionCreationPage: NextPage = () => {
       member_limit: whitelistDetails?.memberLimit,
     }
 
-    const data = await whitelistContract.instantiate(
-      WHITELIST_CODE_ID,
-      msg,
-      'Stargaze Whitelist Contract',
-      wallet.address,
-    )
+    const data = await whitelistContract.instantiate(1835, msg, 'Stargaze Whitelist Contract', wallet.address)
 
     return data.contractAddress
   }
