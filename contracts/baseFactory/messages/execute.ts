@@ -10,6 +10,7 @@ export interface DispatchExecuteArgs {
   txSigner: string
   msg: Record<string, unknown>
   funds: Coin[]
+  updatable?: boolean
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -17,12 +18,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   if (!messages) {
     throw new Error('cannot dispatch execute, messages is not defined')
   }
-  return messages.createBaseMinter(txSigner, args.msg, args.funds)
+  return messages.createBaseMinter(txSigner, args.msg, args.funds, args.updatable)
 }
 
 export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages } = useBaseFactoryContract()
   const { contract } = args
-  return messages(contract)?.createBaseMinter(args.msg)
+  return messages(contract)?.createBaseMinter(args.msg, args.updatable)
 }

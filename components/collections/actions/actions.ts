@@ -9,9 +9,7 @@ import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
 export type ActionType = typeof ACTION_TYPES[number]
 
 export const ACTION_TYPES = [
-  'mint',
   'mint_token_uri',
-  'purge',
   'update_mint_price',
   'update_discount_price',
   'remove_discount_price',
@@ -32,6 +30,9 @@ export const ACTION_TYPES = [
   'shuffle',
   'airdrop',
   'burn_remaining',
+  'update_token_metadata',
+  'batch_update_token_metadata',
+  'freeze_token_metadata',
 ] as const
 
 export interface ActionListItem {
@@ -85,11 +86,6 @@ export const BASE_ACTION_LIST: ActionListItem[] = [
 
 export const VENDING_ACTION_LIST: ActionListItem[] = [
   {
-    id: 'mint',
-    name: 'Mint',
-    description: `Mint a token`,
-  },
-  {
     id: 'update_mint_price',
     name: 'Update Mint Price',
     description: `Update mint price`,
@@ -111,7 +107,7 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
   },
   {
     id: 'batch_mint',
-    name: 'Batch Mint',
+    name: 'Batch Mint To',
     description: `Mint multiple tokens to a user`,
   },
   {
@@ -189,10 +185,23 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     name: 'Burn Remaining Tokens',
     description: 'Burn remaining tokens',
   },
+]
+
+export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
   {
-    id: 'purge',
-    name: 'Purge',
-    description: `Purge`,
+    id: 'update_token_metadata',
+    name: 'Update Token Metadata',
+    description: `Update the metadata URI for a token`,
+  },
+  {
+    id: 'batch_update_token_metadata',
+    name: 'Batch Update Token Metadata',
+    description: `Update the metadata URI for a range of tokens`,
+  },
+  {
+    id: 'freeze_token_metadata',
+    name: 'Freeze Token Metadata',
+    description: `Render the metadata for tokens no longer updatable`,
   },
 ]
 
@@ -213,9 +222,7 @@ export type DispatchExecuteArgs = {
   txSigner: string
 } & (
   | { type: undefined }
-  | { type: Select<'mint'> }
   | { type: Select<'mint_token_uri'>; tokenUri: string }
-  | { type: Select<'purge'> }
   | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'update_discount_price'>; price: string }
   | { type: Select<'remove_discount_price'> }
@@ -236,6 +243,9 @@ export type DispatchExecuteArgs = {
   | { type: Select<'burn_remaining'> }
   | { type: Select<'update_collection_info'>; collectionInfo: CollectionInfo | undefined }
   | { type: Select<'freeze_collection_info'> }
+  | { type: Select<'update_token_metadata'>; tokenId: number; tokenUri: string }
+  | { type: Select<'batch_update_token_metadata'>; tokenIds: string; baseUri: string }
+  | { type: Select<'freeze_token_metadata'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -244,14 +254,8 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
-    case 'mint': {
-      return vendingMinterMessages.mint(txSigner)
-    }
     case 'mint_token_uri': {
       return baseMinterMessages.mint(txSigner, args.tokenUri)
-    }
-    case 'purge': {
-      return vendingMinterMessages.purge(txSigner)
     }
     case 'update_mint_price': {
       return vendingMinterMessages.updateMintPrice(txSigner, args.price)
@@ -288,6 +292,15 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'freeze_collection_info': {
       return sg721Messages.freezeCollectionInfo()
+    }
+    case 'update_token_metadata': {
+      return sg721Messages.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
+    }
+    case 'batch_update_token_metadata': {
+      return sg721Messages.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+    }
+    case 'freeze_token_metadata': {
+      return sg721Messages.freezeTokenMetadata()
     }
     case 'shuffle': {
       return vendingMinterMessages.shuffle(txSigner)
@@ -328,14 +341,8 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages: baseMinterMessages } = useBaseMinterContract()
   const { minterContract, sg721Contract } = args
   switch (args.type) {
-    case 'mint': {
-      return vendingMinterMessages(minterContract)?.mint()
-    }
     case 'mint_token_uri': {
       return baseMinterMessages(minterContract)?.mint(args.tokenUri)
-    }
-    case 'purge': {
-      return vendingMinterMessages(minterContract)?.purge()
     }
     case 'update_mint_price': {
       return vendingMinterMessages(minterContract)?.updateMintPrice(args.price)
@@ -372,6 +379,15 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'freeze_collection_info': {
       return sg721Messages(sg721Contract)?.freezeCollectionInfo()
+    }
+    case 'update_token_metadata': {
+      return sg721Messages(sg721Contract)?.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
+    }
+    case 'batch_update_token_metadata': {
+      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+    }
+    case 'freeze_token_metadata': {
+      return sg721Messages(sg721Contract)?.freezeTokenMetadata()
     }
     case 'shuffle': {
       return vendingMinterMessages(minterContract)?.shuffle()
