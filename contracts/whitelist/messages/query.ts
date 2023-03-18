@@ -2,7 +2,15 @@ import type { WhiteListInstance } from '../contract'
 
 export type QueryType = typeof QUERY_TYPES[number]
 
-export const QUERY_TYPES = ['has_started', 'has_ended', 'is_active', 'members', 'has_member', 'config'] as const
+export const QUERY_TYPES = [
+  'has_started',
+  'has_ended',
+  'is_active',
+  'members',
+  'admin_list',
+  'has_member',
+  'config',
+] as const
 
 export interface QueryListItem {
   id: QueryType
@@ -15,6 +23,7 @@ export const QUERY_LIST: QueryListItem[] = [
   { id: 'has_ended', name: 'Has Ended', description: 'Check if the whitelist minting has ended' },
   { id: 'is_active', name: 'Is Active', description: 'Check if the whitelist minting is active' },
   { id: 'members', name: 'Members', description: 'View the whitelist members' },
+  { id: 'admin_list', name: 'Admin List', description: 'View the whitelist admin list' },
   { id: 'has_member', name: 'Has Member', description: 'Check if a member is in the whitelist' },
   { id: 'config', name: 'Config', description: 'View the whitelist configuration' },
 ]
@@ -36,6 +45,8 @@ export const dispatchQuery = (props: DispatchQueryProps) => {
       return messages?.isActive()
     case 'members':
       return messages?.members()
+    case 'admin_list':
+      return messages?.adminList()
     case 'has_member':
       return messages?.hasMember(address)
     case 'config':
