@@ -386,7 +386,12 @@ const CollectionCreationPage: NextPage = () => {
       admins_mutable: whitelistDetails?.adminsMutable,
     }
 
-    const data = await whitelistContract.instantiate(1835, msg, 'Stargaze Whitelist Contract', wallet.address)
+    const data = await whitelistContract.instantiate(
+      WHITELIST_CODE_ID,
+      msg,
+      'Stargaze Whitelist Contract',
+      wallet.address,
+    )
 
     return data.contractAddress
   }

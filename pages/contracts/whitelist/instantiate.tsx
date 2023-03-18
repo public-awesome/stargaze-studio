@@ -27,6 +27,8 @@ import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
+import { WHITELIST_CODE_ID } from '../../../utils/constants'
+
 const WhitelistInstantiatePage: NextPage = () => {
   const wallet = useWallet()
   const { whitelist: contract } = useContracts()
@@ -93,11 +95,14 @@ const WhitelistInstantiatePage: NextPage = () => {
         ] || [wallet.address],
         admins_mutable: adminsMutable,
       }
-      return toast.promise(contract.instantiate(1835, msg, 'Stargaze Whitelist Contract', wallet.address), {
-        loading: 'Instantiating contract...',
-        error: 'Instantiation failed!',
-        success: 'Instantiation success!',
-      })
+      return toast.promise(
+        contract.instantiate(WHITELIST_CODE_ID, msg, 'Stargaze Whitelist Contract', wallet.address),
+        {
+          loading: 'Instantiating contract...',
+          error: 'Instantiation failed!',
+          success: 'Instantiation success!',
+        },
+      )
     },
     {
       onError: (error) => {
