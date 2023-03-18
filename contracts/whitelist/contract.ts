@@ -35,6 +35,7 @@ export interface WhiteListInstance {
   updatePerAddressLimit: (limit: number) => Promise<string>
   increaseMemberLimit: (limit: number) => Promise<string>
   updateAdmins: (admins: string[]) => Promise<string>
+  freeze: () => Promise<string>
 }
 
 export interface WhitelistMessages {
@@ -45,6 +46,7 @@ export interface WhitelistMessages {
   updatePerAddressLimit: (limit: number) => UpdatePerAddressLimitMessage
   increaseMemberLimit: (limit: number) => IncreaseMemberLimitMessage
   updateAdmins: (admins: string[]) => UpdateAdminsMessage
+  freeze: () => FreezeMessage
 }
 
 export interface UpdateStartTimeMessage {
@@ -71,6 +73,13 @@ export interface UpdateAdminsMessage {
   msg: {
     update_admins: { admins: string[] }
   }
+  funds: Coin[]
+}
+
+export interface FreezeMessage {
+  sender: string
+  contract: string
+  msg: { freeze: Record<string, never> }
   funds: Coin[]
 }
 export interface AddMembersMessage {
@@ -201,6 +210,18 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       return res.transactionHash
     }
 
+    const freeze = async (): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          freeze: {},
+        },
+        'auto',
+      )
+      return res.transactionHash
+    }
+
     const removeMembers = async (memberList: string[]): Promise<string> => {
       const res = await client.execute(
         txSigner,
@@ -231,6 +252,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       updateStartTime,
       updateEndTime,
       updateAdmins,
+      freeze,
       addMembers,
       removeMembers,
       updatePerAddressLimit,
@@ -307,6 +329,17 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
+    const freeze = () => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          freeze: {},
+        },
+        funds: [],
+      }
+    }
+
     const removeMembers = (memberList: string[]) => {
       return {
         sender: txSigner,
@@ -348,6 +381,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       removeMembers,
       updatePerAddressLimit,
       increaseMemberLimit,
+      freeze,
     }
   }
 
