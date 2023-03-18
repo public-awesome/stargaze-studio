@@ -12,6 +12,8 @@ export const EXECUTE_TYPES = [
   'revoke_all',
   'mint',
   'burn',
+  'update_token_metadata',
+  'freeze_token_metadata',
 ] as const
 
 export interface ExecuteListItem {
@@ -61,6 +63,16 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     name: 'Burn',
     description: `Burn a token transaction sender has access to`,
   },
+  {
+    id: 'update_token_metadata',
+    name: 'Update Token Metadata',
+    description: `Update the metadata URI for a token`,
+  },
+  {
+    id: 'freeze_token_metadata',
+    name: 'Freeze Token Metadata',
+    description: `Render the metadata for tokens no longer updatable`,
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -84,6 +96,8 @@ export type DispatchExecuteArgs = {
   | { type: Select<'revoke_all'>; operator: string }
   | { type: Select<'mint'>; recipient: string; tokenId: string; tokenURI?: string }
   | { type: Select<'burn'>; tokenId: string }
+  | { type: Select<'update_token_metadata'>; tokenId: string; tokenURI: string }
+  | { type: Select<'freeze_token_metadata'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -115,6 +129,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'burn': {
       return messages.burn(args.tokenId)
+    }
+    case 'update_token_metadata': {
+      return messages.updateTokenMetadata(args.tokenId, args.tokenURI)
+    }
+    case 'freeze_token_metadata': {
+      return messages.freezeTokenMetadata()
     }
     default: {
       throw new Error('unknown execute type')
@@ -150,6 +170,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'burn': {
       return messages(contract)?.burn(args.tokenId)
+    }
+    case 'update_token_metadata': {
+      return messages(contract)?.updateTokenMetadata(args.tokenId, args.tokenURI)
+    }
+    case 'freeze_token_metadata': {
+      return messages(contract)?.freezeTokenMetadata()
     }
     default: {
       return {}

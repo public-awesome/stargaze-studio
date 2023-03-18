@@ -4,6 +4,8 @@ import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import { BASE_FACTORY_ADDRESS } from 'utils/constants'
 
+import { BASE_FACTORY_UPDATABLE_ADDRESS } from '../../utils/constants'
+
 export interface CreateBaseMinterResponse {
   readonly baseMinterAddress: string
   readonly sg721Address: string
@@ -21,11 +23,12 @@ export interface BaseFactoryInstance {
     senderAddress: string,
     msg: Record<string, unknown>,
     funds: Coin[],
+    updatable?: boolean,
   ) => Promise<CreateBaseMinterResponse>
 }
 
 export interface BaseFactoryMessages {
-  createBaseMinter: (msg: Record<string, unknown>) => CreateBaseMinterMessage
+  createBaseMinter: (msg: Record<string, unknown>, updatable?: boolean) => CreateBaseMinterMessage
 }
 
 export interface CreateBaseMinterMessage {
@@ -56,8 +59,16 @@ export const baseFactory = (client: SigningCosmWasmClient, txSigner: string): Ba
       senderAddress: string,
       msg: Record<string, unknown>,
       funds: Coin[],
+      updatable?: boolean,
     ): Promise<CreateBaseMinterResponse> => {
-      const result = await client.execute(senderAddress, BASE_FACTORY_ADDRESS, msg, 'auto', '', funds)
+      const result = await client.execute(
+        senderAddress,
+        updatable ? BASE_FACTORY_UPDATABLE_ADDRESS : BASE_FACTORY_ADDRESS,
+        msg,
+        'auto',
+        '',
+        funds,
+      )
 
       return {
         baseMinterAddress: result.logs[0].events[5].attributes[0].value,
@@ -75,12 +86,12 @@ export const baseFactory = (client: SigningCosmWasmClient, txSigner: string): Ba
   }
 
   const messages = (contractAddress: string) => {
-    const createBaseMinter = (msg: Record<string, unknown>): CreateBaseMinterMessage => {
+    const createBaseMinter = (msg: Record<string, unknown>, updatable?: boolean): CreateBaseMinterMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg,
-        funds: [coin('1000000000', 'ustars')],
+        funds: [coin(updatable ? '3000000000' : '1000000000', 'ustars')],
       }
     }
 

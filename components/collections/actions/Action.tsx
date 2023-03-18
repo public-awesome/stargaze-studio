@@ -26,7 +26,7 @@ import { resolveAddress } from 'utils/resolveAddress'
 
 import type { CollectionInfo } from '../../../contracts/sg721/contract'
 import { TextInput } from '../../forms/FormInput'
-import type { MinterType } from './Combobox'
+import type { MinterType, Sg721Type } from './Combobox'
 
 interface CollectionActionsProps {
   minterContractAddress: string
@@ -35,6 +35,7 @@ interface CollectionActionsProps {
   vendingMinterMessages: VendingMinterInstance | undefined
   baseMinterMessages: BaseMinterInstance | undefined
   minterType: MinterType
+  sg721Type: Sg721Type
 }
 
 type ExplicitContentType = true | false | undefined
@@ -46,6 +47,7 @@ export const CollectionActions = ({
   vendingMinterMessages,
   baseMinterMessages,
   minterType,
+  sg721Type,
 }: CollectionActionsProps) => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
@@ -100,7 +102,15 @@ export const CollectionActions = ({
     id: 'token-uri',
     name: 'tokenURI',
     title: 'Token URI',
-    subtitle: 'URI for the token to be minted',
+    subtitle: 'URI for the token',
+    placeholder: 'ipfs://',
+  })
+
+  const baseURIState = useInputState({
+    id: 'base-uri',
+    name: 'baseURI',
+    title: 'Base URI',
+    subtitle: 'Base URI to batch update token metadata with',
     placeholder: 'ipfs://',
   })
 
@@ -154,13 +164,18 @@ export const CollectionActions = ({
     placeholder: '5%',
   })
 
-  const showTokenUriField = type === 'mint_token_uri'
+  const showTokenUriField = isEitherType(type, ['mint_token_uri', 'update_token_metadata'])
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showLimitField = type === 'update_per_address_limit'
-  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
+  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn', 'update_token_metadata'])
   const showNumberOfTokensField = type === 'batch_mint'
-  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer', 'batch_mint_for'])
+  const showTokenIdListField = isEitherType(type, [
+    'batch_burn',
+    'batch_transfer',
+    'batch_mint_for',
+    'batch_update_token_metadata',
+  ])
   const showRecipientField = isEitherType(type, [
     'transfer',
     'mint_to',
@@ -176,6 +191,7 @@ export const CollectionActions = ({
   const showExternalLinkField = type === 'update_collection_info'
   const showRoyaltyRelatedFields = type === 'update_collection_info'
   const showExplicitContentField = type === 'update_collection_info'
+  const showBaseUriField = type === 'batch_update_token_metadata'
 
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
@@ -185,7 +201,9 @@ export const CollectionActions = ({
     sg721Contract: sg721ContractAddress,
     tokenId: tokenIdState.value,
     tokenIds: tokenIdListState.value,
-    tokenUri: tokenURIState.value,
+    tokenUri: tokenURIState.value.trim().endsWith('/')
+      ? tokenURIState.value.trim().slice(0, -1)
+      : tokenURIState.value.trim(),
     batchNumber: batchNumberState.value,
     vendingMinterMessages,
     baseMinterMessages,
@@ -195,6 +213,9 @@ export const CollectionActions = ({
     txSigner: wallet.address,
     type,
     price: priceState.value.toString(),
+    baseUri: baseURIState.value.trim().endsWith('/')
+      ? baseURIState.value.trim().slice(0, -1)
+      : baseURIState.value.trim(),
     collectionInfo,
   }
   const resolveRecipientAddress = async () => {
@@ -350,13 +371,14 @@ export const CollectionActions = ({
     <form>
       <div className="grid grid-cols-2 mt-4">
         <div className="mr-2">
-          <ActionsCombobox minterType={minterType} {...actionComboboxState} />
+          <ActionsCombobox minterType={minterType} sg721Type={sg721Type} {...actionComboboxState} />
           {showRecipientField && <AddressInput {...recipientState} />}
           {showTokenUriField && <TextInput className="mt-2" {...tokenURIState} />}
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
-          {showTokenIdField && <NumberInput {...tokenIdState} />}
+          {showTokenIdField && <NumberInput className="mt-2" {...tokenIdState} />}
           {showTokenIdListField && <TextInput className="mt-2" {...tokenIdListState} />}
+          {showBaseUriField && <TextInput className="mt-2" {...baseURIState} />}
           {showNumberOfTokensField && <NumberInput className="mt-2" {...batchNumberState} />}
           {showPriceField && <NumberInput className="mt-2" {...priceState} />}
           {showDescriptionField && <TextInput className="my-2" {...descriptionState} />}
