@@ -11,6 +11,7 @@ export const EXECUTE_TYPES = [
   'remove_members',
   'update_per_address_limit',
   'increase_member_limit',
+  'freeze',
 ] as const
 
 export interface ExecuteListItem {
@@ -55,6 +56,11 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     name: 'Increase Member Limit',
     description: `Increase the member limit of the whitelist`,
   },
+  {
+    id: 'freeze',
+    name: 'Freeze',
+    description: `Freeze the current state of the whitelist`,
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -77,6 +83,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'increase_member_limit'>; limit: number }
   | { type: Select<'update_admins'>; admins: string[] }
+  | { type: Select<'freeze'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -105,6 +112,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'increase_member_limit': {
       return messages.increaseMemberLimit(args.limit)
+    }
+    case 'freeze': {
+      return messages.freeze()
     }
     default: {
       throw new Error('unknown execute type')
@@ -137,6 +147,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'increase_member_limit': {
       return messages(contract)?.increaseMemberLimit(args.limit)
+    }
+    case 'freeze': {
+      return messages(contract)?.freeze()
     }
     default: {
       return {}
