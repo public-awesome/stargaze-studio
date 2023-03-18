@@ -59,7 +59,7 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
   {
     id: 'freeze',
     name: 'Freeze',
-    description: `Freeze the current state of the whitelist`,
+    description: `Freeze the current state of the contract admin list`,
   },
 ]
 
