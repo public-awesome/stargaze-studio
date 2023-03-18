@@ -35,7 +35,7 @@ const WhitelistInstantiatePage: NextPage = () => {
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [adminsMutable, setAdminsMutable] = useState<boolean>(false)
+  const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const [whitelistArray, setWhitelistArray] = useState<string[]>([])
 

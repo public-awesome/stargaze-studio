@@ -36,7 +36,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [whitelistArray, setWhitelistArray] = useState<string[]>([])
-  const [adminsMutable, setAdminsMutable] = useState<boolean>(false)
+  const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const whitelistAddressState = useInputState({
     id: 'whitelist-address',
@@ -204,7 +204,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             </FormControl>
           </FormGroup>
           <div>
-            <div className="mt-2 ml-3 w-full form-control">
+            <div className="mt-2 ml-3 w-[65%] form-control">
               <label className="justify-start cursor-pointer label">
                 <span className="mr-4 font-bold">Mutable Administrator Addresses</span>
                 <input
