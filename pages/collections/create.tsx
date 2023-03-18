@@ -814,8 +814,8 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Per address limit is required')
       if (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
         throw new Error('Member limit is required')
-      if (Number(whitelistDetails.startTime) > Number(whitelistDetails.endTime))
-        throw new Error('Whitelist start time cannot be later than whitelist end time')
+      if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
+        throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
       if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
         throw new Error('Whitelist start time must be the same as the minting start time')
       if (whitelistDetails.perAddressLimit && mintingDetails?.numTokens) {
