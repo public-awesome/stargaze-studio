@@ -24,6 +24,7 @@ export interface WhiteListInstance {
   isActive: () => Promise<boolean>
   members: (startAfter?: string, limit?: number) => Promise<string[]>
   hasMember: (member: string) => Promise<boolean>
+  adminList: () => Promise<string[]>
   config: () => Promise<ConfigResponse>
 
   //Execute
@@ -149,6 +150,12 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       })
     }
 
+    const adminList = async (): Promise<string[]> => {
+      return client.queryContractSmart(contractAddress, {
+        admin_list: {},
+      })
+    }
+
     const config = async (): Promise<ConfigResponse> => {
       return client.queryContractSmart(contractAddress, {
         config: {},
@@ -233,6 +240,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       isActive,
       members,
       hasMember,
+      adminList,
       config,
     }
   }
