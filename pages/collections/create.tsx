@@ -864,7 +864,11 @@ const CollectionCreationPage: NextPage = () => {
         Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
         (collectionDetails?.updatable ? 5000000000 : 3000000000)
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
     } else {
       const amountNeeded =
         minterType === 'vending'
@@ -875,7 +879,11 @@ const CollectionCreationPage: NextPage = () => {
           ? 3000000000
           : 1000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
     }
   }
   useEffect(() => {
