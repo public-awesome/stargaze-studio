@@ -196,24 +196,30 @@ const SplitsInstantiatePage: NextPage = () => {
           </div>
         </div>
       </div>
-      <AddressInput className="ml-4 w-1/2" {...splitsAdminState} />
-      <Conditional test={cw4Method === 'new'}>
-        <AddressInput className="ml-4 w-1/2" {...cw4GroupAdminState} />
-      </Conditional>
-      <Conditional test={cw4Method === 'new'}>
-        <div className="my-4 ml-4 w-1/2">
-          <MemberAttributes
-            attributes={memberListState.entries}
-            onAdd={memberListState.add}
-            onChange={memberListState.update}
-            onRemove={memberListState.remove}
-            title="Members"
-          />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <AddressInput className="mt-2 ml-4 w-full" {...splitsAdminState} />
+          <Conditional test={cw4Method === 'new'}>
+            <AddressInput className="mt-2 ml-4 w-full" {...cw4GroupAdminState} />
+          </Conditional>
+          <Conditional test={cw4Method === 'existing'}>
+            <AddressInput className="mt-2 ml-4 w-full" {...cw4GroupAddressState} />
+          </Conditional>
         </div>
-      </Conditional>
-      <Conditional test={cw4Method === 'existing'}>
-        <AddressInput className="ml-4 w-1/2" {...cw4GroupAddressState} />
-      </Conditional>
+        <div>
+          <Conditional test={cw4Method === 'new'}>
+            <div className="ml-4 w-full">
+              <MemberAttributes
+                attributes={memberListState.entries}
+                onAdd={memberListState.add}
+                onChange={memberListState.update}
+                onRemove={memberListState.remove}
+                title="Members"
+              />
+            </div>
+          </Conditional>
+        </div>
+      </div>
 
       <div className="flex items-center p-4">
         <div className="flex-grow" />

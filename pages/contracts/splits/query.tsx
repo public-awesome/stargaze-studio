@@ -46,7 +46,7 @@ const SplitsQueryPage: NextPage = () => {
     id: 'start-after-string',
     name: 'start-after-string',
     title: 'Start After (optional)',
-    subtitle: 'The public key to start the pagination after',
+    subtitle: 'The member address to start the pagination after',
   })
 
   const paginationLimitState = useNumberInputState({
