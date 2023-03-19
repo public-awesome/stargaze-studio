@@ -35,7 +35,7 @@ type Select<T extends ExecuteType> = T
 export type DispatchExecuteArgs = {
   contract: string
   messages?: SplitsInstance
-} & ({ type: Select<'update_admin'>; admin: string } | { type: Select<'distribute'> })
+} & ({ type: Select<'update_admin'>; admin: string } | { type: Select<'distribute'> | undefined })
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   const { messages } = args
