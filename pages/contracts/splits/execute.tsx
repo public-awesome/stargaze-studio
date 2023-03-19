@@ -100,7 +100,7 @@ const SplitsExecutePage: NextPage = () => {
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Execute Splits Contract" />
       <ContractPageHeader
-        description="Splits contract distributes funds to a cw4-group based on their weights."
+        description="Splits contract distributes funds to a cw4-group based on member weights."
         link={links.Documentation}
         title="Splits Contract"
       />
