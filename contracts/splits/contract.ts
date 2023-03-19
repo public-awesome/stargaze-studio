@@ -58,7 +58,7 @@ export const Splits = (client: SigningCosmWasmClient, txSigner: string): SplitsC
     ///QUERY
     const listMembers = async (startAfter?: string, limit?: number): Promise<string[]> => {
       return client.queryContractSmart(contractAddress, {
-        list_members: { limit, start_after: startAfter },
+        list_members: { start_after: startAfter ? startAfter : undefined, limit },
       })
     }
 

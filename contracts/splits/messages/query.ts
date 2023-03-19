@@ -21,8 +21,8 @@ export interface DispatchQueryProps {
   messages: SplitsInstance | undefined
   type: QueryType
   address: string
-  startAfter: string
-  limit: number
+  startAfter?: string
+  limit?: number
 }
 
 export const dispatchQuery = (props: DispatchQueryProps) => {

@@ -77,8 +77,8 @@ const SplitsQueryPage: NextPage = () => {
           messages,
           type,
           address: resolvedAddress,
-          startAfter,
-          limit,
+          startAfter: startAfter.length > 0 ? startAfter : undefined,
+          limit: limit > 0 ? limit : undefined,
         })
         return result
       })
