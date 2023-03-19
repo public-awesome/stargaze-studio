@@ -28,6 +28,8 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_BADGE_HUB_ADDRESS: string
     readonly NEXT_PUBLIC_BADGE_NFT_CODE_ID: string
     readonly NEXT_PUBLIC_BADGE_NFT_ADDRESS: string
+    readonly NEXT_PUBLIC_SPLITS_CODE_ID: string
+    readonly NEXT_PUBLIC_CW4_GROUP_CODE_ID: string
 
     readonly NEXT_PUBLIC_PINATA_ENDPOINT_URL: string
     readonly NEXT_PUBLIC_API_URL: string
