@@ -414,6 +414,7 @@ const CollectionCreationPage: NextPage = () => {
           base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}` : `${baseUri}`}`,
           start_time: mintingDetails?.startTime,
           num_tokens: mintingDetails?.numTokens,
+          payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress : undefined,
           mint_price: {
             amount: mintingDetails?.unitPrice,
             denom: 'ustars',
@@ -769,6 +770,8 @@ const CollectionCreationPage: NextPage = () => {
       )
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
+    if (mintingDetails.paymentAddress && !isValidAddress(mintingDetails.paymentAddress))
+      throw new Error('Invalid payment address')
   }
 
   const checkWhitelistDetails = async () => {
@@ -861,7 +864,11 @@ const CollectionCreationPage: NextPage = () => {
         Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
         (collectionDetails?.updatable ? 5000000000 : 3000000000)
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
     } else {
       const amountNeeded =
         minterType === 'vending'
@@ -872,7 +879,11 @@ const CollectionCreationPage: NextPage = () => {
           ? 3000000000
           : 1000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
     }
   }
   useEffect(() => {
