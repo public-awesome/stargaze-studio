@@ -1,9 +1,15 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
+import type { logs } from '@cosmjs/stargate'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
   readonly transactionHash: string
+}
+
+export interface MigrateResponse {
+  readonly transactionHash: string
+  readonly logs: readonly logs.Log[]
 }
 
 export interface SplitsInstance {
@@ -49,6 +55,13 @@ export interface SplitsContract {
   ) => Promise<InstantiateResponse>
 
   use: (contractAddress: string) => SplitsInstance
+
+  migrate: (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ) => Promise<MigrateResponse>
 
   messages: (contractAddress: string) => SplitsMessages
 }
@@ -132,6 +145,19 @@ export const Splits = (client: SigningCosmWasmClient, txSigner: string): SplitsC
     }
   }
 
+  const migrate = async (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ): Promise<MigrateResponse> => {
+    const result = await client.migrate(senderAddress, contractAddress, codeId, migrateMsg, 'auto')
+    return {
+      transactionHash: result.transactionHash,
+      logs: result.logs,
+    }
+  }
+
   const messages = (contractAddress: string) => {
     const updateAdmin = (admin: string) => {
       return {
@@ -161,5 +187,5 @@ export const Splits = (client: SigningCosmWasmClient, txSigner: string): SplitsC
     }
   }
 
-  return { use, instantiate, messages }
+  return { use, instantiate, migrate, messages }
 }
