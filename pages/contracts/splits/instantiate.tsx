@@ -77,7 +77,10 @@ const SplitsInstantiatePage: NextPage = () => {
       }
       const msg =
         cw4Method === 'existing'
-          ? { admin: splitsAdminState.value, group: { cw4_address: cw4GroupAddressState.value } }
+          ? {
+              admin: splitsAdminState.value ? splitsAdminState.value : undefined,
+              group: { cw4_address: cw4GroupAddressState.value },
+            }
           : {
               admin: splitsAdminState.value ? splitsAdminState.value : undefined,
               group: {
