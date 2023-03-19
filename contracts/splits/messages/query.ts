@@ -11,9 +11,9 @@ export interface QueryListItem {
 }
 
 export const QUERY_LIST: QueryListItem[] = [
-  { id: 'admin', name: 'Query Admin', description: 'View the splits contract admin' },
-  { id: 'member', name: 'Query Member Weight', description: 'Check the weight of a member in the group' },
   { id: 'list_members', name: 'Query Members', description: 'View the group members' },
+  { id: 'member', name: 'Query Member Weight', description: 'Query the weight of a member in the group' },
+  { id: 'admin', name: 'Query Admin', description: 'View the splits contract admin' },
   { id: 'group', name: 'Query Group Contract Address', description: 'View the group contract address' },
 ]
 
