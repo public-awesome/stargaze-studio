@@ -24,6 +24,7 @@ export interface WhiteListInstance {
   isActive: () => Promise<boolean>
   members: (startAfter?: string, limit?: number) => Promise<string[]>
   hasMember: (member: string) => Promise<boolean>
+  adminList: () => Promise<string[]>
   config: () => Promise<ConfigResponse>
 
   //Execute
@@ -33,6 +34,8 @@ export interface WhiteListInstance {
   removeMembers: (memberList: string[]) => Promise<string>
   updatePerAddressLimit: (limit: number) => Promise<string>
   increaseMemberLimit: (limit: number) => Promise<string>
+  updateAdmins: (admins: string[]) => Promise<string>
+  freeze: () => Promise<string>
 }
 
 export interface WhitelistMessages {
@@ -42,6 +45,8 @@ export interface WhitelistMessages {
   removeMembers: (memberList: string[]) => RemoveMembersMessage
   updatePerAddressLimit: (limit: number) => UpdatePerAddressLimitMessage
   increaseMemberLimit: (limit: number) => IncreaseMemberLimitMessage
+  updateAdmins: (admins: string[]) => UpdateAdminsMessage
+  freeze: () => FreezeMessage
 }
 
 export interface UpdateStartTimeMessage {
@@ -59,6 +64,22 @@ export interface UpdateEndTimeMessage {
   msg: {
     update_end_time: string
   }
+  funds: Coin[]
+}
+
+export interface UpdateAdminsMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_admins: { admins: string[] }
+  }
+  funds: Coin[]
+}
+
+export interface FreezeMessage {
+  sender: string
+  contract: string
+  msg: { freeze: Record<string, never> }
   funds: Coin[]
 }
 
@@ -139,6 +160,12 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       })
     }
 
+    const adminList = async (): Promise<string[]> => {
+      return client.queryContractSmart(contractAddress, {
+        admin_list: {},
+      })
+    }
+
     const config = async (): Promise<ConfigResponse> => {
       return client.queryContractSmart(contractAddress, {
         config: {},
@@ -164,6 +191,32 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
           add_members: {
             to_add: memberList,
           },
+        },
+        'auto',
+      )
+      return res.transactionHash
+    }
+
+    const updateAdmins = async (admins: string[]): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          update_admins: {
+            admins,
+          },
+        },
+        'auto',
+      )
+      return res.transactionHash
+    }
+
+    const freeze = async (): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          freeze: {},
         },
         'auto',
       )
@@ -199,6 +252,8 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       contractAddress,
       updateStartTime,
       updateEndTime,
+      updateAdmins,
+      freeze,
       addMembers,
       removeMembers,
       updatePerAddressLimit,
@@ -208,6 +263,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       isActive,
       members,
       hasMember,
+      adminList,
       config,
     }
   }
@@ -263,6 +319,28 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
+    const updateAdmins = (admins: string[]) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_admins: { admins },
+        },
+        funds: [],
+      }
+    }
+
+    const freeze = () => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          freeze: {},
+        },
+        funds: [],
+      }
+    }
+
     const removeMembers = (memberList: string[]) => {
       return {
         sender: txSigner,
@@ -299,10 +377,12 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
     return {
       updateStartTime,
       updateEndTime,
+      updateAdmins,
       addMembers,
       removeMembers,
       updatePerAddressLimit,
       increaseMemberLimit,
+      freeze,
     }
   }
 
