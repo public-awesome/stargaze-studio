@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import clsx from 'clsx'
+import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
@@ -12,6 +13,7 @@ import { Tooltip } from 'components/Tooltip'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import { SG721_UPDATABLE_CODE_ID } from 'utils/constants'
 
 import { TextInput } from '../../forms/FormInput'
 import type { MinterType } from '../actions/Combobox'
@@ -241,36 +243,38 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             </div>
           </div>
         </div>
-        <Tooltip
-          backgroundColor="bg-blue-500"
-          label={
-            <div className="grid grid-flow-row">
-              <span>
-                ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until the
-                collection is frozen by the creator.
-              </span>
-            </div>
-          }
-          placement="bottom"
-        >
-          <div
-            className={clsx(
-              minterType === 'base'
-                ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
-                : 'flex flex-col space-y-2 w-3/4 form-control',
-            )}
+        <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+          <Tooltip
+            backgroundColor="bg-blue-500"
+            label={
+              <div className="grid grid-flow-row">
+                <span>
+                  ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until the
+                  collection is frozen by the creator.
+                </span>
+              </div>
+            }
+            placement="bottom"
           >
-            <label className="justify-start cursor-pointer label">
-              <span className="mr-4 font-bold">Updatable Token Metadata</span>
-              <input
-                checked={updatable}
-                className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
-                onClick={() => setUpdatable(!updatable)}
-                type="checkbox"
-              />
-            </label>
-          </div>
-        </Tooltip>
+            <div
+              className={clsx(
+                minterType === 'base'
+                  ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
+                  : 'flex flex-col space-y-2 w-3/4 form-control',
+              )}
+            >
+              <label className="justify-start cursor-pointer label">
+                <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                <input
+                  checked={updatable}
+                  className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
+                  onClick={() => setUpdatable(!updatable)}
+                  type="checkbox"
+                />
+              </label>
+            </div>
+          </Tooltip>
+        </Conditional>
       </FormGroup>
     </div>
   )
