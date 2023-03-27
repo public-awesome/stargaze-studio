@@ -770,7 +770,10 @@ const CollectionCreationPage: NextPage = () => {
       )
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
-    if (mintingDetails.paymentAddress && !isValidAddress(mintingDetails.paymentAddress))
+    if (
+      mintingDetails.paymentAddress &&
+      (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
+    )
       throw new Error('Invalid payment address')
   }
 
