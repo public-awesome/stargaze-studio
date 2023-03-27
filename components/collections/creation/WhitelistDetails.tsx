@@ -1,11 +1,8 @@
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
-import { AddressList } from 'components/forms/AddressList'
-import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import React, { useEffect, useState } from 'react'
-import { isValidAddress } from 'utils/isValidAddress'
 
 import { Conditional } from '../../Conditional'
 import { AddressInput, NumberInput } from '../../forms/FormInput'
@@ -25,8 +22,6 @@ export interface WhitelistDetailsDataProps {
   endTime?: string
   perAddressLimit?: number
   memberLimit?: number
-  admins?: string[]
-  adminsMutable?: boolean
 }
 
 type WhitelistState = 'none' | 'existing' | 'new'
@@ -36,7 +31,6 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [whitelistArray, setWhitelistArray] = useState<string[]>([])
-  const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const whitelistAddressState = useInputState({
     id: 'whitelist-address',
@@ -73,8 +67,6 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     setWhitelistArray(data)
   }
 
-  const addressListState = useAddressListState()
-
   useEffect(() => {
     const data: WhitelistDetailsDataProps = {
       whitelistType: whitelistState,
@@ -90,14 +82,6 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
       endTime: endDate ? (endDate.getTime() * 1_000_000).toString() : '',
       perAddressLimit: perAddressLimitState.value,
       memberLimit: memberLimitState.value,
-      admins: [
-        ...new Set(
-          addressListState.values
-            .map((a) => a.address.trim())
-            .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
-        ),
-      ],
-      adminsMutable,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -110,8 +94,6 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     endDate,
     whitelistArray,
     whitelistState,
-    addressListState.values,
-    adminsMutable,
   ])
 
   return (
@@ -204,28 +186,6 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             </FormControl>
           </FormGroup>
           <div>
-            <div className="mt-2 ml-3 w-[65%] form-control">
-              <label className="justify-start cursor-pointer label">
-                <span className="mr-4 font-bold">Mutable Administrator Addresses</span>
-                <input
-                  checked={adminsMutable}
-                  className={`toggle ${adminsMutable ? `bg-stargaze` : `bg-gray-600`}`}
-                  onClick={() => setAdminsMutable(!adminsMutable)}
-                  type="checkbox"
-                />
-              </label>
-            </div>
-            <div className="my-4 ml-4">
-              <AddressList
-                entries={addressListState.entries}
-                isRequired
-                onAdd={addressListState.add}
-                onChange={addressListState.update}
-                onRemove={addressListState.remove}
-                subtitle="The list of administrator addresses"
-                title="Administrator Addresses"
-              />
-            </div>
             <FormGroup subtitle="TXT file that contains the whitelisted addresses" title="Whitelist File">
               <WhitelistUpload onChange={whitelistFileOnChange} />
             </FormGroup>

@@ -104,26 +104,3 @@ export const badgeHubLinkTabs: LinkTabProps[] = [
     href: '/contracts/badgeHub/migrate',
   },
 ]
-
-export const splitsLinkTabs: LinkTabProps[] = [
-  {
-    title: 'Instantiate',
-    description: `Initialize a new Splits contract`,
-    href: '/contracts/splits/instantiate',
-  },
-  {
-    title: 'Query',
-    description: `Dispatch queries for your Splits contract`,
-    href: '/contracts/splits/query',
-  },
-  {
-    title: 'Execute',
-    description: `Execute Splits contract actions`,
-    href: '/contracts/splits/execute',
-  },
-  {
-    title: 'Migrate',
-    description: `Migrate Splits contract`,
-    href: '/contracts/splits/migrate',
-  },
-]

@@ -6,12 +6,10 @@ export type ExecuteType = typeof EXECUTE_TYPES[number]
 export const EXECUTE_TYPES = [
   'update_start_time',
   'update_end_time',
-  'update_admins',
   'add_members',
   'remove_members',
   'update_per_address_limit',
   'increase_member_limit',
-  'freeze',
 ] as const
 
 export interface ExecuteListItem {
@@ -32,11 +30,6 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     description: `Update the end time of the whitelist`,
   },
   {
-    id: 'update_admins',
-    name: 'Update Admins',
-    description: `Update the list of administrators for the whitelist`,
-  },
-  {
     id: 'add_members',
     name: 'Add Members',
     description: `Add members to the whitelist`,
@@ -55,11 +48,6 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     id: 'increase_member_limit',
     name: 'Increase Member Limit',
     description: `Increase the member limit of the whitelist`,
-  },
-  {
-    id: 'freeze',
-    name: 'Freeze',
-    description: `Freeze the current state of the contract admin list`,
   },
 ]
 
@@ -82,8 +70,6 @@ export type DispatchExecuteArgs = {
   | { type: Select<'remove_members'>; members: string[] }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'increase_member_limit'>; limit: number }
-  | { type: Select<'update_admins'>; admins: string[] }
-  | { type: Select<'freeze'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -98,9 +84,6 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'update_end_time': {
       return messages.updateEndTime(args.timestamp)
     }
-    case 'update_admins': {
-      return messages.updateAdmins(args.admins)
-    }
     case 'add_members': {
       return messages.addMembers(args.members)
     }
@@ -112,9 +95,6 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'increase_member_limit': {
       return messages.increaseMemberLimit(args.limit)
-    }
-    case 'freeze': {
-      return messages.freeze()
     }
     default: {
       throw new Error('unknown execute type')
@@ -133,9 +113,6 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     case 'update_end_time': {
       return messages(contract)?.updateEndTime(args.timestamp)
     }
-    case 'update_admins': {
-      return messages(contract)?.updateAdmins(args.admins)
-    }
     case 'add_members': {
       return messages(contract)?.addMembers(args.members)
     }
@@ -147,9 +124,6 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'increase_member_limit': {
       return messages(contract)?.increaseMemberLimit(args.limit)
-    }
-    case 'freeze': {
-      return messages(contract)?.freeze()
     }
     default: {
       return {}
