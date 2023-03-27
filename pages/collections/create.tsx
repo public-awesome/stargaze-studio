@@ -378,8 +378,6 @@ const CollectionCreationPage: NextPage = () => {
       mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
-      admins: whitelistDetails?.admins || [wallet.address],
-      admins_mutable: whitelistDetails?.adminsMutable,
     }
 
     const data = await whitelistContract.instantiate(
@@ -410,7 +408,6 @@ const CollectionCreationPage: NextPage = () => {
           base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}` : `${baseUri}`}`,
           start_time: mintingDetails?.startTime,
           num_tokens: mintingDetails?.numTokens,
-          payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress.trim() : undefined,
           mint_price: {
             amount: mintingDetails?.unitPrice,
             denom: 'ustars',
@@ -764,12 +761,6 @@ const CollectionCreationPage: NextPage = () => {
       )
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
-    if (
-      mintingDetails.paymentAddress &&
-      (!isValidAddress(mintingDetails.paymentAddress.trim()) ||
-        !mintingDetails.paymentAddress.trim().startsWith('stars1'))
-    )
-      throw new Error('Invalid payment address')
   }
 
   const checkWhitelistDetails = async () => {
@@ -815,8 +806,8 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Per address limit is required')
       if (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
         throw new Error('Member limit is required')
-      if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
-        throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
+      if (Number(whitelistDetails.startTime) > Number(whitelistDetails.endTime))
+        throw new Error('Whitelist start time cannot be later than whitelist end time')
       if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
         throw new Error('Whitelist start time must be the same as the minting start time')
       if (whitelistDetails.perAddressLimit && mintingDetails?.numTokens) {
@@ -860,19 +851,11 @@ const CollectionCreationPage: NextPage = () => {
     if (minterType === 'vending' && whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
       const amountNeeded = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + 3000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error(
-          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-            amountNeeded / 1000000
-          ).toString()} STARS`,
-        )
+        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     } else {
       const amountNeeded = minterType === 'vending' ? 3000000000 : 1000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error(
-          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-            amountNeeded / 1000000
-          ).toString()} STARS`,
-        )
+        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
     }
   }
   useEffect(() => {

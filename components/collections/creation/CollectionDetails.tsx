@@ -119,9 +119,9 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <TextInput className="mt-2" {...symbolState} isRequired />
           </div>
           <div className={clsx(minterType === 'base' ? 'ml-10' : '')}>
-            <TextInput className="mt-2" {...externalLinkState} />
+            <TextInput {...externalLinkState} />
             <FormControl
-              className={clsx(minterType === 'base' ? 'mt-12' : 'mt-2')}
+              className={clsx(minterType === 'base' ? 'mt-12' : '')}
               htmlId="timestamp"
               subtitle="Trading start time offset will be set as 2 weeks by default."
               title="Trading Start Time (optional)"
@@ -140,8 +140,6 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <input
               accept="image/*"
               className={clsx(
-                minterType === 'base' ? 'w-1/2' : 'w-full',
-                'p-[13px] rounded border-2 border-white/20 border-dashed cursor-pointer h-18',
                 'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
                 'before:hover:bg-white/5 before:transition',
               )}
@@ -175,7 +173,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
         </FormControl>
         <div className={clsx(minterType === 'base' ? 'flex flex-col -ml-16 space-y-2' : 'flex flex-col space-y-2')}>
           <div>
-            <div className="flex mt-4">
+            <div className="flex">
               <span className="mt-1 text-sm first-letter:capitalize">
                 Does the collection contain explicit content?
               </span>

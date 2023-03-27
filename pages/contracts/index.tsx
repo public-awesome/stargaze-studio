@@ -58,9 +58,6 @@ const HomePage: NextPage = () => {
             Execute messages and run queries on the Badge Hub contract designed for event organizers.
           </HomeCard>
         </Conditional>
-        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/splits" title="Splits Contract">
-          Execute messages and run queries on the Splits contract designed for revenue distribution.
-        </HomeCard>
       </div>
     </section>
   )

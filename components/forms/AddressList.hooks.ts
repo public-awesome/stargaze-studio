@@ -27,9 +27,5 @@ export function useAddressListState() {
     })
   }
 
-  function reset() {
-    setRecord({})
-  }
-
-  return { entries, values, add, update, remove, reset }
+  return { entries, values, add, update, remove }
 }
