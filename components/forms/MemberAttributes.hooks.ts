@@ -1,22 +1,20 @@
 import { useMemo, useState } from 'react'
 import { uid } from 'utils/random'
 
-import type { Address } from './AddressList'
+import type { Attribute } from './MemberAttributes'
 
-export function useAddressListState() {
-  const [record, setRecord] = useState<Record<string, Address>>(() => ({
-    [uid()]: { address: '' },
-  }))
+export function useMemberAttributesState() {
+  const [record, setRecord] = useState<Record<string, Attribute>>(() => ({}))
 
   const entries = useMemo(() => Object.entries(record), [record])
   const values = useMemo(() => Object.values(record), [record])
 
-  function add(balance: Address = { address: '' }) {
-    setRecord((prev) => ({ ...prev, [uid()]: balance }))
+  function add(attribute: Attribute = { address: '', weight: 0 }) {
+    setRecord((prev) => ({ ...prev, [uid()]: attribute }))
   }
 
-  function update(key: string, balance = record[key]) {
-    setRecord((prev) => ({ ...prev, [key]: balance }))
+  function update(key: string, attribute = record[key]) {
+    setRecord((prev) => ({ ...prev, [key]: attribute }))
   }
 
   function remove(key: string) {

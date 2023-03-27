@@ -64,6 +64,7 @@ const WhitelistExecutePage: NextPage = () => {
   const showLimitState = isEitherType(type, ['update_per_address_limit', 'increase_member_limit'])
   const showTimestamp = isEitherType(type, ['update_start_time', 'update_end_time'])
   const showMemberList = isEitherType(type, ['add_members', 'remove_members'])
+  const showAdminList = isEitherType(type, ['update_admins'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -80,6 +81,13 @@ const WhitelistExecutePage: NextPage = () => {
           .concat(memberList),
       ),
     ],
+    admins: [
+      ...new Set(
+        addressListState.values
+          .map((a) => a.address.trim())
+          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
+      ),
+    ] || [wallet.address],
   }
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
@@ -146,20 +154,22 @@ const WhitelistExecutePage: NextPage = () => {
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
             </FormControl>
           </Conditional>
-          <Conditional test={showMemberList}>
+          <Conditional test={showMemberList || showAdminList}>
             <AddressList
               entries={addressListState.entries}
               isRequired
               onAdd={addressListState.add}
               onChange={addressListState.update}
               onRemove={addressListState.remove}
-              subtitle="Enter the member addresses"
+              subtitle={type === 'update_admins' ? 'Enter the admin addresses' : 'Enter the member addresses'}
               title="Addresses"
             />
-            <Alert className="mt-8" type="info">
-              You may optionally choose a text file of additional member addresses.
-            </Alert>
-            <WhitelistUpload onChange={setMemberList} />
+            <Conditional test={showMemberList}>
+              <Alert className="mt-8" type="info">
+                You may optionally choose a text file of additional member addresses.
+              </Alert>
+              <WhitelistUpload onChange={setMemberList} />
+            </Conditional>
           </Conditional>
         </div>
         <div className="space-y-8">

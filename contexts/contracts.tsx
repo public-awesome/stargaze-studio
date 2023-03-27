@@ -17,6 +17,9 @@ import { Fragment, useEffect } from 'react'
 import type { State } from 'zustand'
 import create from 'zustand'
 
+import type { UseSplitsContractProps } from '../contracts/splits/useContract'
+import { useSplitsContract } from '../contracts/splits/useContract'
+
 /**
  * Contracts store type definitions
  */
@@ -28,6 +31,7 @@ export interface ContractsStore extends State {
   vendingFactory: UseVendingFactoryContractProps | null
   baseFactory: UseBaseFactoryContractProps | null
   badgeHub: UseBadgeHubContractProps | null
+  splits: UseSplitsContractProps | null
 }
 
 /**
@@ -41,6 +45,7 @@ export const defaultValues: ContractsStore = {
   vendingFactory: null,
   baseFactory: null,
   badgeHub: null,
+  splits: null,
 }
 
 /**
@@ -71,6 +76,7 @@ const ContractsSubscription: VFC = () => {
   const vendingFactory = useVendingFactoryContract()
   const baseFactory = useBaseFactoryContract()
   const badgeHub = useBadgeHubContract()
+  const splits = useSplitsContract()
 
   useEffect(() => {
     useContracts.setState({
@@ -81,8 +87,9 @@ const ContractsSubscription: VFC = () => {
       vendingFactory,
       baseFactory,
       badgeHub,
+      splits,
     })
-  }, [sg721, vendingMinter, baseMinter, whitelist, vendingFactory, baseFactory, badgeHub])
+  }, [sg721, vendingMinter, baseMinter, whitelist, vendingFactory, baseFactory, badgeHub, splits])
 
   return null
 }

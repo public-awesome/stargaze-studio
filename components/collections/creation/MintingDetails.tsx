@@ -1,10 +1,12 @@
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
-import { useNumberInputState } from 'components/forms/FormInput.hooks'
+import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import React, { useEffect, useState } from 'react'
+import { resolveAddress } from 'utils/resolveAddress'
 
-import { NumberInput } from '../../forms/FormInput'
+import { useWallet } from '../../../contexts/wallet'
+import { NumberInput, TextInput } from '../../forms/FormInput'
 import type { UploadMethod } from './UploadDetails'
 
 interface MintingDetailsProps {
@@ -18,9 +20,12 @@ export interface MintingDetailsDataProps {
   unitPrice: string
   perAddressLimit: number
   startTime: string
+  paymentAddress?: string
 }
 
 export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: MintingDetailsProps) => {
+  const wallet = useWallet()
+
   const [timestamp, setTimestamp] = useState<Date | undefined>()
 
   const numberOfTokensState = useNumberInputState({
@@ -47,6 +52,24 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
     placeholder: '1',
   })
 
+  const paymentAddressState = useInputState({
+    id: 'payment-address',
+    name: 'paymentAddress',
+    title: 'Payment Address (optional)',
+    subtitle: 'Address to receive minting revenues (defaults to current wallet address)',
+    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+  })
+
+  const resolvePaymentAddress = async () => {
+    await resolveAddress(paymentAddressState.value.trim(), wallet).then((resolvedAddress) => {
+      paymentAddressState.onChange(resolvedAddress)
+    })
+  }
+
+  useEffect(() => {
+    void resolvePaymentAddress()
+  }, [paymentAddressState.value])
+
   useEffect(() => {
     if (numberOfTokens) numberOfTokensState.onChange(numberOfTokens)
     const data: MintingDetailsDataProps = {
@@ -54,10 +77,18 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
       unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
       perAddressLimit: perAddressLimitState.value,
       startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
+      paymentAddress: paymentAddressState.value.trim(),
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [numberOfTokens, numberOfTokensState.value, unitPriceState.value, perAddressLimitState.value, timestamp])
+  }, [
+    numberOfTokens,
+    numberOfTokensState.value,
+    unitPriceState.value,
+    perAddressLimitState.value,
+    timestamp,
+    paymentAddressState.value,
+  ])
 
   return (
     <div>
@@ -74,6 +105,7 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
         </FormControl>
       </FormGroup>
+      <TextInput className="p-4 mt-5" {...paymentAddressState} />
     </div>
   )
 }

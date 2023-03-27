@@ -1,48 +1,31 @@
 import { Combobox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
+import type { ExecuteListItem } from 'contracts/splits/messages/execute'
+import { EXECUTE_LIST } from 'contracts/splits/messages/execute'
 import { matchSorter } from 'match-sorter'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
-import type { ActionListItem } from './actions'
-import { BASE_ACTION_LIST, SG721_UPDATABLE_ACTION_LIST, VENDING_ACTION_LIST } from './actions'
-
-export type MinterType = 'base' | 'vending'
-export type Sg721Type = 'updatable' | 'base'
-
-export interface ActionsComboboxProps {
-  value: ActionListItem | null
-  onChange: (item: ActionListItem) => void
-  minterType?: MinterType
-  sg721Type?: Sg721Type
+export interface ExecuteComboboxProps {
+  value: ExecuteListItem | null
+  onChange: (item: ExecuteListItem) => void
 }
 
-export const ActionsCombobox = ({ value, onChange, minterType, sg721Type }: ActionsComboboxProps) => {
+export const ExecuteCombobox = ({ value, onChange }: ExecuteComboboxProps) => {
   const [search, setSearch] = useState('')
-  const [ACTION_LIST, SET_ACTION_LIST] = useState<ActionListItem[]>(VENDING_ACTION_LIST)
-
-  useEffect(() => {
-    if (minterType === 'base') {
-      if (sg721Type === 'updatable') SET_ACTION_LIST(BASE_ACTION_LIST.concat(SG721_UPDATABLE_ACTION_LIST))
-      else SET_ACTION_LIST(BASE_ACTION_LIST)
-    } else if (minterType === 'vending') {
-      if (sg721Type === 'updatable') SET_ACTION_LIST(VENDING_ACTION_LIST.concat(SG721_UPDATABLE_ACTION_LIST))
-      else SET_ACTION_LIST(VENDING_ACTION_LIST)
-    } else SET_ACTION_LIST(VENDING_ACTION_LIST.concat(SG721_UPDATABLE_ACTION_LIST))
-  }, [minterType, sg721Type])
 
   const filtered =
-    search === '' ? ACTION_LIST : matchSorter(ACTION_LIST, search, { keys: ['id', 'name', 'description'] })
+    search === '' ? EXECUTE_LIST : matchSorter(EXECUTE_LIST, search, { keys: ['id', 'name', 'description'] })
 
   return (
     <Combobox
       as={FormControl}
-      htmlId="action"
+      htmlId="message-type"
       labelAs={Combobox.Label}
       onChange={onChange}
-      subtitle="Collection actions"
-      title=""
+      subtitle="Contract execute message type"
+      title="Message Type"
       value={value}
     >
       <div className="relative">
@@ -52,10 +35,10 @@ export const ActionsCombobox = ({ value, onChange, minterType, sg721Type }: Acti
             'placeholder:text-white/50',
             'focus:ring focus:ring-plumbus-20',
           )}
-          displayValue={(val?: ActionListItem) => val?.name ?? ''}
+          displayValue={(val?: ExecuteListItem) => val?.name ?? ''}
           id="message-type"
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Select action"
+          placeholder="Select message type"
         />
 
         <Combobox.Button
@@ -77,7 +60,7 @@ export const ActionsCombobox = ({ value, onChange, minterType, sg721Type }: Acti
           >
             {filtered.length < 1 && (
               <span className="flex flex-col justify-center items-center p-4 text-sm text-center text-white/50">
-                Action not found
+                Message type not found.
               </span>
             )}
             {filtered.map((entry) => (

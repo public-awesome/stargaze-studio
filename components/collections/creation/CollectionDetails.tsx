@@ -4,13 +4,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import clsx from 'clsx'
+import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
+import { Tooltip } from 'components/Tooltip'
 import type { ChangeEvent } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
+import { SG721_UPDATABLE_CODE_ID } from 'utils/constants'
 
 import { TextInput } from '../../forms/FormInput'
 import type { MinterType } from '../actions/Combobox'
@@ -31,12 +34,16 @@ export interface CollectionDetailsDataProps {
   externalLink?: string
   startTradingTime?: string
   explicit: boolean
+  updatable: boolean
 }
 
 export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minterType }: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
+  const [updatable, setUpdatable] = useState<boolean>(false)
+
+  const initialRender = useRef(true)
 
   const nameState = useInputState({
     id: 'name',
@@ -76,6 +83,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
         externalLink: externalLinkState.value || undefined,
         startTradingTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
         explicit,
+        updatable,
       }
       onChange(data)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,6 +99,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
     coverImage,
     timestamp,
     explicit,
+    updatable,
   ])
 
   const selectCoverImage = (event: ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +118,22 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
     reader.readAsArrayBuffer(event.target.files[0])
   }
 
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false
+    } else if (updatable) {
+      toast.success('Token metadata will be updatable upon collection creation.', {
+        style: { maxWidth: 'none' },
+        icon: '✅📝',
+      })
+    } else {
+      toast.error('Token metadata will not be updatable upon collection creation.', {
+        style: { maxWidth: 'none' },
+        icon: '⛔🔏',
+      })
+    }
+  }, [updatable])
+
   return (
     <div>
       <FormGroup subtitle="Information about your collection" title="Collection Details">
@@ -119,9 +144,9 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <TextInput className="mt-2" {...symbolState} isRequired />
           </div>
           <div className={clsx(minterType === 'base' ? 'ml-10' : '')}>
-            <TextInput {...externalLinkState} />
+            <TextInput className="mt-2" {...externalLinkState} />
             <FormControl
-              className={clsx(minterType === 'base' ? 'mt-12' : '')}
+              className={clsx(minterType === 'base' ? 'mt-12' : 'mt-2')}
               htmlId="timestamp"
               subtitle="Trading start time offset will be set as 2 weeks by default."
               title="Trading Start Time (optional)"
@@ -140,6 +165,8 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <input
               accept="image/*"
               className={clsx(
+                minterType === 'base' ? 'w-1/2' : 'w-full',
+                'p-[13px] rounded border-2 border-white/20 border-dashed cursor-pointer h-18',
                 'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
                 'before:hover:bg-white/5 before:transition',
               )}
@@ -173,8 +200,8 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
         </FormControl>
         <div className={clsx(minterType === 'base' ? 'flex flex-col -ml-16 space-y-2' : 'flex flex-col space-y-2')}>
           <div>
-            <div className="flex">
-              <span className="mt-1 text-sm first-letter:capitalize">
+            <div className="flex mt-4">
+              <span className="mt-1 ml-[2px] text-sm first-letter:capitalize">
                 Does the collection contain explicit content?
               </span>
               <div className="ml-2 font-bold form-check form-check-inline">
@@ -216,6 +243,38 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             </div>
           </div>
         </div>
+        <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+          <Tooltip
+            backgroundColor="bg-blue-500"
+            label={
+              <div className="grid grid-flow-row">
+                <span>
+                  ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until the
+                  collection is frozen by the creator.
+                </span>
+              </div>
+            }
+            placement="bottom"
+          >
+            <div
+              className={clsx(
+                minterType === 'base'
+                  ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
+                  : 'flex flex-col space-y-2 w-3/4 form-control',
+              )}
+            >
+              <label className="justify-start cursor-pointer label">
+                <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                <input
+                  checked={updatable}
+                  className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
+                  onClick={() => setUpdatable(!updatable)}
+                  type="checkbox"
+                />
+              </label>
+            </div>
+          </Tooltip>
+        </Conditional>
       </FormGroup>
     </div>
   )

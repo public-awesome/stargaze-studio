@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -39,11 +40,14 @@ import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
 import {
   BASE_FACTORY_ADDRESS,
+  BASE_FACTORY_UPDATABLE_ADDRESS,
   BLOCK_EXPLORER_URL,
   NETWORK,
   SG721_CODE_ID,
+  SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
   VENDING_FACTORY_ADDRESS,
+  VENDING_FACTORY_UPDATABLE_ADDRESS,
   WHITELIST_CODE_ID,
 } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
@@ -378,6 +382,8 @@ const CollectionCreationPage: NextPage = () => {
       mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
+      admins: whitelistDetails?.admins || [wallet.address],
+      admins_mutable: whitelistDetails?.adminsMutable,
     }
 
     const data = await whitelistContract.instantiate(
@@ -408,6 +414,7 @@ const CollectionCreationPage: NextPage = () => {
           base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}` : `${baseUri}`}`,
           start_time: mintingDetails?.startTime,
           num_tokens: mintingDetails?.numTokens,
+          payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress : undefined,
           mint_price: {
             amount: mintingDetails?.unitPrice,
             denom: 'ustars',
@@ -416,7 +423,7 @@ const CollectionCreationPage: NextPage = () => {
           whitelist,
         },
         collection_params: {
-          code_id: SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -437,11 +444,12 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const payload: VendingFactoryDispatchExecuteArgs = {
-      contract: VENDING_FACTORY_ADDRESS,
+      contract: collectionDetails?.updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
       messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin('3000000000', 'ustars')],
+      funds: [coin(collectionDetails?.updatable ? '5000000000' : '3000000000', 'ustars')],
+      updatable: collectionDetails?.updatable,
     }
     const data = await vendingFactoryDispatchExecute(payload)
     setTransactionHash(data.transactionHash)
@@ -466,7 +474,7 @@ const CollectionCreationPage: NextPage = () => {
       create_minter: {
         init_msg: null,
         collection_params: {
-          code_id: SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -487,11 +495,12 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const payload: BaseFactoryDispatchExecuteArgs = {
-      contract: BASE_FACTORY_ADDRESS,
+      contract: collectionDetails?.updatable ? BASE_FACTORY_UPDATABLE_ADDRESS : BASE_FACTORY_ADDRESS,
       messages: baseFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin('1000000000', 'ustars')],
+      funds: [coin(collectionDetails?.updatable ? '3000000000' : '1000000000', 'ustars')],
+      updatable: collectionDetails?.updatable,
     }
     await baseFactoryDispatchExecute(payload)
       .then(async (data) => {
@@ -761,6 +770,11 @@ const CollectionCreationPage: NextPage = () => {
       )
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
+    if (
+      mintingDetails.paymentAddress &&
+      (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
+    )
+      throw new Error('Invalid payment address')
   }
 
   const checkWhitelistDetails = async () => {
@@ -806,8 +820,8 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Per address limit is required')
       if (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
         throw new Error('Member limit is required')
-      if (Number(whitelistDetails.startTime) > Number(whitelistDetails.endTime))
-        throw new Error('Whitelist start time cannot be later than whitelist end time')
+      if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
+        throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
       if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
         throw new Error('Whitelist start time must be the same as the minting start time')
       if (whitelistDetails.perAddressLimit && mintingDetails?.numTokens) {
@@ -849,13 +863,30 @@ const CollectionCreationPage: NextPage = () => {
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     if (minterType === 'vending' && whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
-      const amountNeeded = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + 3000000000
+      const amountNeeded =
+        Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
+        (collectionDetails?.updatable ? 5000000000 : 3000000000)
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
     } else {
-      const amountNeeded = minterType === 'vending' ? 3000000000 : 1000000000
+      const amountNeeded =
+        minterType === 'vending'
+          ? collectionDetails?.updatable
+            ? 5000000000
+            : 3000000000
+          : collectionDetails?.updatable
+          ? 3000000000
+          : 1000000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error('Insufficient wallet balance to instantiate the required contracts.')
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
     }
   }
   useEffect(() => {

@@ -4,6 +4,8 @@ import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 
+import { VENDING_FACTORY_UPDATABLE_ADDRESS } from '../../utils/constants'
+
 export interface CreateVendingMinterResponse {
   readonly vendingMinterAddress: string
   readonly sg721Address: string
@@ -21,11 +23,12 @@ export interface VendingFactoryInstance {
     senderAddress: string,
     msg: Record<string, unknown>,
     funds: Coin[],
+    updatable?: boolean,
   ) => Promise<CreateVendingMinterResponse>
 }
 
 export interface VendingFactoryMessages {
-  createVendingMinter: (msg: Record<string, unknown>) => CreateVendingMinterMessage
+  createVendingMinter: (msg: Record<string, unknown>, updatable?: boolean) => CreateVendingMinterMessage
 }
 
 export interface CreateVendingMinterMessage {
@@ -50,8 +53,16 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
       senderAddress: string,
       msg: Record<string, unknown>,
       funds: Coin[],
+      updatable?: boolean,
     ): Promise<CreateVendingMinterResponse> => {
-      const result = await client.execute(senderAddress, VENDING_FACTORY_ADDRESS, msg, 'auto', '', funds)
+      const result = await client.execute(
+        senderAddress,
+        updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
+        msg,
+        'auto',
+        '',
+        funds,
+      )
 
       return {
         vendingMinterAddress: result.logs[0].events[5].attributes[0].value,
@@ -68,12 +79,12 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
   }
 
   const messages = (contractAddress: string) => {
-    const createVendingMinter = (msg: Record<string, unknown>): CreateVendingMinterMessage => {
+    const createVendingMinter = (msg: Record<string, unknown>, updatable?: boolean): CreateVendingMinterMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg,
-        funds: [coin('3000000000', 'ustars')],
+        funds: [coin(updatable ? '5000000000' : '3000000000', 'ustars')],
       }
     }
 

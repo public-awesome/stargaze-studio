@@ -26,7 +26,7 @@ export const vendingMinterLinkTabs: LinkTabProps[] = [
   },
   {
     title: 'Query',
-    description: `Dispatch queries with your Vending Minter contract`,
+    description: `Dispatch queries for your Vending Minter contract`,
     href: '/contracts/vendingMinter/query',
   },
   {
@@ -49,7 +49,7 @@ export const baseMinterLinkTabs: LinkTabProps[] = [
   },
   {
     title: 'Query',
-    description: `Dispatch queries with your Base Minter contract`,
+    description: `Dispatch queries for your Base Minter contract`,
     href: '/contracts/baseMinter/query',
   },
   {
@@ -72,7 +72,7 @@ export const whitelistLinkTabs: LinkTabProps[] = [
   },
   {
     title: 'Query',
-    description: `Dispatch queries with your Whitelist contract`,
+    description: `Dispatch queries for your Whitelist contract`,
     href: '/contracts/whitelist/query',
   },
   {
@@ -102,5 +102,28 @@ export const badgeHubLinkTabs: LinkTabProps[] = [
     title: 'Migrate',
     description: `Migrate Badge Hub contract`,
     href: '/contracts/badgeHub/migrate',
+  },
+]
+
+export const splitsLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Instantiate',
+    description: `Initialize a new Splits contract`,
+    href: '/contracts/splits/instantiate',
+  },
+  {
+    title: 'Query',
+    description: `Dispatch queries for your Splits contract`,
+    href: '/contracts/splits/query',
+  },
+  {
+    title: 'Execute',
+    description: `Execute Splits contract actions`,
+    href: '/contracts/splits/execute',
+  },
+  {
+    title: 'Migrate',
+    description: `Migrate Splits contract`,
+    href: '/contracts/splits/migrate',
   },
 ]

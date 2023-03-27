@@ -2,15 +2,15 @@ import clsx from 'clsx'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
-import { AddressInput } from 'components/forms/FormInput'
-import { useInputState } from 'components/forms/FormInput.hooks'
+import { AddressInput, NumberInput, TextInput } from 'components/forms/FormInput'
+import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { whitelistLinkTabs } from 'components/LinkTabs.data'
+import { splitsLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { QueryType } from 'contracts/whitelist/messages/query'
-import { dispatchQuery, QUERY_LIST } from 'contracts/whitelist/messages/query'
+import type { QueryType } from 'contracts/splits/messages/query'
+import { dispatchQuery, QUERY_LIST } from 'contracts/splits/messages/query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -21,40 +21,64 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
 
-const WhitelistQueryPage: NextPage = () => {
-  const { whitelist: contract } = useContracts()
+const SplitsQueryPage: NextPage = () => {
+  const { splits: contract } = useContracts()
   const wallet = useWallet()
 
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Whitelist Address',
-    subtitle: 'Address of the Whitelist contract',
+    title: 'Splits Address',
+    subtitle: 'Address of the Splits contract',
   })
   const contractAddress = contractState.value
 
-  const addressState = useInputState({
-    id: 'address',
-    name: 'address',
-    title: 'Address',
-    subtitle: 'Address of the user - defaults to current address',
+  const memberAddressState = useInputState({
+    id: 'member-address',
+    name: 'member-address',
+    title: 'Member Address',
+    subtitle: 'Member address to query the weight for',
   })
-  const address = addressState.value
 
-  const [type, setType] = useState<QueryType>('config')
+  const memberAddress = memberAddressState.value
 
-  const addressVisible = type === 'has_member'
+  const startAfterStringState = useInputState({
+    id: 'start-after-string',
+    name: 'start-after-string',
+    title: 'Start After (optional)',
+    subtitle: 'The member address to start the pagination after',
+  })
+
+  const paginationLimitState = useNumberInputState({
+    id: 'pagination-limit',
+    name: 'pagination-limit',
+    title: 'Pagination Limit (optional)',
+    subtitle: 'The number of items to return (max: 30)',
+    defaultValue: 5,
+  })
+
+  const [type, setType] = useState<QueryType>('list_members')
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, address] as const,
+    [
+      contractAddress,
+      type,
+      contract,
+      wallet,
+      memberAddress,
+      startAfterStringState.value,
+      paginationLimitState.value,
+    ] as const,
     async ({ queryKey }) => {
-      const [_contractAddress, _type, _contract, _wallet, _address] = queryKey
+      const [_contractAddress, _type, _contract, _wallet, _memberAddress, startAfter, limit] = queryKey
       const messages = contract?.use(contractAddress)
-      const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
+      const res = await resolveAddress(_memberAddress, wallet).then(async (resolvedAddress) => {
         const result = await dispatchQuery({
           messages,
           type,
           address: resolvedAddress,
+          startAfter: startAfter.length > 0 ? startAfter : undefined,
+          limit: limit > 0 ? limit : undefined,
         })
         return result
       })
@@ -84,13 +108,13 @@ const WhitelistQueryPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Query Whitelist Contract" />
+      <NextSeo title="Query Splits Contract" />
       <ContractPageHeader
-        description="Whitelist contract manages the whitelisted addresses for the collection."
+        description="Splits contract distributes funds to a cw4-group based on member weights."
         link={links.Documentation}
-        title="Whitelist Contract"
+        title="Splits Contract"
       />
-      <LinkTabs activeIndex={1} data={whitelistLinkTabs} />
+      <LinkTabs activeIndex={1} data={splitsLinkTabs} />
 
       <div className="grid grid-cols-2 p-4 space-x-8">
         <div className="space-y-8">
@@ -114,8 +138,13 @@ const WhitelistQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional test={addressVisible}>
-            <AddressInput {...addressState} />
+          <Conditional test={type === 'member'}>
+            <AddressInput {...memberAddressState} />
+          </Conditional>
+
+          <Conditional test={type === 'list_members'}>
+            <TextInput {...startAfterStringState} />
+            <NumberInput {...paginationLimitState} />
           </Conditional>
         </div>
         <JsonPreview content={contractAddress ? { type, response } : null} title="Query Response" />
@@ -124,4 +153,4 @@ const WhitelistQueryPage: NextPage = () => {
   )
 }
 
-export default withMetadata(WhitelistQueryPage, { center: false })
+export default withMetadata(SplitsQueryPage, { center: false })
