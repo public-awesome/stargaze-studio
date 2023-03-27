@@ -1,4 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 
 import { useBaseMinterContract } from 'contracts/baseMinter'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
