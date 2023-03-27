@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+
 import { useBaseMinterContract } from 'contracts/baseMinter'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'

@@ -77,7 +77,7 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
       unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
       perAddressLimit: perAddressLimitState.value,
       startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
-      paymentAddress: paymentAddressState.value,
+      paymentAddress: paymentAddressState.value.trim(),
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
