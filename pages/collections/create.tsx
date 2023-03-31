@@ -134,6 +134,7 @@ const CollectionCreationPage: NextPage = () => {
       checkCollectionDetails()
       checkWhitelistDetails()
         .then(() => {
+          checkwalletBalance()
           setReadyToCreateBm(true)
         })
         .catch((err) => {
