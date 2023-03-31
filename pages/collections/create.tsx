@@ -336,7 +336,7 @@ const CollectionCreationPage: NextPage = () => {
             return result
           })
           .then((result) => {
-            toast.success(`Token(s) minted & appended to the collection successfully! Tx Hash: ${result}`, {
+            toast.success(`Token(s) minted & added to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
@@ -355,7 +355,7 @@ const CollectionCreationPage: NextPage = () => {
           .use(baseMinterDetails?.existingBaseMinter as string)
           ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
-            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
+            toast.success(`Token minted & added to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
@@ -913,7 +913,7 @@ const CollectionCreationPage: NextPage = () => {
       <NextSeo
         title={
           minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Append Token'
+            ? 'Add Token'
             : 'Create Collection'
         }
       />
@@ -921,7 +921,7 @@ const CollectionCreationPage: NextPage = () => {
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
           {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Append Token'
+            ? 'Add Token'
             : 'Create Collection'}
         </h1>
 
@@ -1195,7 +1195,7 @@ const CollectionCreationPage: NextPage = () => {
               onClick={performUploadAndMintChecks}
               variant="solid"
             >
-              Mint & Append Token(s)
+              Mint & Add Token(s)
             </Button>
           </Conditional>
         </div>

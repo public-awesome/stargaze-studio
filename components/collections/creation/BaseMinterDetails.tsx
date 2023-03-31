@@ -177,7 +177,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio6"
           >
-            Append a New Token to an Existing 1/1 Collection
+            Add a New Token to an Existing 1/1 Collection
           </label>
         </div>
       </div>
