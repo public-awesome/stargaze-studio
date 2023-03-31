@@ -91,7 +91,7 @@ export const baseFactory = (client: SigningCosmWasmClient, txSigner: string): Ba
         sender: txSigner,
         contract: contractAddress,
         msg,
-        funds: [coin(updatable ? '3000000000' : '1000000000', 'ustars')],
+        funds: [coin(updatable ? '3000000000' : '250000000', 'ustars')],
       }
     }
 
