@@ -134,10 +134,14 @@ const CollectionCreationPage: NextPage = () => {
       checkCollectionDetails()
       checkWhitelistDetails()
         .then(() => {
+          checkwalletBalance()
           setReadyToCreateBm(true)
         })
         .catch((err) => {
-          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          if (!err.message.includes('Insufficient wallet balance'))
+            toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          else toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreateBm(false)
         })
     } catch (error: any) {
@@ -499,7 +503,7 @@ const CollectionCreationPage: NextPage = () => {
       messages: baseFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin(collectionDetails?.updatable ? '3000000000' : '1000000000', 'ustars')],
+      funds: [coin(collectionDetails?.updatable ? '3000000000' : '250000000', 'ustars')],
       updatable: collectionDetails?.updatable,
     }
     await baseFactoryDispatchExecute(payload)
@@ -880,7 +884,7 @@ const CollectionCreationPage: NextPage = () => {
             : 3000000000
           : collectionDetails?.updatable
           ? 3000000000
-          : 1000000000
+          : 250000000
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error(
           `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
