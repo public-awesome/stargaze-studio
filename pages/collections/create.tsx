@@ -503,7 +503,7 @@ const CollectionCreationPage: NextPage = () => {
       messages: baseFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin(collectionDetails?.updatable ? '3000000000' : '1000000000', 'ustars')],
+      funds: [coin(collectionDetails?.updatable ? '3000000000' : '250000000', 'ustars')],
       updatable: collectionDetails?.updatable,
     }
     await baseFactoryDispatchExecute(payload)
