@@ -145,7 +145,7 @@ const BaseMinterInstantiatePage: NextPage = () => {
       return toast.promise(
         contract
           .use(BASE_FACTORY_ADDRESS)
-          ?.createBaseMinter(wallet.address, msg, [coin('1000000000', 'ustars')]) as Promise<CreateBaseMinterResponse>,
+          ?.createBaseMinter(wallet.address, msg, [coin('250000000', 'ustars')]) as Promise<CreateBaseMinterResponse>,
         {
           loading: 'Instantiating contract...',
           error: 'Instantiation failed!',
