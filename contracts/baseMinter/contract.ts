@@ -249,7 +249,7 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
     label: string,
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto', {
-      funds: [coin('250000000', 'ustars')],
+      funds: [coin('1000000000', 'ustars')],
     })
     return {
       contractAddress: result.contractAddress,
