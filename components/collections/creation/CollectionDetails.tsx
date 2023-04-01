@@ -13,7 +13,7 @@ import { Tooltip } from 'components/Tooltip'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { SG721_UPDATABLE_CODE_ID } from 'utils/constants'
+import { SG721_CODE_ID } from 'utils/constants'
 
 import { TextInput } from '../../forms/FormInput'
 import type { MinterType } from '../actions/Combobox'
@@ -185,7 +185,9 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <div className="max-w-[200px] max-h-[200px] rounded border-2">
               <img
                 alt="no-preview-available"
-                src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
+                src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
+                  coverImageUrl.lastIndexOf('ipfs://') + 7,
+                )}`}
               />
             </div>
           )}
@@ -243,7 +245,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             </div>
           </div>
         </div>
-        <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+        <Conditional test={SG721_CODE_ID > 0}>
           <Tooltip
             backgroundColor="bg-blue-500"
             label={
