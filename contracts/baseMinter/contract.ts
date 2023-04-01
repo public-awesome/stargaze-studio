@@ -6,7 +6,6 @@ import type { logs } from '@cosmjs/stargate'
 import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 import toast from 'react-hot-toast'
-import { BASE_FACTORY_ADDRESS } from 'utils/constants'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -114,10 +113,9 @@ export interface BaseMinterContract {
 export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): BaseMinterContract => {
   const use = (contractAddress: string): BaseMinterInstance => {
     //Query
-    const getFactoryParameters = async (): Promise<any> => {
-      const res = await client.queryContractSmart(BASE_FACTORY_ADDRESS, { params: {} })
+    const getFactoryParameters = async (factoryAddress: string): Promise<any> => {
+      const res = await client.queryContractSmart(factoryAddress, { params: {} })
       return res
-      console.log(res)
     }
 
     const getConfig = async (): Promise<any> => {
@@ -136,34 +134,34 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
 
     //Execute
     const mint = async (senderAddress: string, tokenUri: string): Promise<string> => {
-      //const factoryParameters = await baseFactory?.use(BASE_FACTORY_ADDRESS)?.getParams()
+      const txHash = await getConfig().then(async (response) => {
+        const factoryParameters = await toast.promise(getFactoryParameters(response.config?.factory), {
+          loading: 'Querying Factory Parameters...',
+          error: 'Querying Factory Parameters failed!',
+          success: 'Query successful! Minting...',
+        })
+        console.log(factoryParameters.params.mint_fee_bps)
 
-      const factoryParameters = await toast.promise(getFactoryParameters(), {
-        loading: 'Querying Factory Parameters...',
-        error: 'Querying Factory Parameters failed!',
-        success: 'Query successful! Minting...',
-      })
-      console.log(factoryParameters.params.mint_fee_bps)
-
-      const price = (await getConfig()).config?.mint_price.amount
-      if (!price) {
-        throw new Error(
-          'Unable to retrieve a valid mint price. It may be that the given contract address does not belong to a Base Minter contract.',
+        const price = response.config?.mint_price.amount
+        if (!price) {
+          throw new Error(
+            'Unable to retrieve a valid mint price. It may be that the given contract address does not belong to a Base Minter contract.',
+          )
+        }
+        console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
+        const res = await client.execute(
+          senderAddress,
+          contractAddress,
+          {
+            mint: { token_uri: tokenUri },
+          },
+          'auto',
+          '',
+          [coin((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100 / 100, 'ustars')],
         )
-      }
-      console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
-      const res = await client.execute(
-        senderAddress,
-        contractAddress,
-        {
-          mint: { token_uri: tokenUri },
-        },
-        'auto',
-        '',
-        [coin((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100 / 100, 'ustars')],
-      )
-
-      return res.transactionHash
+        return res.transactionHash
+      })
+      return txHash
     }
 
     const updateStartTradingTime = async (senderAddress: string, time?: Timestamp): Promise<string> => {
@@ -181,42 +179,45 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
     }
 
     const batchMint = async (senderAddress: string, baseUri: string, batchCount: number): Promise<string> => {
-      const factoryParameters = await toast.promise(getFactoryParameters(), {
-        loading: 'Querying Factory Parameters...',
-        error: 'Querying Factory Parameters failed!',
-        success: 'Query successful! Minting...',
+      const txHash = await getConfig().then(async (response) => {
+        const factoryParameters = await toast.promise(getFactoryParameters(response?.config?.factory), {
+          loading: 'Querying Factory Parameters...',
+          error: 'Querying Factory Parameters failed!',
+          success: 'Query successful! Minting...',
+        })
+        console.log(factoryParameters.params.mint_fee_bps)
+
+        const price = response.config?.mint_price.amount
+        if (!price) {
+          throw new Error(
+            'Unable to retrieve a valid mint price. It may be that the given contract address does not belong to a Base Minter contract.',
+          )
+        }
+        console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
+
+        const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+        for (let i = 0; i < batchCount; i++) {
+          const msg = {
+            mint: { token_uri: `${baseUri}/${i + 1}` },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: senderAddress,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+              funds: [coin((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100 / 100, 'ustars')],
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
+        }
+
+        const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'batch mint')
+
+        return res.transactionHash
       })
-      console.log(factoryParameters.params.mint_fee_bps)
-
-      const price = (await getConfig()).config?.mint_price.amount
-      if (!price) {
-        throw new Error(
-          'Unable to retrieve a valid mint price. It may be that the given contract address does not belong to a Base Minter contract.',
-        )
-      }
-      console.log((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100)
-
-      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
-      for (let i = 0; i < batchCount; i++) {
-        const msg = {
-          mint: { token_uri: `${baseUri}/${i + 1}` },
-        }
-        const executeContractMsg: MsgExecuteContractEncodeObject = {
-          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-          value: MsgExecuteContract.fromPartial({
-            sender: senderAddress,
-            contract: contractAddress,
-            msg: toUtf8(JSON.stringify(msg)),
-            funds: [coin((Number(price) * Number(factoryParameters.params.mint_fee_bps)) / 100 / 100, 'ustars')],
-          }),
-        }
-
-        executeContractMsgs.push(executeContractMsg)
-      }
-
-      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'batch mint')
-
-      return res.transactionHash
+      return txHash
     }
 
     return {

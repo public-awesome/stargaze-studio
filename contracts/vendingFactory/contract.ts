@@ -1,6 +1,5 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
-import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 
@@ -28,7 +27,7 @@ export interface VendingFactoryInstance {
 }
 
 export interface VendingFactoryMessages {
-  createVendingMinter: (msg: Record<string, unknown>, updatable?: boolean) => CreateVendingMinterMessage
+  createVendingMinter: (msg: Record<string, unknown>, funds: Coin[], updatable?: boolean) => CreateVendingMinterMessage
 }
 
 export interface CreateVendingMinterMessage {
@@ -79,12 +78,16 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
   }
 
   const messages = (contractAddress: string) => {
-    const createVendingMinter = (msg: Record<string, unknown>, updatable?: boolean): CreateVendingMinterMessage => {
+    const createVendingMinter = (
+      msg: Record<string, unknown>,
+      funds: Coin[],
+      updatable?: boolean,
+    ): CreateVendingMinterMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg,
-        funds: [coin(updatable ? '5000000000' : '3000000000', 'ustars')],
+        funds,
       }
     }
 

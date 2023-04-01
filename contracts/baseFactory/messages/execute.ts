@@ -25,5 +25,5 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages } = useBaseFactoryContract()
   const { contract } = args
-  return messages(contract)?.createBaseMinter(args.msg, args.updatable)
+  return messages(contract)?.createBaseMinter(args.msg, args.funds, args.updatable)
 }
