@@ -1,6 +1,4 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 
 import { useBaseMinterContract } from 'contracts/baseMinter'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
@@ -48,8 +46,8 @@ export interface ActionListItem {
 export const BASE_ACTION_LIST: ActionListItem[] = [
   {
     id: 'mint_token_uri',
-    name: 'Append New Token',
-    description: `Mint a new token and append it to the collection`,
+    name: 'Add New Token',
+    description: `Mint a new token and add it to the collection`,
   },
   {
     id: 'update_start_trading_time',

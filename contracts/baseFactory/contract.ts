@@ -1,6 +1,5 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
-import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import { BASE_FACTORY_ADDRESS } from 'utils/constants'
 
@@ -28,7 +27,7 @@ export interface BaseFactoryInstance {
 }
 
 export interface BaseFactoryMessages {
-  createBaseMinter: (msg: Record<string, unknown>, updatable?: boolean) => CreateBaseMinterMessage
+  createBaseMinter: (msg: Record<string, unknown>, funds: Coin[], updatable?: boolean) => CreateBaseMinterMessage
 }
 
 export interface CreateBaseMinterMessage {
@@ -86,12 +85,16 @@ export const baseFactory = (client: SigningCosmWasmClient, txSigner: string): Ba
   }
 
   const messages = (contractAddress: string) => {
-    const createBaseMinter = (msg: Record<string, unknown>, updatable?: boolean): CreateBaseMinterMessage => {
+    const createBaseMinter = (
+      msg: Record<string, unknown>,
+      funds: Coin[],
+      updatable?: boolean,
+    ): CreateBaseMinterMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg,
-        funds: [coin(updatable ? '3000000000' : '1000000000', 'ustars')],
+        funds,
       }
     }
 

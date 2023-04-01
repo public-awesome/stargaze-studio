@@ -88,6 +88,11 @@ const CollectionCreationPage: NextPage = () => {
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
   const [minterType, setMinterType] = useState<MinterType>('vending')
 
+  const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<string | null>(null)
+  const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
+  const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
+  const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
+
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
@@ -336,7 +341,7 @@ const CollectionCreationPage: NextPage = () => {
             return result
           })
           .then((result) => {
-            toast.success(`Token(s) minted & appended to the collection successfully! Tx Hash: ${result}`, {
+            toast.success(`Token(s) minted & added to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
@@ -355,7 +360,7 @@ const CollectionCreationPage: NextPage = () => {
           .use(baseMinterDetails?.existingBaseMinter as string)
           ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
-            toast.success(`Token minted & appended to the collection successfully! Tx Hash: ${result}`, {
+            toast.success(`Token minted & added to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
@@ -452,7 +457,14 @@ const CollectionCreationPage: NextPage = () => {
       messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin(collectionDetails?.updatable ? '5000000000' : '3000000000', 'ustars')],
+      funds: [
+        coin(
+          collectionDetails?.updatable
+            ? (vendingMinterUpdatableCreationFee as string)
+            : (vendingMinterCreationFee as string),
+          'ustars',
+        ),
+      ],
       updatable: collectionDetails?.updatable,
     }
     const data = await vendingFactoryDispatchExecute(payload)
@@ -503,7 +515,12 @@ const CollectionCreationPage: NextPage = () => {
       messages: baseFactoryMessages,
       txSigner: wallet.address,
       msg,
-      funds: [coin(collectionDetails?.updatable ? '3000000000' : '1000000000', 'ustars')],
+      funds: [
+        coin(
+          collectionDetails?.updatable ? (baseMinterUpdatableCreationFee as string) : (baseMinterCreationFee as string),
+          'ustars',
+        ),
+      ],
       updatable: collectionDetails?.updatable,
     }
     await baseFactoryDispatchExecute(payload)
@@ -864,12 +881,37 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
 
+  const fetchFactoryParameters = async () => {
+    const client = wallet.client
+    if (!client) return
+    if (BASE_FACTORY_ADDRESS) {
+      const baseFactoryParameters = await client.queryContractSmart(BASE_FACTORY_ADDRESS, { params: {} })
+      setBaseMinterCreationFee(baseFactoryParameters?.params?.creation_fee?.amount)
+    }
+    if (BASE_FACTORY_UPDATABLE_ADDRESS) {
+      const baseFactoryUpdatableParameters = await client.queryContractSmart(BASE_FACTORY_UPDATABLE_ADDRESS, {
+        params: {},
+      })
+      setBaseMinterUpdatableCreationFee(baseFactoryUpdatableParameters?.params?.creation_fee?.amount)
+    }
+    if (VENDING_FACTORY_ADDRESS) {
+      const vendingFactoryParameters = await client.queryContractSmart(VENDING_FACTORY_ADDRESS, { params: {} })
+      setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+    }
+    if (VENDING_FACTORY_UPDATABLE_ADDRESS) {
+      const vendingFactoryUpdatableParameters = await client.queryContractSmart(VENDING_FACTORY_UPDATABLE_ADDRESS, {
+        params: {},
+      })
+      setVendingMinterUpdatableCreationFee(vendingFactoryUpdatableParameters?.params?.creation_fee?.amount)
+    }
+  }
+
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     if (minterType === 'vending' && whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
       const amountNeeded =
         Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
-        (collectionDetails?.updatable ? 5000000000 : 3000000000)
+        (collectionDetails?.updatable ? Number(vendingMinterUpdatableCreationFee) : Number(vendingMinterCreationFee))
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error(
           `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
@@ -880,11 +922,11 @@ const CollectionCreationPage: NextPage = () => {
       const amountNeeded =
         minterType === 'vending'
           ? collectionDetails?.updatable
-            ? 5000000000
-            : 3000000000
+            ? Number(vendingMinterUpdatableCreationFee)
+            : Number(vendingMinterCreationFee)
           : collectionDetails?.updatable
-          ? 3000000000
-          : 1000000000
+          ? Number(baseMinterUpdatableCreationFee)
+          : Number(baseMinterCreationFee)
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error(
           `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
@@ -908,12 +950,16 @@ const CollectionCreationPage: NextPage = () => {
     setIsMintingComplete(false)
   }, [minterType, baseMinterDetails?.baseMinterAcquisitionMethod, uploadDetails?.uploadMethod])
 
+  useEffect(() => {
+    void fetchFactoryParameters()
+  }, [wallet.client])
+
   return (
     <div>
       <NextSeo
         title={
           minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Append Token'
+            ? 'Add Token'
             : 'Create Collection'
         }
       />
@@ -921,7 +967,7 @@ const CollectionCreationPage: NextPage = () => {
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
           {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
-            ? 'Append Token'
+            ? 'Add Token'
             : 'Create Collection'}
         </h1>
 
@@ -947,7 +993,7 @@ const CollectionCreationPage: NextPage = () => {
                   <Anchor
                     className="text-stargaze hover:underline"
                     external
-                    href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri as string}`}
+                    href={`https://ipfs-gw.stargaze-apis.com/ipfs/${baseTokenUri as string}`}
                   >
                     ipfs://{baseTokenUri as string}
                   </Anchor>
@@ -956,7 +1002,7 @@ const CollectionCreationPage: NextPage = () => {
                   <Anchor
                     className="text-stargaze hover:underline"
                     external
-                    href={`https://ipfs.stargaze.zone/ipfs/${baseTokenUri?.substring(
+                    href={`https://ipfs-gw.stargaze-apis.com/ipfs/${baseTokenUri?.substring(
                       baseTokenUri.lastIndexOf('ipfs://') + 7,
                     )}/`}
                   >
@@ -1195,7 +1241,7 @@ const CollectionCreationPage: NextPage = () => {
               onClick={performUploadAndMintChecks}
               variant="solid"
             >
-              Mint & Append Token(s)
+              Mint & Add Token(s)
             </Button>
           </Conditional>
         </div>
