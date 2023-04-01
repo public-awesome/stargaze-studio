@@ -280,7 +280,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
             htmlFor="inlineRadio2"
           >
-            {minterType === 'base' ? 'Upload asset & metadata' : 'Upload assets & metadata'}
+            {minterType === 'base' ? 'Upload assets & metadata' : 'Upload assets & metadata'}
           </label>
         </div>
         <div className="mt-3 ml-2 font-bold form-check form-check-inline">

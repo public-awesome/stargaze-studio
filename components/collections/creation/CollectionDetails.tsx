@@ -13,7 +13,7 @@ import { Tooltip } from 'components/Tooltip'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { SG721_CODE_ID } from 'utils/constants'
+import { SG721_UPDATABLE_CODE_ID } from 'utils/constants'
 
 import { TextInput } from '../../forms/FormInput'
 import type { MinterType } from '../actions/Combobox'
@@ -245,7 +245,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             </div>
           </div>
         </div>
-        <Conditional test={SG721_CODE_ID > 0}>
+        <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
           <Tooltip
             backgroundColor="bg-blue-500"
             label={
