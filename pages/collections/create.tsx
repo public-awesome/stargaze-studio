@@ -504,7 +504,7 @@ const CollectionCreationPage: NextPage = () => {
             external_link: collectionDetails?.externalLink,
             explicit_content: collectionDetails?.explicit,
             royalty_info: royaltyInfo,
-            start_trading_time: collectionDetails?.startTradingTime || null,
+            start_trading_time: null, //collectionDetails?.startTradingTime || null,
           },
         },
       },
