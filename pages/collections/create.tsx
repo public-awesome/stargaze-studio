@@ -1074,7 +1074,7 @@ const CollectionCreationPage: NextPage = () => {
                   </Anchor>
                 </Button>
               </Conditional>
-              <Conditional test={minterType === 'vending'}>
+              <Conditional test={minterType === 'base'}>
                 <Button className="mt-2">
                   <Anchor
                     className="text-white"
