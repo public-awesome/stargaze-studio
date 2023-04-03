@@ -100,7 +100,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
   const debouncedMyBaseMinterContracts = useDebounce(myBaseMinterContracts, 500)
 
   const renderBaseMinterContracts = useCallback(() => {
-    return myBaseMinterContracts.map((baseMinterContract, index) => {
+    return debouncedMyBaseMinterContracts.map((baseMinterContract, index) => {
       return (
         <option key={index} className="mt-2 text-lg bg-[#1A1A1A]">
           {`${baseMinterContract.name} - ${baseMinterContract.minter}`}
