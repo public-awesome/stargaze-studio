@@ -1063,15 +1063,28 @@ const CollectionCreationPage: NextPage = () => {
                   {transactionHash}
                 </Anchor>
               </Conditional>
-              <Button className="mt-2">
-                <Anchor
-                  className="text-white"
-                  external
-                  href={`${STARGAZE_URL}/launchpad/${vendingMinterContractAddress as string}`}
-                >
-                  View on Launchpad
-                </Anchor>
-              </Button>
+              <Conditional test={minterType === 'vending'}>
+                <Button className="mt-2">
+                  <Anchor
+                    className="text-white"
+                    external
+                    href={`${STARGAZE_URL}/launchpad/${vendingMinterContractAddress as string}`}
+                  >
+                    View on Launchpad
+                  </Anchor>
+                </Button>
+              </Conditional>
+              <Conditional test={minterType === 'vending'}>
+                <Button className="mt-2">
+                  <Anchor
+                    className="text-white"
+                    external
+                    href={`${STARGAZE_URL}/marketplace/${sg721ContractAddress as string}?sort=price_asc`}
+                  >
+                    View on Marketplace
+                  </Anchor>
+                </Button>
+              </Conditional>
             </div>
           </Alert>
         </Conditional>
