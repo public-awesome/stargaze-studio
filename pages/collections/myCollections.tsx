@@ -79,7 +79,7 @@ const CollectionList: NextPage = () => {
 
   const renderTable = useCallback(() => {
     return (
-      <div className="overflow-x-auto w-full">
+      <div className="overflow-x-auto w-full no-scrollbar">
         {myCollections.length > 0 && (
           <div>
             {myStandardCollections.length > 0 && (
