@@ -144,15 +144,93 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <TextInput className="mt-2" {...symbolState} isRequired />
           </div>
           <div className={clsx(minterType === 'base' ? 'ml-10' : '')}>
-            <TextInput className="mt-2" {...externalLinkState} />
-            <FormControl
-              className={clsx(minterType === 'base' ? 'mt-12' : 'mt-2')}
-              htmlId="timestamp"
-              subtitle="Trading start time offset will be set as 2 weeks by default."
-              title="Trading Start Time (optional)"
-            >
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
-            </FormControl>
+            <TextInput className={clsx(minterType === 'base' ? 'mt-0' : 'mt-2')} {...externalLinkState} />
+            {/* Currently trading starts immediately for 1/1 Collections */}
+            <Conditional test={minterType !== 'base'}>
+              <FormControl
+                className={clsx(minterType === 'base' ? 'mt-10' : 'mt-2')}
+                htmlId="timestamp"
+                subtitle="Trading start time offset will be set as 2 weeks by default."
+                title="Trading Start Time (optional)"
+              >
+                <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+              </FormControl>
+            </Conditional>
+            <Conditional test={minterType === 'base'}>
+              <div
+                className={clsx(minterType === 'base' ? 'flex flex-col -ml-6 space-y-2' : 'flex flex-col space-y-2')}
+              >
+                <div>
+                  <div className="flex mt-9 ml-6">
+                    <span className="mt-1 ml-[2px] text-sm first-letter:capitalize">
+                      Does the collection contain explicit content?
+                    </span>
+                    <div className="ml-2 font-bold form-check form-check-inline">
+                      <input
+                        checked={explicit}
+                        className="peer sr-only"
+                        id="explicitRadio1"
+                        name="explicitRadioOptions1"
+                        onClick={() => {
+                          setExplicit(true)
+                        }}
+                        type="radio"
+                      />
+                      <label
+                        className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                        htmlFor="explicitRadio1"
+                      >
+                        YES
+                      </label>
+                    </div>
+                    <div className="ml-2 font-bold form-check form-check-inline">
+                      <input
+                        checked={!explicit}
+                        className="peer sr-only"
+                        id="explicitRadio2"
+                        name="explicitRadioOptions2"
+                        onClick={() => {
+                          setExplicit(false)
+                        }}
+                        type="radio"
+                      />
+                      <label
+                        className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                        htmlFor="explicitRadio2"
+                      >
+                        NO
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+                <Tooltip
+                  backgroundColor="bg-blue-500"
+                  label={
+                    <div className="grid grid-flow-row">
+                      <span>
+                        ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until
+                        the collection is frozen by the creator.
+                      </span>
+                    </div>
+                  }
+                  placement="bottom"
+                >
+                  <div className={clsx('flex flex-col mt-11 space-y-2 w-full form-control')}>
+                    <label className="justify-start cursor-pointer label">
+                      <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                      <input
+                        checked={updatable}
+                        className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
+                        onClick={() => setUpdatable(!updatable)}
+                        type="checkbox"
+                      />
+                    </label>
+                  </div>
+                </Tooltip>
+              </Conditional>
+            </Conditional>
           </div>
         </div>
 
@@ -200,82 +278,84 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
             <span className="italic font-light ">Waiting for cover image URL to be specified.</span>
           )}
         </FormControl>
-        <div className={clsx(minterType === 'base' ? 'flex flex-col -ml-16 space-y-2' : 'flex flex-col space-y-2')}>
-          <div>
-            <div className="flex mt-4">
-              <span className="mt-1 ml-[2px] text-sm first-letter:capitalize">
-                Does the collection contain explicit content?
-              </span>
-              <div className="ml-2 font-bold form-check form-check-inline">
-                <input
-                  checked={explicit}
-                  className="peer sr-only"
-                  id="explicitRadio1"
-                  name="explicitRadioOptions1"
-                  onClick={() => {
-                    setExplicit(true)
-                  }}
-                  type="radio"
-                />
-                <label
-                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-                  htmlFor="explicitRadio1"
-                >
-                  YES
-                </label>
-              </div>
-              <div className="ml-2 font-bold form-check form-check-inline">
-                <input
-                  checked={!explicit}
-                  className="peer sr-only"
-                  id="explicitRadio2"
-                  name="explicitRadioOptions2"
-                  onClick={() => {
-                    setExplicit(false)
-                  }}
-                  type="radio"
-                />
-                <label
-                  className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-                  htmlFor="explicitRadio2"
-                >
-                  NO
-                </label>
+        <Conditional test={minterType !== 'base'}>
+          <div className={clsx(minterType === 'base' ? 'flex flex-col -ml-6 space-y-2' : 'flex flex-col space-y-2')}>
+            <div>
+              <div className="flex mt-4">
+                <span className="mt-1 ml-[2px] text-sm first-letter:capitalize">
+                  Does the collection contain explicit content?
+                </span>
+                <div className="ml-2 font-bold form-check form-check-inline">
+                  <input
+                    checked={explicit}
+                    className="peer sr-only"
+                    id="explicitRadio1"
+                    name="explicitRadioOptions1"
+                    onClick={() => {
+                      setExplicit(true)
+                    }}
+                    type="radio"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="explicitRadio1"
+                  >
+                    YES
+                  </label>
+                </div>
+                <div className="ml-2 font-bold form-check form-check-inline">
+                  <input
+                    checked={!explicit}
+                    className="peer sr-only"
+                    id="explicitRadio2"
+                    name="explicitRadioOptions2"
+                    onClick={() => {
+                      setExplicit(false)
+                    }}
+                    type="radio"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-sm text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="explicitRadio2"
+                  >
+                    NO
+                  </label>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
-          <Tooltip
-            backgroundColor="bg-blue-500"
-            label={
-              <div className="grid grid-flow-row">
-                <span>
-                  ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until the
-                  collection is frozen by the creator.
-                </span>
-              </div>
-            }
-            placement="bottom"
-          >
-            <div
-              className={clsx(
-                minterType === 'base'
-                  ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
-                  : 'flex flex-col space-y-2 w-3/4 form-control',
-              )}
+          <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              label={
+                <div className="grid grid-flow-row">
+                  <span>
+                    ℹ️ When enabled, the metadata for tokens can be updated after the collection is created until the
+                    collection is frozen by the creator.
+                  </span>
+                </div>
+              }
+              placement="bottom"
             >
-              <label className="justify-start cursor-pointer label">
-                <span className="mr-4 font-bold">Updatable Token Metadata</span>
-                <input
-                  checked={updatable}
-                  className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
-                  onClick={() => setUpdatable(!updatable)}
-                  type="checkbox"
-                />
-              </label>
-            </div>
-          </Tooltip>
+              <div
+                className={clsx(
+                  minterType === 'base'
+                    ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
+                    : 'flex flex-col space-y-2 w-3/4 form-control',
+                )}
+              >
+                <label className="justify-start cursor-pointer label">
+                  <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                  <input
+                    checked={updatable}
+                    className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
+                    onClick={() => setUpdatable(!updatable)}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+            </Tooltip>
+          </Conditional>
         </Conditional>
       </FormGroup>
     </div>

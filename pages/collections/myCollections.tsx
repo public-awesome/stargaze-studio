@@ -20,6 +20,7 @@ import { copy } from 'utils/clipboard'
 import { API_URL, STARGAZE_URL } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { truncateMiddle } from 'utils/text'
 
 const CollectionList: NextPage = () => {
   const wallet = useWallet()
@@ -84,7 +85,9 @@ const CollectionList: NextPage = () => {
           <div>
             {myStandardCollections.length > 0 && (
               <div className="bg-transparent">
-                <span className="text-2xl font-bold text-blue-300">Standard Collections</span>
+                <span className="ml-6 text-2xl font-bold text-blue-300 underline underline-offset-4">
+                  Standard Collections
+                </span>
                 <table className="table w-full">
                   <thead>
                     <tr>
@@ -97,7 +100,7 @@ const CollectionList: NextPage = () => {
                     {myStandardCollections.map((collection: any, index: any) => {
                       return (
                         <tr key={index}>
-                          <td className="w-[55%] bg-black">
+                          <td className="w-[40%] bg-black">
                             <div className="flex items-center space-x-3">
                               <div className="avatar">
                                 <div className="w-28 h-28 mask mask-squircle">
@@ -114,12 +117,16 @@ const CollectionList: NextPage = () => {
                                 </div>
                               </div>
                               <div className="pl-2">
-                                <p className="overflow-auto max-w-xs font-bold no-scrollbar ">{collection.name}</p>
-                                <p className="max-w-xs text-sm truncate opacity-50">{collection.description}</p>
+                                <p className="overflow-auto font-bold lg:max-w-[160px] xl:max-w-[220px] 2xl:max-w-xs no-scrollbar ">
+                                  {collection.name}
+                                </p>
+                                <p className="text-sm truncate opacity-50 lg:max-w-[160px] xl:max-w-[220px] 2xl:max-w-xs">
+                                  {collection.description}
+                                </p>
                               </div>
                             </div>
                           </td>
-                          <td className="w-[35%] bg-black">
+                          <td className="w-[50%] bg-black">
                             <div className="flex flex-row items-center space-x-3">
                               Minter:
                               <span className="ml-2">
@@ -132,7 +139,9 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.minter as string)}
                                     type="button"
                                   >
-                                    <span>{collection.minter}</span>
+                                    <span>
+                                      {truncateMiddle(collection.minter ? (collection.minter as string) : '', 36)}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
@@ -147,7 +156,12 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.contractAddress as string)}
                                     type="button"
                                   >
-                                    <span>{collection.contractAddress}</span>
+                                    <span>
+                                      {truncateMiddle(
+                                        collection.contractAddress ? (collection.contractAddress as string) : '',
+                                        36,
+                                      )}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
@@ -180,7 +194,9 @@ const CollectionList: NextPage = () => {
             )}
             {myOneOfOneCollections.length > 0 && (
               <div className="mt-4">
-                <span className="text-2xl font-bold text-blue-300">1/1 Collections</span>
+                <span className="ml-6 text-2xl font-bold text-blue-300 underline underline-offset-4">
+                  1/1 Collections
+                </span>
                 <table className="table w-full">
                   <thead>
                     <tr>
@@ -193,7 +209,7 @@ const CollectionList: NextPage = () => {
                     {myOneOfOneCollections.map((collection: any, index: any) => {
                       return (
                         <tr key={index}>
-                          <td className="w-[55%] bg-black">
+                          <td className="w-[40%] bg-black">
                             <div className="flex items-center space-x-3">
                               <div className="avatar">
                                 <div className="w-28 h-28 mask mask-squircle">
@@ -210,12 +226,16 @@ const CollectionList: NextPage = () => {
                                 </div>
                               </div>
                               <div className="pl-2">
-                                <p className="overflow-auto max-w-xs font-bold no-scrollbar ">{collection.name}</p>
-                                <p className="max-w-xs text-sm truncate opacity-50">{collection.description}</p>
+                                <p className="overflow-auto font-bold lg:max-w-[160px] xl:max-w-[220px]  2xl:max-w-xs no-scrollbar ">
+                                  {collection.name}
+                                </p>
+                                <p className="text-sm truncate opacity-50  lg:max-w-[160px] xl:max-w-[220px] 2xl:max-w-xs">
+                                  {collection.description}
+                                </p>
                               </div>
                             </div>
                           </td>
-                          <td className="w-[35%] bg-black">
+                          <td className="w-[50%] bg-black">
                             <div className="flex flex-row items-center space-x-3">
                               Minter:
                               <span className="ml-2">
@@ -228,7 +248,9 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.minter as string)}
                                     type="button"
                                   >
-                                    <span>{collection.minter}</span>
+                                    <span>
+                                      {truncateMiddle(collection.minter ? (collection.minter as string) : '', 36)}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
@@ -243,7 +265,12 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.contractAddress as string)}
                                     type="button"
                                   >
-                                    <span>{collection.contractAddress}</span>
+                                    <span>
+                                      {truncateMiddle(
+                                        collection.contractAddress ? (collection.contractAddress as string) : '',
+                                        36,
+                                      )}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>

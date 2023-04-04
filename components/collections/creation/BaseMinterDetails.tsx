@@ -22,6 +22,7 @@ export type BaseMinterAcquisitionMethod = 'existing' | 'new'
 export interface MinterInfo {
   name: string
   minter: string
+  contractAddress: string
 }
 
 interface BaseMinterDetailsProps {
@@ -32,6 +33,8 @@ interface BaseMinterDetailsProps {
 export interface BaseMinterDetailsDataProps {
   baseMinterAcquisitionMethod: BaseMinterAcquisitionMethod
   existingBaseMinter: string | undefined
+  selectedCollectionAddress: string | undefined
+  collectionTokenCount: number | undefined
 }
 
 export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsProps) => {
@@ -39,6 +42,8 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
 
   const [myBaseMinterContracts, setMyBaseMinterContracts] = useState<MinterInfo[]>([])
   const [baseMinterAcquisitionMethod, setBaseMinterAcquisitionMethod] = useState<BaseMinterAcquisitionMethod>('new')
+  const [selectedCollectionAddress, setSelectedCollectionAddress] = useState<string | undefined>(undefined)
+  const [collectionTokenCount, setCollectionTokenCount] = useState<number | undefined>(undefined)
 
   const existingBaseMinterState = useInputState({
     id: 'existingMinter',
@@ -54,7 +59,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
       .then((response) => {
         const collectionData = response.data
         const minterContracts = collectionData.map((collection: any) => {
-          return { name: collection.name, minter: collection.minter }
+          return { name: collection.name, minter: collection.minter, contractAddress: collection.contractAddress }
         })
         return minterContracts
       })
@@ -100,7 +105,7 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
   const debouncedMyBaseMinterContracts = useDebounce(myBaseMinterContracts, 500)
 
   const renderBaseMinterContracts = useCallback(() => {
-    return myBaseMinterContracts.map((baseMinterContract, index) => {
+    return debouncedMyBaseMinterContracts.map((baseMinterContract, index) => {
       return (
         <option key={index} className="mt-2 text-lg bg-[#1A1A1A]">
           {`${baseMinterContract.name} - ${baseMinterContract.minter}`}
@@ -111,12 +116,46 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
 
   const debouncedWalletAddress = useDebounce(wallet.address, 300)
 
+  const debouncedExistingBaseMinterContract = useDebounce(existingBaseMinterState.value, 300)
+
   const displayToast = async () => {
     await toast.promise(filterBaseMinterContracts(), {
       loading: 'Retrieving previous 1/1 collections...',
       success: 'Collection retrieval finalized.',
       error: 'Unable to retrieve any 1/1 collections.',
     })
+  }
+
+  const fetchSg721Address = async () => {
+    if (debouncedExistingBaseMinterContract.length === 0) return
+    await wallet.client
+      ?.queryContractSmart(debouncedExistingBaseMinterContract, {
+        config: {},
+      })
+      .then((response) => {
+        console.log(response.collection_address)
+        setSelectedCollectionAddress(response.collection_address)
+      })
+      .catch((err) => {
+        console.log(err)
+        console.log('Unable to retrieve collection address')
+      })
+  }
+
+  const fetchCollectionTokenCount = async () => {
+    if (selectedCollectionAddress === undefined) return
+    await wallet.client
+      ?.queryContractSmart(selectedCollectionAddress, {
+        num_tokens: {},
+      })
+      .then((response) => {
+        console.log(response)
+        setCollectionTokenCount(Number(response.count))
+      })
+      .catch((err) => {
+        console.log(err)
+        console.log('Unable to retrieve collection token count')
+      })
   }
 
   useEffect(() => {
@@ -131,13 +170,33 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
   }, [debouncedWalletAddress, baseMinterAcquisitionMethod])
 
   useEffect(() => {
+    if (baseMinterAcquisitionMethod === 'existing') {
+      void fetchSg721Address()
+    }
+  }, [debouncedExistingBaseMinterContract])
+
+  useEffect(() => {
+    if (baseMinterAcquisitionMethod === 'existing') {
+      void fetchCollectionTokenCount()
+    }
+  }, [selectedCollectionAddress])
+
+  useEffect(() => {
     const data: BaseMinterDetailsDataProps = {
       baseMinterAcquisitionMethod,
       existingBaseMinter: existingBaseMinterState.value,
+      selectedCollectionAddress,
+      collectionTokenCount,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingBaseMinterState.value, baseMinterAcquisitionMethod, wallet.initialized])
+  }, [
+    existingBaseMinterState.value,
+    baseMinterAcquisitionMethod,
+    wallet.initialized,
+    selectedCollectionAddress,
+    collectionTokenCount,
+  ])
 
   return (
     <div className="mx-10 mb-4 rounded border-2 border-white/20">
