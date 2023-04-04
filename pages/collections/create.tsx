@@ -9,6 +9,7 @@ import { coin } from '@cosmjs/proto-signing'
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
+import { AnchorButton } from 'components/AnchorButton'
 import { Button } from 'components/Button'
 import {
   CollectionDetails,
@@ -143,10 +144,7 @@ const CollectionCreationPage: NextPage = () => {
           setReadyToCreateBm(true)
         })
         .catch((err) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          if (!err.message.includes('Insufficient wallet balance'))
-            toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
-          else toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreateBm(false)
         })
     } catch (error: any) {
@@ -164,7 +162,7 @@ const CollectionCreationPage: NextPage = () => {
           setReadyToUploadAndMint(true)
         })
         .catch((err) => {
-          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToUploadAndMint(false)
         })
     } catch (error: any) {
@@ -300,12 +298,12 @@ const CollectionCreationPage: NextPage = () => {
       if (!wallet.initialized) throw new Error('Wallet not connected')
       if (!baseMinterContract) throw new Error('Contract not found')
       setCreatingCollection(true)
+      setIsMintingComplete(false)
       setBaseTokenUri(null)
       setCoverImageUrl(null)
       setVendingMinterContractAddress(null)
       setSg721ContractAddress(null)
       setTransactionHash(null)
-
       if (uploadDetails?.uploadMethod === 'new') {
         console.log(JSON.stringify(uploadDetails.baseMinterMetadataFile?.text()))
         setUploading(true)
@@ -333,7 +331,6 @@ const CollectionCreationPage: NextPage = () => {
               return result
             }
             setBaseTokenUri(baseUri)
-
             const result = await baseMinterContract
               .use(baseMinterDetails?.existingBaseMinter as string)
               ?.batchMint(wallet.address, `ipfs://${baseUri}`, uploadDetails.assetFiles.length)
@@ -346,6 +343,8 @@ const CollectionCreationPage: NextPage = () => {
               duration: 5000,
             })
             setIsMintingComplete(true)
+            setSg721ContractAddress(baseMinterDetails?.selectedCollectionAddress as string)
+            setTransactionHash(result as string)
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
@@ -364,6 +363,9 @@ const CollectionCreationPage: NextPage = () => {
               style: { maxWidth: 'none' },
               duration: 5000,
             })
+            setIsMintingComplete(true)
+            setSg721ContractAddress(baseMinterDetails?.selectedCollectionAddress as string)
+            setTransactionHash(result)
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
@@ -504,7 +506,7 @@ const CollectionCreationPage: NextPage = () => {
             external_link: collectionDetails?.externalLink,
             explicit_content: collectionDetails?.explicit,
             royalty_info: royaltyInfo,
-            start_trading_time: collectionDetails?.startTradingTime || null,
+            start_trading_time: null, //collectionDetails?.startTradingTime || null,
           },
         },
       },
@@ -936,8 +938,9 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
   useEffect(() => {
-    if (vendingMinterContractAddress !== null) scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [vendingMinterContractAddress])
+    if (vendingMinterContractAddress !== null || isMintingComplete)
+      scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [vendingMinterContractAddress, isMintingComplete])
 
   useEffect(() => {
     setBaseTokenUri(uploadDetails?.baseTokenURI as string)
@@ -984,7 +987,7 @@ const CollectionCreationPage: NextPage = () => {
         </p>
       </div>
       <div className="mx-10" ref={scrollRef}>
-        <Conditional test={vendingMinterContractAddress !== null}>
+        <Conditional test={vendingMinterContractAddress !== null || isMintingComplete}>
           <Alert className="mt-5" type="info">
             <div>
               <Conditional test={minterType === 'vending' || isMintingComplete}>
@@ -1010,80 +1013,145 @@ const CollectionCreationPage: NextPage = () => {
                   </Anchor>
                 )}
                 <br />
+                <Conditional test={vendingMinterContractAddress === null && isMintingComplete}>
+                  Transaction Hash: {'  '}
+                  <Conditional test={NETWORK === 'testnet'}>
+                    <Anchor
+                      className="text-stargaze hover:underline"
+                      external
+                      href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                    >
+                      {transactionHash}
+                    </Anchor>
+                  </Conditional>
+                  <Conditional test={NETWORK === 'mainnet'}>
+                    <Anchor
+                      className="text-stargaze hover:underline"
+                      external
+                      href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                    >
+                      {transactionHash}
+                    </Anchor>
+                  </Conditional>
+                  <br />
+                  Minter Contract Address:{'  '}
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`/contracts/baseMinter/query/?contractAddress=${
+                      baseMinterDetails?.existingBaseMinter as string
+                    }`}
+                  >
+                    {baseMinterDetails?.existingBaseMinter as string}
+                  </Anchor>
+                  <br />
+                  SG721 Contract Address:{'  '}
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`/contracts/sg721/query/?contractAddress=${sg721ContractAddress as string}`}
+                  >
+                    {sg721ContractAddress}
+                  </Anchor>
+                  <br />
+                  <div className="flex flex-row mt-2">
+                    <AnchorButton className="text-white" external href={`${STARGAZE_URL}/profile/${wallet.address}`}>
+                      Visit Your Profile
+                    </AnchorButton>
+                    <AnchorButton
+                      className="ml-2 text-white"
+                      external
+                      href={`${STARGAZE_URL}/marketplace/${sg721ContractAddress as string}/${
+                        baseMinterDetails?.collectionTokenCount
+                          ? (baseMinterDetails.collectionTokenCount + 1).toString()
+                          : '1'
+                      }`}
+                    >
+                      View the Token(s) on Marketplace
+                    </AnchorButton>
+                  </div>
+                </Conditional>
               </Conditional>
-              Minter Contract Address:{'  '}
-              <Anchor
-                className="text-stargaze hover:underline"
-                external
-                href={
-                  minterType === 'vending'
-                    ? `/contracts/vendingMinter/query/?contractAddress=${vendingMinterContractAddress as string}`
-                    : `/contracts/baseMinter/query/?contractAddress=${vendingMinterContractAddress as string}`
-                }
-              >
-                {vendingMinterContractAddress}
-              </Anchor>
-              <br />
-              SG721 Contract Address:{'  '}
-              <Anchor
-                className="text-stargaze hover:underline"
-                external
-                href={`/contracts/sg721/query/?contractAddress=${sg721ContractAddress as string}`}
-              >
-                {sg721ContractAddress}
-              </Anchor>
-              <br />
-              <Conditional test={whitelistContractAddress !== null && whitelistContractAddress !== undefined}>
-                Whitelist Contract Address:{'  '}
+              <Conditional test={vendingMinterContractAddress !== null}>
+                Minter Contract Address:{'  '}
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
+                  href={
+                    minterType === 'vending'
+                      ? `/contracts/vendingMinter/query/?contractAddress=${vendingMinterContractAddress as string}`
+                      : `/contracts/baseMinter/query/?contractAddress=${vendingMinterContractAddress as string}`
+                  }
                 >
-                  {whitelistContractAddress}
+                  {vendingMinterContractAddress}
                 </Anchor>
                 <br />
-              </Conditional>
-              Transaction Hash: {'  '}
-              <Conditional test={NETWORK === 'testnet'}>
+                SG721 Contract Address:{'  '}
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
+                  href={`/contracts/sg721/query/?contractAddress=${sg721ContractAddress as string}`}
                 >
-                  {transactionHash}
+                  {sg721ContractAddress}
                 </Anchor>
-              </Conditional>
-              <Conditional test={NETWORK === 'mainnet'}>
-                <Anchor
-                  className="text-stargaze hover:underline"
-                  external
-                  href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
-                >
-                  {transactionHash}
-                </Anchor>
-              </Conditional>
-              <Conditional test={minterType === 'vending'}>
-                <Button className="mt-2">
+                <br />
+                <Conditional test={whitelistContractAddress !== null && whitelistContractAddress !== undefined}>
+                  Whitelist Contract Address:{'  '}
                   <Anchor
-                    className="text-white"
+                    className="text-stargaze hover:underline"
                     external
-                    href={`${STARGAZE_URL}/launchpad/${vendingMinterContractAddress as string}`}
+                    href={`/contracts/whitelist/query/?contractAddress=${whitelistContractAddress as string}`}
                   >
-                    View on Launchpad
+                    {whitelistContractAddress}
                   </Anchor>
-                </Button>
-              </Conditional>
-              <Conditional test={minterType === 'base'}>
-                <Button className="mt-2">
+                  <br />
+                </Conditional>
+                Transaction Hash: {'  '}
+                <Conditional test={NETWORK === 'testnet'}>
                   <Anchor
-                    className="text-white"
+                    className="text-stargaze hover:underline"
                     external
-                    href={`${STARGAZE_URL}/marketplace/${sg721ContractAddress as string}?sort=price_asc`}
+                    href={`${BLOCK_EXPLORER_URL}/tx/${transactionHash as string}`}
                   >
-                    View on Marketplace
+                    {transactionHash}
                   </Anchor>
-                </Button>
+                </Conditional>
+                <Conditional test={NETWORK === 'mainnet'}>
+                  <Anchor
+                    className="text-stargaze hover:underline"
+                    external
+                    href={`${BLOCK_EXPLORER_URL}/txs/${transactionHash as string}`}
+                  >
+                    {transactionHash}
+                  </Anchor>
+                </Conditional>
+                <Conditional test={minterType === 'vending'}>
+                  <Button className="mt-2">
+                    <Anchor
+                      className="text-white"
+                      external
+                      href={`${STARGAZE_URL}/launchpad/${vendingMinterContractAddress as string}`}
+                    >
+                      View on Launchpad
+                    </Anchor>
+                  </Button>
+                </Conditional>
+                <Conditional test={minterType === 'base'}>
+                  <div className="flex flex-row mt-2">
+                    <AnchorButton className="text-white" external href={`${STARGAZE_URL}/profile/${wallet.address}`}>
+                      Visit Your Profile
+                    </AnchorButton>
+                    <AnchorButton
+                      className="ml-2 text-white"
+                      external
+                      href={`${STARGAZE_URL}/marketplace/${sg721ContractAddress as string}${
+                        !isMintingComplete ? `?sort=price_asc` : `/1`
+                      }`}
+                    >
+                      View the Collection on Marketplace
+                    </AnchorButton>
+                  </div>
+                </Conditional>
               </Conditional>
             </div>
           </Alert>
