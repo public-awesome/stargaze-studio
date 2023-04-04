@@ -143,10 +143,7 @@ const CollectionCreationPage: NextPage = () => {
           setReadyToCreateBm(true)
         })
         .catch((err) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          if (!err.message.includes('Insufficient wallet balance'))
-            toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
-          else toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreateBm(false)
         })
     } catch (error: any) {
@@ -164,7 +161,7 @@ const CollectionCreationPage: NextPage = () => {
           setReadyToUploadAndMint(true)
         })
         .catch((err) => {
-          toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToUploadAndMint(false)
         })
     } catch (error: any) {
