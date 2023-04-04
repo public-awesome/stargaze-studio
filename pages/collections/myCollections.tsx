@@ -20,6 +20,7 @@ import { copy } from 'utils/clipboard'
 import { API_URL, STARGAZE_URL } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { truncateMiddle } from 'utils/text'
 
 const CollectionList: NextPage = () => {
   const wallet = useWallet()
@@ -132,7 +133,9 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.minter as string)}
                                     type="button"
                                   >
-                                    <span>{collection.minter}</span>
+                                    <span>
+                                      {truncateMiddle(collection.minter ? (collection.minter as string) : '', 36)}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
@@ -147,7 +150,12 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.contractAddress as string)}
                                     type="button"
                                   >
-                                    <span>{collection.contractAddress}</span>
+                                    <span>
+                                      {truncateMiddle(
+                                        collection.contractAddress ? (collection.contractAddress as string) : '',
+                                        36,
+                                      )}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
@@ -228,7 +236,9 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.minter as string)}
                                     type="button"
                                   >
-                                    <span>{collection.minter}</span>
+                                    <span>
+                                      {truncateMiddle(collection.minter ? (collection.minter as string) : '', 36)}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
@@ -243,7 +253,12 @@ const CollectionList: NextPage = () => {
                                     onClick={() => void copy(collection.contractAddress as string)}
                                     type="button"
                                   >
-                                    <span>{collection.contractAddress}</span>
+                                    <span>
+                                      {truncateMiddle(
+                                        collection.contractAddress ? (collection.contractAddress as string) : '',
+                                        36,
+                                      )}
+                                    </span>
                                     <FaCopy className="opacity-0 group-hover:opacity-100" />
                                   </button>
                                 </Tooltip>
