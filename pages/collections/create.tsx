@@ -427,7 +427,7 @@ const CollectionCreationPage: NextPage = () => {
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
       royaltyInfo = {
-        payment_address: royaltyDetails.paymentAddress,
+        payment_address: royaltyDetails.paymentAddress.trim(),
         share: (Number(royaltyDetails.share) / 100).toString(),
       }
     }
@@ -496,7 +496,7 @@ const CollectionCreationPage: NextPage = () => {
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
       royaltyInfo = {
-        payment_address: royaltyDetails.paymentAddress,
+        payment_address: royaltyDetails.paymentAddress.trim(),
         share: (Number(royaltyDetails.share) / 100).toString(),
       }
     }
@@ -887,7 +887,7 @@ const CollectionCreationPage: NextPage = () => {
       if (royaltyDetails.share === 0) throw new Error('Royalty share percentage is required')
       if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share percentage')
       if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
-      if (!isValidAddress(royaltyDetails.paymentAddress)) {
+      if (!isValidAddress(royaltyDetails.paymentAddress.trim())) {
         if (royaltyDetails.paymentAddress.trim().endsWith('.stars')) {
           throw new Error('Royalty payment address could not be resolved')
         }
@@ -895,7 +895,7 @@ const CollectionCreationPage: NextPage = () => {
       }
       const contractInfoResponse = await wallet.client
         ?.queryContractRaw(
-          royaltyDetails.paymentAddress,
+          royaltyDetails.paymentAddress.trim(),
           toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
         )
         .catch((e) => {
