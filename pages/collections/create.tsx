@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
@@ -113,16 +114,22 @@ const CollectionCreationPage: NextPage = () => {
       checkUploadDetails()
       checkCollectionDetails()
       checkMintingDetails()
-      checkRoyaltyDetails()
-      checkWhitelistDetails()
+      void checkRoyaltyDetails()
         .then(() => {
-          checkwalletBalance()
-          setReadyToCreateVm(true)
+          checkWhitelistDetails()
+            .then(() => {
+              checkwalletBalance()
+              setReadyToCreateVm(true)
+            })
+            .catch((err) => {
+              if (String(err.message).includes('Insufficient wallet balance'))
+                toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+              else toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+              setReadyToCreateVm(false)
+            })
         })
         .catch((err) => {
-          if (String(err.message).includes('Insufficient wallet balance'))
-            toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
-          else toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`Error in Royalty Details: ${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreateVm(false)
         })
     } catch (error: any) {
@@ -136,15 +143,21 @@ const CollectionCreationPage: NextPage = () => {
     try {
       setReadyToCreateBm(false)
       checkUploadDetails()
-      checkRoyaltyDetails()
       checkCollectionDetails()
-      checkWhitelistDetails()
+      void checkRoyaltyDetails()
         .then(() => {
-          checkwalletBalance()
-          setReadyToCreateBm(true)
+          checkWhitelistDetails()
+            .then(() => {
+              checkwalletBalance()
+              setReadyToCreateBm(true)
+            })
+            .catch((err) => {
+              toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+              setReadyToCreateBm(false)
+            })
         })
         .catch((err) => {
-          toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`Error in Royalty Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
           setReadyToCreateBm(false)
         })
     } catch (error: any) {
@@ -414,7 +427,7 @@ const CollectionCreationPage: NextPage = () => {
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
       royaltyInfo = {
-        payment_address: royaltyDetails.paymentAddress,
+        payment_address: royaltyDetails.paymentAddress.trim(),
         share: (Number(royaltyDetails.share) / 100).toString(),
       }
     }
@@ -483,7 +496,7 @@ const CollectionCreationPage: NextPage = () => {
     let royaltyInfo = null
     if (royaltyDetails?.royaltyType === 'new') {
       royaltyInfo = {
-        payment_address: royaltyDetails.paymentAddress,
+        payment_address: royaltyDetails.paymentAddress.trim(),
         share: (Number(royaltyDetails.share) / 100).toString(),
       }
     }
@@ -868,17 +881,34 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
 
-  const checkRoyaltyDetails = () => {
+  const checkRoyaltyDetails = async () => {
     if (!royaltyDetails) throw new Error('Please fill out the royalty details')
     if (royaltyDetails.royaltyType === 'new') {
       if (royaltyDetails.share === 0) throw new Error('Royalty share percentage is required')
       if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share percentage')
       if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
-      if (!isValidAddress(royaltyDetails.paymentAddress)) {
+      if (!isValidAddress(royaltyDetails.paymentAddress.trim())) {
         if (royaltyDetails.paymentAddress.trim().endsWith('.stars')) {
           throw new Error('Royalty payment address could not be resolved')
         }
         throw new Error('Invalid royalty payment address')
+      }
+      const contractInfoResponse = await wallet.client
+        ?.queryContractRaw(
+          royaltyDetails.paymentAddress.trim(),
+          toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+        )
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          if (e.message.includes('bech32')) throw new Error('Invalid royalty payment address.')
+          console.log(e.message)
+        })
+      if (contractInfoResponse !== undefined) {
+        const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (contractInfo && !contractInfo.contract.includes('splits'))
+          throw new Error('The provided royalty payment address does not belong to a splits contract.')
+        else console.log(contractInfo)
       }
     }
   }
