@@ -1,3 +1,4 @@
+import { toUtf8 } from '@cosmjs/encoding'
 import { AirdropUpload } from 'components/AirdropUpload'
 import { Button } from 'components/Button'
 import type { DispatchExecuteArgs } from 'components/collections/actions/actions'
@@ -345,6 +346,30 @@ export const CollectionActions = ({
         (royaltyShareState.value ? !royaltyPaymentAddressState.value : royaltyPaymentAddressState.value)
       ) {
         throw new Error('Royalty payment address and share percentage are both required')
+      }
+
+      if (
+        type === 'update_collection_info' &&
+        royaltyPaymentAddressState.value &&
+        !royaltyPaymentAddressState.value.trim().endsWith('.stars')
+      ) {
+        const contractInfoResponse = await wallet.client
+          ?.queryContractRaw(
+            royaltyPaymentAddressState.value.trim(),
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          )
+          .catch((e) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            if (e.message.includes('bech32')) throw new Error('Invalid royalty payment address.')
+            console.log(e.message)
+          })
+        if (contractInfoResponse !== undefined) {
+          const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          if (contractInfo && !contractInfo.contract.includes('splits'))
+            throw new Error('The provided royalty payment address does not belong to a splits contract.')
+          else console.log(contractInfo)
+        }
       }
 
       const txHash = await toast.promise(dispatchExecute(payload), {
