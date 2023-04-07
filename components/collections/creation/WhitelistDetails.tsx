@@ -49,7 +49,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: 'Token price for whitelisted addresses \n (min. 25 STARS)',
+    subtitle: 'Token price for whitelisted addresses \n (min. 0 STARS)',
     placeholder: '25',
   })
 
