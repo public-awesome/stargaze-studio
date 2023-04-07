@@ -113,9 +113,6 @@ const VendingMinterExecutePage: NextPage = () => {
       if (contractState.value === '') {
         throw new Error('Please enter the contract address.')
       }
-      if (type === 'update_mint_price' && priceState.value < 50) {
-        throw new Error('Mint price must be at least 50 STARS')
-      }
 
       if (wallet.client && type === 'update_mint_price') {
         const contractConfig = wallet.client.queryContractSmart(contractState.value, {
@@ -153,6 +150,22 @@ const VendingMinterExecutePage: NextPage = () => {
                 .catch((error) => {
                   throw new Error(String(error).substring(String(error).lastIndexOf('Error:') + 7))
                 })
+            } else {
+              await contractConfig.then(async (config) => {
+                const factoryParameters = await wallet.client?.queryContractSmart(config.factory, {
+                  params: {},
+                })
+                if (
+                  factoryParameters.params.min_mint_price.amount &&
+                  priceState.value < Number(factoryParameters.params.min_mint_price.amount) / 1000000
+                ) {
+                  throw new Error(
+                    `Updated mint price cannot be lower than the minimum mint price of ${
+                      Number(factoryParameters.params.min_mint_price.amount) / 1000000
+                    } STARS`,
+                  )
+                }
+              })
             }
           })
       }

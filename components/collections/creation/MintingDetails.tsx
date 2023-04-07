@@ -13,6 +13,7 @@ interface MintingDetailsProps {
   onChange: (data: MintingDetailsDataProps) => void
   numberOfTokens: number | undefined
   uploadMethod: UploadMethod
+  minimumMintPrice: number
 }
 
 export interface MintingDetailsDataProps {
@@ -23,7 +24,7 @@ export interface MintingDetailsDataProps {
   paymentAddress?: string
 }
 
-export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: MintingDetailsProps) => {
+export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod, minimumMintPrice }: MintingDetailsProps) => {
   const wallet = useWallet()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
@@ -40,7 +41,7 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod }: Minti
     id: 'unitPrice',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: 'Price of each token (min. 50 STARS)',
+    subtitle: `Price of each token (min. ${minimumMintPrice} STARS)`,
     placeholder: '50',
   })
 
