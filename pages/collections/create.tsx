@@ -94,6 +94,8 @@ const CollectionCreationPage: NextPage = () => {
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
+  const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
+  const [minimumUpdatableMintPrice, setMinimumUpdatableMintPrice] = useState<string | null>('0')
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
@@ -784,8 +786,13 @@ const CollectionCreationPage: NextPage = () => {
   const checkMintingDetails = () => {
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
-    if (Number(mintingDetails.unitPrice) < 50000000)
-      throw new Error('Invalid unit price: The minimum unit price is 50 STARS')
+    if (collectionDetails?.updatable) {
+      if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
+        throw new Error(
+          `Invalid unit price: The minimum unit price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
+        )
+    } else if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
+      throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumMintPrice) / 1000000} STARS`)
     if (
       !mintingDetails.perAddressLimit ||
       mintingDetails.perAddressLimit < 1 ||
@@ -929,12 +936,14 @@ const CollectionCreationPage: NextPage = () => {
     if (VENDING_FACTORY_ADDRESS) {
       const vendingFactoryParameters = await client.queryContractSmart(VENDING_FACTORY_ADDRESS, { params: {} })
       setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+      setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
     }
     if (VENDING_FACTORY_UPDATABLE_ADDRESS) {
       const vendingFactoryUpdatableParameters = await client.queryContractSmart(VENDING_FACTORY_UPDATABLE_ADDRESS, {
         params: {},
       })
       setVendingMinterUpdatableCreationFee(vendingFactoryUpdatableParameters?.params?.creation_fee?.amount)
+      setMinimumUpdatableMintPrice(vendingFactoryUpdatableParameters?.params?.min_mint_price?.amount)
     }
   }
 
@@ -1285,6 +1294,11 @@ const CollectionCreationPage: NextPage = () => {
             </Conditional>
             <Conditional test={minterType === 'vending'}>
               <MintingDetails
+                minimumMintPrice={
+                  collectionDetails?.updatable
+                    ? Number(minimumUpdatableMintPrice) / 1000000
+                    : Number(minimumMintPrice) / 1000000
+                }
                 numberOfTokens={uploadDetails?.assetFiles.length}
                 onChange={setMintingDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
