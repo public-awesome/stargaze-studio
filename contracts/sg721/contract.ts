@@ -483,7 +483,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         {
           update_royalty_info: {
             payment_address: royaltyInfo.payment_address,
-            share_bps: royaltyInfo.share_bps,
+            share_bps: royaltyInfo.share_bps * 100,
           },
         },
         'auto',
@@ -837,7 +837,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         msg: {
           update_royalty_info: {
             payment_address: royaltyInfo.payment_address,
-            share_bps: royaltyInfo.share_bps,
+            share_bps: royaltyInfo.share_bps * 100,
           },
         },
         funds: [],
