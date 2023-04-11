@@ -1,6 +1,6 @@
 import type { MinterInstance } from 'contracts/minter'
 import { useMinterContract } from 'contracts/minter'
-import type { SG721Instance } from 'contracts/sg721'
+import type { RoyaltyInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 
 export type ActionType = typeof ACTION_TYPES[number]
@@ -11,6 +11,7 @@ export const ACTION_TYPES = [
   'batch_mint',
   'set_whitelist',
   'update_start_time',
+  'update_royalty_info',
   'update_per_address_limit',
   'withdraw',
   'transfer',
@@ -47,6 +48,11 @@ export const ACTION_LIST: ActionListItem[] = [
     id: 'set_whitelist',
     name: 'Set Whitelist',
     description: `Set whitelist contract address`,
+  },
+  {
+    id: 'update_royalty_info',
+    name: 'Update Royalty Info',
+    description: `Update royalty payment details`,
   },
   {
     id: 'update_start_time',
@@ -123,6 +129,7 @@ export type DispatchExecuteArgs = {
   | { type: Select<'batch_transfer'>; recipient: string; tokenIds: string }
   | { type: Select<'burn'>; tokenId: number }
   | { type: Select<'batch_burn'>; tokenIds: string }
+  | { type: Select<'update_royalty_info'>; royaltyInfo: RoyaltyInfo }
   | { type: Select<'airdrop'>; recipients: string[] }
 )
 
@@ -164,6 +171,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'burn': {
       return sg721Messages.burn(args.tokenId.toString())
+    }
+    case 'update_royalty_info': {
+      return sg721Messages.updateRoyaltyInfo(args.royaltyInfo)
     }
     case 'batch_burn': {
       return sg721Messages.batchBurn(args.tokenIds)
@@ -216,6 +226,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'burn': {
       return sg721Messages(sg721Contract)?.burn(args.tokenId.toString())
+    }
+    case 'update_royalty_info': {
+      return sg721Messages(sg721Contract)?.updateRoyaltyInfo(args.royaltyInfo)
     }
     case 'batch_burn': {
       return sg721Messages(sg721Contract)?.batchBurn(args.tokenIds)

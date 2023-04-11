@@ -91,6 +91,7 @@ export interface Sg721Messages {
   approveAll: (operator: string, expires?: Expiration) => ApproveAllMessage
   revokeAll: (operator: string) => RevokeAllMessage
   mint: (tokenId: string, owner: string, tokenURI?: string) => MintMessage
+  updateRoyaltyInfo: (royaltyInfo: RoyaltyInfo) => UpdateRoyaltyInfoMessage
   burn: (tokenId: string) => BurnMessage
   batchBurn: (tokenIds: string) => BatchBurnMessage
   batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
@@ -102,7 +103,7 @@ export interface UpdateRoyaltyInfoMessage {
   msg: {
     update_royalty_info: {
       payment_address: string
-      share_bps: string
+      share_bps: number
     }
   }
   funds: Coin[]
