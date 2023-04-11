@@ -14,6 +14,11 @@ export interface MigrateResponse {
   readonly logs: readonly logs.Log[]
 }
 
+export interface RoyaltyInfo {
+  payment_address: string
+  share_bps: number
+}
+
 export type Expiration = { at_height: number } | { at_time: string } | { never: Record<string, never> }
 
 export interface SG721Instance {
@@ -70,6 +75,7 @@ export interface SG721Instance {
   revokeAll: (operator: string) => Promise<string>
   /// Mint a new NFT, can only be called by the contract minter
   mint: (tokenId: string, owner: string, tokenURI?: string) => Promise<string> //MintMsg<T>
+  updateRoyaltyInfo: (royaltyInfo: RoyaltyInfo) => Promise<string>
 
   /// Burn an NFT the sender has access to
   burn: (tokenId: string) => Promise<string>
@@ -88,6 +94,18 @@ export interface Sg721Messages {
   burn: (tokenId: string) => BurnMessage
   batchBurn: (tokenIds: string) => BatchBurnMessage
   batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
+}
+
+export interface UpdateRoyaltyInfoMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_royalty_info: {
+      payment_address: string
+      share_bps: string
+    }
+  }
+  funds: Coin[]
 }
 
 export interface TransferNFTMessage {
@@ -425,6 +443,22 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    const updateRoyaltyInfo = async (royaltyInfo: RoyaltyInfo): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          update_royalty_info: {
+            payment_address: royaltyInfo.payment_address,
+            share_bps: royaltyInfo.share_bps,
+          },
+        },
+        'auto',
+        '',
+      )
+      return res.transactionHash
+    }
+
     const burn = async (tokenId: string): Promise<string> => {
       const res = await client.execute(
         txSigner,
@@ -546,6 +580,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       approveAll,
       revokeAll,
       mint,
+      updateRoyaltyInfo,
       burn,
       batchBurn,
       batchTransfer,
@@ -684,6 +719,20 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
+    const updateRoyaltyInfo = (royaltyInfo: RoyaltyInfo) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_royalty_info: {
+            payment_address: royaltyInfo.payment_address,
+            share_bps: royaltyInfo.share_bps,
+          },
+        },
+        funds: [],
+      }
+    }
+
     const burn = (tokenId: string) => {
       return {
         sender: txSigner,
@@ -753,6 +802,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       approveAll,
       revokeAll,
       mint,
+      updateRoyaltyInfo,
       burn,
       batchBurn,
       batchTransfer,
