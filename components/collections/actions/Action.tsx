@@ -1,3 +1,4 @@
+import { toUtf8 } from '@cosmjs/encoding'
 import { AirdropUpload } from 'components/AirdropUpload'
 import { Button } from 'components/Button'
 import type { DispatchExecuteArgs } from 'components/collections/actions/actions'
@@ -83,6 +84,22 @@ export const CollectionActions = ({
     subtitle: 'Address of the recipient',
   })
 
+  const tokenURIState = useInputState({
+    id: 'token-uri',
+    name: 'tokenURI',
+    title: 'Token URI',
+    subtitle: 'URI for the token',
+    placeholder: 'ipfs://',
+  })
+
+  const baseURIState = useInputState({
+    id: 'base-uri',
+    name: 'baseURI',
+    title: 'Base URI',
+    subtitle: 'Base URI to batch update token metadata with',
+    placeholder: 'ipfs://',
+  })
+
   const whitelistState = useInputState({
     id: 'whitelist-address',
     name: 'whitelistAddress',
@@ -90,14 +107,33 @@ export const CollectionActions = ({
     subtitle: 'Address of the whitelist contract',
   })
 
+  const royaltyPaymentAddressState = useInputState({
+    id: 'royalty-payment-address',
+    name: 'royaltyPaymentAddress',
+    title: 'Royalty Payment Address',
+    subtitle: 'Address to receive royalties.',
+    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+  })
+
+  const royaltyShareState = useInputState({
+    id: 'royalty-share',
+    name: 'royaltyShare',
+    title: 'Share Percentage',
+    subtitle: 'Percentage of royalties to be paid',
+    placeholder: '8%',
+  })
+
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = type === 'update_start_time'
   const showLimitField = type === 'update_per_address_limit'
-  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
+  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn', 'update_token_metadata'])
   const showNumberOfTokensField = type === 'batch_mint'
-  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer'])
+  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer', 'batch_update_token_metadata'])
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
   const showAirdropFileField = type === 'airdrop'
+  const showRoyaltyInfoFields = type === 'update_royalty_info'
+  const showTokenUriField = type === 'update_token_metadata'
+  const showBaseUriField = type === 'batch_update_token_metadata'
 
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
@@ -113,6 +149,16 @@ export const CollectionActions = ({
     recipient: recipientState.value,
     recipients: airdropArray,
     txSigner: wallet.address,
+    royaltyInfo: {
+      payment_address: royaltyPaymentAddressState.value,
+      share_bps: Number(royaltyShareState.value),
+    },
+    baseUri: baseURIState.value.trim().endsWith('/')
+      ? baseURIState.value.trim().slice(0, -1)
+      : baseURIState.value.trim(),
+    tokenUri: tokenURIState.value.trim().endsWith('/')
+      ? tokenURIState.value.trim().slice(0, -1)
+      : tokenURIState.value.trim(),
     type,
   }
 
@@ -140,6 +186,38 @@ export const CollectionActions = ({
       if (minterContractAddress === '' && sg721ContractAddress === '') {
         throw new Error('Please enter minter and sg721 contract addresses!')
       }
+
+      if (
+        type === 'update_royalty_info' &&
+        (royaltyShareState.value ? !royaltyPaymentAddressState.value : royaltyPaymentAddressState.value)
+      ) {
+        throw new Error('Royalty payment address and share percentage are both required')
+      }
+
+      if (
+        type === 'update_royalty_info' &&
+        royaltyPaymentAddressState.value &&
+        !royaltyPaymentAddressState.value.trim().endsWith('.stars')
+      ) {
+        const contractInfoResponse = await wallet.client
+          ?.queryContractRaw(
+            royaltyPaymentAddressState.value.trim(),
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          )
+          .catch((e) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            if (e.message.includes('bech32')) throw new Error('Invalid royalty payment address.')
+            console.log(e.message)
+          })
+        if (contractInfoResponse !== undefined) {
+          const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          if (contractInfo && !contractInfo.contract.includes('splits'))
+            throw new Error('The provided royalty payment address does not belong to a splits contract.')
+          else console.log(contractInfo)
+        }
+      }
+
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',
@@ -151,7 +229,7 @@ export const CollectionActions = ({
     },
     {
       onError: (error) => {
-        toast.error(String(error))
+        toast.error(String(error), { style: { maxWidth: 'none' } })
       },
     },
   )
@@ -170,8 +248,12 @@ export const CollectionActions = ({
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
           {showTokenIdField && <NumberInput {...tokenIdState} />}
+          {showTokenUriField && <TextInput className="mt-2" {...tokenURIState} />}
           {showTokenIdListField && <TextInput {...tokenIdListState} />}
+          {showBaseUriField && <TextInput className="mt-2" {...baseURIState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
+          {showRoyaltyInfoFields && <TextInput className="mt-2" {...royaltyPaymentAddressState} />}
+          {showRoyaltyInfoFields && <NumberInput className="mt-2" {...royaltyShareState} />}
           {showAirdropFileField && (
             <FormGroup
               subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: address,amount"
