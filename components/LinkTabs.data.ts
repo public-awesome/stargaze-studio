@@ -16,6 +16,11 @@ export const sg721LinkTabs: LinkTabProps[] = [
     description: `Execute SG721 contract actions`,
     href: '/contracts/sg721/execute',
   },
+  {
+    title: 'Migrate',
+    description: `Migrate SG721 contract`,
+    href: '/contracts/sg721/migrate',
+  },
 ]
 
 export const minterLinkTabs: LinkTabProps[] = [
