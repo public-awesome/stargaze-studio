@@ -20,6 +20,9 @@ export const ACTION_TYPES = [
   'batch_burn',
   'shuffle',
   'airdrop',
+  'update_token_metadata',
+  'batch_update_token_metadata',
+  'freeze_token_metadata',
 ] as const
 
 export interface ActionListItem {
@@ -63,6 +66,21 @@ export const ACTION_LIST: ActionListItem[] = [
     id: 'update_per_address_limit',
     name: 'Update Tokens Per Address Limit',
     description: `Update token per address limit`,
+  },
+  {
+    id: 'update_token_metadata',
+    name: 'Update Token Metadata',
+    description: `Update the metadata URI for a token`,
+  },
+  {
+    id: 'batch_update_token_metadata',
+    name: 'Batch Update Token Metadata',
+    description: `Update the metadata URI for a range of tokens`,
+  },
+  {
+    id: 'freeze_token_metadata',
+    name: 'Freeze Token Metadata',
+    description: `Render the metadata for tokens no longer updatable`,
   },
   {
     id: 'withdraw',
@@ -131,6 +149,9 @@ export type DispatchExecuteArgs = {
   | { type: Select<'batch_burn'>; tokenIds: string }
   | { type: Select<'update_royalty_info'>; royaltyInfo: RoyaltyInfo }
   | { type: Select<'airdrop'>; recipients: string[] }
+  | { type: Select<'update_token_metadata'>; tokenId: number; tokenUri: string }
+  | { type: Select<'batch_update_token_metadata'>; tokenIds: string; baseUri: string }
+  | { type: Select<'freeze_token_metadata'> }
 )
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -181,6 +202,15 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'airdrop': {
       return minterMessages.airdrop(txSigner, args.recipients)
     }
+    case 'update_token_metadata': {
+      return sg721Messages.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
+    }
+    case 'batch_update_token_metadata': {
+      return sg721Messages.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+    }
+    case 'freeze_token_metadata': {
+      return sg721Messages.freezeTokenMetadata()
+    }
     default: {
       throw new Error('Unknown action')
     }
@@ -217,6 +247,15 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'withdraw': {
       return minterMessages(minterContract)?.withdraw()
+    }
+    case 'update_token_metadata': {
+      return sg721Messages(sg721Contract)?.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
+    }
+    case 'batch_update_token_metadata': {
+      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+    }
+    case 'freeze_token_metadata': {
+      return sg721Messages(sg721Contract)?.freezeTokenMetadata()
     }
     case 'transfer': {
       return sg721Messages(sg721Contract)?.transferNft(args.recipient, args.tokenId.toString())

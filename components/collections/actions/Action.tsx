@@ -84,6 +84,22 @@ export const CollectionActions = ({
     subtitle: 'Address of the recipient',
   })
 
+  const tokenURIState = useInputState({
+    id: 'token-uri',
+    name: 'tokenURI',
+    title: 'Token URI',
+    subtitle: 'URI for the token',
+    placeholder: 'ipfs://',
+  })
+
+  const baseURIState = useInputState({
+    id: 'base-uri',
+    name: 'baseURI',
+    title: 'Base URI',
+    subtitle: 'Base URI to batch update token metadata with',
+    placeholder: 'ipfs://',
+  })
+
   const whitelistState = useInputState({
     id: 'whitelist-address',
     name: 'whitelistAddress',
@@ -110,12 +126,14 @@ export const CollectionActions = ({
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = type === 'update_start_time'
   const showLimitField = type === 'update_per_address_limit'
-  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn'])
+  const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn', 'update_token_metadata'])
   const showNumberOfTokensField = type === 'batch_mint'
-  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer'])
+  const showTokenIdListField = isEitherType(type, ['batch_burn', 'batch_transfer', 'batch_update_token_metadata'])
   const showRecipientField = isEitherType(type, ['transfer', 'mint_to', 'mint_for', 'batch_mint', 'batch_transfer'])
   const showAirdropFileField = type === 'airdrop'
   const showRoyaltyInfoFields = type === 'update_royalty_info'
+  const showTokenUriField = type === 'update_token_metadata'
+  const showBaseUriField = type === 'batch_update_token_metadata'
 
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
@@ -135,6 +153,12 @@ export const CollectionActions = ({
       payment_address: royaltyPaymentAddressState.value,
       share_bps: Number(royaltyShareState.value),
     },
+    baseUri: baseURIState.value.trim().endsWith('/')
+      ? baseURIState.value.trim().slice(0, -1)
+      : baseURIState.value.trim(),
+    tokenUri: tokenURIState.value.trim().endsWith('/')
+      ? tokenURIState.value.trim().slice(0, -1)
+      : tokenURIState.value.trim(),
     type,
   }
 
@@ -224,7 +248,9 @@ export const CollectionActions = ({
           {showWhitelistField && <AddressInput {...whitelistState} />}
           {showLimitField && <NumberInput {...limitState} />}
           {showTokenIdField && <NumberInput {...tokenIdState} />}
+          {showTokenUriField && <TextInput className="mt-2" {...tokenURIState} />}
           {showTokenIdListField && <TextInput {...tokenIdListState} />}
+          {showBaseUriField && <TextInput className="mt-2" {...baseURIState} />}
           {showNumberOfTokensField && <NumberInput {...batchNumberState} />}
           {showRoyaltyInfoFields && <TextInput className="mt-2" {...royaltyPaymentAddressState} />}
           {showRoyaltyInfoFields && <NumberInput className="mt-2" {...royaltyShareState} />}
