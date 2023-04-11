@@ -2,7 +2,7 @@ import type { Coin } from '@cosmjs/proto-signing'
 import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
 
-import type { SG721Contract, SG721Instance, Sg721Messages } from './contract'
+import type { MigrateResponse, SG721Contract, SG721Instance, Sg721Messages } from './contract'
 import { SG721 as initContract } from './contract'
 
 interface InstantiateResponse {
@@ -18,6 +18,7 @@ export interface UseSG721ContractProps {
     admin?: string,
     funds?: Coin[],
   ) => Promise<InstantiateResponse>
+  migrate: (contractAddress: string, codeId: number, migrateMsg: Record<string, unknown>) => Promise<MigrateResponse>
   use: (customAddress: string) => SG721Instance | undefined
   updateContractAddress: (contractAddress: string) => void
   messages: (contractAddress: string) => Sg721Messages | undefined
@@ -55,6 +56,19 @@ export function useSG721Contract(): UseSG721ContractProps {
     [SG721, wallet],
   )
 
+  const migrate = useCallback(
+    (contractAddress: string, codeId: number, migrateMsg: Record<string, unknown>): Promise<MigrateResponse> => {
+      return new Promise((resolve, reject) => {
+        if (!SG721) {
+          reject(new Error('Contract is not initialized.'))
+          return
+        }
+        SG721.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+      })
+    },
+    [SG721, wallet],
+  )
+
   const use = useCallback(
     (customAddress = ''): SG721Instance | undefined => {
       return SG721?.use(address || customAddress)
@@ -74,5 +88,6 @@ export function useSG721Contract(): UseSG721ContractProps {
     use,
     updateContractAddress,
     messages,
+    migrate,
   }
 }

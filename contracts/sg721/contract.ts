@@ -1,12 +1,17 @@
 import type { MsgExecuteContractEncodeObject, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toBase64, toUtf8 } from '@cosmjs/encoding'
-import type { Coin } from '@cosmjs/stargate'
+import type { Coin, logs } from '@cosmjs/stargate'
 import { coin } from '@cosmjs/stargate'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
   readonly transactionHash: string
+}
+
+export interface MigrateResponse {
+  readonly transactionHash: string
+  readonly logs: readonly logs.Log[]
 }
 
 export type Expiration = { at_height: number } | { at_time: string } | { never: Record<string, never> }
@@ -205,6 +210,13 @@ export interface SG721Contract {
     label: string,
     admin?: string,
   ) => Promise<InstantiateResponse>
+
+  migrate: (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ) => Promise<MigrateResponse>
 
   use: (contractAddress: string) => SG721Instance
 
@@ -540,6 +552,19 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
     }
   }
 
+  const migrate = async (
+    senderAddress: string,
+    contractAddress: string,
+    codeId: number,
+    migrateMsg: Record<string, unknown>,
+  ): Promise<MigrateResponse> => {
+    const result = await client.migrate(senderAddress, contractAddress, codeId, migrateMsg, 'auto')
+    return {
+      transactionHash: result.transactionHash,
+      logs: result.logs,
+    }
+  }
+
   const instantiate = async (
     senderAddress: string,
     codeId: number,
@@ -734,5 +759,5 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
     }
   }
 
-  return { use, instantiate, messages }
+  return { use, instantiate, migrate, messages }
 }
