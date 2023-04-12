@@ -23,6 +23,13 @@ export interface MemberAttributesProps {
 export function MemberAttributes(props: MemberAttributesProps) {
   const { title, subtitle, isRequired, attributes, onAdd, onChange, onRemove } = props
 
+  const calculateMemberPercent = (id: string) => {
+    const total = attributes.reduce((acc, [, { weight }]) => acc + (weight ? weight : 0), 0)
+    // return attributes.map(([id, { weight }]) => [id, weight / total])
+    const memberWeight = attributes.find(([memberId]) => memberId === id)?.[1].weight
+    return memberWeight ? memberWeight / total : 0
+  }
+
   return (
     <FormControl isRequired={isRequired} subtitle={subtitle} title={title}>
       {attributes.map(([id], i) => (
@@ -34,6 +41,7 @@ export function MemberAttributes(props: MemberAttributesProps) {
           onAdd={onAdd}
           onChange={onChange}
           onRemove={onRemove}
+          percentage={(Number(calculateMemberPercent(id)) * 100).toFixed(2)}
         />
       ))}
     </FormControl>
@@ -47,9 +55,18 @@ export interface MemberAttributeProps {
   onChange: MemberAttributesProps['onChange']
   onRemove: MemberAttributesProps['onRemove']
   defaultAttribute: Attribute
+  percentage?: string
 }
 
-export function MemberAttribute({ id, isLast, onAdd, onChange, onRemove, defaultAttribute }: MemberAttributeProps) {
+export function MemberAttribute({
+  id,
+  isLast,
+  onAdd,
+  onChange,
+  onRemove,
+  defaultAttribute,
+  percentage,
+}: MemberAttributeProps) {
   const Icon = useMemo(() => (isLast ? FaPlus : FaMinus), [isLast])
 
   const htmlId = useId()
@@ -64,7 +81,7 @@ export function MemberAttribute({ id, isLast, onAdd, onChange, onRemove, default
   const weightState = useNumberInputState({
     id: `ma-weight-${htmlId}`,
     name: `ma-weight-${htmlId}`,
-    title: `Weight`,
+    title: `Weight ${percentage ? `: ${percentage}%` : ''}`,
     defaultValue: defaultAttribute.weight,
   })
 
@@ -73,7 +90,7 @@ export function MemberAttribute({ id, isLast, onAdd, onChange, onRemove, default
   }, [addressState.value, weightState.value, id])
 
   return (
-    <div className="grid relative lg:grid-cols-[70%_20%_10%] 2xl:space-x-2">
+    <div className="grid relative md:grid-cols-[50%_43%_7%] lg:grid-cols-[65%_28%_7%] 2xl:grid-cols-[70%_23%_7%] 2xl:space-x-2">
       <AddressInput {...addressState} />
       <NumberInput {...weightState} />
 
