@@ -13,13 +13,14 @@ import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { whitelistLinkTabs } from 'components/LinkTabs.data'
+import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
 import type { InstantiateResponse } from 'contracts/sg721'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaAsterisk } from 'react-icons/fa'
 import { useMutation } from 'react-query'
@@ -27,7 +28,7 @@ import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-import { WHITELIST_CODE_ID } from '../../../utils/constants'
+import { WHITELIST_CODE_ID, WHITELIST_FLEX_CODE_ID } from '../../../utils/constants'
 
 const WhitelistInstantiatePage: NextPage = () => {
   const wallet = useWallet()
@@ -39,7 +40,7 @@ const WhitelistInstantiatePage: NextPage = () => {
   const [whitelistType, setWhitelistType] = useState<'standard' | 'flex'>('standard')
 
   const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
-  const [whitelistFlexArray, setWhitelistFlexArray] = useState<string[]>([])
+  const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
 
   const unitPriceState = useNumberInputState({
     id: 'unit-price',
@@ -63,6 +64,13 @@ const WhitelistInstantiatePage: NextPage = () => {
     title: 'Per Address Limit',
     subtitle: 'Limit of tokens per address',
     placeholder: '5',
+  })
+
+  const whaleCapState = useNumberInputState({
+    id: 'whale-cap',
+    name: 'whaleCap',
+    title: 'Whale Cap (optional)',
+    subtitle: 'Maximum number of tokens a single address can mint',
   })
 
   const addressListState = useAddressListState()
@@ -97,8 +105,31 @@ const WhitelistInstantiatePage: NextPage = () => {
         ] || [wallet.address],
         admins_mutable: adminsMutable,
       }
+
+      const flexMsg = {
+        members: whitelistFlexArray,
+        start_time: (startDate.getTime() * 1_000_000).toString(),
+        end_time: (endDate.getTime() * 1_000_000).toString(),
+        mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
+        whale_cap: whaleCapState.value || undefined,
+        member_limit: memberLimitState.value,
+        admins: [
+          ...new Set(
+            addressListState.values
+              .map((a) => a.address.trim())
+              .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
+          ),
+        ] || [wallet.address],
+        admins_mutable: adminsMutable,
+      }
+
       return toast.promise(
-        contract.instantiate(WHITELIST_CODE_ID, standardMsg, 'Stargaze Whitelist Contract', wallet.address),
+        contract.instantiate(
+          whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
+          whitelistType === 'standard' ? standardMsg : flexMsg,
+          whitelistType === 'standard' ? 'Stargaze Whitelist Contract' : 'Stargaze Whitelist Flex Contract',
+          wallet.address,
+        ),
         {
           loading: 'Instantiating contract...',
           error: 'Instantiation failed!',
@@ -117,6 +148,15 @@ const WhitelistInstantiatePage: NextPage = () => {
     setWhitelistStandardArray(whitelistData)
   }
 
+  const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
+    setWhitelistFlexArray(whitelistData)
+  }
+
+  useEffect(() => {
+    setWhitelistStandardArray([])
+    setWhitelistFlexArray([])
+  }, [whitelistType])
+
   return (
     <form className="py-6 px-12 space-y-4" onSubmit={mutate}>
       <NextSeo title="Instantiate Whitelist Contract" />
@@ -127,7 +167,7 @@ const WhitelistInstantiatePage: NextPage = () => {
       />
       <LinkTabs activeIndex={0} data={whitelistLinkTabs} />
 
-      <div className="flex justify-between mb-5 max-w-[360px] text-lg font-bold">
+      <div className="flex justify-between mb-5 ml-6 max-w-[300px] text-lg font-bold">
         <div className="form-check form-check-inline">
           <input
             checked={whitelistType === 'standard'}
@@ -202,16 +242,29 @@ const WhitelistInstantiatePage: NextPage = () => {
       </div>
 
       <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File">
-        <WhitelistUpload onChange={whitelistFileOnChange} />
-        <Conditional test={whitelistStandardArray.length > 0}>
-          <JsonPreview content={whitelistStandardArray} initialState={false} title="File Contents" />
+        <Conditional test={whitelistType === 'standard'}>
+          <WhitelistUpload onChange={whitelistFileOnChange} />
+          <Conditional test={whitelistStandardArray.length > 0}>
+            <JsonPreview content={whitelistStandardArray} initialState={false} title="File Contents" />
+          </Conditional>
+        </Conditional>
+        <Conditional test={whitelistType === 'flex'}>
+          <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
+          <Conditional test={whitelistFlexArray.length > 0}>
+            <JsonPreview content={whitelistFlexArray} initialState={false} title="File Contents" />
+          </Conditional>
         </Conditional>
       </FormGroup>
 
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
         <NumberInput isRequired {...unitPriceState} />
         <NumberInput isRequired {...memberLimitState} />
-        <NumberInput isRequired {...perAddressLimitState} />
+        <Conditional test={whitelistType === 'standard'}>
+          <NumberInput isRequired {...perAddressLimitState} />
+        </Conditional>
+        <Conditional test={whitelistType === 'flex'}>
+          <NumberInput {...whaleCapState} />
+        </Conditional>
         <FormControl htmlId="start-date" isRequired subtitle="Start time for the minting" title="Start Time">
           <InputDateTime minDate={new Date()} onChange={(date) => setStartDate(date)} value={startDate} />
         </FormControl>
