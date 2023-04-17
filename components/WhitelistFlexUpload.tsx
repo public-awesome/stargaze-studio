@@ -107,8 +107,7 @@ export const WhitelistFlexUpload = ({ onChange }: WhitelistFlexUploadProps) => {
           'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
           'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
         )}
-        id="airdrop-file"
-        multiple
+        id="whitelist-flex-file"
         onChange={onFileChange}
         type="file"
       />

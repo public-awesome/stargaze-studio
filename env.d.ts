@@ -17,7 +17,9 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_SG721_CODE_ID: string
     readonly NEXT_PUBLIC_SG721_UPDATABLE_CODE_ID: string
     readonly NEXT_PUBLIC_WHITELIST_CODE_ID: string
+    readonly NEXT_PUBLIC_WHITELIST_FLEX_CODE_ID: string
     readonly NEXT_PUBLIC_VENDING_MINTER_CODE_ID: string
+    readonly NEXT_PUBLIC_VENDING_MINTER_FLEX_CODE_ID: string
     readonly NEXT_PUBLIC_VENDING_FACTORY_ADDRESS: string
     readonly NEXT_PUBLIC_VENDING_FACTORY_UPDATABLE_ADDRESS: string
     readonly NEXT_PUBLIC_BASE_FACTORY_ADDRESS: string
