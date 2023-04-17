@@ -145,7 +145,7 @@ const CollectionActionsPage: NextPage = () => {
       })
       .catch((err) => {
         console.log(err)
-        setMinterType('base')
+        setSg721Type('base')
         console.log('Unable to retrieve contract type. Defaulting to "base".')
       })
   }, [debouncedSg721ContractState, wallet.client])
