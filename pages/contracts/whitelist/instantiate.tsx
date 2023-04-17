@@ -36,8 +36,10 @@ const WhitelistInstantiatePage: NextPage = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
+  const [whitelistType, setWhitelistType] = useState<'standard' | 'flex'>('standard')
 
-  const [whitelistArray, setWhitelistArray] = useState<string[]>([])
+  const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
+  const [whitelistFlexArray, setWhitelistFlexArray] = useState<string[]>([])
 
   const unitPriceState = useNumberInputState({
     id: 'unit-price',
@@ -79,8 +81,8 @@ const WhitelistInstantiatePage: NextPage = () => {
         throw new Error('End date is required')
       }
 
-      const msg = {
-        members: whitelistArray,
+      const standardMsg = {
+        members: whitelistStandardArray,
         start_time: (startDate.getTime() * 1_000_000).toString(),
         end_time: (endDate.getTime() * 1_000_000).toString(),
         mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
@@ -96,7 +98,7 @@ const WhitelistInstantiatePage: NextPage = () => {
         admins_mutable: adminsMutable,
       }
       return toast.promise(
-        contract.instantiate(WHITELIST_CODE_ID, msg, 'Stargaze Whitelist Contract', wallet.address),
+        contract.instantiate(WHITELIST_CODE_ID, standardMsg, 'Stargaze Whitelist Contract', wallet.address),
         {
           loading: 'Instantiating contract...',
           error: 'Instantiation failed!',
@@ -112,7 +114,7 @@ const WhitelistInstantiatePage: NextPage = () => {
   )
 
   const whitelistFileOnChange = (whitelistData: string[]) => {
-    setWhitelistArray(whitelistData)
+    setWhitelistStandardArray(whitelistData)
   }
 
   return (
@@ -125,6 +127,48 @@ const WhitelistInstantiatePage: NextPage = () => {
       />
       <LinkTabs activeIndex={0} data={whitelistLinkTabs} />
 
+      <div className="flex justify-between mb-5 max-w-[360px] text-lg font-bold">
+        <div className="form-check form-check-inline">
+          <input
+            checked={whitelistType === 'standard'}
+            className="peer sr-only"
+            id="inlineRadio1"
+            name="inlineRadioOptions3"
+            onClick={() => {
+              setWhitelistType('standard')
+            }}
+            type="radio"
+            value="nft-storage"
+          />
+          <label
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+            htmlFor="inlineRadio1"
+          >
+            Standard Whitelist
+          </label>
+        </div>
+
+        <div className="form-check form-check-inline">
+          <input
+            checked={whitelistType === 'flex'}
+            className="peer sr-only"
+            id="inlineRadio2"
+            name="inlineRadioOptions2"
+            onClick={() => {
+              setWhitelistType('flex')
+            }}
+            type="radio"
+            value="flex"
+          />
+          <label
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+            htmlFor="inlineRadio2"
+          >
+            Whitelist Flex
+          </label>
+        </div>
+      </div>
+
       <Conditional test={Boolean(data)}>
         <Alert type="info">
           <b>Instantiate success!</b> Here is the transaction result containing the contract address and the transaction
@@ -134,7 +178,7 @@ const WhitelistInstantiatePage: NextPage = () => {
         <br />
       </Conditional>
 
-      <div className="mt-2 ml-3 w-full form-control">
+      <div className="mt-2 ml-3 w-1/3 form-control">
         <label className="justify-start cursor-pointer label">
           <span className="mr-4 font-bold">Mutable Administrator Addresses</span>
           <input
@@ -159,8 +203,8 @@ const WhitelistInstantiatePage: NextPage = () => {
 
       <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File">
         <WhitelistUpload onChange={whitelistFileOnChange} />
-        <Conditional test={whitelistArray.length > 0}>
-          <JsonPreview content={whitelistArray} initialState={false} title="File Contents" />
+        <Conditional test={whitelistStandardArray.length > 0}>
+          <JsonPreview content={whitelistStandardArray} initialState={false} title="File Contents" />
         </Conditional>
       </FormGroup>
 
