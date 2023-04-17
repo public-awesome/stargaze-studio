@@ -1,6 +1,7 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
+import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -30,7 +31,7 @@ export interface WhiteListInstance {
   //Execute
   updateStartTime: (startTime: string) => Promise<string>
   updateEndTime: (endTime: string) => Promise<string>
-  addMembers: (memberList: string[]) => Promise<string>
+  addMembers: (memberList: string[] | WhitelistFlexMember[]) => Promise<string>
   removeMembers: (memberList: string[]) => Promise<string>
   updatePerAddressLimit: (limit: number) => Promise<string>
   increaseMemberLimit: (limit: number) => Promise<string>
@@ -41,7 +42,7 @@ export interface WhiteListInstance {
 export interface WhitelistMessages {
   updateStartTime: (startTime: string) => UpdateStartTimeMessage
   updateEndTime: (endTime: string) => UpdateEndTimeMessage
-  addMembers: (memberList: string[]) => AddMembersMessage
+  addMembers: (memberList: string[] | WhitelistFlexMember[]) => AddMembersMessage
   removeMembers: (memberList: string[]) => RemoveMembersMessage
   updatePerAddressLimit: (limit: number) => UpdatePerAddressLimitMessage
   increaseMemberLimit: (limit: number) => IncreaseMemberLimitMessage
@@ -86,7 +87,7 @@ export interface AddMembersMessage {
   sender: string
   contract: string
   msg: {
-    add_members: { to_add: string[] }
+    add_members: { to_add: string[] | WhitelistFlexMember[] }
   }
   funds: Coin[]
 }
@@ -182,7 +183,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       return res.transactionHash
     }
 
-    const addMembers = async (memberList: string[]): Promise<string> => {
+    const addMembers = async (memberList: string[] | WhitelistFlexMember[]): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
@@ -307,7 +308,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
-    const addMembers = (memberList: string[]) => {
+    const addMembers = (memberList: string[] | WhitelistFlexMember[]) => {
       return {
         sender: txSigner,
         contract: contractAddress,
