@@ -1,6 +1,7 @@
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
 import { Button } from 'components/Button'
+import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { useExecuteComboboxState } from 'components/contracts/sg721/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
@@ -106,21 +107,23 @@ const Sg721MigratePage: NextPage = () => {
         <div className="space-y-8">
           <AddressInput {...contractState} />
           <NumberInput isRequired {...codeIdState} />
-          <Alert type="info">
-            <div className="inline-block">
-              Migrating a v1 contract to Code ID: {SG721_UPDATABLE_V1_CODE_ID} (sg721-updatable) will allow the creator
-              to update the royalty details and token metadata. Once the migration is complete, new functionalities can
-              be performed using{' '}
-              <Anchor
-                className="font-bold text-plumbus hover:underline"
-                external
-                href={`/collections/actions/?sg721ContractAddress=${contractState.value}`}
-              >
-                Collection Actions
-              </Anchor>
-              .
-            </div>
-          </Alert>
+          <Conditional test={SG721_UPDATABLE_V1_CODE_ID > 0}>
+            <Alert type="info">
+              <div className="inline-block">
+                Migrating a v1 contract to Code ID: {SG721_UPDATABLE_V1_CODE_ID} (sg721-updatable) will allow the
+                creator to update the royalty details and token metadata. Once the migration is complete, new
+                functionalities can be performed using{' '}
+                <Anchor
+                  className="font-bold text-plumbus hover:underline"
+                  external
+                  href={`/collections/actions/?sg721ContractAddress=${contractState.value}`}
+                >
+                  Collection Actions
+                </Anchor>
+                .
+              </div>
+            </Alert>
+          </Conditional>
         </div>
         <div className="space-y-8">
           <div className="relative">
