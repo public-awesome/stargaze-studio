@@ -221,8 +221,8 @@ const CollectionCreationPage: NextPage = () => {
         setCoverImageUrl(coverImageUri)
 
         let whitelist: string | undefined
-        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
-        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        if (whitelistDetails?.whitelistState === 'existing') whitelist = whitelistDetails.contractAddress
+        else if (whitelistDetails?.whitelistState === 'new') whitelist = await instantiateWhitelist()
         setWhitelistContractAddress(whitelist as string)
 
         await instantiateVendingMinter(baseUri, coverImageUri, whitelist)
@@ -231,8 +231,8 @@ const CollectionCreationPage: NextPage = () => {
         setCoverImageUrl(uploadDetails?.imageUrl as string)
 
         let whitelist: string | undefined
-        if (whitelistDetails?.whitelistType === 'existing') whitelist = whitelistDetails.contractAddress
-        else if (whitelistDetails?.whitelistType === 'new') whitelist = await instantiateWhitelist()
+        if (whitelistDetails?.whitelistState === 'existing') whitelist = whitelistDetails.contractAddress
+        else if (whitelistDetails?.whitelistState === 'new') whitelist = await instantiateWhitelist()
         setWhitelistContractAddress(whitelist as string)
 
         await instantiateVendingMinter(baseTokenUri as string, coverImageUrl as string, whitelist)
@@ -822,7 +822,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkWhitelistDetails = async () => {
     if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
-    if (whitelistDetails.whitelistType === 'existing') {
+    if (whitelistDetails.whitelistState === 'existing') {
       if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
       else {
         const contract = whitelistContract?.use(whitelistDetails.contractAddress)
@@ -852,7 +852,7 @@ const CollectionCreationPage: NextPage = () => {
           }
         }
       }
-    } else if (whitelistDetails.whitelistType === 'new') {
+    } else if (whitelistDetails.whitelistState === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
       if (whitelistDetails.unitPrice === '') throw new Error('Whitelist unit price is required')
       if (Number(whitelistDetails.unitPrice) < 0)
@@ -949,7 +949,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkwalletBalance = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
-    if (minterType === 'vending' && whitelistDetails?.whitelistType === 'new' && whitelistDetails.memberLimit) {
+    if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
       const amountNeeded =
         Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
         (collectionDetails?.updatable ? Number(vendingMinterUpdatableCreationFee) : Number(vendingMinterCreationFee))

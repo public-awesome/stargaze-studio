@@ -17,7 +17,8 @@ interface WhitelistDetailsProps {
 }
 
 export interface WhitelistDetailsDataProps {
-  whitelistType: WhitelistState
+  whitelistState: WhitelistState
+  whitelistType: WhitelistType
   contractAddress?: string
   members?: string[]
   unitPrice?: string
@@ -31,8 +32,11 @@ export interface WhitelistDetailsDataProps {
 
 type WhitelistState = 'none' | 'existing' | 'new'
 
+type WhitelistType = 'standard' | 'flex'
+
 export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
+  const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [whitelistArray, setWhitelistArray] = useState<string[]>([])
@@ -77,7 +81,8 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
 
   useEffect(() => {
     const data: WhitelistDetailsDataProps = {
-      whitelistType: whitelistState,
+      whitelistState,
+      whitelistType,
       contractAddress: whitelistAddressState.value
         .toLowerCase()
         .replace(/,/g, '')
