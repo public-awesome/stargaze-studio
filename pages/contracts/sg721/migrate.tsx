@@ -1,4 +1,7 @@
+import { Alert } from 'components/Alert'
+import { Anchor } from 'components/Anchor'
 import { Button } from 'components/Button'
+import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { useExecuteComboboxState } from 'components/contracts/sg721/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
@@ -19,6 +22,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import { SG721_UPDATABLE_V1_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -36,6 +40,7 @@ const Sg721MigratePage: NextPage = () => {
     title: 'Code ID',
     subtitle: 'Code ID of the New Sg721 contract',
     placeholder: '1',
+    defaultValue: SG721_UPDATABLE_V1_CODE_ID,
   })
 
   const contractState = useInputState({
@@ -102,6 +107,23 @@ const Sg721MigratePage: NextPage = () => {
         <div className="space-y-8">
           <AddressInput {...contractState} />
           <NumberInput isRequired {...codeIdState} />
+          <Conditional test={SG721_UPDATABLE_V1_CODE_ID > 0}>
+            <Alert type="info">
+              <div className="inline-block">
+                Migrating a v1 contract to Code ID: {SG721_UPDATABLE_V1_CODE_ID} (sg721-updatable) will allow the
+                creator to update the royalty details and token metadata. Once the migration is complete, new
+                functionalities can be performed using{' '}
+                <Anchor
+                  className="font-bold text-plumbus hover:underline"
+                  external
+                  href={`/collections/actions/?sg721ContractAddress=${contractState.value}`}
+                >
+                  Collection Actions
+                </Anchor>
+                .
+              </div>
+            </Alert>
+          </Conditional>
         </div>
         <div className="space-y-8">
           <div className="relative">
