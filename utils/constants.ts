@@ -1,6 +1,7 @@
 export const SG721_CODE_ID = parseInt(process.env.NEXT_PUBLIC_SG721_CODE_ID, 10)
 export const MINTER_CODE_ID = parseInt(process.env.NEXT_PUBLIC_MINTER_CODE_ID, 10)
 export const WHITELIST_CODE_ID = parseInt(process.env.NEXT_PUBLIC_WHITELIST_CODE_ID, 10)
+export const SG721_UPDATABLE_V1_CODE_ID = parseInt(process.env.NEXT_PUBLIC_SG721_UPDATABLE_V1_CODE_ID, 10)
 
 export const PINATA_ENDPOINT_URL = process.env.NEXT_PUBLIC_PINATA_ENDPOINT_URL
 export const NETWORK = process.env.NEXT_PUBLIC_NETWORK

@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import { SG721_UPDATABLE_V1_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
@@ -38,7 +39,7 @@ const Sg721MigratePage: NextPage = () => {
     title: 'Code ID',
     subtitle: 'Code ID of the New Sg721 contract',
     placeholder: '1',
-    defaultValue: 47,
+    defaultValue: SG721_UPDATABLE_V1_CODE_ID,
   })
 
   const contractState = useInputState({
@@ -107,8 +108,9 @@ const Sg721MigratePage: NextPage = () => {
           <NumberInput isRequired {...codeIdState} />
           <Alert type="info">
             <div className="inline-block">
-              Migrating a v1 contract to Code ID: 47 (sg721-updatable) will allow the creator to update the royalty
-              details and token metadata. Once the migration is complete, new functionalities can be performed using{' '}
+              Migrating a v1 contract to Code ID: {SG721_UPDATABLE_V1_CODE_ID} (sg721-updatable) will allow the creator
+              to update the royalty details and token metadata. Once the migration is complete, new functionalities can
+              be performed using{' '}
               <Anchor
                 className="font-bold text-plumbus hover:underline"
                 external
