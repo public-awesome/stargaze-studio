@@ -49,8 +49,10 @@ import {
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
   VENDING_FACTORY_ADDRESS,
+  VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
   WHITELIST_CODE_ID,
+  WHITELIST_FLEX_CODE_ID,
 } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -93,9 +95,11 @@ const CollectionCreationPage: NextPage = () => {
   const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<string | null>(null)
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
+  const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<string | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
   const [minimumUpdatableMintPrice, setMinimumUpdatableMintPrice] = useState<string | null>('0')
+  const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
@@ -401,7 +405,7 @@ const CollectionCreationPage: NextPage = () => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
     if (!whitelistContract) throw new Error('Contract not found')
 
-    const msg = {
+    const standardMsg = {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
@@ -412,9 +416,19 @@ const CollectionCreationPage: NextPage = () => {
       admins_mutable: whitelistDetails?.adminsMutable,
     }
 
+    const flexMsg = {
+      members: whitelistDetails?.members,
+      start_time: whitelistDetails?.startTime,
+      end_time: whitelistDetails?.endTime,
+      mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
+      member_limit: whitelistDetails?.memberLimit,
+      admins: whitelistDetails?.admins || [wallet.address],
+      admins_mutable: whitelistDetails?.adminsMutable,
+    }
+
     const data = await whitelistContract.instantiate(
-      WHITELIST_CODE_ID,
-      msg,
+      whitelistDetails?.whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
+      whitelistDetails?.whitelistType === 'standard' ? standardMsg : flexMsg,
       'Stargaze Whitelist Contract',
       wallet.address,
     )
@@ -469,20 +483,40 @@ const CollectionCreationPage: NextPage = () => {
       },
     }
 
+    console.log('Whitelist State: ', whitelistDetails?.whitelistState)
+    console.log('Whitelist Type: ', whitelistDetails?.whitelistType)
+    console.log(
+      'Factory Address: ',
+      whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex'
+        ? VENDING_FACTORY_FLEX_ADDRESS
+        : collectionDetails?.updatable
+        ? VENDING_FACTORY_UPDATABLE_ADDRESS
+        : VENDING_FACTORY_ADDRESS,
+    )
+
+    console.log('Whitelist: ', whitelist)
     const payload: VendingFactoryDispatchExecuteArgs = {
-      contract: collectionDetails?.updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
+      contract:
+        whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex'
+          ? VENDING_FACTORY_FLEX_ADDRESS
+          : collectionDetails?.updatable
+          ? VENDING_FACTORY_UPDATABLE_ADDRESS
+          : VENDING_FACTORY_ADDRESS,
       messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
       funds: [
         coin(
-          collectionDetails?.updatable
+          whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex'
+            ? (vendingMinterFlexCreationFee as string)
+            : collectionDetails?.updatable
             ? (vendingMinterUpdatableCreationFee as string)
             : (vendingMinterCreationFee as string),
           'ustars',
         ),
       ],
       updatable: collectionDetails?.updatable,
+      flex: whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex',
     }
     const data = await vendingFactoryDispatchExecute(payload)
     setTransactionHash(data.transactionHash)
@@ -786,7 +820,10 @@ const CollectionCreationPage: NextPage = () => {
   const checkMintingDetails = () => {
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
-    if (collectionDetails?.updatable) {
+    if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex') {
+      if (Number(mintingDetails.unitPrice) < Number(minimumFlexMintPrice))
+        throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} STARS`)
+    } else if (collectionDetails?.updatable) {
       if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
         throw new Error(
           `Invalid unit price: The minimum unit price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
@@ -859,7 +896,10 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Invalid unit price: The unit price cannot be negative')
       if (whitelistDetails.startTime === '') throw new Error('Start time is required')
       if (whitelistDetails.endTime === '') throw new Error('End time is required')
-      if (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
+      if (
+        whitelistDetails.whitelistType === 'standard' &&
+        (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
+      )
         throw new Error('Per address limit is required')
       if (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
         throw new Error('Member limit is required')
@@ -945,6 +985,13 @@ const CollectionCreationPage: NextPage = () => {
       setVendingMinterUpdatableCreationFee(vendingFactoryUpdatableParameters?.params?.creation_fee?.amount)
       setMinimumUpdatableMintPrice(vendingFactoryUpdatableParameters?.params?.min_mint_price?.amount)
     }
+    if (VENDING_FACTORY_FLEX_ADDRESS) {
+      const vendingFactoryFlexParameters = await client.queryContractSmart(VENDING_FACTORY_FLEX_ADDRESS, {
+        params: {},
+      })
+      setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
+      setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
+    }
   }
 
   const checkwalletBalance = () => {
@@ -952,7 +999,11 @@ const CollectionCreationPage: NextPage = () => {
     if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
       const amountNeeded =
         Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
-        (collectionDetails?.updatable ? Number(vendingMinterUpdatableCreationFee) : Number(vendingMinterCreationFee))
+        (whitelistDetails.whitelistType === 'flex'
+          ? Number(vendingMinterFlexCreationFee)
+          : collectionDetails?.updatable
+          ? Number(vendingMinterUpdatableCreationFee)
+          : Number(vendingMinterCreationFee))
       if (amountNeeded >= Number(wallet.balance[0].amount))
         throw new Error(
           `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(

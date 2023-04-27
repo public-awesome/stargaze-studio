@@ -4,6 +4,8 @@ import { AddressList } from 'components/forms/AddressList'
 import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
+import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
+import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import React, { useEffect, useState } from 'react'
 import { isValidAddress } from 'utils/isValidAddress'
 
@@ -20,7 +22,7 @@ export interface WhitelistDetailsDataProps {
   whitelistState: WhitelistState
   whitelistType: WhitelistType
   contractAddress?: string
-  members?: string[]
+  members?: string[] | WhitelistFlexMember[]
   unitPrice?: string
   startTime?: string
   endTime?: string
@@ -39,7 +41,8 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [whitelistArray, setWhitelistArray] = useState<string[]>([])
+  const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
+  const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
   const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const whitelistAddressState = useInputState({
@@ -76,8 +79,17 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   const addressListState = useAddressListState()
 
   const whitelistFileOnChange = (data: string[]) => {
-    setWhitelistArray(data)
+    setWhitelistStandardArray(data)
   }
+
+  const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
+    setWhitelistFlexArray(whitelistData)
+  }
+
+  useEffect(() => {
+    setWhitelistStandardArray([])
+    setWhitelistFlexArray([])
+  }, [whitelistType])
 
   useEffect(() => {
     const data: WhitelistDetailsDataProps = {
@@ -89,7 +101,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
         .replace(/"/g, '')
         .replace(/'/g, '')
         .replace(/ /g, ''),
-      members: whitelistArray,
+      members: whitelistType === 'standard' ? whitelistStandardArray : whitelistFlexArray,
       unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
       startTime: startDate ? (startDate.getTime() * 1_000_000).toString() : '',
       endTime: endDate ? (endDate.getTime() * 1_000_000).toString() : '',
@@ -113,7 +125,8 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     perAddressLimitState.value,
     startDate,
     endDate,
-    whitelistArray,
+    whitelistStandardArray,
+    whitelistFlexArray,
     whitelistState,
     addressListState.values,
     adminsMutable,
@@ -186,11 +199,54 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
       </Conditional>
 
       <Conditional test={whitelistState === 'new'}>
+        <div className="flex justify-between mb-5 ml-6 max-w-[300px] text-lg font-bold">
+          <div className="form-check form-check-inline">
+            <input
+              checked={whitelistType === 'standard'}
+              className="peer sr-only"
+              id="inlineRadio7"
+              name="inlineRadioOptions7"
+              onClick={() => {
+                setWhitelistType('standard')
+              }}
+              type="radio"
+              value="nft-storage"
+            />
+            <label
+              className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+              htmlFor="inlineRadio7"
+            >
+              Standard Whitelist
+            </label>
+          </div>
+
+          <div className="form-check form-check-inline">
+            <input
+              checked={whitelistType === 'flex'}
+              className="peer sr-only"
+              id="inlineRadio8"
+              name="inlineRadioOptions8"
+              onClick={() => {
+                setWhitelistType('flex')
+              }}
+              type="radio"
+              value="flex"
+            />
+            <label
+              className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+              htmlFor="inlineRadio8"
+            >
+              Whitelist Flex
+            </label>
+          </div>
+        </div>
         <div className="grid grid-cols-2">
           <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
             <NumberInput isRequired {...unitPriceState} />
             <NumberInput isRequired {...memberLimitState} />
-            <NumberInput isRequired {...perAddressLimitState} />
+            <Conditional test={whitelistType === 'standard'}>
+              <NumberInput isRequired {...perAddressLimitState} />
+            </Conditional>
             <FormControl
               htmlId="start-date"
               isRequired
@@ -231,11 +287,24 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
                 title="Administrator Addresses"
               />
             </div>
-            <FormGroup subtitle="TXT file that contains the whitelisted addresses" title="Whitelist File">
-              <WhitelistUpload onChange={whitelistFileOnChange} />
-            </FormGroup>
-            <Conditional test={whitelistArray.length > 0}>
-              <JsonPreview content={whitelistArray} initialState title="File Contents" />
+            <Conditional test={whitelistType === 'standard'}>
+              <FormGroup subtitle="TXT file that contains the whitelisted addresses" title="Whitelist File">
+                <WhitelistUpload onChange={whitelistFileOnChange} />
+              </FormGroup>
+              <Conditional test={whitelistStandardArray.length > 0}>
+                <JsonPreview content={whitelistStandardArray} initialState title="File Contents" />
+              </Conditional>
+            </Conditional>
+            <Conditional test={whitelistType === 'flex'}>
+              <FormGroup
+                subtitle="CSV file that contains the whitelisted addresses and their corresponding mint counts"
+                title="Whitelist File"
+              >
+                <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
+              </FormGroup>
+              <Conditional test={whitelistFlexArray.length > 0}>
+                <JsonPreview content={whitelistFlexArray} initialState={false} title="File Contents" />
+              </Conditional>
             </Conditional>
           </div>
         </div>
