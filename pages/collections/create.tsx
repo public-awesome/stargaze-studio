@@ -487,7 +487,7 @@ const CollectionCreationPage: NextPage = () => {
     console.log('Whitelist Type: ', whitelistDetails?.whitelistType)
     console.log(
       'Factory Address: ',
-      whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex'
+      whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
         ? VENDING_FACTORY_FLEX_ADDRESS
         : collectionDetails?.updatable
         ? VENDING_FACTORY_UPDATABLE_ADDRESS
@@ -497,7 +497,7 @@ const CollectionCreationPage: NextPage = () => {
     console.log('Whitelist: ', whitelist)
     const payload: VendingFactoryDispatchExecuteArgs = {
       contract:
-        whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex'
+        whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
           ? VENDING_FACTORY_FLEX_ADDRESS
           : collectionDetails?.updatable
           ? VENDING_FACTORY_UPDATABLE_ADDRESS
@@ -507,7 +507,7 @@ const CollectionCreationPage: NextPage = () => {
       msg,
       funds: [
         coin(
-          whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex'
+          whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
             ? (vendingMinterFlexCreationFee as string)
             : collectionDetails?.updatable
             ? (vendingMinterUpdatableCreationFee as string)
@@ -516,7 +516,7 @@ const CollectionCreationPage: NextPage = () => {
         ),
       ],
       updatable: collectionDetails?.updatable,
-      flex: whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex',
+      flex: whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex',
     }
     const data = await vendingFactoryDispatchExecute(payload)
     setTransactionHash(data.transactionHash)
@@ -820,7 +820,7 @@ const CollectionCreationPage: NextPage = () => {
   const checkMintingDetails = () => {
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
-    if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.whitelistType === 'flex') {
+    if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
       if (Number(mintingDetails.unitPrice) < Number(minimumFlexMintPrice))
         throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} STARS`)
     } else if (collectionDetails?.updatable) {
@@ -865,6 +865,8 @@ const CollectionCreationPage: NextPage = () => {
         const contract = whitelistContract?.use(whitelistDetails.contractAddress)
         //check if the address belongs to a whitelist contract (see performChecks())
         const config = await contract?.config()
+        if (JSON.stringify(config).includes('whale_cap')) whitelistDetails.whitelistType = 'flex'
+        else whitelistDetails.whitelistType = 'standard'
         if (Number(config?.start_time) !== Number(mintingDetails?.startTime)) {
           const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
           throw Error(`Whitelist start time (${whitelistStartDate.toLocaleString()}) does not match minting start time`)
@@ -1013,7 +1015,9 @@ const CollectionCreationPage: NextPage = () => {
     } else {
       const amountNeeded =
         minterType === 'vending'
-          ? collectionDetails?.updatable
+          ? whitelistDetails?.whitelistState === 'existing' && whitelistDetails.whitelistType === 'flex'
+            ? Number(vendingMinterFlexCreationFee)
+            : collectionDetails?.updatable
             ? Number(vendingMinterUpdatableCreationFee)
             : Number(vendingMinterCreationFee)
           : collectionDetails?.updatable

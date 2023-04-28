@@ -143,6 +143,7 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             name="whitelistRadioOptions1"
             onClick={() => {
               setWhitelistState('none')
+              setWhitelistType('standard')
             }}
             type="radio"
             value="None"
