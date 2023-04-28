@@ -11,6 +11,7 @@ export interface DispatchExecuteArgs {
   msg: Record<string, unknown>
   funds: Coin[]
   updatable?: boolean
+  flex?: boolean
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -18,12 +19,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   if (!messages) {
     throw new Error('cannot dispatch execute, messages is not defined')
   }
-  return messages.createVendingMinter(txSigner, args.msg, args.funds, args.updatable)
+  return messages.createVendingMinter(txSigner, args.msg, args.funds, args.updatable, args.flex)
 }
 
 export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages } = useVendingFactoryContract()
   const { contract } = args
-  return messages(contract)?.createVendingMinter(args.msg, args.funds, args.updatable)
+  return messages(contract)?.createVendingMinter(args.msg, args.funds, args.updatable, args.flex)
 }

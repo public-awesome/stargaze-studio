@@ -1,7 +1,9 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
+import { VENDING_FACTORY_ADDRESS, VENDING_FACTORY_FLEX_ADDRESS } from 'utils/constants'
 
 import { VENDING_FACTORY_UPDATABLE_ADDRESS } from '../../utils/constants'
 
@@ -23,11 +25,17 @@ export interface VendingFactoryInstance {
     msg: Record<string, unknown>,
     funds: Coin[],
     updatable?: boolean,
+    flex?: boolean,
   ) => Promise<CreateVendingMinterResponse>
 }
 
 export interface VendingFactoryMessages {
-  createVendingMinter: (msg: Record<string, unknown>, funds: Coin[], updatable?: boolean) => CreateVendingMinterMessage
+  createVendingMinter: (
+    msg: Record<string, unknown>,
+    funds: Coin[],
+    updatable?: boolean,
+    flex?: boolean,
+  ) => CreateVendingMinterMessage
 }
 
 export interface CreateVendingMinterMessage {
@@ -53,10 +61,11 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
       msg: Record<string, unknown>,
       funds: Coin[],
       updatable?: boolean,
+      flex?: boolean,
     ): Promise<CreateVendingMinterResponse> => {
       const result = await client.execute(
         senderAddress,
-        updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
+        flex ? VENDING_FACTORY_FLEX_ADDRESS : updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
         msg,
         'auto',
         '',
@@ -82,6 +91,7 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
       msg: Record<string, unknown>,
       funds: Coin[],
       updatable?: boolean,
+      flex?: boolean,
     ): CreateVendingMinterMessage => {
       return {
         sender: txSigner,
