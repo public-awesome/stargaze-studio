@@ -1,3 +1,6 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
+import { toUtf8 } from '@cosmjs/encoding'
 import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
@@ -7,6 +10,8 @@ import { useExecuteComboboxState } from 'components/contracts/whitelist/ExecuteC
 import { FormControl } from 'components/FormControl'
 import { AddressList } from 'components/forms/AddressList'
 import { useAddressListState } from 'components/forms/AddressList.hooks'
+import { FlexMemberAttributes } from 'components/forms/FlexMemberAttributes'
+import { useFlexMemberAttributesState } from 'components/forms/FlexMemberAttributes.hooks'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
@@ -14,6 +19,8 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { whitelistLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
+import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
+import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
@@ -27,6 +34,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import { useDebounce } from 'utils/debounce'
 import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -37,6 +45,8 @@ const WhitelistExecutePage: NextPage = () => {
 
   const [lastTx, setLastTx] = useState('')
   const [memberList, setMemberList] = useState<string[]>([])
+  const [flexMemberList, setFlexMemberList] = useState<WhitelistFlexMember[]>([])
+  const [whitelistType, setWhitelistType] = useState<'standard' | 'flex'>('standard')
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -45,6 +55,8 @@ const WhitelistExecutePage: NextPage = () => {
 
   const addressListState = useAddressListState()
 
+  const flexAddressListState = useFlexMemberAttributesState()
+
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
@@ -52,6 +64,8 @@ const WhitelistExecutePage: NextPage = () => {
     subtitle: 'Address of the Whitelist contract',
   })
   const contractAddress = contractState.value
+
+  const debouncedWhitelistContractState = useDebounce(contractState.value, 300)
 
   const limitState = useNumberInputState({
     id: 'limit',
@@ -63,7 +77,9 @@ const WhitelistExecutePage: NextPage = () => {
 
   const showLimitState = isEitherType(type, ['update_per_address_limit', 'increase_member_limit'])
   const showTimestamp = isEitherType(type, ['update_start_time', 'update_end_time'])
-  const showMemberList = isEitherType(type, ['add_members', 'remove_members'])
+  const showMemberList = isEitherType(type, ['add_members'])
+  const showFlexMemberList = isEitherType(type, ['add_members'])
+  const showRemoveMemberList = isEitherType(type, ['remove_members'])
   const showAdminList = isEitherType(type, ['update_admins'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, contractState.value])
@@ -73,14 +89,44 @@ const WhitelistExecutePage: NextPage = () => {
     type,
     limit: limitState.value,
     timestamp: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
-    members: [
-      ...new Set(
-        addressListState.values
-          .map((a) => a.address.trim())
-          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
-          .concat(memberList),
-      ),
-    ],
+    members:
+      whitelistType === 'standard'
+        ? [
+            ...new Set(
+              addressListState.values
+                .map((a) => a.address.trim())
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+                .concat(memberList),
+            ),
+          ]
+        : type === 'add_members'
+        ? [
+            ...new Set(
+              flexAddressListState.values
+                .concat(flexMemberList)
+                .filter((obj, index, self) => index === self.findIndex((t) => t.address.trim() === obj.address.trim()))
+                .filter(
+                  (member) =>
+                    member.address !== '' &&
+                    isValidAddress(member.address.trim()) &&
+                    member.address.startsWith('stars'),
+                )
+                .map((member) => {
+                  return {
+                    address: member.address.trim(),
+                    mint_count: Math.round(member.mint_count),
+                  }
+                }),
+            ),
+          ]
+        : [
+            ...new Set(
+              addressListState.values
+                .map((a) => a.address.trim())
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+                .concat(memberList),
+            ),
+          ],
     admins: [
       ...new Set(
         addressListState.values
@@ -122,10 +168,54 @@ const WhitelistExecutePage: NextPage = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractAddress])
+
   useEffect(() => {
     const initial = new URL(document.URL).searchParams.get('contractAddress')
     if (initial && initial.length > 0) contractState.onChange(initial)
   }, [])
+
+  useEffect(() => {
+    flexAddressListState.reset()
+    flexAddressListState.add({
+      address: '',
+      mint_count: 0,
+    })
+  }, [])
+
+  useEffect(() => {
+    async function getWhitelistContractType() {
+      if (wallet.client && debouncedWhitelistContractState.length > 0) {
+        const client = wallet.client
+        const data = await toast.promise(
+          client.queryContractRaw(
+            debouncedWhitelistContractState,
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          ),
+          {
+            loading: 'Retrieving Whitelist type...',
+            error: 'Whitelist type retrieval failed.',
+            success: 'Whitelist type retrieved.',
+          },
+        )
+        const contractType: string = JSON.parse(new TextDecoder().decode(data as Uint8Array)).contract
+        console.log(contractType)
+        return contractType
+      }
+    }
+    void getWhitelistContractType()
+      .then((contractType) => {
+        if (contractType?.includes('flex')) {
+          setWhitelistType('flex')
+        } else {
+          setWhitelistType('standard')
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+        setWhitelistType('standard')
+        console.log('Unable to retrieve contract type. Defaulting to "standard".')
+      })
+  }, [debouncedWhitelistContractState, wallet.client])
 
   return (
     <section className="py-6 px-12 space-y-4">
@@ -154,7 +244,7 @@ const WhitelistExecutePage: NextPage = () => {
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
             </FormControl>
           </Conditional>
-          <Conditional test={showMemberList || showAdminList}>
+          <Conditional test={(whitelistType === 'standard' && showMemberList) || showAdminList || showRemoveMemberList}>
             <AddressList
               entries={addressListState.entries}
               isRequired
@@ -164,11 +254,28 @@ const WhitelistExecutePage: NextPage = () => {
               subtitle={type === 'update_admins' ? 'Enter the admin addresses' : 'Enter the member addresses'}
               title="Addresses"
             />
-            <Conditional test={showMemberList}>
+            <Conditional test={whitelistType === 'standard' && showMemberList}>
               <Alert className="mt-8" type="info">
                 You may optionally choose a text file of additional member addresses.
               </Alert>
               <WhitelistUpload onChange={setMemberList} />
+            </Conditional>
+          </Conditional>
+
+          <Conditional test={whitelistType === 'flex' && showFlexMemberList}>
+            <FlexMemberAttributes
+              attributes={flexAddressListState.entries}
+              onAdd={flexAddressListState.add}
+              onChange={flexAddressListState.update}
+              onRemove={flexAddressListState.remove}
+              subtitle="Enter the member addresses and corresponding mint counts"
+              title="Members"
+            />
+            <Conditional test={whitelistType === 'flex' && showFlexMemberList}>
+              <Alert className="mt-8" type="info">
+                You may optionally choose a .csv file of additional member addresses and mint counts.
+              </Alert>
+              <WhitelistFlexUpload onChange={setFlexMemberList} />
             </Conditional>
           </Conditional>
         </div>

@@ -1,3 +1,4 @@
+import type { WhitelistFlexMember } from '../../../components/WhitelistFlexUpload'
 import type { WhiteListInstance } from '../index'
 import { useWhiteListContract } from '../index'
 
@@ -68,23 +69,16 @@ export interface DispatchExecuteProps {
   [k: string]: unknown
 }
 
-type Select<T extends ExecuteType> = T
-
 /** @see {@link WhiteListInstance} */
-export type DispatchExecuteArgs = {
+export interface DispatchExecuteArgs {
   contract: string
   messages?: WhiteListInstance
-} & (
-  | { type: undefined }
-  | { type: Select<'update_start_time'>; timestamp: string }
-  | { type: Select<'update_end_time'>; timestamp: string }
-  | { type: Select<'add_members'>; members: string[] }
-  | { type: Select<'remove_members'>; members: string[] }
-  | { type: Select<'update_per_address_limit'>; limit: number }
-  | { type: Select<'increase_member_limit'>; limit: number }
-  | { type: Select<'update_admins'>; admins: string[] }
-  | { type: Select<'freeze'> }
-)
+  type: string | undefined
+  timestamp: string
+  members: string[] | WhitelistFlexMember[]
+  limit: number
+  admins: string[]
+}
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   const { messages } = args
@@ -105,7 +99,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return messages.addMembers(args.members)
     }
     case 'remove_members': {
-      return messages.removeMembers(args.members)
+      return messages.removeMembers(args.members as string[])
     }
     case 'update_per_address_limit': {
       return messages.updatePerAddressLimit(args.limit)
@@ -140,7 +134,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return messages(contract)?.addMembers(args.members)
     }
     case 'remove_members': {
-      return messages(contract)?.removeMembers(args.members)
+      return messages(contract)?.removeMembers(args.members as string[])
     }
     case 'update_per_address_limit': {
       return messages(contract)?.updatePerAddressLimit(args.limit)
