@@ -483,18 +483,6 @@ const CollectionCreationPage: NextPage = () => {
       },
     }
 
-    console.log('Whitelist State: ', whitelistDetails?.whitelistState)
-    console.log('Whitelist Type: ', whitelistDetails?.whitelistType)
-    console.log(
-      'Factory Address: ',
-      whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
-        ? VENDING_FACTORY_FLEX_ADDRESS
-        : collectionDetails?.updatable
-        ? VENDING_FACTORY_UPDATABLE_ADDRESS
-        : VENDING_FACTORY_ADDRESS,
-    )
-
-    console.log('Whitelist: ', whitelist)
     const payload: VendingFactoryDispatchExecuteArgs = {
       contract:
         whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
@@ -820,6 +808,7 @@ const CollectionCreationPage: NextPage = () => {
   const checkMintingDetails = () => {
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
+    if (mintingDetails.unitPrice === '') throw new Error('Public mint price is required')
     if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
       if (Number(mintingDetails.unitPrice) < Number(minimumFlexMintPrice))
         throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} STARS`)
@@ -893,7 +882,7 @@ const CollectionCreationPage: NextPage = () => {
       }
     } else if (whitelistDetails.whitelistState === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
-      if (whitelistDetails.unitPrice === '') throw new Error('Whitelist unit price is required')
+      if (whitelistDetails.unitPrice === undefined) throw new Error('Whitelist unit price is required')
       if (Number(whitelistDetails.unitPrice) < 0)
         throw new Error('Invalid unit price: The unit price cannot be negative')
       if (whitelistDetails.startTime === '') throw new Error('Start time is required')

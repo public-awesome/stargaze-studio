@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
@@ -75,7 +77,11 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod, minimum
     if (numberOfTokens) numberOfTokensState.onChange(numberOfTokens)
     const data: MintingDetailsDataProps = {
       numTokens: numberOfTokensState.value,
-      unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
+      unitPrice: unitPriceState.value
+        ? (Number(unitPriceState.value) * 1_000_000).toString()
+        : unitPriceState.value === 0
+        ? '0'
+        : '',
       perAddressLimit: perAddressLimitState.value,
       startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
       paymentAddress: paymentAddressState.value.trim(),
