@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { AddressList } from 'components/forms/AddressList'
@@ -102,7 +104,11 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
         .replace(/'/g, '')
         .replace(/ /g, ''),
       members: whitelistType === 'standard' ? whitelistStandardArray : whitelistFlexArray,
-      unitPrice: unitPriceState.value ? (Number(unitPriceState.value) * 1_000_000).toString() : '',
+      unitPrice: unitPriceState.value
+        ? (Number(unitPriceState.value) * 1_000_000).toString()
+        : unitPriceState.value === 0
+        ? '0'
+        : undefined,
       startTime: startDate ? (startDate.getTime() * 1_000_000).toString() : '',
       endTime: endDate ? (endDate.getTime() * 1_000_000).toString() : '',
       perAddressLimit: perAddressLimitState.value,
