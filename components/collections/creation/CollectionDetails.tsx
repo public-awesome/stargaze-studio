@@ -10,10 +10,12 @@ import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { Tooltip } from 'components/Tooltip'
+import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { SG721_UPDATABLE_CODE_ID } from 'utils/constants'
+import { uid } from 'utils/random'
 
 import { TextInput } from '../../forms/FormInput'
 import type { MinterType } from '../actions/Combobox'
@@ -89,6 +91,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

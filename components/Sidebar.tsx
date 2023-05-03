@@ -3,21 +3,36 @@
 
 import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
+import { setLogItemList, useLogStore } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useEffect } from 'react'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
 import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK } from '../utils/constants'
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
+import { LogModal } from './LogModal'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
 export const Sidebar = () => {
   const router = useRouter()
   const wallet = useWallet()
+  const logs = useLogStore()
+
+  useEffect(() => {
+    if (logs.itemList.length === 0) return
+    console.log('Stringified log item list: ', JSON.stringify(logs.itemList))
+    window.localStorage.setItem('logs', JSON.stringify(logs.itemList))
+  }, [logs])
+
+  useEffect(() => {
+    console.log(window.localStorage.getItem('logs'))
+    setLogItemList(JSON.parse(window.localStorage.getItem('logs') || '[]'))
+  }, [])
 
   return (
     <SidebarLayout>
@@ -25,7 +40,6 @@ export const Sidebar = () => {
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
         <img alt="Brand Text" className="w-full" src="/stargaze_logo_800.svg" />
       </Anchor>
-
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
@@ -205,9 +219,17 @@ export const Sidebar = () => {
       </div>
 
       <IncomeDashboardDisclaimer creatorAddress={wallet.address ? wallet.address : ''} />
+      <LogModal />
 
       <div className="flex-grow" />
-
+      {logs.itemList.length > 0 && (
+        <label
+          className="w-[65%] h-[4px] text-lg font-bold text-white normal-case bg-blue-500 hover:bg-blue-600 border-none animate-none btn modal-button"
+          htmlFor="my-modal-8"
+        >
+          View Logs
+        </label>
+      )}
       {/* Stargaze network status */}
       <div className="text-sm capitalize">Network: {wallet.network}</div>
 

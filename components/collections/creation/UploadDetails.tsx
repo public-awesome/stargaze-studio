@@ -13,10 +13,12 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataInput } from 'components/MetadataInput'
 import { MetadataModal } from 'components/MetadataModal'
 import { SingleAssetPreview } from 'components/SingleAssetPreview'
+import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
+import { uid } from 'utils/random'
 import { naturalCompare } from 'utils/sort'
 
 import type { MinterType } from '../actions/Combobox'
@@ -106,6 +108,12 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
       for (let i = 0; i < sortedFileNames.length; i++) {
         if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
           toast.error('The file names should be in numerical order starting from 1.')
+          addLogItem({
+            id: uid(),
+            message: 'The file names should be in numerical order starting from 1.',
+            type: 'Error',
+            timestamp: new Date(),
+          })
           //clear the input
           event.target.value = ''
           return
@@ -152,6 +160,12 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
       for (let i = 0; i < sortedFileNames.length; i++) {
         if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
           toast.error('The file names should be in numerical order starting from 1.')
+          addLogItem({
+            id: uid(),
+            message: 'The file names should be in numerical order starting from 1.',
+            type: 'Error',
+            timestamp: new Date(),
+          })
           event.target.value = ''
           return
         }
@@ -174,9 +188,10 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
             setMetadataFilesArray([])
             return toast.error(`Invalid metadata file: ${metadataFile.name}`)
           }
-        } catch (error) {
+        } catch (error: any) {
           event.target.value = ''
           setMetadataFilesArray([])
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           return toast.error(`Invalid metadata file: ${metadataFile.name}`)
         }
       }
@@ -237,6 +252,7 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
       onChange(data)
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
     }
   }, [
     assetFilesArray,
