@@ -29,6 +29,7 @@ import type { WhitelistDetailsDataProps } from 'components/collections/creation/
 import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
 import { useContracts } from 'contexts/contracts'
+import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as BaseFactoryDispatchExecuteArgs } from 'contracts/baseFactory/messages/execute'
 import { dispatchExecute as baseFactoryDispatchExecute } from 'contracts/baseFactory/messages/execute'
@@ -56,6 +57,7 @@ import {
 } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { uid } from 'utils/random'
 
 import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
@@ -127,19 +129,25 @@ const CollectionCreationPage: NextPage = () => {
               checkwalletBalance()
               setReadyToCreateVm(true)
             })
-            .catch((err) => {
-              if (String(err.message).includes('Insufficient wallet balance'))
-                toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
-              else toast.error(`Error in Whitelist Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+            .catch((error) => {
+              if (String(error.message).includes('Insufficient wallet balance')) {
+                toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+                addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+              } else {
+                toast.error(`Error in Whitelist Configuration: ${error.message}`, { style: { maxWidth: 'none' } })
+                addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+              }
               setReadyToCreateVm(false)
             })
         })
-        .catch((err) => {
-          toast.error(`Error in Royalty Details: ${err.message}`, { style: { maxWidth: 'none' } })
+        .catch((error) => {
+          toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToCreateVm(false)
         })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setUploading(false)
       setReadyToCreateVm(false)
     }
@@ -157,17 +165,20 @@ const CollectionCreationPage: NextPage = () => {
               checkwalletBalance()
               setReadyToCreateBm(true)
             })
-            .catch((err) => {
-              toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+            .catch((error) => {
+              toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+              addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
               setReadyToCreateBm(false)
             })
         })
-        .catch((err) => {
-          toast.error(`Error in Royalty Configuration: ${err.message}`, { style: { maxWidth: 'none' } })
+        .catch((error) => {
+          toast.error(`Error in Royalty Configuration: ${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToCreateBm(false)
         })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setUploading(false)
     }
   }
@@ -180,12 +191,14 @@ const CollectionCreationPage: NextPage = () => {
         .then(() => {
           setReadyToUploadAndMint(true)
         })
-        .catch((err) => {
-          toast.error(`${err.message}`, { style: { maxWidth: 'none' } })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToUploadAndMint(false)
         })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setUploading(false)
     }
   }
@@ -245,6 +258,7 @@ const CollectionCreationPage: NextPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' }, duration: 10000 })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setCreatingCollection(false)
       setUploading(false)
     }
@@ -307,6 +321,7 @@ const CollectionCreationPage: NextPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' }, duration: 10000 })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setCreatingCollection(false)
       setUploading(false)
     }
@@ -367,6 +382,7 @@ const CollectionCreationPage: NextPage = () => {
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
+            addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
             setUploading(false)
             setCreatingCollection(false)
             setIsMintingComplete(false)
@@ -388,6 +404,7 @@ const CollectionCreationPage: NextPage = () => {
           })
           .catch((error) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
+            addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
             setUploading(false)
             setCreatingCollection(false)
           })
@@ -396,6 +413,7 @@ const CollectionCreationPage: NextPage = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setCreatingCollection(false)
       setUploading(false)
     }
@@ -583,6 +601,7 @@ const CollectionCreationPage: NextPage = () => {
             )
             .catch((error) => {
               toast.error(error.message, { style: { maxWidth: 'none' } })
+              addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
               setUploading(false)
               setIsMintingComplete(false)
               setCreatingCollection(false)
@@ -607,6 +626,7 @@ const CollectionCreationPage: NextPage = () => {
             )
             .catch((error) => {
               toast.error(error.message, { style: { maxWidth: 'none' } })
+              addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
               setUploading(false)
               setIsMintingComplete(false)
               setCreatingCollection(false)
@@ -617,6 +637,7 @@ const CollectionCreationPage: NextPage = () => {
       })
       .catch((error) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
+        addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         setUploading(false)
         setCreatingCollection(false)
       })
