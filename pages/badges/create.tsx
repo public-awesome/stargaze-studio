@@ -22,6 +22,7 @@ import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
+import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
 import type { Badge } from 'contracts/badgeHub'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
@@ -41,6 +42,7 @@ import { copy } from 'utils/clipboard'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { uid } from 'utils/random'
 import { resolveAddress } from 'utils/resolveAddress'
 import { truncateMiddle } from 'utils/text'
 
@@ -97,6 +99,7 @@ const BadgeCreationPage: NextPage = () => {
       }, 100)
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setUploading(false)
       setReadyToCreateBadge(false)
     }
@@ -127,6 +130,7 @@ const BadgeCreationPage: NextPage = () => {
       return imageUploadDetails?.imageUrl as string
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setCreatingBadge(false)
       setUploading(false)
       throw new Error("Couldn't upload the image.")
@@ -252,13 +256,15 @@ const BadgeCreationPage: NextPage = () => {
           })
           .catch((error: { message: any }) => {
             toast.error(error.message, { style: { maxWidth: 'none' } })
+            addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
             setUploading(false)
             setIsAddingKeysComplete(false)
             setCreatingBadge(false)
           })
       }
-    } catch (err: any) {
-      toast.error(err.message, { style: { maxWidth: 'none' } })
+    } catch (error: any) {
+      toast.error(error.message, { style: { maxWidth: 'none' } })
+      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
       setCreatingBadge(false)
       setUploading(false)
     }
@@ -296,6 +302,12 @@ const BadgeCreationPage: NextPage = () => {
         const url = new URL(badgeDetails.external_url)
       } catch (e: any) {
         throw new Error(`Invalid external url: Make sure to include the protocol (e.g. https://)`)
+        addLogItem({
+          id: uid(),
+          message: 'Invalid external url: Make sure to include the protocol (e.g. https://)',
+          type: 'Error',
+          timestamp: new Date(),
+        })
       }
     }
   }
