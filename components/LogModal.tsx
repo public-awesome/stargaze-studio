@@ -123,9 +123,9 @@ export const LogModal = (props: LogModalProps) => {
                 onClick={() => {
                   const csv = logs.itemList
                     .map((logItem) => {
-                      return `${logItem.type as string},${logItem.message},${(logItem.timestamp as Date)
-                        .toUTCString()
-                        .replace(',', '')}`
+                      return `${logItem.type as string},${logItem.message},${
+                        logItem.timestamp ? new Date(logItem.timestamp).toUTCString().replace(',', '') : ''
+                      }`
                     })
                     .join('\n')
                   const blob = new Blob([csv], { type: 'text/csv' })
