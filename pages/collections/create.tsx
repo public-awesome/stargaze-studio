@@ -1378,8 +1378,8 @@ const CollectionCreationPage: NextPage = () => {
             }
           >
             <Alert className="mt-4" type="info">
-              Setting the unit price as 0 for public minting may render the collection vulnerable for bot attacks on the
-              Launchpad. Please consider creating a whitelist of addresses that can mint for free instead.
+              Setting the unit price as 0 for public minting may render the collection vulnerable for bot attacks.
+              Please consider creating a whitelist of addresses that can mint for free instead.
             </Alert>
           </Conditional>
         </Conditional>
