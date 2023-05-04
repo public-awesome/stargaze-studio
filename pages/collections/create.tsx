@@ -1370,6 +1370,18 @@ const CollectionCreationPage: NextPage = () => {
               />
             </Conditional>
           </div>
+          <Conditional
+            test={
+              mintingDetails?.numTokens !== undefined &&
+              mintingDetails.numTokens > 0 &&
+              mintingDetails.unitPrice === '0'
+            }
+          >
+            <Alert className="mt-4" type="info">
+              Setting the public minting price as 0 may render the collection vulnerable for bot attacks on the
+              Launchpad. Please consider creating a whitelist of addresses that can mint for free instead.
+            </Alert>
+          </Conditional>
         </Conditional>
 
         <Conditional

@@ -112,7 +112,7 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod, minimum
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
         </FormControl>
       </FormGroup>
-      <TextInput className="p-4 mt-10" {...paymentAddressState} />
+      <TextInput className="p-4 mt-5" {...paymentAddressState} />
     </div>
   )
 }
