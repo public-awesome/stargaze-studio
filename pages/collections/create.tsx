@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
@@ -976,31 +977,56 @@ const CollectionCreationPage: NextPage = () => {
     const client = wallet.client
     if (!client) return
     if (BASE_FACTORY_ADDRESS) {
-      const baseFactoryParameters = await client.queryContractSmart(BASE_FACTORY_ADDRESS, { params: {} })
+      const baseFactoryParameters = await client
+        .queryContractSmart(BASE_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
       setBaseMinterCreationFee(baseFactoryParameters?.params?.creation_fee?.amount)
     }
     if (BASE_FACTORY_UPDATABLE_ADDRESS) {
-      const baseFactoryUpdatableParameters = await client.queryContractSmart(BASE_FACTORY_UPDATABLE_ADDRESS, {
-        params: {},
-      })
+      const baseFactoryUpdatableParameters = await client
+        .queryContractSmart(BASE_FACTORY_UPDATABLE_ADDRESS, {
+          params: {},
+        })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
       setBaseMinterUpdatableCreationFee(baseFactoryUpdatableParameters?.params?.creation_fee?.amount)
     }
     if (VENDING_FACTORY_ADDRESS) {
-      const vendingFactoryParameters = await client.queryContractSmart(VENDING_FACTORY_ADDRESS, { params: {} })
+      const vendingFactoryParameters = await client
+        .queryContractSmart(VENDING_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
       setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
       setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
     }
     if (VENDING_FACTORY_UPDATABLE_ADDRESS) {
-      const vendingFactoryUpdatableParameters = await client.queryContractSmart(VENDING_FACTORY_UPDATABLE_ADDRESS, {
-        params: {},
-      })
+      const vendingFactoryUpdatableParameters = await client
+        .queryContractSmart(VENDING_FACTORY_UPDATABLE_ADDRESS, {
+          params: {},
+        })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
       setVendingMinterUpdatableCreationFee(vendingFactoryUpdatableParameters?.params?.creation_fee?.amount)
       setMinimumUpdatableMintPrice(vendingFactoryUpdatableParameters?.params?.min_mint_price?.amount)
     }
     if (VENDING_FACTORY_FLEX_ADDRESS) {
-      const vendingFactoryFlexParameters = await client.queryContractSmart(VENDING_FACTORY_FLEX_ADDRESS, {
-        params: {},
-      })
+      const vendingFactoryFlexParameters = await client
+        .queryContractSmart(VENDING_FACTORY_FLEX_ADDRESS, {
+          params: {},
+        })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
       setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
       setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
     }
