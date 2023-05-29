@@ -49,7 +49,7 @@ const CollectionList: NextPage = () => {
           .then((contractType) => {
             if (contractType?.includes('sg-base-minter')) {
               setMyOneOfOneCollections((prevState) => [...prevState, collection])
-            } else if (contractType?.includes('sg-minter')) {
+            } else if (contractType?.includes('sg-minter') || contractType?.includes('flex')) {
               setMyStandardCollections((prevState) => [...prevState, collection])
             }
           })

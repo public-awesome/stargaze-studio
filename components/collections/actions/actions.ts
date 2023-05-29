@@ -35,6 +35,7 @@ export const ACTION_TYPES = [
   'update_token_metadata',
   'batch_update_token_metadata',
   'freeze_token_metadata',
+  'enable_updatable',
 ] as const
 
 export interface ActionListItem {
@@ -205,6 +206,11 @@ export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
     name: 'Freeze Token Metadata',
     description: `Render the metadata for tokens no longer updatable`,
   },
+  {
+    id: 'enable_updatable',
+    name: 'Enable Updatable',
+    description: `Render a collection updatable following a migration`,
+  },
 ]
 
 export interface DispatchExecuteProps {
@@ -212,43 +218,28 @@ export interface DispatchExecuteProps {
   [k: string]: unknown
 }
 
-type Select<T extends ActionType> = T
-
 /** @see {@link VendingMinterInstance}{@link BaseMinterInstance} */
-export type DispatchExecuteArgs = {
+export interface DispatchExecuteArgs {
   minterContract: string
   sg721Contract: string
   vendingMinterMessages?: VendingMinterInstance
   baseMinterMessages?: BaseMinterInstance
   sg721Messages?: SG721Instance
   txSigner: string
-} & (
-  | { type: undefined }
-  | { type: Select<'mint_token_uri'>; tokenUri: string }
-  | { type: Select<'update_mint_price'>; price: string }
-  | { type: Select<'update_discount_price'>; price: string }
-  | { type: Select<'remove_discount_price'> }
-  | { type: Select<'mint_to'>; recipient: string }
-  | { type: Select<'mint_for'>; recipient: string; tokenId: number }
-  | { type: Select<'batch_mint'>; recipient: string; batchNumber: number }
-  | { type: Select<'set_whitelist'>; whitelist: string }
-  | { type: Select<'update_start_time'>; startTime: string }
-  | { type: Select<'update_start_trading_time'>; startTime?: string }
-  | { type: Select<'update_per_address_limit'>; limit: number }
-  | { type: Select<'shuffle'> }
-  | { type: Select<'transfer'>; recipient: string; tokenId: number }
-  | { type: Select<'batch_transfer'>; recipient: string; tokenIds: string }
-  | { type: Select<'burn'>; tokenId: number }
-  | { type: Select<'batch_burn'>; tokenIds: string }
-  | { type: Select<'batch_mint_for'>; recipient: string; tokenIds: string }
-  | { type: Select<'airdrop'>; recipients: string[] }
-  | { type: Select<'burn_remaining'> }
-  | { type: Select<'update_collection_info'>; collectionInfo: CollectionInfo | undefined }
-  | { type: Select<'freeze_collection_info'> }
-  | { type: Select<'update_token_metadata'>; tokenId: number; tokenUri: string }
-  | { type: Select<'batch_update_token_metadata'>; tokenIds: string; baseUri: string }
-  | { type: Select<'freeze_token_metadata'> }
-)
+  type: string | undefined
+  tokenUri: string
+  price: string
+  recipient: string
+  tokenId: number
+  batchNumber: number
+  whitelist: string
+  startTime: string | undefined
+  limit: number
+  tokenIds: string
+  recipients: string[]
+  collectionInfo: CollectionInfo | undefined
+  baseUri: string
+}
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   const { vendingMinterMessages, baseMinterMessages, sg721Messages, txSigner } = args
@@ -281,7 +272,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return vendingMinterMessages.setWhitelist(txSigner, args.whitelist)
     }
     case 'update_start_time': {
-      return vendingMinterMessages.updateStartTime(txSigner, args.startTime)
+      return vendingMinterMessages.updateStartTime(txSigner, args.startTime as string)
     }
     case 'update_start_trading_time': {
       return vendingMinterMessages.updateStartTradingTime(txSigner, args.startTime)
@@ -303,6 +294,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'freeze_token_metadata': {
       return sg721Messages.freezeTokenMetadata()
+    }
+    case 'enable_updatable': {
+      return sg721Messages.enableUpdatable()
     }
     case 'shuffle': {
       return vendingMinterMessages.shuffle(txSigner)
@@ -368,7 +362,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return vendingMinterMessages(minterContract)?.setWhitelist(args.whitelist)
     }
     case 'update_start_time': {
-      return vendingMinterMessages(minterContract)?.updateStartTime(args.startTime)
+      return vendingMinterMessages(minterContract)?.updateStartTime(args.startTime as string)
     }
     case 'update_start_trading_time': {
       return vendingMinterMessages(minterContract)?.updateStartTradingTime(args.startTime as string)
@@ -390,6 +384,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'freeze_token_metadata': {
       return sg721Messages(sg721Contract)?.freezeTokenMetadata()
+    }
+    case 'enable_updatable': {
+      return sg721Messages(sg721Contract)?.enableUpdatable()
     }
     case 'shuffle': {
       return vendingMinterMessages(minterContract)?.shuffle()
