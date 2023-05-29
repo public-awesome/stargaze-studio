@@ -89,6 +89,7 @@ export interface SG721Instance {
   updateTokenMetadata: (tokenId: string, tokenURI: string) => Promise<string>
   batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => Promise<string>
   freezeTokenMetadata: () => Promise<string>
+  enableUpdatable: () => Promise<string>
 }
 
 export interface Sg721Messages {
@@ -107,6 +108,7 @@ export interface Sg721Messages {
   updateTokenMetadata: (tokenId: string, tokenURI: string) => UpdateTokenMetadataMessage
   batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => BatchUpdateTokenMetadataMessage
   freezeTokenMetadata: () => FreezeTokenMetadataMessage
+  enableUpdatable: () => EnableUpdatableMessage
 }
 
 export interface TransferNFTMessage {
@@ -244,6 +246,13 @@ export interface FreezeTokenMetadataMessage {
   sender: string
   contract: string
   msg: { freeze_token_metadata: Record<string, never> }
+  funds: Coin[]
+}
+
+export interface EnableUpdatableMessage {
+  sender: string
+  contract: string
+  msg: { enable_updatable: Record<string, never> }
   funds: Coin[]
 }
 
@@ -687,6 +696,20 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    const enableUpdatable = async (): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          enable_updatable: {},
+        },
+        'auto',
+        '',
+        [coin('500000000', 'ustars')],
+      )
+      return res.transactionHash
+    }
+
     return {
       contractAddress,
       ownerOf,
@@ -716,6 +739,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       updateTokenMetadata,
       batchUpdateTokenMetadata,
       freezeTokenMetadata,
+      enableUpdatable,
     }
   }
 
@@ -963,6 +987,17 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
+    const enableUpdatable = () => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          enable_updatable: {},
+        },
+        funds: [coin('500000000', 'ustars')],
+      }
+    }
+
     const updateCollectionInfo = (collectionInfo: CollectionInfo) => {
       return {
         sender: txSigner,
@@ -1001,6 +1036,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       updateTokenMetadata,
       batchUpdateTokenMetadata,
       freezeTokenMetadata,
+      enableUpdatable,
     }
   }
 
