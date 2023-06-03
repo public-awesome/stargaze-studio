@@ -3,7 +3,7 @@
 export type AssetType = 'image' | 'audio' | 'video' | 'html' | 'unknown'
 
 export const getAssetType = (assetFileName: string): AssetType => {
-  const assetType = assetFileName?.split('.').pop() || 'unknown'
+  const assetType = assetFileName?.toLowerCase().split('.').pop() || 'unknown'
   if (assetType === 'png' || assetType === 'jpg' || assetType === 'jpeg' || assetType === 'svg' || assetType === 'gif')
     return 'image'
   if (assetType === 'mp3' || assetType === 'wav') return 'audio'
