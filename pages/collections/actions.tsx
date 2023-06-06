@@ -1,4 +1,5 @@
 import { toUtf8 } from '@cosmjs/encoding'
+import { Sidetab } from '@typeform/embed-react'
 import { CollectionActions } from 'components/collections/actions/Action'
 import { CollectionQueries } from 'components/collections/queries/Queries'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -231,6 +232,7 @@ const CollectionActionsPage: NextPage = () => {
             </div>
           </div>
         </div>
+        <Sidetab buttonColor="#455CF9" buttonText="Studio Survey" height={600} id="yJnL8fXk" width={800} />
       </form>
     </section>
   )

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { Sidetab } from '@typeform/embed-react'
 import type { MintRule } from 'components/badges/creation/ImageUploadDetails'
 import { BadgeQueries } from 'components/badges/queries/Queries'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -206,6 +207,7 @@ const BadgeActionsPage: NextPage = () => {
             </div>
           </div>
         </div>
+        <Sidetab buttonColor="#455CF9" buttonText="Studio Survey" height={600} id="yJnL8fXk" width={800} />
       </form>
     </section>
   )
