@@ -8,6 +8,7 @@
 
 import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
+import { Sidetab } from '@typeform/embed-react'
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
@@ -1472,6 +1473,7 @@ const CollectionCreationPage: NextPage = () => {
               Mint & Add Token(s)
             </Button>
           </Conditional>
+          <Sidetab buttonColor="#455CF9" buttonText="Studio Survey" height={600} id="yJnL8fXk" width={800} />
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 {
   "name": "stargaze-studio",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "workspaces": [
     "packages/*"
   ],
@@ -28,6 +28,7 @@
     "@svgr/webpack": "^6",
     "@tailwindcss/forms": "^0",
     "@tailwindcss/line-clamp": "^0",
+    "@typeform/embed-react": "2.21.0",
     "axios": "^0",
     "clsx": "^1",
     "compare-versions": "^4",
