@@ -185,7 +185,7 @@ export const CollectionActions = ({
     'batch_transfer',
     'batch_mint_for',
   ])
-  const showAirdropFileField = type === 'airdrop'
+  const showAirdropFileField = isEitherType(type, ['airdrop', 'airdrop_specific'])
   const showPriceField = isEitherType(type, ['update_mint_price', 'update_discount_price'])
   const showDescriptionField = type === 'update_collection_info'
   const showImageField = type === 'update_collection_info'
@@ -211,6 +211,7 @@ export const CollectionActions = ({
     sg721Messages,
     recipient: resolvedRecipientAddress,
     recipients: airdropArray,
+    tokenRecipients: airdropAllocationArray,
     txSigner: wallet.address,
     type,
     price: priceState.value.toString(),
@@ -477,7 +478,9 @@ export const CollectionActions = ({
           )}
           {showAirdropFileField && (
             <FormGroup
-              subtitle="CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: address,amount"
+              subtitle={`CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: ${
+                type === 'airdrop' ? 'address,amount' : 'address,tokenId'
+              }`}
               title="Airdrop File"
             >
               <AirdropUpload onChange={airdropFileOnChange} />
