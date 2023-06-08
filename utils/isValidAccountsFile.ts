@@ -12,7 +12,6 @@ export const isValidAccountsFile = (file: AirdropAllocation[]) => {
   let sumOfAmounts = 0
   file.forEach((allocation) => {
     sumOfAmounts += Number(allocation.amount)
-    console.log('sum: ', sumOfAmounts)
   })
   if (sumOfAmounts > 10000) {
     toast.error(`Accounts file must cover less than 10000 tokens`)
