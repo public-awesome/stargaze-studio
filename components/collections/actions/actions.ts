@@ -5,6 +5,7 @@ import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { useVendingMinterContract } from 'contracts/vendingMinter'
+import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
 
@@ -243,6 +244,7 @@ export interface DispatchExecuteArgs {
   limit: number
   tokenIds: string
   recipients: string[]
+  tokenRecipients: AirdropAllocation[]
   collectionInfo: CollectionInfo | undefined
   baseUri: string
 }
@@ -324,6 +326,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'airdrop': {
       return vendingMinterMessages.airdrop(txSigner, args.recipients)
+    }
+    case 'airdrop_specific': {
+      return vendingMinterMessages.airdropSpecificTokens(txSigner, args.tokenRecipients)
     }
     case 'burn_remaining': {
       return vendingMinterMessages.burnRemaining(txSigner)
@@ -414,6 +419,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'airdrop': {
       return vendingMinterMessages(minterContract)?.airdrop(args.recipients)
+    }
+    case 'airdrop_specific': {
+      return vendingMinterMessages(minterContract)?.airdropSpecificTokens(args.tokenRecipients)
     }
     case 'burn_remaining': {
       return vendingMinterMessages(minterContract)?.burnRemaining()
