@@ -5,6 +5,7 @@ import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
+import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -47,6 +48,7 @@ export interface VendingMinterInstance {
   shuffle: (senderAddress: string) => Promise<string>
   withdraw: (senderAddress: string) => Promise<string>
   airdrop: (senderAddress: string, recipients: string[]) => Promise<string>
+  airdropSpecificTokens: (senderAddress: string, tokenRecipients: AirdropAllocation[]) => Promise<string>
   burnRemaining: (senderAddress: string) => Promise<string>
   updateDiscountPrice: (senderAddress: string, price: string) => Promise<string>
   removeDiscountPrice: (senderAddress: string) => Promise<string>
@@ -67,6 +69,7 @@ export interface VendingMinterMessages {
   shuffle: () => ShuffleMessage
   withdraw: () => WithdrawMessage
   airdrop: (recipients: string[]) => CustomMessage
+  airdropSpecificTokens: (recipients: AirdropAllocation[]) => CustomMessage
   burnRemaining: () => BurnRemainingMessage
   updateDiscountPrice: (price: string) => UpdateDiscountPriceMessage
   removeDiscountPrice: () => RemoveDiscountPriceMessage
@@ -553,6 +556,29 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
       return res.transactionHash
     }
 
+    const airdropSpecificTokens = async (senderAddress: string, recipients: AirdropAllocation[]): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        const msg = {
+          mint_for: { recipient: recipients[i].address, token_id: Number(recipients[i].tokenId) },
+        }
+        const executeContractMsg: MsgExecuteContractEncodeObject = {
+          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+          value: MsgExecuteContract.fromPartial({
+            sender: senderAddress,
+            contract: contractAddress,
+            msg: toUtf8(JSON.stringify(msg)),
+          }),
+        }
+
+        executeContractMsgs.push(executeContractMsg)
+      }
+
+      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'airdrop_specific_tokens')
+
+      return res.transactionHash
+    }
+
     const shuffle = async (senderAddress: string): Promise<string> => {
       const res = await client.execute(
         senderAddress,
@@ -617,6 +643,7 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
       batchMintFor,
       batchMint,
       airdrop,
+      airdropSpecificTokens,
       shuffle,
       withdraw,
       burnRemaining,
@@ -838,6 +865,19 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
       }
     }
 
+    const airdropSpecificTokens = (recipients: AirdropAllocation[]): CustomMessage => {
+      const msg: Record<string, unknown>[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        msg.push({ mint_for: { recipient: recipients[i].address, token_id: recipients[i].tokenId } })
+      }
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
     const shuffle = (): ShuffleMessage => {
       return {
         sender: txSigner,
@@ -886,6 +926,7 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
       batchMintFor,
       batchMint,
       airdrop,
+      airdropSpecificTokens,
       shuffle,
       withdraw,
       burnRemaining,

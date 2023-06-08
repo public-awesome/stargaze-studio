@@ -5,11 +5,11 @@ export const csvToArray = (str: string, delimiter = ',') => {
   if (str.includes('\r')) newline = '\r'
   if (str.includes('\r\n')) newline = '\r\n'
 
-  const headers = str.slice(0, str.indexOf(newline)).split(delimiter)
+  const headers = str.trim().slice(0, str.indexOf(newline)).split(delimiter)
   if (headers.length !== 2) {
     throw new Error('Invalid accounts file')
   }
-  if (headers[0] !== 'address' || headers[1] !== 'amount') {
+  if (headers[0] !== 'address' || (headers[1] !== 'amount' && headers[1] !== 'tokenId')) {
     throw new Error('Invalid accounts file')
   }
 
