@@ -31,6 +31,7 @@ export const ACTION_TYPES = [
   'batch_mint_for',
   'shuffle',
   'airdrop',
+  'airdrop_specific',
   'burn_remaining',
   'update_token_metadata',
   'batch_update_token_metadata',
@@ -182,6 +183,11 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     id: 'airdrop',
     name: 'Airdrop Tokens',
     description: 'Airdrop tokens to given addresses',
+  },
+  {
+    id: 'airdrop_specific',
+    name: 'Airdrop Specific Tokens',
+    description: 'Airdrop specific tokens to given addresses',
   },
   {
     id: 'burn_remaining',
