@@ -5,6 +5,7 @@ import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { useVendingMinterContract } from 'contracts/vendingMinter'
+import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
 
@@ -31,6 +32,7 @@ export const ACTION_TYPES = [
   'batch_mint_for',
   'shuffle',
   'airdrop',
+  'airdrop_specific',
   'burn_remaining',
   'update_token_metadata',
   'batch_update_token_metadata',
@@ -184,6 +186,11 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     description: 'Airdrop tokens to given addresses',
   },
   {
+    id: 'airdrop_specific',
+    name: 'Airdrop Specific Tokens',
+    description: 'Airdrop specific tokens to given addresses',
+  },
+  {
     id: 'burn_remaining',
     name: 'Burn Remaining Tokens',
     description: 'Burn remaining tokens',
@@ -237,6 +244,7 @@ export interface DispatchExecuteArgs {
   limit: number
   tokenIds: string
   recipients: string[]
+  tokenRecipients: AirdropAllocation[]
   collectionInfo: CollectionInfo | undefined
   baseUri: string
 }
@@ -318,6 +326,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'airdrop': {
       return vendingMinterMessages.airdrop(txSigner, args.recipients)
+    }
+    case 'airdrop_specific': {
+      return vendingMinterMessages.airdropSpecificTokens(txSigner, args.tokenRecipients)
     }
     case 'burn_remaining': {
       return vendingMinterMessages.burnRemaining(txSigner)
@@ -408,6 +419,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'airdrop': {
       return vendingMinterMessages(minterContract)?.airdrop(args.recipients)
+    }
+    case 'airdrop_specific': {
+      return vendingMinterMessages(minterContract)?.airdropSpecificTokens(args.tokenRecipients)
     }
     case 'burn_remaining': {
       return vendingMinterMessages(minterContract)?.burnRemaining()
