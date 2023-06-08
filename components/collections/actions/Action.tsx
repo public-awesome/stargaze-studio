@@ -478,7 +478,9 @@ export const CollectionActions = ({
           )}
           {showAirdropFileField && (
             <FormGroup
-              subtitle={`CSV file that contains the airdrop addresses and the amount of tokens allocated for each address. Should start with the following header row: ${
+              subtitle={`CSV file that contains the airdrop addresses and the ${
+                type === 'airdrop' ? 'amount of tokens' : 'token ID'
+              } allocated for each address. Should start with the following header row: ${
                 type === 'airdrop' ? 'address,amount' : 'address,tokenId'
               }`}
               title="Airdrop File"
