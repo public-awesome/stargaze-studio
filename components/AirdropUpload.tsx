@@ -38,7 +38,7 @@ export const AirdropUpload = ({ onChange }: AirdropUploadProps) => {
           .then((res) => {
             const tokenUri = JSON.parse(new TextDecoder().decode(res as Uint8Array)).token_uri
             if (tokenUri && isValidAddress(tokenUri))
-              resolvedAllocationData.push({ address: tokenUri, amount: data.amount })
+              resolvedAllocationData.push({ address: tokenUri, amount: data.amount, tokenId: data.tokenId })
             else toast.error(`Resolved address is empty or invalid for the name: ${data.address}`)
           })
           .catch((e) => {
@@ -80,8 +80,15 @@ export const AirdropUpload = ({ onChange }: AirdropUploadProps) => {
                 .map((data) => ({
                   address: data.address.trim(),
                   amount: data.amount,
+                  tokenId: data.tokenId,
                 }))
-                .concat(resolvedAllocationData),
+                .concat(
+                  resolvedAllocationData.map((data) => ({
+                    address: data.address,
+                    amount: data.amount,
+                    tokenId: data.tokenId,
+                  })),
+                ),
             )
           },
         )
