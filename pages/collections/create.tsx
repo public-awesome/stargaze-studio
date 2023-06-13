@@ -48,6 +48,7 @@ import {
   BASE_FACTORY_UPDATABLE_ADDRESS,
   BLOCK_EXPLORER_URL,
   NETWORK,
+  OPEN_EDITION_FACTORY_ADDRESS,
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
@@ -1289,67 +1290,84 @@ const CollectionCreationPage: NextPage = () => {
         </Conditional>
       </div>
 
-      {/* To be removed */}
-      <Conditional test={BASE_FACTORY_ADDRESS === undefined}>
-        <div className="mx-10 mt-5" />
-      </Conditional>
-      <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
-        {/* /To be removed */}
-        <div>
+      <div>
+        <div
+          className={clsx(
+            'mx-10 mt-5',
+            'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
+            'before:inset-x-0 before:bottom-0 before:border-white/25',
+          )}
+        >
           <div
             className={clsx(
-              'mx-10 mt-5',
-              'grid before:absolute relative grid-cols-2 grid-flow-col items-stretch rounded',
-              'before:inset-x-0 before:bottom-0 before:border-white/25',
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <div
-              className={clsx(
-                'isolate space-y-1 border-2',
-                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-                minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
-                minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
-              )}
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => {
+                setMinterType('vending')
+                resetReadyFlags()
+              }}
+              type="button"
             >
-              <button
-                className="p-4 w-full h-full text-left bg-transparent"
-                onClick={() => {
-                  setMinterType('vending')
-                  resetReadyFlags()
-                }}
-                type="button"
-              >
-                <h4 className="font-bold">Standard Collection</h4>
-                <span className="text-sm text-white/80 line-clamp-2">
-                  A non-appendable collection that facilitates primary market vending machine style minting
-                </span>
-              </button>
-            </div>
-            <div
-              className={clsx(
-                'isolate space-y-1 border-2',
-                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-                minterType === 'base' ? 'border-stargaze' : 'border-transparent',
-                minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
-              )}
-            >
-              <button
-                className="p-4 w-full h-full text-left bg-transparent"
-                onClick={() => {
-                  setMinterType('base')
-                  resetReadyFlags()
-                }}
-                type="button"
-              >
-                <h4 className="font-bold">1/1 Collection</h4>
-                <span className="text-sm text-white/80 line-clamp-2">
-                  An appendable collection that only allows for direct secondary market listing of tokens
-                </span>
-              </button>
-            </div>
+              <h4 className="font-bold">Standard Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                A non-appendable collection that facilitates primary market vending machine style minting
+              </span>
+            </button>
           </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'base' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => {
+                setMinterType('base')
+                resetReadyFlags()
+              }}
+              type="button"
+            >
+              <h4 className="font-bold">1/1 Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                An appendable collection that only allows for direct secondary market listing of tokens
+              </span>
+            </button>
+          </div>
+          <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
+            <div
+              className={clsx(
+                'isolate space-y-1 border-2',
+                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+                minterType === 'openEdition' ? 'border-stargaze' : 'border-transparent',
+                minterType !== 'openEdition' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              )}
+            >
+              <button
+                className="p-4 w-full h-full text-left bg-transparent"
+                onClick={() => {
+                  setMinterType('openEdition')
+                  resetReadyFlags()
+                }}
+                type="button"
+              >
+                <h4 className="font-bold">Open Edition Minting</h4>
+                <span className="text-sm text-white/80 line-clamp-2">
+                  Allows multiple copies of a single NFT to be minted for a given time interval.
+                </span>
+              </button>
+            </div>
+          </Conditional>
         </div>
-      </Conditional>
+      </div>
 
       {minterType === 'base' && (
         <div>
