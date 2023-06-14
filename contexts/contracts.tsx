@@ -4,6 +4,8 @@ import type { UseBaseFactoryContractProps } from 'contracts/baseFactory'
 import { useBaseFactoryContract } from 'contracts/baseFactory'
 import type { UseBaseMinterContractProps } from 'contracts/baseMinter'
 import { useBaseMinterContract } from 'contracts/baseMinter'
+import { type UseOpenEditionFactoryContractProps, useOpenEditionFactoryContract } from 'contracts/openEditionFactory'
+import { type UseOpenEditionMinterContractProps, useOpenEditionMinterContract } from 'contracts/openEditionMinter'
 import type { UseSG721ContractProps } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 import type { UseVendingFactoryContractProps } from 'contracts/vendingFactory'
@@ -27,9 +29,11 @@ export interface ContractsStore extends State {
   sg721: UseSG721ContractProps | null
   vendingMinter: UseVendingMinterContractProps | null
   baseMinter: UseBaseMinterContractProps | null
+  openEditionMinter: UseOpenEditionMinterContractProps | null
   whitelist: UseWhiteListContractProps | null
   vendingFactory: UseVendingFactoryContractProps | null
   baseFactory: UseBaseFactoryContractProps | null
+  openEditionFactory: UseOpenEditionFactoryContractProps | null
   badgeHub: UseBadgeHubContractProps | null
   splits: UseSplitsContractProps | null
 }
@@ -41,9 +45,11 @@ export const defaultValues: ContractsStore = {
   sg721: null,
   vendingMinter: null,
   baseMinter: null,
+  openEditionMinter: null,
   whitelist: null,
   vendingFactory: null,
   baseFactory: null,
+  openEditionFactory: null,
   badgeHub: null,
   splits: null,
 }
@@ -72,9 +78,11 @@ const ContractsSubscription: VFC = () => {
   const sg721 = useSG721Contract()
   const vendingMinter = useVendingMinterContract()
   const baseMinter = useBaseMinterContract()
+  const openEditionMinter = useOpenEditionMinterContract()
   const whitelist = useWhiteListContract()
   const vendingFactory = useVendingFactoryContract()
   const baseFactory = useBaseFactoryContract()
+  const openEditionFactory = useOpenEditionFactoryContract()
   const badgeHub = useBadgeHubContract()
   const splits = useSplitsContract()
 
@@ -83,9 +91,11 @@ const ContractsSubscription: VFC = () => {
       sg721,
       vendingMinter,
       baseMinter,
+      openEditionMinter,
       whitelist,
       vendingFactory,
       baseFactory,
+      openEditionFactory,
       badgeHub,
       splits,
     })
