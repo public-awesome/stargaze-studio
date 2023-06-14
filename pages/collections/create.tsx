@@ -30,6 +30,8 @@ import type { UploadDetailsDataProps } from 'components/collections/creation/Upl
 import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
 import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
+import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
+import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
@@ -49,6 +51,7 @@ import {
   BLOCK_EXPLORER_URL,
   NETWORK,
   OPEN_EDITION_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
@@ -92,6 +95,9 @@ const CollectionCreationPage: NextPage = () => {
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
   const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
+  const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterCreatorDataProps | null>(
+    null,
+  )
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
@@ -100,10 +106,16 @@ const CollectionCreationPage: NextPage = () => {
   const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<string | null>(null)
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
+  const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<string | null>(null)
+  const [openEditionMinterUpdatableCreationFee, setOpenEditionMinterUpdatableCreationFee] = useState<string | null>(
+    null,
+  )
   const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<string | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
   const [minimumUpdatableMintPrice, setMinimumUpdatableMintPrice] = useState<string | null>('0')
+  const [minimumOpenEditionMintPrice, setMinimumOpenEditionMintPrice] = useState<string | null>('0')
+  const [minimumOpenEditionUpdatableMintPrice, setMinimumOpenEditionUpdatableMintPrice] = useState<string | null>('0')
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
   const [uploading, setUploading] = useState(false)
@@ -1032,6 +1044,26 @@ const CollectionCreationPage: NextPage = () => {
       setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
       setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
     }
+    if (OPEN_EDITION_FACTORY_ADDRESS) {
+      const openEditionFactoryParameters = await client
+        .queryContractSmart(OPEN_EDITION_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
+      setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
+    }
+    if (OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS) {
+      const openEditionUpdatableFactoryParameters = await client
+        .queryContractSmart(OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
+      setMinimumOpenEditionMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+    }
   }
 
   const checkwalletBalance = () => {
@@ -1374,13 +1406,23 @@ const CollectionCreationPage: NextPage = () => {
           <BaseMinterDetails minterType={minterType} onChange={setBaseMinterDetails} />
         </div>
       )}
-
-      <div className="mx-10">
-        <UploadDetails
-          baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
-          minterType={minterType}
-          onChange={setUploadDetails}
+      <Conditional test={minterType === 'openEdition'}>
+        <OpenEditionMinterCreator
+          minimumMintPrice={minimumOpenEditionMintPrice as string}
+          minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
+          onChange={setOpenEditionMinterDetails}
+          openEditionMinterCreationFee={openEditionMinterCreationFee as string}
+          openEditionMinterUpdatableCreationFee={openEditionMinterUpdatableCreationFee as string}
         />
+      </Conditional>
+      <div className="mx-10">
+        <Conditional test={minterType === 'vending' || minterType === 'base'}>
+          <UploadDetails
+            baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
+            minterType={minterType}
+            onChange={setUploadDetails}
+          />
+        </Conditional>
 
         <Conditional
           test={
