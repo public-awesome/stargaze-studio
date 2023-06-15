@@ -1391,7 +1391,7 @@ const CollectionCreationPage: NextPage = () => {
                 }}
                 type="button"
               >
-                <h4 className="font-bold">Open Edition Minting</h4>
+                <h4 className="font-bold">Open Edition Collection</h4>
                 <span className="text-sm text-white/80 line-clamp-2">
                   Allows multiple copies of a single NFT to be minted for a given time interval.
                 </span>
