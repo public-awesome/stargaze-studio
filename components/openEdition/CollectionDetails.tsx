@@ -19,11 +19,13 @@ import { uid } from 'utils/random'
 
 import { TextInput } from '../forms/FormInput'
 import type { UploadMethod } from './OffChainMetadataUploadDetails'
+import type { MetadataStorageMethod } from './OpenEditionMinterCreator'
 
 interface CollectionDetailsProps {
   onChange: (data: CollectionDetailsDataProps) => void
   uploadMethod: UploadMethod
   coverImageUrl: string
+  metadataStorageMethod: MetadataStorageMethod
 }
 
 export interface CollectionDetailsDataProps {
@@ -37,13 +39,20 @@ export interface CollectionDetailsDataProps {
   updatable: boolean
 }
 
-export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: CollectionDetailsProps) => {
+export const CollectionDetails = ({
+  onChange,
+  uploadMethod,
+  metadataStorageMethod,
+  coverImageUrl,
+}: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
   const [updatable, setUpdatable] = useState<boolean>(false)
 
   const initialRender = useRef(true)
+
+  const coverImageInputRef = useRef<HTMLInputElement>(null)
 
   const nameState = useInputState({
     id: 'name',
@@ -120,6 +129,12 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
   }
 
   useEffect(() => {
+    setCoverImage(null)
+    // empty the element so that the same file can be selected again
+    coverImageInputRef.current!.value = ''
+  }, [metadataStorageMethod])
+
+  useEffect(() => {
     if (initialRender.current) {
       initialRender.current = false
     } else if (updatable) {
@@ -171,6 +186,7 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl }: Col
               )}
               id="cover-image"
               onChange={selectCoverImage}
+              ref={coverImageInputRef}
               type="file"
             />
           )}
