@@ -65,7 +65,7 @@ export const ImageUploadDetails = ({ onChange }: ImageUploadDetailsProps) => {
   const imageUrlState = useInputState({
     id: 'imageUrl',
     name: 'imageUrl',
-    title: 'Image URL',
+    title: 'Asset URL',
     placeholder: 'ipfs://',
     defaultValue: '',
   })
@@ -217,7 +217,7 @@ export const ImageUploadDetails = ({ onChange }: ImageUploadDetailsProps) => {
         <Conditional test={uploadMethod === 'existing'}>
           <div className="ml-3 flex-column">
             <p className="mb-5 ml-5">
-              Though the Open Edition contracts allow for off-chain image storage, it is recommended to use a
+              Though the Open Edition contracts allow for off-chain asset storage, it is recommended to use a
               decentralized storage solution, such as IPFS. <br /> You may head over to{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
                 NFT.Storage
@@ -310,7 +310,7 @@ export const ImageUploadDetails = ({ onChange }: ImageUploadDetailsProps) => {
                         className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
                         htmlFor="assetFile"
                       >
-                        Image Selection
+                        Asset Selection
                       </label>
                       <div
                         className={clsx(

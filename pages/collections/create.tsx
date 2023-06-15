@@ -1374,30 +1374,30 @@ const CollectionCreationPage: NextPage = () => {
               </span>
             </button>
           </div>
-          <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
-            <div
-              className={clsx(
-                'isolate space-y-1 border-2',
-                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-                minterType === 'openEdition' ? 'border-stargaze' : 'border-transparent',
-                minterType !== 'openEdition' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
-              )}
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'openEdition' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'openEdition' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              OPEN_EDITION_FACTORY_ADDRESS === undefined ? 'hover:bg-zinc-500 opacity-50 hover:opacity-70' : '',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              disabled={OPEN_EDITION_FACTORY_ADDRESS === undefined}
+              onClick={() => {
+                setMinterType('openEdition')
+                resetReadyFlags()
+              }}
+              type="button"
             >
-              <button
-                className="p-4 w-full h-full text-left bg-transparent"
-                onClick={() => {
-                  setMinterType('openEdition')
-                  resetReadyFlags()
-                }}
-                type="button"
-              >
-                <h4 className="font-bold">Open Edition Collection</h4>
-                <span className="text-sm text-white/80 line-clamp-2">
-                  Allows multiple copies of a single NFT to be minted for a given time interval.
-                </span>
-              </button>
-            </div>
-          </Conditional>
+              <h4 className="font-bold">Open Edition Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                Allows multiple copies of a single NFT to be minted for a given time interval.
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 

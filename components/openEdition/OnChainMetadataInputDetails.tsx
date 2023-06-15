@@ -66,7 +66,8 @@ export const OnChainMetadataInputDetails = ({ onChange }: OnChainMetadataInputDe
     id: 'metadata-external-url',
     name: 'metadata-external-url',
     title: 'External URL',
-    subtitle: 'External URL for the badge',
+    subtitle: 'External URL for the token',
+    placeholder: 'https://',
   })
 
   const attributesState = useMetadataAttributesState()
@@ -75,14 +76,16 @@ export const OnChainMetadataInputDetails = ({ onChange }: OnChainMetadataInputDe
     id: 'metadata-animation-url',
     name: 'metadata-animation-url',
     title: 'Animation URL',
-    subtitle: 'Animation URL for the badge',
+    subtitle: 'Animation URL for the token',
+    placeholder: 'https://',
   })
 
   const youtubeUrlState = useInputState({
     id: 'metadata-youtube-url',
     name: 'metadata-youtube-url',
     title: 'YouTube URL',
-    subtitle: 'YouTube URL for the badge',
+    subtitle: 'YouTube URL for the token',
+    placeholder: 'https://',
   })
 
   const parseMetadata = async () => {
@@ -193,8 +196,9 @@ export const OnChainMetadataInputDetails = ({ onChange }: OnChainMetadataInputDe
   ])
 
   return (
-    <div>
-      <div className={clsx('grid grid-cols-2 mt-4 ml-12 max-w-5xl')}>
+    <div className="py-3 px-8 rounded border-2 border-white/20">
+      <span className="ml-4 text-xl font-bold underline underline-offset-4">NFT Metadata</span>
+      <div className={clsx('grid grid-cols-2 mt-4 mb-2 ml-4 max-w-6xl')}>
         <div className={clsx('mt-6')}>
           <TextInput className="mt-2" {...nameState} />
           <TextInput className="mt-2" {...descriptionState} />

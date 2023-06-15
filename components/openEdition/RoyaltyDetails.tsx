@@ -61,7 +61,7 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
   }, [royaltyState, royaltyPaymentAddressState.value, royaltyShareState.value])
 
   return (
-    <div className="py-3 px-8 rounded border-2 border-white/20">
+    <div className="py-3 px-8 mx-10 rounded border-2 border-white/20">
       <div className="flex justify-center">
         <div className="ml-4 font-bold form-check form-check-inline">
           <input

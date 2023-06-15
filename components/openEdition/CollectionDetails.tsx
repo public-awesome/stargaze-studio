@@ -14,7 +14,7 @@ import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { SG721_UPDATABLE_CODE_ID } from 'utils/constants'
+import { OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, SG721_UPDATABLE_CODE_ID } from 'utils/constants'
 import { uid } from 'utils/random'
 
 import { TextInput } from '../forms/FormInput'
@@ -131,7 +131,7 @@ export const CollectionDetails = ({
   useEffect(() => {
     setCoverImage(null)
     // empty the element so that the same file can be selected again
-    coverImageInputRef.current!.value = ''
+    if (coverImageInputRef.current) coverImageInputRef.current.value = ''
   }, [metadataStorageMethod])
 
   useEffect(() => {
@@ -261,7 +261,7 @@ export const CollectionDetails = ({
             </div>
           </div>
         </div>
-        <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+        <Conditional test={SG721_UPDATABLE_CODE_ID > 0 && OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS !== undefined}>
           <Tooltip
             backgroundColor="bg-blue-500"
             label={

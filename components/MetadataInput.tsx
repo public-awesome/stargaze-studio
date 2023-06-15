@@ -175,9 +175,9 @@ export const MetadataInput = (props: MetadataInputProps) => {
 
   return (
     <div>
-      <div className="grid grid-cols-2 mx-4 mt-4 w-full max-w-6xl max-h-full no-scrollbar">
+      <div className="grid grid-cols-2 mt-4 mr-4 ml-8 w-full max-w-6xl max-h-full no-scrollbar">
         <div className="mr-4">
-          <div className="mb-7 text-xl font-bold underline underline-offset-2">NFT Metadata</div>
+          <div className="mb-7 text-xl font-bold underline underline-offset-4">NFT Metadata</div>
           <TextInput {...nameState} />
           <TextInput className="mt-2" {...descriptionState} />
           <TextInput className="mt-2" {...externalUrlState} />
