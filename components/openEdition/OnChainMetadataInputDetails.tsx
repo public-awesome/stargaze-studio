@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import clsx from 'clsx'
+import { Conditional } from 'components/Conditional'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { useWallet } from 'contexts/wallet'
@@ -33,7 +34,7 @@ export interface OnChainMetadataInputDetailsDataProps {
   youtube_url?: string
 }
 
-export const OnChainMetadataInputDetails = ({ onChange }: OnChainMetadataInputDetailsProps) => {
+export const OnChainMetadataInputDetails = ({ onChange, uploadMethod }: OnChainMetadataInputDetailsProps) => {
   const wallet = useWallet()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [metadataFile, setMetadataFile] = useState<File>()
@@ -203,7 +204,9 @@ export const OnChainMetadataInputDetails = ({ onChange }: OnChainMetadataInputDe
           <TextInput className="mt-2" {...nameState} />
           <TextInput className="mt-2" {...descriptionState} />
           <TextInput className="mt-2" {...externalUrlState} />
-          <TextInput className="mt-2" {...animationUrlState} />
+          <Conditional test={uploadMethod === 'existing'}>
+            <TextInput className="mt-2" {...animationUrlState} />
+          </Conditional>
           <TextInput className="mt-2" {...youtubeUrlState} />
         </div>
         <div className={clsx('ml-10')}>

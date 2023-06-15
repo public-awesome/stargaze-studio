@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -320,7 +321,12 @@ export const OpenEditionMinterCreator = ({
                     description: onChainMetadataInputDetails?.description,
                     attributes: onChainMetadataInputDetails?.attributes,
                     external_url: onChainMetadataInputDetails?.external_url,
-                    animation_url: onChainMetadataInputDetails?.animation_url,
+                    animation_url:
+                      imageUploadDetails?.uploadMethod === 'existing'
+                        ? onChainMetadataInputDetails?.animation_url
+                        : getAssetType(imageUploadDetails?.assetFile?.name as string) === 'video'
+                        ? uri
+                        : undefined,
                     youtube_url: onChainMetadataInputDetails?.youtube_url,
                   }
                 : null,
@@ -443,7 +449,10 @@ export const OpenEditionMinterCreator = ({
         <Conditional test={metadataStorageMethod === 'on-chain'}>
           <div>
             <ImageUploadDetails onChange={setImageUploadDetails} />
-            <OnChainMetadataInputDetails onChange={setOnChainMetadataInputDetails} uploadMethod={undefined} />
+            <OnChainMetadataInputDetails
+              onChange={setOnChainMetadataInputDetails}
+              uploadMethod={imageUploadDetails?.uploadMethod}
+            />
           </div>
         </Conditional>
       </div>
