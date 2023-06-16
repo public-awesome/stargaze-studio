@@ -28,13 +28,18 @@ export interface OpenEditionMinterInstance {
   //Query
   getConfig: () => Promise<any>
   getStartTime: () => Promise<any>
+  getEndTime: () => Promise<any>
   getMintPrice: () => Promise<any>
   getMintCount: (address: string) => Promise<any>
+  getTotalMintCount: () => Promise<any>
   getStatus: () => Promise<any>
 
   //Execute
   mint: (senderAddress: string) => Promise<string>
   purge: (senderAddress: string) => Promise<string>
+  updateMintPrice: (senderAddress: string, price: string) => Promise<string>
+  updateStartTime: (senderAddress: string, time: Timestamp) => Promise<string>
+  updateEndTime: (senderAddress: string, time: Timestamp) => Promise<string>
   updateStartTradingTime: (senderAddress: string, time?: Timestamp) => Promise<string>
   updatePerAddressLimit: (senderAddress: string, perAddressLimit: number) => Promise<string>
   mintTo: (senderAddress: string, recipient: string) => Promise<string>
@@ -45,6 +50,9 @@ export interface OpenEditionMinterInstance {
 export interface OpenEditionMinterMessages {
   mint: () => MintMessage
   purge: () => PurgeMessage
+  updateMintPrice: (price: string) => UpdateMintPriceMessage
+  updateStartTime: (time: Timestamp) => UpdateStartTimeMessage
+  updateEndTime: (time: Timestamp) => UpdateEndTimeMessage
   updateStartTradingTime: (time: Timestamp) => UpdateStartTradingTimeMessage
   updatePerAddressLimit: (perAddressLimit: number) => UpdatePerAddressLimitMessage
   mintTo: (recipient: string) => MintToMessage
@@ -75,6 +83,35 @@ export interface UpdateStartTradingTimeMessage {
   contract: string
   msg: {
     update_start_trading_time: string
+  }
+  funds: Coin[]
+}
+
+export interface UpdateStartTimeMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_start_time: string
+  }
+  funds: Coin[]
+}
+
+export interface UpdateEndTimeMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_end_time: string
+  }
+  funds: Coin[]
+}
+
+export interface UpdateMintPriceMessage {
+  sender: string
+  contract: string
+  msg: {
+    update_mint_price: {
+      price: string
+    }
   }
   funds: Coin[]
 }
@@ -162,6 +199,13 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
       return res
     }
 
+    const getEndTime = async (): Promise<any> => {
+      const res = await client.queryContractSmart(contractAddress, {
+        end_time: {},
+      })
+      return res
+    }
+
     const getMintPrice = async (): Promise<MintPriceMessage> => {
       const res = await client.queryContractSmart(contractAddress, {
         mint_price: {},
@@ -172,6 +216,13 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
     const getMintCount = async (address: string): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
         mint_count: { address },
+      })
+      return res
+    }
+
+    const getTotalMintCount = async (): Promise<any> => {
+      const res = await client.queryContractSmart(contractAddress, {
+        total_mint_count: {},
       })
       return res
     }
@@ -220,6 +271,50 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         contractAddress,
         {
           update_start_trading_time: time || null,
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const updateStartTime = async (senderAddress: string, time: Timestamp): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_start_time: time,
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const updateEndTime = async (senderAddress: string, time: Timestamp): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_end_time: time,
+        },
+        'auto',
+        '',
+      )
+
+      return res.transactionHash
+    }
+
+    const updateMintPrice = async (senderAddress: string, price: string): Promise<string> => {
+      const res = await client.execute(
+        senderAddress,
+        contractAddress,
+        {
+          update_mint_price: {
+            price: (Number(price) * 1000000).toString(),
+          },
         },
         'auto',
         '',
@@ -306,12 +401,17 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
       contractAddress,
       getConfig,
       getStartTime,
+      getEndTime,
       getMintPrice,
       getMintCount,
+      getTotalMintCount,
       getStatus,
       mint,
       purge,
       updateStartTradingTime,
+      updateStartTime,
+      updateEndTime,
+      updateMintPrice,
       updatePerAddressLimit,
       mintTo,
       batchMint,
@@ -383,6 +483,41 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
       }
     }
 
+    const updateStartTime = (startTime: string): UpdateStartTimeMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_start_time: startTime,
+        },
+        funds: [],
+      }
+    }
+
+    const updateEndTime = (endTime: string): UpdateEndTimeMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_end_time: endTime,
+        },
+        funds: [],
+      }
+    }
+
+    const updateMintPrice = (price: string): UpdateMintPriceMessage => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          update_mint_price: {
+            price: (Number(price) * 1000000).toString(),
+          },
+        },
+        funds: [],
+      }
+    }
+
     const updatePerAddressLimit = (limit: number): UpdatePerAddressLimitMessage => {
       return {
         sender: txSigner,
@@ -439,6 +574,9 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
       mint,
       purge,
       updateStartTradingTime,
+      updateStartTime,
+      updateEndTime,
+      updateMintPrice,
       updatePerAddressLimit,
       mintTo,
       batchMint,
