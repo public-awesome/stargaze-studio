@@ -1,8 +1,10 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
 import clsx from 'clsx'
 import { Button } from 'components/Button'
@@ -24,6 +26,7 @@ import {
   SG721_UPDATABLE_CODE_ID,
 } from 'utils/constants'
 import { getAssetType } from 'utils/getAssetType'
+import { isValidAddress } from 'utils/isValidAddress'
 import { uid } from 'utils/random'
 
 import { type CollectionDetailsDataProps, CollectionDetails } from './CollectionDetails'
@@ -97,34 +100,20 @@ export const OpenEditionMinterCreator = ({
 
   const performOpenEditionMinterChecks = () => {
     try {
-      //setReadyToCreate(false)
-      // checkUploadDetails()
-      // checkCollectionDetails()
-      // checkMintingDetails()
-      // void checkRoyaltyDetails()
-      //   .then(() => {
-      //     checkWhitelistDetails()
-      //       .then(() => {
-      //         checkwalletBalance()
-      //         setReadyToCreateVm(true)
-      //       })
-      //       .catch((error) => {
-      //         if (String(error.message).includes('Insufficient wallet balance')) {
-      //           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
-      //           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-      //         } else {
-      //           toast.error(`Error in Whitelist Configuration: ${error.message}`, { style: { maxWidth: 'none' } })
-      //           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-      //         }
-      //         setReadyToCreateVm(false)
-      //       })
-      //   })
-      //   .catch((error) => {
-      //     toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
-      //     addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-      //     setReadyToCreateVm(false)
-      //   })
-      setReadyToCreate(true)
+      setReadyToCreate(false)
+      checkUploadDetails()
+      checkCollectionDetails()
+      checkMintingDetails()
+      void checkRoyaltyDetails()
+        .then(() => {
+          // TODO: check wallet balance
+          setReadyToCreate(true)
+        })
+        .catch((error: any) => {
+          toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+          setReadyToCreate(false)
+        })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
@@ -133,11 +122,169 @@ export const OpenEditionMinterCreator = ({
     }
   }
 
-  useEffect(() => {
-    console.log(readyToCreate)
-  }, [readyToCreate])
+  const checkUploadDetails = () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (
+      (metadataStorageMethod === 'off-chain' && !offChainMetadataUploadDetails) ||
+      (metadataStorageMethod === 'on-chain' && !imageUploadDetails)
+    ) {
+      throw new Error('Please select assets and metadata')
+    }
 
-  // TODO: Reset Ready Flag, reset contract address
+    if (
+      metadataStorageMethod === 'off-chain' &&
+      offChainMetadataUploadDetails?.uploadMethod === 'new' &&
+      offChainMetadataUploadDetails.assetFiles.length === 0
+    ) {
+      throw new Error('Please select the asset file')
+    }
+    if (
+      metadataStorageMethod === 'on-chain' &&
+      imageUploadDetails?.uploadMethod === 'new' &&
+      imageUploadDetails.assetFile === undefined
+    ) {
+      throw new Error('Please select the asset file')
+    }
+    if (metadataStorageMethod === 'off-chain' && offChainMetadataUploadDetails?.uploadMethod === 'new') {
+      if (
+        offChainMetadataUploadDetails.uploadService === 'nft-storage' &&
+        offChainMetadataUploadDetails.nftStorageApiKey === ''
+      ) {
+        throw new Error('Please enter a valid NFT.Storage API key')
+      } else if (
+        offChainMetadataUploadDetails.uploadService === 'pinata' &&
+        (offChainMetadataUploadDetails.pinataApiKey === '' || offChainMetadataUploadDetails.pinataSecretKey === '')
+      ) {
+        throw new Error('Please enter valid Pinata API and secret keys')
+      }
+    }
+    if (metadataStorageMethod === 'on-chain' && imageUploadDetails?.uploadMethod === 'new') {
+      if (imageUploadDetails.uploadService === 'nft-storage' && imageUploadDetails.nftStorageApiKey === '') {
+        throw new Error('Please enter a valid NFT.Storage API key')
+      } else if (
+        imageUploadDetails.uploadService === 'pinata' &&
+        (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
+      ) {
+        throw new Error('Please enter valid Pinata API and secret keys')
+      }
+    }
+    if (metadataStorageMethod === 'off-chain' && offChainMetadataUploadDetails?.uploadMethod === 'existing') {
+      if (
+        offChainMetadataUploadDetails.tokenURI === '' ||
+        !(offChainMetadataUploadDetails.tokenURI as string).includes('ipfs://')
+      ) {
+        throw new Error('Please enter a valid token URI')
+      }
+      if (
+        offChainMetadataUploadDetails.imageUrl === '' ||
+        !(offChainMetadataUploadDetails.imageUrl as string).includes('ipfs://')
+      ) {
+        throw new Error('Please enter a valid image URI')
+      }
+    }
+    if (metadataStorageMethod === 'on-chain' && imageUploadDetails?.uploadMethod === 'existing') {
+      if (imageUploadDetails.imageUrl === '' || !(imageUploadDetails.imageUrl as string).includes('ipfs://')) {
+        throw new Error('Please enter a valid asset URI')
+      }
+      if (
+        imageUploadDetails.coverImageUrl === '' ||
+        !(imageUploadDetails.coverImageUrl as string).includes('ipfs://')
+      ) {
+        throw new Error('Please enter a valid cover image URL')
+      }
+    }
+  }
+
+  const checkCollectionDetails = () => {
+    if (!collectionDetails) throw new Error('Please fill out the collection details')
+    if (collectionDetails.name === '') throw new Error('Collection name is required')
+    if (collectionDetails.description === '') throw new Error('Collection description is required')
+    if (collectionDetails.symbol === '') throw new Error('Collection symbol is required')
+    if (collectionDetails.description.length > 512)
+      throw new Error('Collection description cannot exceed 512 characters')
+    if (
+      metadataStorageMethod === 'off-chain' &&
+      offChainMetadataUploadDetails?.uploadMethod === 'new' &&
+      collectionDetails.imageFile.length === 0
+    )
+      throw new Error('Collection cover image is required')
+    if (
+      metadataStorageMethod === 'on-chain' &&
+      imageUploadDetails?.uploadMethod === 'new' &&
+      collectionDetails.imageFile.length === 0
+    )
+      throw new Error('Collection cover image is required')
+    if (
+      collectionDetails.startTradingTime &&
+      Number(collectionDetails.startTradingTime) < new Date().getTime() * 1000000
+    )
+      throw new Error('Invalid trading start time')
+    if (
+      collectionDetails.startTradingTime &&
+      Number(collectionDetails.startTradingTime) < Number(mintingDetails?.startTime)
+    )
+      throw new Error('Trading start time must be after minting start time')
+    if (collectionDetails.externalLink) {
+      try {
+        const url = new URL(collectionDetails.externalLink)
+      } catch (e: any) {
+        throw new Error(`Invalid external link: Make sure to include the protocol (e.g. https://)`)
+      }
+    }
+  }
+
+  const checkMintingDetails = () => {
+    if (!mintingDetails) throw new Error('Please fill out the minting details')
+    if (mintingDetails.unitPrice === '') throw new Error('Mint price is required')
+    if (collectionDetails?.updatable) {
+      if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
+        throw new Error(
+          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
+        )
+    } else if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
+      throw new Error(`Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} STARS`)
+    if (!mintingDetails.perAddressLimit || mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
+      throw new Error('Invalid limit for tokens per address')
+    if (mintingDetails.startTime === '') throw new Error('Start time is required')
+    if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
+    if (
+      mintingDetails.paymentAddress &&
+      (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
+    )
+      throw new Error('Invalid payment address')
+  }
+
+  const checkRoyaltyDetails = async () => {
+    if (!royaltyDetails) throw new Error('Please fill out the royalty details')
+    if (royaltyDetails.royaltyType === 'new') {
+      if (royaltyDetails.share === 0) throw new Error('Royalty share percentage is required')
+      if (royaltyDetails.share > 100 || royaltyDetails.share < 0) throw new Error('Invalid royalty share percentage')
+      if (royaltyDetails.paymentAddress === '') throw new Error('Royalty payment address is required')
+      if (!isValidAddress(royaltyDetails.paymentAddress.trim())) {
+        if (royaltyDetails.paymentAddress.trim().endsWith('.stars')) {
+          throw new Error('Royalty payment address could not be resolved')
+        }
+        throw new Error('Invalid royalty payment address')
+      }
+      const contractInfoResponse = await wallet.client
+        ?.queryContractRaw(
+          royaltyDetails.paymentAddress.trim(),
+          toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+        )
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          if (e.message.includes('bech32')) throw new Error('Invalid royalty payment address.')
+          console.log(e.message)
+        })
+      if (contractInfoResponse !== undefined) {
+        const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (contractInfo && !contractInfo.contract.includes('splits'))
+          throw new Error('The provided royalty payment address does not belong to a splits contract.')
+        else console.log(contractInfo)
+      }
+    }
+  }
 
   const createOpenEditionMinter = async () => {
     try {

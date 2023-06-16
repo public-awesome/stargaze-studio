@@ -176,7 +176,7 @@ export const OnChainMetadataInputDetails = ({ onChange, uploadMethod }: OnChainM
             : undefined,
         image_data: imageDataState.value || undefined,
         external_url: externalUrlState.value || undefined,
-        animation_url: animationUrlState.value || undefined,
+        animation_url: animationUrlState.value.trim() || undefined,
         youtube_url: youtubeUrlState.value || undefined,
       }
       onChange(data)

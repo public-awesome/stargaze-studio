@@ -1394,7 +1394,7 @@ const CollectionCreationPage: NextPage = () => {
             >
               <h4 className="font-bold">Open Edition Collection</h4>
               <span className="text-sm text-white/80 line-clamp-2">
-                Allows multiple copies of a single NFT to be minted for a given time interval.
+                Allows multiple copies of a single NFT to be minted for a given time interval
               </span>
             </button>
           </div>
