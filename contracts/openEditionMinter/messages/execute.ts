@@ -5,6 +5,9 @@ export type ExecuteType = typeof EXECUTE_TYPES[number]
 
 export const EXECUTE_TYPES = [
   'mint',
+  'update_start_time',
+  'update_end_time',
+  'update_mint_price',
   'update_start_trading_time',
   'update_per_address_limit',
   'mint_to',
@@ -22,6 +25,21 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     id: 'mint',
     name: 'Mint',
     description: `Mint a new token`,
+  },
+  {
+    id: 'update_mint_price',
+    name: 'Update Mint Price',
+    description: `Update the mint price per token`,
+  },
+  {
+    id: 'update_start_time',
+    name: 'Update Start Time',
+    description: `Update the start time for minting`,
+  },
+  {
+    id: 'update_end_time',
+    name: 'Update End Time',
+    description: `Update the end time for minting`,
   },
   {
     id: 'update_start_trading_time',
@@ -61,6 +79,9 @@ export type DispatchExecuteArgs = {
   | { type: undefined }
   | { type: Select<'mint'> }
   | { type: Select<'purge'> }
+  | { type: Select<'update_start_time'>; startTime: string }
+  | { type: Select<'update_end_time'>; endTime: string }
+  | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'update_start_trading_time'>; startTime?: string }
   | { type: Select<'update_per_address_limit'>; limit: number }
   | { type: Select<'mint_to'>; recipient: string }
@@ -77,6 +98,15 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'purge': {
       return messages.purge(txSigner)
+    }
+    case 'update_start_time': {
+      return messages.updateStartTime(txSigner, args.startTime)
+    }
+    case 'update_end_time': {
+      return messages.updateEndTime(txSigner, args.endTime)
+    }
+    case 'update_mint_price': {
+      return messages.updateMintPrice(txSigner, args.price)
     }
     case 'update_start_trading_time': {
       return messages.updateStartTradingTime(txSigner, args.startTime)
@@ -103,6 +133,15 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'purge': {
       return messages(contract)?.purge()
+    }
+    case 'update_start_time': {
+      return messages(contract)?.updateStartTime(args.startTime)
+    }
+    case 'update_end_time': {
+      return messages(contract)?.updateEndTime(args.endTime)
+    }
+    case 'update_mint_price': {
+      return messages(contract)?.updateMintPrice(args.price)
     }
     case 'update_start_trading_time': {
       return messages(contract)?.updateStartTradingTime(args.startTime as string)
