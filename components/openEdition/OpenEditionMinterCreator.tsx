@@ -106,8 +106,15 @@ export const OpenEditionMinterCreator = ({
       checkMintingDetails()
       void checkRoyaltyDetails()
         .then(() => {
-          // TODO: check wallet balance
-          setReadyToCreate(true)
+          void checkwalletBalance()
+            .then(() => {
+              setReadyToCreate(true)
+            })
+            .catch((error: any) => {
+              toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
+              addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+              setReadyToCreate(false)
+            })
         })
         .catch((error: any) => {
           toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
@@ -284,6 +291,21 @@ export const OpenEditionMinterCreator = ({
         else console.log(contractInfo)
       }
     }
+  }
+
+  const checkwalletBalance = async () => {
+    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    const amountNeeded = collectionDetails?.updatable
+      ? Number(openEditionMinterUpdatableCreationFee)
+      : Number(openEditionMinterCreationFee)
+    await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
+      if (amountNeeded >= Number(balance.amount))
+        throw new Error(
+          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+            amountNeeded / 1000000
+          ).toString()} STARS`,
+        )
+    })
   }
 
   const createOpenEditionMinter = async () => {
