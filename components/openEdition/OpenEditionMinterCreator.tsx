@@ -8,6 +8,7 @@ import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
 import clsx from 'clsx'
 import { Button } from 'components/Button'
+import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
@@ -45,22 +46,20 @@ import { type RoyaltyDetailsDataProps, RoyaltyDetails } from './RoyaltyDetails'
 
 export type MetadataStorageMethod = 'off-chain' | 'on-chain'
 
-export interface OpenEditionMinterInfo {
-  name: string
-  minter: string
-  contractAddress: string
-}
-
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
   openEditionMinterUpdatableCreationFee?: string
   openEditionMinterCreationFee?: string
   minimumMintPrice?: string
   minimumUpdatableMintPrice?: string
+  minterType?: MinterType
 }
 
 export interface OpenEditionMinterCreatorDataProps {
   metadataStorageMethod: MetadataStorageMethod
+  openEditionMinterContractAddress: string | null
+  sg721ContractAddress: string | null
+  transactionHash: string | null
 }
 
 export const OpenEditionMinterCreator = ({
@@ -69,6 +68,7 @@ export const OpenEditionMinterCreator = ({
   openEditionMinterUpdatableCreationFee,
   minimumMintPrice,
   minimumUpdatableMintPrice,
+  minterType,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
   const { openEditionMinter: openEditionMinterContract, openEditionFactory: openEditionFactoryContract } =
@@ -544,6 +544,7 @@ export const OpenEditionMinterCreator = ({
     }
     await openEditionFactoryDispatchExecute(payload)
       .then((data) => {
+        console.log('Data: ', data)
         setTransactionHash(data.transactionHash)
         setOpenEditionMinterContractAddress(data.openEditionMinterAddress)
         setSg721ContractAddress(data.sg721Address)
@@ -555,15 +556,26 @@ export const OpenEditionMinterCreator = ({
         setCreationInProgress(false)
       })
   }
+  useEffect(() => {
+    if (minterType !== 'openEdition') {
+      setTransactionHash(null)
+      setOpenEditionMinterContractAddress(null)
+      setSg721ContractAddress(null)
+      setCreationInProgress(false)
+      setUploading(false)
+    }
+  }, [minterType])
 
   useEffect(() => {
     const data: OpenEditionMinterCreatorDataProps = {
       metadataStorageMethod,
+      openEditionMinterContractAddress,
+      sg721ContractAddress,
+      transactionHash,
     }
     onChange(data)
-    toast.success('Metadata storage method updated')
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metadataStorageMethod])
+  }, [metadataStorageMethod, openEditionMinterContractAddress, sg721ContractAddress, transactionHash])
 
   return (
     <div>

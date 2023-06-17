@@ -1102,9 +1102,13 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
   useEffect(() => {
-    if (vendingMinterContractAddress !== null || isMintingComplete)
+    if (
+      vendingMinterContractAddress !== null ||
+      openEditionMinterDetails?.openEditionMinterContractAddress ||
+      isMintingComplete
+    )
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [vendingMinterContractAddress, isMintingComplete])
+  }, [vendingMinterContractAddress, openEditionMinterDetails?.openEditionMinterContractAddress, isMintingComplete])
 
   useEffect(() => {
     setBaseTokenUri(uploadDetails?.baseTokenURI as string)
@@ -1151,6 +1155,67 @@ const CollectionCreationPage: NextPage = () => {
         </p>
       </div>
       <div className="mx-10" ref={scrollRef}>
+        <Conditional
+          test={minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress !== null}
+        >
+          <Alert className="mt-5" type="info">
+            <div>
+              Open Edition Minter Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/openEditionMinter/query/?contractAddress=${
+                  openEditionMinterDetails?.openEditionMinterContractAddress as string
+                }`}
+              >
+                {openEditionMinterDetails?.openEditionMinterContractAddress as string}
+              </Anchor>
+              <br />
+              SG721 Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/sg721/query/?contractAddress=${
+                  openEditionMinterDetails?.sg721ContractAddress as string
+                }`}
+              >
+                {openEditionMinterDetails?.sg721ContractAddress as string}
+              </Anchor>
+              <br />
+              Transaction Hash: {'  '}
+              <Conditional test={NETWORK === 'testnet'}>
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`${BLOCK_EXPLORER_URL}/tx/${openEditionMinterDetails?.transactionHash as string}`}
+                >
+                  {openEditionMinterDetails?.transactionHash}
+                </Anchor>
+              </Conditional>
+              <Conditional test={NETWORK === 'mainnet'}>
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`${BLOCK_EXPLORER_URL}/txs/${openEditionMinterDetails?.transactionHash as string}`}
+                >
+                  {openEditionMinterDetails?.transactionHash}
+                </Anchor>
+              </Conditional>
+              <br />
+              <Button className="mt-2">
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`${STARGAZE_URL}/launchpad/${
+                    openEditionMinterDetails?.openEditionMinterContractAddress as string
+                  }`}
+                >
+                  View on Launchpad
+                </Anchor>
+              </Button>
+            </div>
+          </Alert>
+        </Conditional>
         <Conditional test={vendingMinterContractAddress !== null || isMintingComplete}>
           <Alert className="mt-5" type="info">
             <div>
@@ -1410,6 +1475,7 @@ const CollectionCreationPage: NextPage = () => {
         <OpenEditionMinterCreator
           minimumMintPrice={minimumOpenEditionMintPrice as string}
           minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
+          minterType={minterType}
           onChange={setOpenEditionMinterDetails}
           openEditionMinterCreationFee={openEditionMinterCreationFee as string}
           openEditionMinterUpdatableCreationFee={openEditionMinterUpdatableCreationFee as string}
