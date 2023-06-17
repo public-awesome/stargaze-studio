@@ -1,1 +1,1 @@
-export { default } from './execute'
+export { default } from './query'
