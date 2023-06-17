@@ -329,7 +329,6 @@ export const OpenEditionMinterCreator = ({
             offChainMetadataUploadDetails.pinataApiKey as string,
             offChainMetadataUploadDetails.pinataSecretKey as string,
           )
-          console.log('Token URI:', metadataUri)
           const metadataUriWithBase = `ipfs://${metadataUri}/${(
             offChainMetadataUploadDetails.openEditionMinterMetadataFile as File
           ).name.substring(
@@ -375,8 +374,6 @@ export const OpenEditionMinterCreator = ({
           const coverImageUriWithBase = `ipfs://${coverImageUri}/${(collectionDetails?.imageFile as File[])[0].name}`
           setCoverImageUrl(coverImageUriWithBase)
 
-          console.log('Image URI:', imageUriWithBase)
-          console.log('Cover Image URI:', coverImageUriWithBase)
           setUploading(false)
           await instantiateOpenEditionMinter(imageUriWithBase, coverImageUriWithBase)
         } else if (imageUploadDetails?.uploadMethod === 'existing') {
@@ -544,7 +541,6 @@ export const OpenEditionMinterCreator = ({
     }
     await openEditionFactoryDispatchExecute(payload)
       .then((data) => {
-        console.log('Data: ', data)
         setTransactionHash(data.transactionHash)
         setOpenEditionMinterContractAddress(data.openEditionMinterAddress)
         setSg721ContractAddress(data.sg721Address)
