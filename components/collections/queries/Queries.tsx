@@ -6,6 +6,7 @@ import { AddressInput, TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
+import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter'
 import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { toast } from 'react-hot-toast'
@@ -21,6 +22,7 @@ interface CollectionQueriesProps {
   sg721Messages: SG721Instance | undefined
   vendingMinterMessages: VendingMinterInstance | undefined
   baseMinterMessages: BaseMinterInstance | undefined
+  openEditionMinterMessages: OpenEditionMinterInstance | undefined
   minterType: MinterType
 }
 export const CollectionQueries = ({
@@ -28,6 +30,7 @@ export const CollectionQueries = ({
   sg721Messages,
   minterContractAddress,
   vendingMinterMessages,
+  openEditionMinterMessages,
   baseMinterMessages,
   minterType,
 }: CollectionQueriesProps) => {
@@ -57,9 +60,25 @@ export const CollectionQueries = ({
   const showAddressField = type === 'tokens_minted_to_user' || type === 'tokens'
 
   const { data: response } = useQuery(
-    [sg721Messages, baseMinterMessages, vendingMinterMessages, type, tokenId, address] as const,
+    [
+      sg721Messages,
+      baseMinterMessages,
+      vendingMinterMessages,
+      openEditionMinterMessages,
+      type,
+      tokenId,
+      address,
+    ] as const,
     async ({ queryKey }) => {
-      const [_sg721Messages, _baseMinterMessages_, _vendingMinterMessages, _type, _tokenId, _address] = queryKey
+      const [
+        _sg721Messages,
+        _baseMinterMessages_,
+        _vendingMinterMessages,
+        _openEditionMinterMessages,
+        _type,
+        _tokenId,
+        _address,
+      ] = queryKey
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -67,6 +86,7 @@ export const CollectionQueries = ({
           tokenId: _tokenId,
           vendingMinterMessages: _vendingMinterMessages,
           baseMinterMessages: _baseMinterMessages_,
+          openEditionMinterMessages: _openEditionMinterMessages,
           sg721Messages: _sg721Messages,
           address: resolvedAddress,
           type: _type,

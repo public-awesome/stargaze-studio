@@ -7,7 +7,7 @@ import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
 import type { MinterType } from '../actions/Combobox'
 import type { QueryListItem } from './query'
-import { BASE_QUERY_LIST, VENDING_QUERY_LIST } from './query'
+import { BASE_QUERY_LIST, OPEN_EDITION_QUERY_LIST, VENDING_QUERY_LIST } from './query'
 
 export interface QueryComboboxProps {
   value: QueryListItem | null
@@ -22,6 +22,8 @@ export const QueryCombobox = ({ value, onChange, minterType }: QueryComboboxProp
   useEffect(() => {
     if (minterType === 'base') {
       SET_QUERY_LIST(BASE_QUERY_LIST)
+    } else if (minterType === 'openEdition') {
+      SET_QUERY_LIST(OPEN_EDITION_QUERY_LIST)
     } else {
       SET_QUERY_LIST(VENDING_QUERY_LIST)
     }

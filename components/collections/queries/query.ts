@@ -1,4 +1,5 @@
 import type { BaseMinterInstance } from 'contracts/baseMinter'
+import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter/contract'
 import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 
@@ -9,6 +10,7 @@ export const QUERY_TYPES = [
   'mint_price',
   'num_tokens',
   'tokens_minted_to_user',
+  'total_mint_count',
   'tokens',
   // 'token_owners',
   'token_info',
@@ -91,6 +93,48 @@ export const BASE_QUERY_LIST: QueryListItem[] = [
     description: `Query Minter Status`,
   },
 ]
+export const OPEN_EDITION_QUERY_LIST: QueryListItem[] = [
+  {
+    id: 'collection_info',
+    name: 'Collection Info',
+    description: `Get information about the collection.`,
+  },
+  {
+    id: 'mint_price',
+    name: 'Mint Price',
+    description: `Get the price of minting a token.`,
+  },
+  {
+    id: 'tokens_minted_to_user',
+    name: 'Tokens Minted to User',
+    description: `Get the number of tokens minted in the collection to a user.`,
+  },
+  {
+    id: 'total_mint_count',
+    name: 'Total Mint Count',
+    description: `Get the total number of tokens minted for the collection.`,
+  },
+  // {
+  //   id: 'token_owners',
+  //   name: 'Token Owners',
+  //   description: `Get the list of users who own tokens in the collection.`,
+  // },
+  {
+    id: 'token_info',
+    name: 'Token Info',
+    description: `Get information about a token in the collection.`,
+  },
+  {
+    id: 'config',
+    name: 'Minter Config',
+    description: `Query Minter Config`,
+  },
+  {
+    id: 'status',
+    name: 'Minter Status',
+    description: `Query Minter Status`,
+  },
+]
 
 export interface DispatchExecuteProps {
   type: QueryType
@@ -102,6 +146,7 @@ type Select<T extends QueryType> = T
 export type DispatchQueryArgs = {
   baseMinterMessages?: BaseMinterInstance
   vendingMinterMessages?: VendingMinterInstance
+  openEditionMinterMessages?: OpenEditionMinterInstance
   sg721Messages?: SG721Instance
 } & (
   | { type: undefined }
@@ -109,6 +154,7 @@ export type DispatchQueryArgs = {
   | { type: Select<'mint_price'> }
   | { type: Select<'num_tokens'> }
   | { type: Select<'tokens_minted_to_user'>; address: string }
+  | { type: Select<'total_mint_count'> }
   | { type: Select<'tokens'>; address: string }
   // | { type: Select<'token_owners'> }
   | { type: Select<'token_info'>; tokenId: string }
@@ -117,8 +163,8 @@ export type DispatchQueryArgs = {
 )
 
 export const dispatchQuery = async (args: DispatchQueryArgs) => {
-  const { baseMinterMessages, vendingMinterMessages, sg721Messages } = args
-  if (!baseMinterMessages || !vendingMinterMessages || !sg721Messages) {
+  const { baseMinterMessages, vendingMinterMessages, openEditionMinterMessages, sg721Messages } = args
+  if (!baseMinterMessages || !vendingMinterMessages || !openEditionMinterMessages || !sg721Messages) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
@@ -133,6 +179,9 @@ export const dispatchQuery = async (args: DispatchQueryArgs) => {
     }
     case 'tokens_minted_to_user': {
       return vendingMinterMessages.getMintCount(args.address)
+    }
+    case 'total_mint_count': {
+      return openEditionMinterMessages.getTotalMintCount()
     }
     case 'tokens': {
       return sg721Messages.tokens(args.address)

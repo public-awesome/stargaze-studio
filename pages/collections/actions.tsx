@@ -237,6 +237,7 @@ const CollectionActionsPage: NextPage = () => {
                   baseMinterMessages={baseMinterMessages}
                   minterContractAddress={minterContractState.value}
                   minterType={minterType}
+                  openEditionMinterMessages={openEditionMinterMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                   vendingMinterMessages={vendingMinterMessages}
