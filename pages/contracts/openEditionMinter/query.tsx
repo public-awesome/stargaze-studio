@@ -2,15 +2,15 @@ import clsx from 'clsx'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
-import { AddressInput, TextInput } from 'components/forms/FormInput'
+import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
-import { sg721LinkTabs } from 'components/LinkTabs.data'
+import { openEditionMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useWallet } from 'contexts/wallet'
-import type { QueryType } from 'contracts/sg721/messages/query'
-import { dispatchQuery, QUERY_LIST } from 'contracts/sg721/messages/query'
+import type { QueryType } from 'contracts/openEditionMinter/messages/query'
+import { dispatchQuery, QUERY_LIST } from 'contracts/openEditionMinter/messages/query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -21,15 +21,15 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
 
-const Sg721QueryPage: NextPage = () => {
-  const { sg721: contract } = useContracts()
+const OpenEditionMinterQueryPage: NextPage = () => {
+  const { openEditionMinter: contract } = useContracts()
   const wallet = useWallet()
 
   const contractState = useInputState({
     id: 'contract-address',
     name: 'contract-address',
-    title: 'Sg721 Address',
-    subtitle: 'Address of the Sg721 contract',
+    title: 'Open Edition Minter Address',
+    subtitle: 'Address of the Open Edition Minter contract',
   })
   const contractAddress = contractState.value
 
@@ -41,30 +41,18 @@ const Sg721QueryPage: NextPage = () => {
   })
   const address = addressState.value
 
-  const tokenIdState = useInputState({
-    id: 'token-id',
-    name: 'tokenId',
-    title: 'Token ID',
-    subtitle: 'Token ID of a given token',
-  })
-  const tokenId = tokenIdState.value
-
-  const [type, setType] = useState<QueryType>('collection_info')
-
-  const addressVisible = ['approval', 'all_operators', 'tokens'].includes(type)
-  const tokenIdVisible = ['owner_of', 'approval', 'approvals', 'nft_info', 'all_nft_info'].includes(type)
+  const [type, setType] = useState<QueryType>('config')
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, tokenId, address] as const,
+    [contractAddress, type, contract, wallet, address] as const,
     async ({ queryKey }) => {
-      const [_contractAddress, _type, _contract, _wallet, _tokenId, _address] = queryKey
-      const messages = contract?.use(contractAddress)
-      const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
+      const [_contractAddress, _type, _contract, _wallet] = queryKey
+      const messages = contract?.use(_contractAddress)
+      const res = await resolveAddress(address, wallet).then(async (resolvedAddress) => {
         const result = await dispatchQuery({
+          address: resolvedAddress,
           messages,
           type,
-          tokenId: _tokenId,
-          address: resolvedAddress,
         })
         return result
       })
@@ -94,13 +82,13 @@ const Sg721QueryPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Query Sg721 Contract" />
+      <NextSeo title="Query Open Edition Minter Contract" />
       <ContractPageHeader
-        description="Sg721 contract is a wrapper contract that has a set of optional extensions on top of cw721-base."
+        description="Open Edition Minter contract allows multiple copies of a single NFT to be minted in a specified time interval."
         link={links.Documentation}
-        title="Sg721 Contract"
+        title="Open Edition Minter Contract"
       />
-      <LinkTabs activeIndex={0} data={sg721LinkTabs} />
+      <LinkTabs activeIndex={0} data={openEditionMinterLinkTabs} />
 
       <div className="grid grid-cols-2 p-4 space-x-8">
         <div className="space-y-8">
@@ -112,7 +100,6 @@ const Sg721QueryPage: NextPage = () => {
                 'placeholder:text-white/50',
                 'focus:ring focus:ring-plumbus-20',
               )}
-              defaultValue="collection_info"
               id="contract-query-type"
               name="query-type"
               onChange={(e) => setType(e.target.value as QueryType)}
@@ -124,11 +111,8 @@ const Sg721QueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional test={addressVisible}>
+          <Conditional test={type === 'mint_count'}>
             <AddressInput {...addressState} />
-          </Conditional>
-          <Conditional test={tokenIdVisible}>
-            <TextInput {...tokenIdState} />
           </Conditional>
         </div>
         <JsonPreview content={contractAddress ? { type, response } : null} title="Query Response" />
@@ -137,4 +121,4 @@ const Sg721QueryPage: NextPage = () => {
   )
 }
 
-export default withMetadata(Sg721QueryPage, { center: false })
+export default withMetadata(OpenEditionMinterQueryPage, { center: false })

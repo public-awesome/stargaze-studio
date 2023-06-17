@@ -25,7 +25,7 @@ export const QUERY_LIST: QueryListItem[] = [
   { id: 'mint_price', name: 'Mint Price', description: 'View the mint price' },
   {
     id: 'mint_count',
-    name: 'Total Minted Count',
+    name: 'Mint Count for Address',
     description: 'View the total amount of minted tokens for an address',
   },
   {

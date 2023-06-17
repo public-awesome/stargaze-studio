@@ -41,6 +41,24 @@ export const vendingMinterLinkTabs: LinkTabProps[] = [
   },
 ]
 
+export const openEditionMinterLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Query',
+    description: `Dispatch queries for your Open Edition Minter contract`,
+    href: '/contracts/openEditionMinter/query',
+  },
+  {
+    title: 'Execute',
+    description: `Execute Open Edition Minter contract actions`,
+    href: '/contracts/openEditionMinter/execute',
+  },
+  {
+    title: 'Migrate',
+    description: `Migrate Open Edition Minter contract`,
+    href: '/contracts/openEditionMinter/migrate',
+  },
+]
+
 export const baseMinterLinkTabs: LinkTabProps[] = [
   {
     title: 'Instantiate',

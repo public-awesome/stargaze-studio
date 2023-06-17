@@ -1,0 +1,249 @@
+import { Button } from 'components/Button'
+import { Conditional } from 'components/Conditional'
+import { ContractPageHeader } from 'components/ContractPageHeader'
+import { ExecuteCombobox } from 'components/contracts/openEditionMinter/ExecuteCombobox'
+import { useExecuteComboboxState } from 'components/contracts/openEditionMinter/ExecuteCombobox.hooks'
+import { FormControl } from 'components/FormControl'
+import { AddressInput, NumberInput } from 'components/forms/FormInput'
+import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
+import { InputDateTime } from 'components/InputDateTime'
+import { JsonPreview } from 'components/JsonPreview'
+import { LinkTabs } from 'components/LinkTabs'
+import { openEditionMinterLinkTabs } from 'components/LinkTabs.data'
+import { TransactionHash } from 'components/TransactionHash'
+import { useContracts } from 'contexts/contracts'
+import { useWallet } from 'contexts/wallet'
+import type { DispatchExecuteArgs } from 'contracts/openEditionMinter/messages/execute'
+import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/openEditionMinter/messages/execute'
+import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
+import { NextSeo } from 'next-seo'
+import type { FormEvent } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { FaArrowRight } from 'react-icons/fa'
+import { useMutation } from 'react-query'
+import { withMetadata } from 'utils/layout'
+import { links } from 'utils/links'
+import { resolveAddress } from 'utils/resolveAddress'
+
+const OpenEditionMinterExecutePage: NextPage = () => {
+  const { openEditionMinter: contract } = useContracts()
+  const wallet = useWallet()
+  const [lastTx, setLastTx] = useState('')
+
+  const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
+  const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
+  const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
+
+  const comboboxState = useExecuteComboboxState()
+  const type = comboboxState.value?.id
+
+  const limitState = useNumberInputState({
+    id: 'per-address-limit',
+    name: 'perAddressLimit',
+    title: 'Per Address Limit',
+    subtitle: 'Enter the per address limit',
+  })
+
+  const tokenIdState = useNumberInputState({
+    id: 'token-id',
+    name: 'tokenId',
+    title: 'Token ID',
+    subtitle: 'Enter the token ID',
+  })
+
+  const priceState = useNumberInputState({
+    id: 'price',
+    name: 'price',
+    title: 'Price',
+    subtitle: 'Enter the price for each token',
+  })
+
+  const contractState = useInputState({
+    id: 'contract-address',
+    name: 'contract-address',
+    title: 'Open Edition Minter Address',
+    subtitle: 'Address of the Open Edition Minter contract',
+  })
+  const contractAddress = contractState.value
+
+  const recipientState = useInputState({
+    id: 'recipient-address',
+    name: 'recipient',
+    title: 'Recipient Address',
+    subtitle: 'Address of the recipient',
+  })
+
+  const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
+  const showEndDateField = type === 'update_end_time'
+  const showLimitField = type === 'update_per_address_limit'
+  const showRecipientField = isEitherType(type, ['mint_to'])
+  const showPriceField = isEitherType(type, ['update_mint_price'])
+
+  const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
+  const payload: DispatchExecuteArgs = {
+    startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
+    endTime: endTimestamp ? (endTimestamp.getTime() * 1_000_000).toString() : '',
+    limit: limitState.value,
+    contract: contractState.value,
+    messages,
+    recipient: resolvedRecipientAddress,
+    txSigner: wallet.address,
+    price: priceState.value ? priceState.value.toString() : '0',
+    type,
+  }
+  const { isLoading, mutate } = useMutation(
+    async (event: FormEvent) => {
+      event.preventDefault()
+      if (!type) {
+        throw new Error('Please select message type!')
+      }
+      if (!wallet.initialized) {
+        throw new Error('Please connect your wallet.')
+      }
+      if (contractState.value === '') {
+        throw new Error('Please enter the contract address.')
+      }
+
+      if (wallet.client && type === 'update_mint_price') {
+        const contractConfig = wallet.client.queryContractSmart(contractState.value, {
+          config: {},
+        })
+        await toast
+          .promise(
+            wallet.client.queryContractSmart(contractState.value, {
+              mint_price: {},
+            }),
+            {
+              error: `Querying mint price failed!`,
+              loading: 'Querying current mint price...',
+              success: (price) => {
+                console.log(price)
+                return `Current mint price is ${Number(price.public_price.amount) / 1000000} STARS`
+              },
+            },
+          )
+          .then(async (price) => {
+            if (Number(price.public_price.amount) / 1000000 <= priceState.value) {
+              await contractConfig
+                .then((config) => {
+                  console.log(config.start_time, Date.now() * 1000000)
+                  if (Number(config.start_time) < Date.now() * 1000000) {
+                    throw new Error(
+                      `Minting has already started on ${new Date(
+                        Number(config.start_time) / 1000000,
+                      ).toLocaleString()}. Updated mint price cannot be higher than the current price of ${
+                        Number(price.public_price.amount) / 1000000
+                      } STARS`,
+                    )
+                  }
+                })
+                .catch((error) => {
+                  throw new Error(String(error).substring(String(error).lastIndexOf('Error:') + 7))
+                })
+            } else {
+              await contractConfig.then(async (config) => {
+                const factoryParameters = await wallet.client?.queryContractSmart(config.factory, {
+                  params: {},
+                })
+                if (
+                  factoryParameters.params.min_mint_price.amount &&
+                  priceState.value < Number(factoryParameters.params.min_mint_price.amount) / 1000000
+                ) {
+                  throw new Error(
+                    `Updated mint price cannot be lower than the minimum mint price of ${
+                      Number(factoryParameters.params.min_mint_price.amount) / 1000000
+                    } STARS`,
+                  )
+                }
+              })
+            }
+          })
+      }
+      const txHash = await toast.promise(dispatchExecute(payload), {
+        error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
+        loading: 'Executing message...',
+        success: (tx) => `Transaction ${tx} success!`,
+      })
+      if (txHash) {
+        setLastTx(txHash)
+      }
+    },
+    {
+      onError: (error) => {
+        toast.error(String(error), { style: { maxWidth: 'none' } })
+      },
+    },
+  )
+
+  const router = useRouter()
+
+  useEffect(() => {
+    if (contractAddress.length > 0) {
+      void router.replace({ query: { contractAddress } })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractAddress])
+  useEffect(() => {
+    const initial = new URL(document.URL).searchParams.get('contractAddress')
+    if (initial && initial.length > 0) contractState.onChange(initial)
+  }, [])
+
+  const resolveRecipientAddress = async () => {
+    await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
+      setResolvedRecipientAddress(resolvedAddress)
+    })
+  }
+  useEffect(() => {
+    void resolveRecipientAddress()
+  }, [recipientState.value])
+
+  return (
+    <section className="py-6 px-12 space-y-4">
+      <NextSeo title="Execute Open Edition Minter Contract" />
+      <ContractPageHeader
+        description="Open Edition Minter contract allows multiple copies of a single NFT to be minted in a specified time interval."
+        link={links.Documentation}
+        title="Open Edition Minter Contract"
+      />
+      <LinkTabs activeIndex={1} data={openEditionMinterLinkTabs} />
+
+      <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
+        <div className="space-y-8">
+          <AddressInput {...contractState} />
+          <ExecuteCombobox {...comboboxState} />
+          {showRecipientField && <AddressInput {...recipientState} />}
+          {showLimitField && <NumberInput {...limitState} />}
+          {showPriceField && <NumberInput {...priceState} />}
+          {/* TODO: Fix address execute message */}
+          <Conditional test={showDateField}>
+            <FormControl htmlId="start-date" subtitle="Start time for the minting" title="Start Time">
+              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+            </FormControl>
+          </Conditional>
+          <Conditional test={showEndDateField}>
+            <FormControl htmlId="end-date" subtitle="End time for the minting" title="End Time">
+              <InputDateTime minDate={new Date()} onChange={(date) => setEndTimestamp(date)} value={endTimestamp} />
+            </FormControl>
+          </Conditional>
+        </div>
+        <div className="space-y-8">
+          <div className="relative">
+            <Button className="absolute top-0 right-0" isLoading={isLoading} rightIcon={<FaArrowRight />} type="submit">
+              Execute
+            </Button>
+            <FormControl subtitle="View execution transaction hash" title="Transaction Hash">
+              <TransactionHash hash={lastTx} />
+            </FormControl>
+          </div>
+          <FormControl subtitle="View current message to be sent" title="Payload Preview">
+            <JsonPreview content={previewExecutePayload(payload)} isCopyable />
+          </FormControl>
+        </div>
+      </form>
+    </section>
+  )
+}
+
+export default withMetadata(OpenEditionMinterExecutePage, { center: false })
