@@ -27,6 +27,7 @@ const CollectionList: NextPage = () => {
   const [myCollections, setMyCollections] = useState<any[]>([])
   const [myOneOfOneCollections, setMyOneOfOneCollections] = useState<any[]>([])
   const [myStandardCollections, setMyStandardCollections] = useState<any[]>([])
+  const [myOpenEditionCollections, setMyOpenEditionCollections] = useState<any[]>([])
 
   async function getMinterContractType(minterContractAddress: string) {
     if (wallet.client && minterContractAddress.length > 0) {
@@ -43,6 +44,7 @@ const CollectionList: NextPage = () => {
   const filterMyCollections = () => {
     setMyOneOfOneCollections([])
     setMyStandardCollections([])
+    setMyOpenEditionCollections([])
     if (myCollections.length > 0) {
       myCollections.map(async (collection: any) => {
         await getMinterContractType(collection.minter)
@@ -51,6 +53,8 @@ const CollectionList: NextPage = () => {
               setMyOneOfOneCollections((prevState) => [...prevState, collection])
             } else if (contractType?.includes('sg-minter') || contractType?.includes('flex')) {
               setMyStandardCollections((prevState) => [...prevState, collection])
+            } else if (contractType?.includes('open-edition')) {
+              setMyOpenEditionCollections((prevState) => [...prevState, collection])
             }
           })
           .catch((err) => {
@@ -302,11 +306,120 @@ const CollectionList: NextPage = () => {
                 </table>
               </div>
             )}
+            {myOpenEditionCollections.length > 0 && (
+              <div className="bg-transparent">
+                <span className="ml-6 text-2xl font-bold text-blue-300 underline underline-offset-4">
+                  Open Edition Collections
+                </span>
+                <table className="table w-full">
+                  <thead>
+                    <tr>
+                      <th className="pl-36 text-lg font-bold text-left bg-transparent">Collection Name</th>
+                      <th className="text-lg font-bold bg-transparent">Contract Address</th>
+                      <th className="bg-transparent" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myOpenEditionCollections.map((collection: any, index: any) => {
+                      return (
+                        <tr key={index}>
+                          <td className="w-[40%] bg-black">
+                            <div className="flex items-center space-x-3">
+                              <div className="avatar">
+                                <div className="w-28 h-28 mask mask-squircle">
+                                  <img
+                                    alt="Cover"
+                                    src={
+                                      (collection?.image as string).startsWith('ipfs')
+                                        ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(
+                                            collection?.image as string
+                                          ).substring(7)}`
+                                        : collection?.image
+                                    }
+                                  />
+                                </div>
+                              </div>
+                              <div className="pl-2">
+                                <p className="overflow-auto font-bold lg:max-w-[160px] xl:max-w-[220px] 2xl:max-w-xs no-scrollbar ">
+                                  {collection.name}
+                                </p>
+                                <p className="text-sm truncate opacity-50 lg:max-w-[160px] xl:max-w-[220px] 2xl:max-w-xs">
+                                  {collection.description}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="w-[50%] bg-black">
+                            <div className="flex flex-row items-center space-x-3">
+                              Minter:
+                              <span className="ml-2">
+                                <Tooltip
+                                  backgroundColor="bg-blue-500"
+                                  label="Click to copy the Vending Minter contract address"
+                                >
+                                  <button
+                                    className="group flex space-x-2 font-mono text-base text-white/80 hover:underline"
+                                    onClick={() => void copy(collection.minter as string)}
+                                    type="button"
+                                  >
+                                    <span>
+                                      {truncateMiddle(collection.minter ? (collection.minter as string) : '', 36)}
+                                    </span>
+                                    <FaCopy className="opacity-0 group-hover:opacity-100" />
+                                  </button>
+                                </Tooltip>
+                              </span>
+                            </div>
+                            <div className="flex flex-row items-center space-x-3">
+                              SG721:
+                              <span className="ml-2">
+                                <Tooltip backgroundColor="bg-blue-500" label="Click to copy the SG721 contract address">
+                                  <button
+                                    className="group flex space-x-2 font-mono text-base text-white/80 hover:underline"
+                                    onClick={() => void copy(collection.contractAddress as string)}
+                                    type="button"
+                                  >
+                                    <span>
+                                      {truncateMiddle(
+                                        collection.contractAddress ? (collection.contractAddress as string) : '',
+                                        36,
+                                      )}
+                                    </span>
+                                    <FaCopy className="opacity-0 group-hover:opacity-100" />
+                                  </button>
+                                </Tooltip>
+                              </span>
+                            </div>
+                          </td>
+                          <th className="bg-black">
+                            <div className="flex items-center space-x-8">
+                              <Anchor
+                                className="text-xl text-plumbus"
+                                href={`/collections/actions?sg721ContractAddress=${collection.contractAddress}&minterContractAddress=${collection.minter}`}
+                              >
+                                <FaSlidersH />
+                              </Anchor>
+                              <Anchor
+                                className="text-xl text-plumbus"
+                                external
+                                href={`${STARGAZE_URL}/launchpad/${collection.minter}`}
+                              >
+                                <FaRocket />
+                              </Anchor>
+                            </div>
+                          </th>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
     )
-  }, [myCollections, myStandardCollections, myOneOfOneCollections, wallet.address])
+  }, [myCollections, myStandardCollections, myOneOfOneCollections, myOpenEditionCollections, wallet.address])
 
   return (
     <section className="py-6 px-12 space-y-4">
