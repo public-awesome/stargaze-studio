@@ -30,6 +30,8 @@ import type { UploadDetailsDataProps } from 'components/collections/creation/Upl
 import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
 import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
+import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
+import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
@@ -48,6 +50,8 @@ import {
   BASE_FACTORY_UPDATABLE_ADDRESS,
   BLOCK_EXPLORER_URL,
   NETWORK,
+  OPEN_EDITION_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
@@ -91,6 +95,9 @@ const CollectionCreationPage: NextPage = () => {
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
   const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
+  const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterCreatorDataProps | null>(
+    null,
+  )
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
@@ -99,10 +106,16 @@ const CollectionCreationPage: NextPage = () => {
   const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<string | null>(null)
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
+  const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<string | null>(null)
+  const [openEditionMinterUpdatableCreationFee, setOpenEditionMinterUpdatableCreationFee] = useState<string | null>(
+    null,
+  )
   const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<string | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
   const [minimumUpdatableMintPrice, setMinimumUpdatableMintPrice] = useState<string | null>('0')
+  const [minimumOpenEditionMintPrice, setMinimumOpenEditionMintPrice] = useState<string | null>('0')
+  const [minimumOpenEditionUpdatableMintPrice, setMinimumOpenEditionUpdatableMintPrice] = useState<string | null>('0')
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
   const [uploading, setUploading] = useState(false)
@@ -1031,6 +1044,26 @@ const CollectionCreationPage: NextPage = () => {
       setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
       setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
     }
+    if (OPEN_EDITION_FACTORY_ADDRESS) {
+      const openEditionFactoryParameters = await client
+        .queryContractSmart(OPEN_EDITION_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
+      setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
+    }
+    if (OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS) {
+      const openEditionUpdatableFactoryParameters = await client
+        .queryContractSmart(OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
+      setMinimumOpenEditionMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+    }
   }
 
   const checkwalletBalance = () => {
@@ -1069,9 +1102,13 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
   useEffect(() => {
-    if (vendingMinterContractAddress !== null || isMintingComplete)
+    if (
+      vendingMinterContractAddress !== null ||
+      openEditionMinterDetails?.openEditionMinterContractAddress ||
+      isMintingComplete
+    )
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [vendingMinterContractAddress, isMintingComplete])
+  }, [vendingMinterContractAddress, openEditionMinterDetails?.openEditionMinterContractAddress, isMintingComplete])
 
   useEffect(() => {
     setBaseTokenUri(uploadDetails?.baseTokenURI as string)
@@ -1118,6 +1155,67 @@ const CollectionCreationPage: NextPage = () => {
         </p>
       </div>
       <div className="mx-10" ref={scrollRef}>
+        <Conditional
+          test={minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress !== null}
+        >
+          <Alert className="mt-5" type="info">
+            <div>
+              Open Edition Minter Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/openEditionMinter/query/?contractAddress=${
+                  openEditionMinterDetails?.openEditionMinterContractAddress as string
+                }`}
+              >
+                {openEditionMinterDetails?.openEditionMinterContractAddress as string}
+              </Anchor>
+              <br />
+              SG721 Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/sg721/query/?contractAddress=${
+                  openEditionMinterDetails?.sg721ContractAddress as string
+                }`}
+              >
+                {openEditionMinterDetails?.sg721ContractAddress as string}
+              </Anchor>
+              <br />
+              Transaction Hash: {'  '}
+              <Conditional test={NETWORK === 'testnet'}>
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`${BLOCK_EXPLORER_URL}/tx/${openEditionMinterDetails?.transactionHash as string}`}
+                >
+                  {openEditionMinterDetails?.transactionHash}
+                </Anchor>
+              </Conditional>
+              <Conditional test={NETWORK === 'mainnet'}>
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`${BLOCK_EXPLORER_URL}/txs/${openEditionMinterDetails?.transactionHash as string}`}
+                >
+                  {openEditionMinterDetails?.transactionHash}
+                </Anchor>
+              </Conditional>
+              <br />
+              <Button className="mt-2">
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`${STARGAZE_URL}/launchpad/${
+                    openEditionMinterDetails?.openEditionMinterContractAddress as string
+                  }`}
+                >
+                  View on Launchpad
+                </Anchor>
+              </Button>
+            </div>
+          </Alert>
+        </Conditional>
         <Conditional test={vendingMinterContractAddress !== null || isMintingComplete}>
           <Alert className="mt-5" type="info">
             <div>
@@ -1289,80 +1387,108 @@ const CollectionCreationPage: NextPage = () => {
         </Conditional>
       </div>
 
-      {/* To be removed */}
-      <Conditional test={BASE_FACTORY_ADDRESS === undefined}>
-        <div className="mx-10 mt-5" />
-      </Conditional>
-      <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
-        {/* /To be removed */}
-        <div>
+      <div>
+        <div
+          className={clsx(
+            'mx-10 mt-5',
+            'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
+            'before:inset-x-0 before:bottom-0 before:border-white/25',
+          )}
+        >
           <div
             className={clsx(
-              'mx-10 mt-5',
-              'grid before:absolute relative grid-cols-2 grid-flow-col items-stretch rounded',
-              'before:inset-x-0 before:bottom-0 before:border-white/25',
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
             )}
           >
-            <div
-              className={clsx(
-                'isolate space-y-1 border-2',
-                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-                minterType === 'vending' ? 'border-stargaze' : 'border-transparent',
-                minterType !== 'vending' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
-              )}
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => {
+                setMinterType('vending')
+                resetReadyFlags()
+              }}
+              type="button"
             >
-              <button
-                className="p-4 w-full h-full text-left bg-transparent"
-                onClick={() => {
-                  setMinterType('vending')
-                  resetReadyFlags()
-                }}
-                type="button"
-              >
-                <h4 className="font-bold">Standard Collection</h4>
-                <span className="text-sm text-white/80 line-clamp-2">
-                  A non-appendable collection that facilitates primary market vending machine style minting
-                </span>
-              </button>
-            </div>
-            <div
-              className={clsx(
-                'isolate space-y-1 border-2',
-                'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
-                minterType === 'base' ? 'border-stargaze' : 'border-transparent',
-                minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
-              )}
+              <h4 className="font-bold">Standard Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                A non-appendable collection that facilitates primary market vending machine style minting
+              </span>
+            </button>
+          </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'base' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'base' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              onClick={() => {
+                setMinterType('base')
+                resetReadyFlags()
+              }}
+              type="button"
             >
-              <button
-                className="p-4 w-full h-full text-left bg-transparent"
-                onClick={() => {
-                  setMinterType('base')
-                  resetReadyFlags()
-                }}
-                type="button"
-              >
-                <h4 className="font-bold">1/1 Collection</h4>
-                <span className="text-sm text-white/80 line-clamp-2">
-                  An appendable collection that only allows for direct secondary market listing of tokens
-                </span>
-              </button>
-            </div>
+              <h4 className="font-bold">1/1 Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                An appendable collection that only allows for direct secondary market listing of tokens
+              </span>
+            </button>
+          </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'openEdition' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'openEdition' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              OPEN_EDITION_FACTORY_ADDRESS === undefined ? 'hover:bg-zinc-500 opacity-50 hover:opacity-70' : '',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              disabled={OPEN_EDITION_FACTORY_ADDRESS === undefined}
+              onClick={() => {
+                setMinterType('openEdition')
+                resetReadyFlags()
+              }}
+              type="button"
+            >
+              <h4 className="font-bold">Open Edition Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                Allows multiple copies of a single NFT to be minted for a given time interval
+              </span>
+            </button>
           </div>
         </div>
-      </Conditional>
+      </div>
 
       {minterType === 'base' && (
         <div>
           <BaseMinterDetails minterType={minterType} onChange={setBaseMinterDetails} />
         </div>
       )}
-
-      <div className="mx-10">
-        <UploadDetails
-          baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
+      <Conditional test={minterType === 'openEdition'}>
+        <OpenEditionMinterCreator
+          minimumMintPrice={minimumOpenEditionMintPrice as string}
+          minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
           minterType={minterType}
-          onChange={setUploadDetails}
+          onChange={setOpenEditionMinterDetails}
+          openEditionMinterCreationFee={openEditionMinterCreationFee as string}
+          openEditionMinterUpdatableCreationFee={openEditionMinterUpdatableCreationFee as string}
         />
+      </Conditional>
+      <div className="mx-10">
+        <Conditional test={minterType === 'vending' || minterType === 'base'}>
+          <UploadDetails
+            baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
+            minterType={minterType}
+            onChange={setUploadDetails}
+          />
+        </Conditional>
 
         <Conditional
           test={

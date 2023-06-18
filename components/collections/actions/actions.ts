@@ -1,6 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-
 import { useBaseMinterContract } from 'contracts/baseMinter'
+import { useOpenEditionMinterContract } from 'contracts/openEditionMinter'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
@@ -8,6 +8,7 @@ import { useVendingMinterContract } from 'contracts/vendingMinter'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
+import type { OpenEditionMinterInstance } from '../../../contracts/openEditionMinter/contract'
 
 export type ActionType = typeof ACTION_TYPES[number]
 
@@ -21,6 +22,7 @@ export const ACTION_TYPES = [
   'batch_mint',
   'set_whitelist',
   'update_start_time',
+  'update_end_time',
   'update_start_trading_time',
   'update_per_address_limit',
   'update_collection_info',
@@ -197,6 +199,79 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
   },
 ]
 
+export const OPEN_EDITION_ACTION_LIST: ActionListItem[] = [
+  {
+    id: 'update_mint_price',
+    name: 'Update Mint Price',
+    description: `Update mint price`,
+  },
+  {
+    id: 'mint_to',
+    name: 'Mint To',
+    description: `Mint a token to a user`,
+  },
+  {
+    id: 'batch_mint',
+    name: 'Batch Mint To',
+    description: `Mint multiple tokens to a user`,
+  },
+  {
+    id: 'update_start_time',
+    name: 'Update Minting Start Time',
+    description: `Update the start time for minting`,
+  },
+  {
+    id: 'update_end_time',
+    name: 'Update Minting End Time',
+    description: `Update the end time for minting`,
+  },
+  {
+    id: 'update_start_trading_time',
+    name: 'Update Trading Start Time',
+    description: `Update start time for trading`,
+  },
+  {
+    id: 'update_per_address_limit',
+    name: 'Update Tokens Per Address Limit',
+    description: `Update token per address limit`,
+  },
+  {
+    id: 'update_collection_info',
+    name: 'Update Collection Info',
+    description: `Update Collection Info`,
+  },
+  {
+    id: 'freeze_collection_info',
+    name: 'Freeze Collection Info',
+    description: `Freeze collection info to prevent further updates`,
+  },
+  {
+    id: 'transfer',
+    name: 'Transfer Tokens',
+    description: `Transfer tokens from one address to another`,
+  },
+  {
+    id: 'batch_transfer',
+    name: 'Batch Transfer Tokens',
+    description: `Transfer a list of tokens to a recipient`,
+  },
+  {
+    id: 'burn',
+    name: 'Burn Token',
+    description: `Burn a specified token from the collection`,
+  },
+  {
+    id: 'batch_burn',
+    name: 'Batch Burn Tokens',
+    description: `Burn a list of tokens from the collection`,
+  },
+  {
+    id: 'airdrop',
+    name: 'Airdrop Tokens',
+    description: 'Airdrop tokens to given addresses',
+  },
+]
+
 export const SG721_UPDATABLE_ACTION_LIST: ActionListItem[] = [
   {
     id: 'update_token_metadata',
@@ -231,6 +306,7 @@ export interface DispatchExecuteArgs {
   sg721Contract: string
   vendingMinterMessages?: VendingMinterInstance
   baseMinterMessages?: BaseMinterInstance
+  openEditionMinterMessages?: OpenEditionMinterInstance
   sg721Messages?: SG721Instance
   txSigner: string
   type: string | undefined
@@ -241,6 +317,7 @@ export interface DispatchExecuteArgs {
   batchNumber: number
   whitelist: string
   startTime: string | undefined
+  endTime: string | undefined
   limit: number
   tokenIds: string
   recipients: string[]
@@ -250,8 +327,8 @@ export interface DispatchExecuteArgs {
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
-  const { vendingMinterMessages, baseMinterMessages, sg721Messages, txSigner } = args
-  if (!vendingMinterMessages || !baseMinterMessages || !sg721Messages) {
+  const { vendingMinterMessages, baseMinterMessages, openEditionMinterMessages, sg721Messages, txSigner } = args
+  if (!vendingMinterMessages || !baseMinterMessages || !openEditionMinterMessages || !sg721Messages) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
@@ -281,6 +358,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     }
     case 'update_start_time': {
       return vendingMinterMessages.updateStartTime(txSigner, args.startTime as string)
+    }
+    case 'update_end_time': {
+      return openEditionMinterMessages.updateEndTime(txSigner, args.endTime as string)
     }
     case 'update_start_trading_time': {
       return vendingMinterMessages.updateStartTradingTime(txSigner, args.startTime)
@@ -346,6 +426,8 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages: sg721Messages } = useSG721Contract()
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages: baseMinterMessages } = useBaseMinterContract()
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { messages: openEditionMinterMessages } = useOpenEditionMinterContract()
   const { minterContract, sg721Contract } = args
   switch (args.type) {
     case 'mint_token_uri': {
@@ -374,6 +456,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'update_start_time': {
       return vendingMinterMessages(minterContract)?.updateStartTime(args.startTime as string)
+    }
+    case 'update_end_time': {
+      return openEditionMinterMessages(minterContract)?.updateEndTime(args.endTime as string)
     }
     case 'update_start_trading_time': {
       return vendingMinterMessages(minterContract)?.updateStartTradingTime(args.startTime as string)

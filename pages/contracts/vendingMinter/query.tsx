@@ -105,7 +105,7 @@ const VendingMinterQueryPage: NextPage = () => {
               onChange={(e) => setType(e.target.value as QueryType)}
             >
               {QUERY_LIST.map(({ id, name }) => (
-                <option key={`query-${id}`} value={id}>
+                <option key={`query-${id}`} className="mt-2 text-lg bg-[#1A1A1A]" value={id}>
                   {name}
                 </option>
               ))}

@@ -11,7 +11,7 @@ import { useEffect } from 'react'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK } from '../utils/constants'
+import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK, OPEN_EDITION_FACTORY_ADDRESS } from '../utils/constants'
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { LogModal } from './LogModal'
@@ -175,6 +175,17 @@ export const Sidebar = () => {
               >
                 <Link href="/contracts/vendingMinter/">Vending Minter Contract</Link>
               </li>
+              <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
+                <li
+                  className={clsx(
+                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/contracts/openEditionMinter/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/contracts/openEditionMinter/">Open Edition Minter Contract</Link>
+                </li>
+              </Conditional>
               <li
                 className={clsx(
                   'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',

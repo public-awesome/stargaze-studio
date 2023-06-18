@@ -4,7 +4,7 @@ import type { NextPage } from 'next'
 // import Brand from 'public/brand/brand.svg'
 import { withMetadata } from 'utils/layout'
 
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS } from '../../utils/constants'
+import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, OPEN_EDITION_FACTORY_ADDRESS } from '../../utils/constants'
 
 const HomePage: NextPage = () => {
   return (
@@ -42,6 +42,15 @@ const HomePage: NextPage = () => {
         <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/sg721" title="Sg721 Contract">
           Execute messages and run queries on Stargaze&apos;s SG721 contract.
         </HomeCard>
+        <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
+          <HomeCard
+            className="p-4 -m-4 hover:bg-gray-500/10 rounded"
+            link="/contracts/openEditionMinter"
+            title="Open Edition Minter Contract"
+          >
+            Execute messages and run queries on Stargaze&apos;s Open Edition Minter contract.
+          </HomeCard>
+        </Conditional>
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/contracts/whitelist"

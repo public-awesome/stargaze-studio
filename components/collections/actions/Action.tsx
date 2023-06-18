@@ -15,6 +15,7 @@ import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
 import { useWallet } from 'contexts/wallet'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
+import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter'
 import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import type { FormEvent } from 'react'
@@ -35,6 +36,7 @@ interface CollectionActionsProps {
   sg721Messages: SG721Instance | undefined
   vendingMinterMessages: VendingMinterInstance | undefined
   baseMinterMessages: BaseMinterInstance | undefined
+  openEditionMinterMessages: OpenEditionMinterInstance | undefined
   minterType: MinterType
   sg721Type: Sg721Type
 }
@@ -47,6 +49,7 @@ export const CollectionActions = ({
   minterContractAddress,
   vendingMinterMessages,
   baseMinterMessages,
+  openEditionMinterMessages,
   minterType,
   sg721Type,
 }: CollectionActionsProps) => {
@@ -54,6 +57,7 @@ export const CollectionActions = ({
   const [lastTx, setLastTx] = useState('')
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
+  const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
   const [airdropAllocationArray, setAirdropAllocationArray] = useState<AirdropAllocation[]>([])
   const [airdropArray, setAirdropArray] = useState<string[]>([])
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>()
@@ -168,6 +172,7 @@ export const CollectionActions = ({
   const showTokenUriField = isEitherType(type, ['mint_token_uri', 'update_token_metadata'])
   const showWhitelistField = type === 'set_whitelist'
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
+  const showEndDateField = type === 'update_end_time'
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn', 'update_token_metadata'])
   const showNumberOfTokensField = type === 'batch_mint'
@@ -197,6 +202,7 @@ export const CollectionActions = ({
   const payload: DispatchExecuteArgs = {
     whitelist: whitelistState.value,
     startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
+    endTime: endTimestamp ? (endTimestamp.getTime() * 1_000_000).toString() : '',
     limit: limitState.value,
     minterContract: minterContractAddress,
     sg721Contract: sg721ContractAddress,
@@ -208,6 +214,7 @@ export const CollectionActions = ({
     batchNumber: batchNumberState.value,
     vendingMinterMessages,
     baseMinterMessages,
+    openEditionMinterMessages,
     sg721Messages,
     recipient: resolvedRecipientAddress,
     recipients: airdropArray,
@@ -491,6 +498,11 @@ export const CollectionActions = ({
           <Conditional test={showDateField}>
             <FormControl className="mt-2" htmlId="start-date" title="Start Time">
               <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+            </FormControl>
+          </Conditional>
+          <Conditional test={showEndDateField}>
+            <FormControl className="mt-2" htmlId="end-date" title="End Time">
+              <InputDateTime minDate={new Date()} onChange={(date) => setEndTimestamp(date)} value={endTimestamp} />
             </FormControl>
           </Conditional>
         </div>
