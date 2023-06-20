@@ -575,48 +575,51 @@ export const OpenEditionMinterCreator = ({
 
   return (
     <div>
-      <div className="mx-10 mb-4 rounded border-2 border-white/20">
-        <div className="flex justify-center mb-2">
-          <div className="mt-3 ml-4 font-bold form-check form-check-inline">
-            <input
-              checked={metadataStorageMethod === 'off-chain'}
-              className="peer sr-only"
-              id="inlineRadio9"
-              name="inlineRadioOptions9"
-              onClick={() => {
-                setMetadataStorageMethod('off-chain')
-              }}
-              type="radio"
-              value="Off Chain"
-            />
-            <label
-              className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-              htmlFor="inlineRadio9"
-            >
-              Off-Chain Metadata
-            </label>
-          </div>
-          <div className="mt-3 ml-2 font-bold form-check form-check-inline">
-            <input
-              checked={metadataStorageMethod === 'on-chain'}
-              className="peer sr-only"
-              id="inlineRadio10"
-              name="inlineRadioOptions10"
-              onClick={() => {
-                setMetadataStorageMethod('on-chain')
-              }}
-              type="radio"
-              value="On Chain"
-            />
-            <label
-              className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-              htmlFor="inlineRadio10"
-            >
-              On-Chain Metadata
-            </label>
+      {/* TODO: Cancel once we're able to index on-chain metadata */}
+      <Conditional test={false}>
+        <div className="mx-10 mb-4 rounded border-2 border-white/20">
+          <div className="flex justify-center mb-2">
+            <div className="mt-3 ml-4 font-bold form-check form-check-inline">
+              <input
+                checked={metadataStorageMethod === 'off-chain'}
+                className="peer sr-only"
+                id="inlineRadio9"
+                name="inlineRadioOptions9"
+                onClick={() => {
+                  setMetadataStorageMethod('off-chain')
+                }}
+                type="radio"
+                value="Off Chain"
+              />
+              <label
+                className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                htmlFor="inlineRadio9"
+              >
+                Off-Chain Metadata
+              </label>
+            </div>
+            <div className="mt-3 ml-2 font-bold form-check form-check-inline">
+              <input
+                checked={metadataStorageMethod === 'on-chain'}
+                className="peer sr-only"
+                id="inlineRadio10"
+                name="inlineRadioOptions10"
+                onClick={() => {
+                  setMetadataStorageMethod('on-chain')
+                }}
+                type="radio"
+                value="On Chain"
+              />
+              <label
+                className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black peer-checked:border-b-2 hover:border-b-2  peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                htmlFor="inlineRadio10"
+              >
+                On-Chain Metadata
+              </label>
+            </div>
           </div>
         </div>
-      </div>
+      </Conditional>
       <div className={clsx('my-4 mx-10')}>
         <Conditional test={metadataStorageMethod === 'off-chain'}>
           <div>
