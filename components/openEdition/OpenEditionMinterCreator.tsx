@@ -500,7 +500,7 @@ export const OpenEditionMinterCreator = ({
           start_time: mintingDetails?.startTime,
           end_time: mintingDetails?.endTime,
           mint_price: {
-            amount: (Number(mintingDetails?.unitPrice) * 1000000).toString(),
+            amount: Number(mintingDetails?.unitPrice).toString(),
             denom: 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
