@@ -67,11 +67,7 @@ export const MintingDetails = ({ onChange, uploadMethod, minimumMintPrice }: Min
 
   useEffect(() => {
     const data: MintingDetailsDataProps = {
-      unitPrice: unitPriceState.value
-        ? (Number(unitPriceState.value) * 1_000_000).toString()
-        : unitPriceState.value === 0
-        ? '0'
-        : '',
+      unitPrice: unitPriceState.value ? Number(unitPriceState.value).toString() : unitPriceState.value === 0 ? '0' : '',
       perAddressLimit: perAddressLimitState.value,
       startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
       endTime: endTimestamp ? (endTimestamp.getTime() * 1_000_000).toString() : '',
