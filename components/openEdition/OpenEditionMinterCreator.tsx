@@ -416,12 +416,13 @@ export const OpenEditionMinterCreator = ({
 
             if (
               getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'audio' ||
-              getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'video'
+              getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'video' ||
+              getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'html'
             ) {
               data.animation_url = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
             }
-
-            data.image = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
+            if (getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) !== 'html')
+              data.image = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
 
             const metadataFileBlob = new Blob([JSON.stringify(data)], {
               type: 'application/json',
