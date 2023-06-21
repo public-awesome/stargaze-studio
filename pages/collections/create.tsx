@@ -731,12 +731,13 @@ const CollectionCreationPage: NextPage = () => {
 
               if (
                 getAssetType(uploadDetails.assetFiles[0].name) === 'audio' ||
-                getAssetType(uploadDetails.assetFiles[0].name) === 'video'
+                getAssetType(uploadDetails.assetFiles[0].name) === 'video' ||
+                getAssetType(uploadDetails.assetFiles[0].name) === 'html'
               ) {
                 data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
               }
-
-              data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
+              if (getAssetType(uploadDetails.assetFiles[0].name) !== 'html')
+                data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
 
               const metadataFileBlob = new Blob([JSON.stringify(data)], {
                 type: 'application/json',
