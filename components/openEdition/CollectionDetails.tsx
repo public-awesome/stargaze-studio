@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable jsx-a11y/media-has-caption */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -12,9 +13,10 @@ import { InputDateTime } from 'components/InputDateTime'
 import { Tooltip } from 'components/Tooltip'
 import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, SG721_UPDATABLE_CODE_ID } from 'utils/constants'
+import { getAssetType } from 'utils/getAssetType'
 import { uid } from 'utils/random'
 
 import { TextInput } from '../forms/FormInput'
@@ -150,6 +152,42 @@ export const CollectionDetails = ({
     }
   }, [updatable])
 
+  const videoPreview = useMemo(() => {
+    if (uploadMethod === 'new' && coverImage) {
+      return (
+        <video
+          controls
+          id="video"
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => e.currentTarget.pause()}
+          src={URL.createObjectURL(coverImage)}
+        />
+      )
+    } else if (uploadMethod === 'existing' && coverImageUrl && coverImageUrl.includes('ipfs://')) {
+      return (
+        <video
+          controls
+          id="video"
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => e.currentTarget.pause()}
+          src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
+            coverImageUrl.lastIndexOf('ipfs://') + 7,
+          )}`}
+        />
+      )
+    } else if (uploadMethod === 'existing' && coverImageUrl && !coverImageUrl.includes('ipfs://')) {
+      return (
+        <video
+          controls
+          id="video"
+          onMouseEnter={(e) => e.currentTarget.play()}
+          onMouseLeave={(e) => e.currentTarget.pause()}
+          src={coverImageUrl}
+        />
+      )
+    }
+  }, [coverImage, coverImageUrl, uploadMethod])
+
   return (
     <div>
       <FormGroup subtitle="Information about your collection" title="Collection Details">
@@ -177,7 +215,7 @@ export const CollectionDetails = ({
         <FormControl className={clsx('')} isRequired={uploadMethod === 'new'} title="Cover Image">
           {uploadMethod === 'new' && (
             <input
-              accept="image/*"
+              accept="image/*, video/*"
               className={clsx(
                 'w-full',
                 'p-[13px] rounded border-2 border-white/20 border-dashed cursor-pointer h-18',
@@ -191,24 +229,42 @@ export const CollectionDetails = ({
             />
           )}
 
-          {coverImage !== null && uploadMethod === 'new' && (
-            <div className="max-w-[200px] max-h-[200px] rounded border-2">
-              <img alt="no-preview-available" src={URL.createObjectURL(coverImage)} />
-            </div>
-          )}
+          <Conditional
+            test={coverImage !== null && uploadMethod === 'new' && getAssetType(coverImage.name) === 'image'}
+          >
+            {coverImage !== null && (
+              <div className="max-w-[200px] max-h-[200px] rounded border-2">
+                <img alt="no-preview-available" src={URL.createObjectURL(coverImage)} />
+              </div>
+            )}
+          </Conditional>
+          <Conditional
+            test={coverImage !== null && uploadMethod === 'new' && getAssetType(coverImage.name) === 'video'}
+          >
+            {coverImage !== null && videoPreview}
+          </Conditional>
+
           {uploadMethod === 'existing' && coverImageUrl?.includes('ipfs://') && (
             <div className="max-w-[200px] max-h-[200px] rounded border-2">
-              <img
-                alt="no-preview-available"
-                src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
-                  coverImageUrl.lastIndexOf('ipfs://') + 7,
-                )}`}
-              />
+              <Conditional test={getAssetType(coverImageUrl) !== 'video'}>
+                <img
+                  alt="no-preview-available"
+                  src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
+                    coverImageUrl.lastIndexOf('ipfs://') + 7,
+                  )}`}
+                />
+              </Conditional>
+              <Conditional test={getAssetType(coverImageUrl) === 'video'}>{videoPreview}</Conditional>
             </div>
           )}
           {uploadMethod === 'existing' && coverImageUrl && !coverImageUrl?.includes('ipfs://') && (
-            <div className="max-w-[200px] max-h-[200px] rounded border-2">
-              <img alt="no-preview-available" src={coverImageUrl} />
+            <div>
+              <div className="max-w-[200px] max-h-[200px] rounded border-2">
+                <Conditional test={getAssetType(coverImageUrl) !== 'video'}>
+                  <img alt="no-preview-available" src={coverImageUrl} />
+                </Conditional>
+                <Conditional test={getAssetType(coverImageUrl) === 'video'}>{videoPreview}</Conditional>
+              </div>
             </div>
           )}
           {uploadMethod === 'existing' && !coverImageUrl && (
