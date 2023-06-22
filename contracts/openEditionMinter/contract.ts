@@ -1,3 +1,6 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { MsgExecuteContractEncodeObject, SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/proto-signing'
@@ -5,6 +8,7 @@ import { coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 import type { Timestamp } from '@stargazezone/types/contracts/minter/shared-types'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
+import toast from 'react-hot-toast'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -185,6 +189,11 @@ export interface OpenEditionMinterContract {
 export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: string): OpenEditionMinterContract => {
   const use = (contractAddress: string): OpenEditionMinterInstance => {
     //Query
+    const getFactoryParameters = async (factoryAddress: string): Promise<any> => {
+      const res = await client.queryContractSmart(factoryAddress, { params: {} })
+      return res
+    }
+
     const getConfig = async (): Promise<any> => {
       const res = await client.queryContractSmart(contractAddress, {
         config: {},
@@ -338,63 +347,129 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
     }
 
     const mintTo = async (senderAddress: string, recipient: string): Promise<string> => {
-      const res = await client.execute(
-        senderAddress,
-        contractAddress,
-        {
-          mint_to: { recipient },
-        },
-        'auto',
-        '',
-      )
+      const txHash = await getConfig().then(async (response) => {
+        const factoryParameters = await toast.promise(getFactoryParameters(response.factory), {
+          loading: 'Querying Factory Parameters...',
+          error: 'Querying Factory Parameters failed!',
+          success: 'Query successful! Minting...',
+        })
+        console.log(factoryParameters?.params?.extension?.airdrop_mint_fee_bps)
 
-      return res.transactionHash
+        const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
+        if (!price) {
+          throw new Error(
+            'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
+          )
+        }
+        console.log((Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100)
+        const res = await client.execute(
+          senderAddress,
+          contractAddress,
+          {
+            mint_to: { recipient },
+          },
+          'auto',
+          '',
+          [
+            coin(
+              (Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100 / 100,
+              'ustars',
+            ),
+          ],
+        )
+        return res.transactionHash
+      })
+      return txHash
     }
 
     const batchMint = async (senderAddress: string, recipient: string, batchNumber: number): Promise<string> => {
-      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
-      for (let i = 0; i < batchNumber; i++) {
-        const msg = {
-          mint_to: { recipient },
+      const txHash = await getConfig().then(async (response) => {
+        const factoryParameters = await toast.promise(getFactoryParameters(response?.factory), {
+          loading: 'Querying Factory Parameters...',
+          error: 'Querying Factory Parameters failed!',
+          success: 'Query successful! Minting...',
+        })
+
+        const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
+        if (!price) {
+          throw new Error(
+            'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
+          )
         }
-        const executeContractMsg: MsgExecuteContractEncodeObject = {
-          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-          value: MsgExecuteContract.fromPartial({
-            sender: senderAddress,
-            contract: contractAddress,
-            msg: toUtf8(JSON.stringify(msg)),
-          }),
+
+        const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+        for (let i = 0; i < batchNumber; i++) {
+          const msg = {
+            mint_to: { recipient },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: senderAddress,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+              funds: [
+                coin(
+                  (Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100 / 100,
+                  'ustars',
+                ),
+              ],
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
         }
 
-        executeContractMsgs.push(executeContractMsg)
-      }
+        const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'batch mint')
 
-      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'batch mint')
-
-      return res.transactionHash
+        return res.transactionHash
+      })
+      return txHash
     }
 
     const airdrop = async (senderAddress: string, recipients: string[]): Promise<string> => {
-      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
-      for (let i = 0; i < recipients.length; i++) {
-        const msg = {
-          mint_to: { recipient: recipients[i] },
+      const txHash = await getConfig().then(async (response) => {
+        const factoryParameters = await toast.promise(getFactoryParameters(response?.factory), {
+          loading: 'Querying Factory Parameters...',
+          error: 'Querying Factory Parameters failed!',
+          success: 'Query successful! Minting...',
+        })
+
+        const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
+        if (!price) {
+          throw new Error(
+            'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
+          )
         }
-        const executeContractMsg: MsgExecuteContractEncodeObject = {
-          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
-          value: MsgExecuteContract.fromPartial({
-            sender: senderAddress,
-            contract: contractAddress,
-            msg: toUtf8(JSON.stringify(msg)),
-          }),
+
+        const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+        for (let i = 0; i < recipients.length; i++) {
+          const msg = {
+            mint_to: { recipient: recipients[i] },
+          }
+          const executeContractMsg: MsgExecuteContractEncodeObject = {
+            typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+            value: MsgExecuteContract.fromPartial({
+              sender: senderAddress,
+              contract: contractAddress,
+              msg: toUtf8(JSON.stringify(msg)),
+              funds: [
+                coin(
+                  (Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100 / 100,
+                  'ustars',
+                ),
+              ],
+            }),
+          }
+
+          executeContractMsgs.push(executeContractMsg)
         }
 
-        executeContractMsgs.push(executeContractMsg)
-      }
+        const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'airdrop')
 
-      const res = await client.signAndBroadcast(senderAddress, executeContractMsgs, 'auto', 'airdrop')
-
-      return res.transactionHash
+        return res.transactionHash
+      })
+      return txHash
     }
 
     return {

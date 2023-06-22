@@ -18,8 +18,10 @@ export const ACTION_TYPES = [
   'update_discount_price',
   'remove_discount_price',
   'mint_to',
+  'mint_to_open_edition',
   'mint_for',
   'batch_mint',
+  'batch_mint_open_edition',
   'set_whitelist',
   'update_start_time',
   'update_end_time',
@@ -34,6 +36,7 @@ export const ACTION_TYPES = [
   'batch_mint_for',
   'shuffle',
   'airdrop',
+  'airdrop_open_edition',
   'airdrop_specific',
   'burn_remaining',
   'update_token_metadata',
@@ -206,12 +209,12 @@ export const OPEN_EDITION_ACTION_LIST: ActionListItem[] = [
     description: `Update mint price`,
   },
   {
-    id: 'mint_to',
+    id: 'mint_to_open_edition',
     name: 'Mint To',
     description: `Mint a token to a user`,
   },
   {
-    id: 'batch_mint',
+    id: 'batch_mint_open_edition',
     name: 'Batch Mint To',
     description: `Mint multiple tokens to a user`,
   },
@@ -266,7 +269,7 @@ export const OPEN_EDITION_ACTION_LIST: ActionListItem[] = [
     description: `Burn a list of tokens from the collection`,
   },
   {
-    id: 'airdrop',
+    id: 'airdrop_open_edition',
     name: 'Airdrop Tokens',
     description: 'Airdrop tokens to given addresses',
   },
@@ -347,11 +350,17 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'mint_to': {
       return vendingMinterMessages.mintTo(txSigner, args.recipient)
     }
+    case 'mint_to_open_edition': {
+      return openEditionMinterMessages.mintTo(txSigner, args.recipient)
+    }
     case 'mint_for': {
       return vendingMinterMessages.mintFor(txSigner, args.recipient, args.tokenId)
     }
     case 'batch_mint': {
       return vendingMinterMessages.batchMint(txSigner, args.recipient, args.batchNumber)
+    }
+    case 'batch_mint_open_edition': {
+      return openEditionMinterMessages.batchMint(txSigner, args.recipient, args.batchNumber)
     }
     case 'set_whitelist': {
       return vendingMinterMessages.setWhitelist(txSigner, args.whitelist)
@@ -407,6 +416,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'airdrop': {
       return vendingMinterMessages.airdrop(txSigner, args.recipients)
     }
+    case 'airdrop_open_edition': {
+      return openEditionMinterMessages.airdrop(txSigner, args.recipients)
+    }
     case 'airdrop_specific': {
       return vendingMinterMessages.airdropSpecificTokens(txSigner, args.tokenRecipients)
     }
@@ -445,11 +457,17 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     case 'mint_to': {
       return vendingMinterMessages(minterContract)?.mintTo(args.recipient)
     }
+    case 'mint_to_open_edition': {
+      return openEditionMinterMessages(minterContract)?.mintTo(args.recipient)
+    }
     case 'mint_for': {
       return vendingMinterMessages(minterContract)?.mintFor(args.recipient, args.tokenId)
     }
     case 'batch_mint': {
       return vendingMinterMessages(minterContract)?.batchMint(args.recipient, args.batchNumber)
+    }
+    case 'batch_mint_open_edition': {
+      return openEditionMinterMessages(minterContract)?.batchMint(args.recipient, args.batchNumber)
     }
     case 'set_whitelist': {
       return vendingMinterMessages(minterContract)?.setWhitelist(args.whitelist)
@@ -504,6 +522,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'airdrop': {
       return vendingMinterMessages(minterContract)?.airdrop(args.recipients)
+    }
+    case 'airdrop_open_edition': {
+      return openEditionMinterMessages(minterContract)?.airdrop(args.recipients)
     }
     case 'airdrop_specific': {
       return vendingMinterMessages(minterContract)?.airdropSpecificTokens(args.tokenRecipients)
