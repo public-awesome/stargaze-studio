@@ -15,7 +15,7 @@ import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
-import { OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, SG721_UPDATABLE_CODE_ID } from 'utils/constants'
+import { OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, SG721_OPEN_EDITION_UPDATABLE_CODE_ID } from 'utils/constants'
 import { getAssetType } from 'utils/getAssetType'
 import { uid } from 'utils/random'
 
@@ -317,7 +317,9 @@ export const CollectionDetails = ({
             </div>
           </div>
         </div>
-        <Conditional test={SG721_UPDATABLE_CODE_ID > 0 && OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS !== undefined}>
+        <Conditional
+          test={SG721_OPEN_EDITION_UPDATABLE_CODE_ID > 0 && OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS !== undefined}
+        >
           <Tooltip
             backgroundColor="bg-blue-500"
             label={
