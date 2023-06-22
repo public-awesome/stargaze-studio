@@ -23,8 +23,8 @@ import { upload } from 'services/upload'
 import {
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
-  SG721_CODE_ID,
-  SG721_UPDATABLE_CODE_ID,
+  SG721_OPEN_EDITION_CODE_ID,
+  SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
 } from 'utils/constants'
 import { getAssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
@@ -508,7 +508,7 @@ export const OpenEditionMinterCreator = ({
           payment_address: mintingDetails?.paymentAddress || null,
         },
         collection_params: {
-          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_OPEN_EDITION_UPDATABLE_CODE_ID : SG721_OPEN_EDITION_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
