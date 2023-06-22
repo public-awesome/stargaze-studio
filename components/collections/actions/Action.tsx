@@ -175,7 +175,7 @@ export const CollectionActions = ({
   const showEndDateField = type === 'update_end_time'
   const showLimitField = type === 'update_per_address_limit'
   const showTokenIdField = isEitherType(type, ['transfer', 'mint_for', 'burn', 'update_token_metadata'])
-  const showNumberOfTokensField = type === 'batch_mint'
+  const showNumberOfTokensField = isEitherType(type, ['batch_mint', 'batch_mint_open_edition'])
   const showTokenIdListField = isEitherType(type, [
     'batch_burn',
     'batch_transfer',
@@ -185,12 +185,14 @@ export const CollectionActions = ({
   const showRecipientField = isEitherType(type, [
     'transfer',
     'mint_to',
+    'mint_to_open_edition',
     'mint_for',
     'batch_mint',
+    'batch_mint_open_edition',
     'batch_transfer',
     'batch_mint_for',
   ])
-  const showAirdropFileField = isEitherType(type, ['airdrop', 'airdrop_specific'])
+  const showAirdropFileField = isEitherType(type, ['airdrop', 'airdrop_open_edition', 'airdrop_specific'])
   const showPriceField = isEitherType(type, ['update_mint_price', 'update_discount_price'])
   const showDescriptionField = type === 'update_collection_info'
   const showImageField = type === 'update_collection_info'
