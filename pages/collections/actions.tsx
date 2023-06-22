@@ -19,7 +19,12 @@ import { links } from 'utils/links'
 import type { MinterType, Sg721Type } from '../../components/collections/actions/Combobox'
 
 const CollectionActionsPage: NextPage = () => {
-  const { baseMinter: baseMinterContract, vendingMinter: vendingMinterContract, sg721: sg721Contract } = useContracts()
+  const {
+    baseMinter: baseMinterContract,
+    vendingMinter: vendingMinterContract,
+    openEditionMinter: openEditionMinterContract,
+    sg721: sg721Contract,
+  } = useContracts()
   const wallet = useWallet()
 
   const [action, setAction] = useState<boolean>(false)
@@ -51,6 +56,11 @@ const CollectionActionsPage: NextPage = () => {
     () => baseMinterContract?.use(minterContractState.value),
     [baseMinterContract, minterContractState.value],
   )
+  const openEditionMinterMessages = useMemo(
+    () => openEditionMinterContract?.use(minterContractState.value),
+    [openEditionMinterContract, minterContractState.value],
+  )
+
   const sg721Messages = useMemo(
     () => sg721Contract?.use(sg721ContractState.value),
     [sg721Contract, sg721ContractState.value],
@@ -105,6 +115,8 @@ const CollectionActionsPage: NextPage = () => {
       .then((contract) => {
         if (contract?.includes('sg-base-minter')) {
           setMinterType('base')
+        } else if (contract?.includes('open-edition')) {
+          setMinterType('openEdition')
         } else {
           setMinterType('vending')
         }
@@ -214,6 +226,7 @@ const CollectionActionsPage: NextPage = () => {
                   baseMinterMessages={baseMinterMessages}
                   minterContractAddress={minterContractState.value}
                   minterType={minterType}
+                  openEditionMinterMessages={openEditionMinterMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                   sg721Type={sg721Type}
@@ -224,6 +237,7 @@ const CollectionActionsPage: NextPage = () => {
                   baseMinterMessages={baseMinterMessages}
                   minterContractAddress={minterContractState.value}
                   minterType={minterType}
+                  openEditionMinterMessages={openEditionMinterMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                   vendingMinterMessages={vendingMinterMessages}

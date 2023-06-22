@@ -1,44 +1,31 @@
 import { Combobox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
+import type { ExecuteListItem } from 'contracts/openEditionMinter/messages/execute'
+import { EXECUTE_LIST } from 'contracts/openEditionMinter/messages/execute'
 import { matchSorter } from 'match-sorter'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 
-import type { MinterType } from '../actions/Combobox'
-import type { QueryListItem } from './query'
-import { BASE_QUERY_LIST, OPEN_EDITION_QUERY_LIST, VENDING_QUERY_LIST } from './query'
-
-export interface QueryComboboxProps {
-  value: QueryListItem | null
-  onChange: (item: QueryListItem) => void
-  minterType?: MinterType
+export interface ExecuteComboboxProps {
+  value: ExecuteListItem | null
+  onChange: (item: ExecuteListItem) => void
 }
 
-export const QueryCombobox = ({ value, onChange, minterType }: QueryComboboxProps) => {
+export const ExecuteCombobox = ({ value, onChange }: ExecuteComboboxProps) => {
   const [search, setSearch] = useState('')
-  const [QUERY_LIST, SET_QUERY_LIST] = useState<QueryListItem[]>(VENDING_QUERY_LIST)
 
-  useEffect(() => {
-    if (minterType === 'base') {
-      SET_QUERY_LIST(BASE_QUERY_LIST)
-    } else if (minterType === 'openEdition') {
-      SET_QUERY_LIST(OPEN_EDITION_QUERY_LIST)
-    } else {
-      SET_QUERY_LIST(VENDING_QUERY_LIST)
-    }
-  }, [minterType])
-
-  const filtered = search === '' ? QUERY_LIST : matchSorter(QUERY_LIST, search, { keys: ['id', 'name', 'description'] })
+  const filtered =
+    search === '' ? EXECUTE_LIST : matchSorter(EXECUTE_LIST, search, { keys: ['id', 'name', 'description'] })
 
   return (
     <Combobox
       as={FormControl}
-      htmlId="query"
+      htmlId="message-type"
       labelAs={Combobox.Label}
       onChange={onChange}
-      subtitle="Collection queries"
-      title=""
+      subtitle="Contract execute message type"
+      title="Message Type"
       value={value}
     >
       <div className="relative">
@@ -48,10 +35,10 @@ export const QueryCombobox = ({ value, onChange, minterType }: QueryComboboxProp
             'placeholder:text-white/50',
             'focus:ring focus:ring-plumbus-20',
           )}
-          displayValue={(val?: QueryListItem) => val?.name ?? ''}
+          displayValue={(val?: ExecuteListItem) => val?.name ?? ''}
           id="message-type"
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Select query"
+          placeholder="Select message type"
         />
 
         <Combobox.Button
@@ -73,7 +60,7 @@ export const QueryCombobox = ({ value, onChange, minterType }: QueryComboboxProp
           >
             {filtered.length < 1 && (
               <span className="flex flex-col justify-center items-center p-4 text-sm text-center text-white/50">
-                Query not found
+                Message type not found.
               </span>
             )}
             {filtered.map((entry) => (
