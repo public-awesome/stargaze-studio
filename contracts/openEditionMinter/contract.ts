@@ -361,7 +361,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
           )
         }
-        console.log((Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100)
+        const airdropFee = Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)
         const res = await client.execute(
           senderAddress,
           contractAddress,
@@ -370,12 +370,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
           },
           'auto',
           '',
-          [
-            coin(
-              (Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100 / 100,
-              'ustars',
-            ),
-          ],
+          airdropFee > 0 ? [coin(airdropFee / 100 / 100, 'ustars')] : [],
         )
         return res.transactionHash
       })
@@ -396,7 +391,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
           )
         }
-
+        const airdropFee = Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)
         const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
         for (let i = 0; i < batchNumber; i++) {
           const msg = {
@@ -408,12 +403,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
               sender: senderAddress,
               contract: contractAddress,
               msg: toUtf8(JSON.stringify(msg)),
-              funds: [
-                coin(
-                  (Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100 / 100,
-                  'ustars',
-                ),
-              ],
+              funds: airdropFee > 0 ? [coin(airdropFee / 100 / 100, 'ustars')] : [],
             }),
           }
 
@@ -441,7 +431,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
           )
         }
-
+        const airdropFee = Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)
         const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
         for (let i = 0; i < recipients.length; i++) {
           const msg = {
@@ -453,12 +443,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
               sender: senderAddress,
               contract: contractAddress,
               msg: toUtf8(JSON.stringify(msg)),
-              funds: [
-                coin(
-                  (Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)) / 100 / 100,
-                  'ustars',
-                ),
-              ],
+              funds: airdropFee > 0 ? [coin(airdropFee / 100 / 100, 'ustars')] : [],
             }),
           }
 
