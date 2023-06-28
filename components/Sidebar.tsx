@@ -37,14 +37,14 @@ export const Sidebar = () => {
   return (
     <SidebarLayout>
       {/* Stargaze brand as home button */}
-      <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="w-full" src="/stargaze_logo_800.svg" />
+      <Anchor href="/home" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
+        <img alt="Brand Text" className="ml-5 w-3/4" src="/studio-logo.png" />
       </Anchor>
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
 
-      <div className="absolute top-[20%] left-[5%] mt-[5%]">
+      <div className="absolute top-[20%] left-[5%] mt-2">
         <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <div
