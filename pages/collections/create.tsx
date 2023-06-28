@@ -1110,10 +1110,25 @@ const CollectionCreationPage: NextPage = () => {
       isMintingComplete
     ) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (sidetabRef.current) sidetabRef.current.open()
     }
-  }, [vendingMinterContractAddress, openEditionMinterDetails?.openEditionMinterContractAddress, isMintingComplete])
+    if (
+      (minterType === 'vending' && vendingMinterContractAddress !== null) ||
+      (minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress) ||
+      (minterType === 'base' && vendingMinterContractAddress !== null && isMintingComplete)
+    ) {
+      if (sidetabRef.current) {
+        setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          sidetabRef.current.open()
+        }, 3000)
+      }
+    }
+  }, [
+    vendingMinterContractAddress,
+    openEditionMinterDetails?.openEditionMinterContractAddress,
+    isMintingComplete,
+    minterType,
+  ])
 
   useEffect(() => {
     setBaseTokenUri(uploadDetails?.baseTokenURI as string)
