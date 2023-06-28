@@ -8,7 +8,7 @@ const HomePage: NextPage = () => {
   return (
     <section className="px-8 pt-4 pb-16 mx-auto space-y-8 max-w-4xl">
       <div className="flex justify-center items-center py-8 max-w-xl">
-        <img alt="Brand Text" className="ml-[50%] w-full" src="/stargaze_logo_800.svg" />
+        <img alt="Brand Text" className="ml-[50%] w-1/2" src="/studio-logo.png" />
       </div>
       <h1 className="font-heading text-4xl font-bold">Welcome!</h1>
       <p className="text-xl">
