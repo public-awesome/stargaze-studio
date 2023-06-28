@@ -81,6 +81,7 @@ const CollectionCreationPage: NextPage = () => {
     baseFactory: baseFactoryContract,
   } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const sidetabRef = useRef<any>(null)
 
   const vendingFactoryMessages = useMemo(
     () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
@@ -1107,8 +1108,11 @@ const CollectionCreationPage: NextPage = () => {
       vendingMinterContractAddress !== null ||
       openEditionMinterDetails?.openEditionMinterContractAddress ||
       isMintingComplete
-    )
+    ) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (sidetabRef.current) sidetabRef.current.open()
+    }
   }, [vendingMinterContractAddress, openEditionMinterDetails?.openEditionMinterContractAddress, isMintingComplete])
 
   useEffect(() => {
@@ -1600,7 +1604,14 @@ const CollectionCreationPage: NextPage = () => {
               Mint & Add Token(s)
             </Button>
           </Conditional>
-          <Sidetab buttonColor="#455CF9" buttonText="Studio Survey" height={600} id="yJnL8fXk" width={800} />
+          <Sidetab
+            buttonColor="#455CF9"
+            buttonText="Studio Survey"
+            height={600}
+            id="yJnL8fXk"
+            ref={sidetabRef}
+            width={800}
+          />
         </div>
       </div>
     </div>
