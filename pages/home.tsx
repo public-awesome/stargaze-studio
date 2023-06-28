@@ -24,15 +24,25 @@ const HomePage: NextPage = () => {
       <br />
 
       <div className="grid gap-8 md:grid-cols-2">
-        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/collections/" title="Collections">
+        <HomeCard
+          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
+          link="/collections/"
+          linkText="Collections"
+          title="Collections"
+        >
           Create a collection, view a list of your collections or execute collection actions and queries.
         </HomeCard>
         <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
-          <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/badges" title="Badges">
+          <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/badges" linkText="Badges" title="Badges">
             Create badges, view a list of them or execute badge related actions and queries.
           </HomeCard>
         </Conditional>
-        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts" title="Contract Dashboards">
+        <HomeCard
+          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
+          link="/contracts"
+          linkText="Dashboards"
+          title="Contract Dashboards"
+        >
           Execute actions and queries for a variety of contracts.
         </HomeCard>
       </div>

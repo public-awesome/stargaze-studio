@@ -37,8 +37,8 @@ export const Sidebar = () => {
   return (
     <SidebarLayout>
       {/* Stargaze brand as home button */}
-      <Anchor href="/home" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="ml-5 w-3/4" src="/studio-logo.png" />
+      <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
+        <img alt="Brand Text" className="ml-6 w-3/4" src="/studio-logo.png" />
       </Anchor>
       {/* wallet button */}
       <WalletLoader />
