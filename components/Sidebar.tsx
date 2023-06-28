@@ -44,7 +44,7 @@ export const Sidebar = () => {
       <WalletLoader />
       {/* main navigation routes */}
 
-      <div className="absolute top-[20%] left-[5%]">
+      <div className="absolute top-[20%] left-[5%] mt-[5%]">
         <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <div
@@ -258,9 +258,9 @@ export const Sidebar = () => {
       {/* footer attribution */}
       <div className="text-xs text-white/50">
         Stargaze Studio {process.env.APP_VERSION} <br />
-        Made by{' '}
-        <Anchor className="text-plumbus hover:underline" href="https://deuslabs.fi">
-          deus labs
+        Powered by{' '}
+        <Anchor className="text-plumbus hover:underline" href="https://stargaze.zone">
+          Stargaze
         </Anchor>
       </div>
 
