@@ -9,6 +9,7 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
 import { Sidetab } from '@typeform/embed-react'
+import axios from 'axios'
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
@@ -41,7 +42,7 @@ import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'c
 import { dispatchExecute as vendingFactoryDispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
@@ -55,6 +56,7 @@ import {
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
+  SYNC_COLLECTIONS_API_URL,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
@@ -1103,6 +1105,17 @@ const CollectionCreationPage: NextPage = () => {
         )
     }
   }
+
+  const syncCollections = useCallback(async () => {
+    const collectionAddress =
+      minterType === 'openEdition' ? openEditionMinterDetails?.sg721ContractAddress : sg721ContractAddress
+    if (collectionAddress) {
+      await axios.get(`${SYNC_COLLECTIONS_API_URL}/${collectionAddress}`).catch((error) => {
+        console.error('Sync collections: ', error)
+      })
+    }
+  }, [minterType, openEditionMinterDetails?.sg721ContractAddress, sg721ContractAddress])
+
   useEffect(() => {
     if (
       vendingMinterContractAddress !== null ||
@@ -1116,6 +1129,7 @@ const CollectionCreationPage: NextPage = () => {
       (minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress) ||
       (minterType === 'base' && vendingMinterContractAddress !== null && isMintingComplete)
     ) {
+      void syncCollections()
       if (sidetabRef.current) {
         setTimeout(() => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call
@@ -1128,6 +1142,7 @@ const CollectionCreationPage: NextPage = () => {
     openEditionMinterDetails?.openEditionMinterContractAddress,
     isMintingComplete,
     minterType,
+    syncCollections,
   ])
 
   useEffect(() => {
