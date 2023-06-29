@@ -1109,7 +1109,7 @@ const CollectionCreationPage: NextPage = () => {
   const syncCollections = useCallback(async () => {
     const collectionAddress =
       minterType === 'openEdition' ? openEditionMinterDetails?.sg721ContractAddress : sg721ContractAddress
-    if (collectionAddress) {
+    if (collectionAddress && SYNC_COLLECTIONS_API_URL) {
       await axios.get(`${SYNC_COLLECTIONS_API_URL}/${collectionAddress}`).catch((error) => {
         console.error('Sync collections: ', error)
       })
