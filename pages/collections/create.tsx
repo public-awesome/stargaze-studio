@@ -9,6 +9,7 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
 import { Sidetab } from '@typeform/embed-react'
+import axios from 'axios'
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
@@ -41,7 +42,7 @@ import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'c
 import { dispatchExecute as vendingFactoryDispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
@@ -55,6 +56,7 @@ import {
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
+  SYNC_COLLECTIONS_API_URL,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
@@ -81,6 +83,7 @@ const CollectionCreationPage: NextPage = () => {
     baseFactory: baseFactoryContract,
   } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
+  const sidetabRef = useRef<any>(null)
 
   const vendingFactoryMessages = useMemo(
     () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
@@ -1102,14 +1105,45 @@ const CollectionCreationPage: NextPage = () => {
         )
     }
   }
+
+  const syncCollections = useCallback(async () => {
+    const collectionAddress =
+      minterType === 'openEdition' ? openEditionMinterDetails?.sg721ContractAddress : sg721ContractAddress
+    if (collectionAddress && SYNC_COLLECTIONS_API_URL) {
+      await axios.get(`${SYNC_COLLECTIONS_API_URL}/${collectionAddress}`).catch((error) => {
+        console.error('Sync collections: ', error)
+      })
+    }
+  }, [minterType, openEditionMinterDetails?.sg721ContractAddress, sg721ContractAddress])
+
   useEffect(() => {
     if (
       vendingMinterContractAddress !== null ||
       openEditionMinterDetails?.openEditionMinterContractAddress ||
       isMintingComplete
-    )
+    ) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [vendingMinterContractAddress, openEditionMinterDetails?.openEditionMinterContractAddress, isMintingComplete])
+    }
+    if (
+      (minterType === 'vending' && vendingMinterContractAddress !== null) ||
+      (minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress) ||
+      (minterType === 'base' && vendingMinterContractAddress !== null && isMintingComplete)
+    ) {
+      void syncCollections()
+      if (sidetabRef.current) {
+        setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          sidetabRef.current.open()
+        }, 3000)
+      }
+    }
+  }, [
+    vendingMinterContractAddress,
+    openEditionMinterDetails?.openEditionMinterContractAddress,
+    isMintingComplete,
+    minterType,
+    syncCollections,
+  ])
 
   useEffect(() => {
     setBaseTokenUri(uploadDetails?.baseTokenURI as string)
@@ -1600,7 +1634,14 @@ const CollectionCreationPage: NextPage = () => {
               Mint & Add Token(s)
             </Button>
           </Conditional>
-          <Sidetab buttonColor="#455CF9" buttonText="Studio Survey" height={600} id="yJnL8fXk" width={800} />
+          <Sidetab
+            buttonColor="#455CF9"
+            buttonText="Studio Survey"
+            height={600}
+            id="yJnL8fXk"
+            ref={sidetabRef}
+            width={800}
+          />
         </div>
       </div>
     </div>

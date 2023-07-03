@@ -16,7 +16,7 @@ export const WalletLoader = () => {
   const displayName = useWalletStore((store) => store.name || getShortAddress(store.address))
 
   return (
-    <Popover className="mt-8 mb-2">
+    <Popover className="mt-4 mb-2">
       {({ close }) => (
         <>
           <div className="grid -mx-4">
