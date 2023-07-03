@@ -63,6 +63,7 @@ import {
   WHITELIST_CODE_ID,
   WHITELIST_FLEX_CODE_ID,
 } from 'utils/constants'
+import { checkTokenUri } from 'utils/isValidTokenUri'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { uid } from 'utils/random'
@@ -176,21 +177,29 @@ const CollectionCreationPage: NextPage = () => {
       setReadyToCreateBm(false)
       checkUploadDetails()
       checkCollectionDetails()
-      void checkRoyaltyDetails()
+      void checkExistingTokenURI()
         .then(() => {
-          checkWhitelistDetails()
+          void checkRoyaltyDetails()
             .then(() => {
-              checkwalletBalance()
-              setReadyToCreateBm(true)
+              checkWhitelistDetails()
+                .then(() => {
+                  checkwalletBalance()
+                  setReadyToCreateBm(true)
+                })
+                .catch((error) => {
+                  toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+                  addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                  setReadyToCreateBm(false)
+                })
             })
             .catch((error) => {
-              toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+              toast.error(`Error in Royalty Configuration: ${error.message}`, { style: { maxWidth: 'none' } })
               addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
               setReadyToCreateBm(false)
             })
         })
         .catch((error) => {
-          toast.error(`Error in Royalty Configuration: ${error.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`Error in Existing Token URI: ${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToCreateBm(false)
         })
@@ -205,12 +214,20 @@ const CollectionCreationPage: NextPage = () => {
     try {
       setReadyToUploadAndMint(false)
       checkUploadDetails()
-      checkWhitelistDetails()
+      checkExistingTokenURI()
         .then(() => {
-          setReadyToUploadAndMint(true)
+          checkWhitelistDetails()
+            .then(() => {
+              setReadyToUploadAndMint(true)
+            })
+            .catch((error) => {
+              toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+              addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+              setReadyToUploadAndMint(false)
+            })
         })
         .catch((error) => {
-          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`Error in Token URI: ${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToUploadAndMint(false)
         })
@@ -815,6 +832,12 @@ const CollectionCreationPage: NextPage = () => {
     }
     if (baseMinterDetails?.baseMinterAcquisitionMethod === 'existing' && !baseMinterDetails.existingBaseMinter) {
       throw new Error('Please specify a valid Base Minter contract address')
+    }
+  }
+
+  const checkExistingTokenURI = async () => {
+    if (minterType === 'base' && uploadDetails && uploadDetails.uploadMethod === 'existing') {
+      await checkTokenUri(uploadDetails.baseTokenURI as string)
     }
   }
 
