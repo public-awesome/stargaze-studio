@@ -38,13 +38,13 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="w-full" src="/stargaze_logo_800.svg" />
+        <img alt="Brand Text" className="ml-6 w-3/4" src="/studio-logo.png" />
       </Anchor>
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
 
-      <div className="absolute top-[20%] left-[5%]">
+      <div className="absolute top-[20%] left-[5%] mt-2">
         <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <div
@@ -258,9 +258,9 @@ export const Sidebar = () => {
       {/* footer attribution */}
       <div className="text-xs text-white/50">
         Stargaze Studio {process.env.APP_VERSION} <br />
-        Made by{' '}
-        <Anchor className="text-plumbus hover:underline" href="https://deuslabs.fi">
-          deus labs
+        Powered by{' '}
+        <Anchor className="text-plumbus hover:underline" href="https://stargaze.zone">
+          Stargaze
         </Anchor>
       </div>
 
