@@ -28,6 +28,7 @@ import {
 } from 'utils/constants'
 import { getAssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
+import { checkTokenUri } from 'utils/isValidTokenUri'
 import { uid } from 'utils/random'
 
 import { type CollectionDetailsDataProps, CollectionDetails } from './CollectionDetails'
@@ -101,23 +102,30 @@ export const OpenEditionMinterCreator = ({
   const performOpenEditionMinterChecks = () => {
     try {
       setReadyToCreate(false)
-      checkUploadDetails()
       checkCollectionDetails()
       checkMintingDetails()
-      void checkRoyaltyDetails()
+      void checkUploadDetails()
         .then(() => {
-          void checkwalletBalance()
+          void checkRoyaltyDetails()
             .then(() => {
-              setReadyToCreate(true)
+              void checkwalletBalance()
+                .then(() => {
+                  setReadyToCreate(true)
+                })
+                .catch((error: any) => {
+                  toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
+                  addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                  setReadyToCreate(false)
+                })
             })
             .catch((error: any) => {
-              toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
+              toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
               addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
               setReadyToCreate(false)
             })
         })
         .catch((error: any) => {
-          toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`Error in Upload Details: ${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToCreate(false)
         })
@@ -129,7 +137,7 @@ export const OpenEditionMinterCreator = ({
     }
   }
 
-  const checkUploadDetails = () => {
+  const checkUploadDetails = async () => {
     if (!wallet.initialized) throw new Error('Wallet not connected.')
     if (
       (metadataStorageMethod === 'off-chain' && !offChainMetadataUploadDetails) ||
@@ -199,6 +207,9 @@ export const OpenEditionMinterCreator = ({
       ) {
         throw new Error('Please enter a valid cover image URL')
       }
+    }
+    if (offChainMetadataUploadDetails?.uploadMethod === 'existing') {
+      await checkTokenUri(offChainMetadataUploadDetails.tokenURI as string)
     }
   }
 
