@@ -12,6 +12,7 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataInput } from 'components/MetadataInput'
 import { MetadataModal } from 'components/MetadataModal'
 import { SingleAssetPreview } from 'components/SingleAssetPreview'
+import { Tooltip } from 'components/Tooltip'
 import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -291,7 +292,14 @@ export const OffChainMetadataUploadDetails = ({
               and upload your asset & metadata manually to get a URI for your token before minting.
             </p>
             <div>
-              <TextInput {...tokenUriState} className="ml-4 w-1/2" />
+              <Tooltip
+                backgroundColor="bg-blue-500"
+                className="mb-2 ml-28"
+                label="The token URI that points directly to the metadata file stored on IPFS."
+                placement="top"
+              >
+                <TextInput {...tokenUriState} className="ml-4 w-1/2" />
+              </Tooltip>
               <TextInput {...coverImageUrlState} className="mt-2 ml-4 w-1/2" />
             </div>
           </div>

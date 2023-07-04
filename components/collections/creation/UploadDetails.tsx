@@ -13,6 +13,7 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { MetadataInput } from 'components/MetadataInput'
 import { MetadataModal } from 'components/MetadataModal'
 import { SingleAssetPreview } from 'components/SingleAssetPreview'
+import { Tooltip } from 'components/Tooltip'
 import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -336,7 +337,14 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
               and upload your assets & metadata manually to get a base URI for your collection.
             </p>
             <div>
-              <TextInput {...baseTokenUriState} className="ml-4 w-1/2" />
+              <Tooltip
+                backgroundColor="bg-blue-500"
+                className="mb-2 ml-20"
+                label="The base token URI that points to the IPFS folder containing the metadata files."
+                placement="top"
+              >
+                <TextInput {...baseTokenUriState} className="ml-4 w-1/2" />
+              </Tooltip>
             </div>
             <Conditional test={minterType !== 'base'}>
               <div>
@@ -360,7 +368,14 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
               and upload your asset & metadata manually to get a URI for your token before minting.
             </p>
             <div>
-              <TextInput {...baseTokenUriState} className="ml-4 w-1/2" />
+              <Tooltip
+                backgroundColor="bg-blue-500"
+                className="mb-2 ml-4"
+                label="The token URI that points directly to the metadata file stored on IPFS."
+                placement="top"
+              >
+                <TextInput {...baseTokenUriState} className="ml-4 w-1/2" />
+              </Tooltip>
             </div>
             <Conditional
               test={minterType !== 'base' || (minterType === 'base' && baseMinterAcquisitionMethod === 'new')}
