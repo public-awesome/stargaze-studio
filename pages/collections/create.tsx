@@ -147,8 +147,15 @@ const CollectionCreationPage: NextPage = () => {
             .then(() => {
               checkWhitelistDetails()
                 .then(() => {
-                  checkwalletBalance()
-                  setReadyToCreateVm(true)
+                  void checkwalletBalance()
+                    .then(() => {
+                      setReadyToCreateVm(true)
+                    })
+                    .catch((error) => {
+                      toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+                      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                      setReadyToCreateVm(false)
+                    })
                 })
                 .catch((error) => {
                   if (String(error.message).includes('Insufficient wallet balance')) {
@@ -191,8 +198,15 @@ const CollectionCreationPage: NextPage = () => {
             .then(() => {
               checkWhitelistDetails()
                 .then(() => {
-                  checkwalletBalance()
-                  setReadyToCreateBm(true)
+                  void checkwalletBalance()
+                    .then(() => {
+                      setReadyToCreateBm(true)
+                    })
+                    .catch((error) => {
+                      toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+                      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                      setReadyToCreateVm(false)
+                    })
                 })
                 .catch((error) => {
                   toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
@@ -1104,40 +1118,41 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
 
-  const checkwalletBalance = () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected.')
-    if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
-      const amountNeeded =
-        Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
-        (whitelistDetails.whitelistType === 'flex'
-          ? Number(vendingMinterFlexCreationFee)
-          : collectionDetails?.updatable
-          ? Number(vendingMinterUpdatableCreationFee)
-          : Number(vendingMinterCreationFee))
-      if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error(
-          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-            amountNeeded / 1000000
-          ).toString()} STARS`,
-        )
-    } else {
-      const amountNeeded =
-        minterType === 'vending'
-          ? whitelistDetails?.whitelistState === 'existing' && whitelistDetails.whitelistType === 'flex'
+  const checkwalletBalance = async () => {
+    const walletBalance = await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
+      if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
+        const amountNeeded =
+          Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
+          (whitelistDetails.whitelistType === 'flex'
             ? Number(vendingMinterFlexCreationFee)
             : collectionDetails?.updatable
             ? Number(vendingMinterUpdatableCreationFee)
-            : Number(vendingMinterCreationFee)
-          : collectionDetails?.updatable
-          ? Number(baseMinterUpdatableCreationFee)
-          : Number(baseMinterCreationFee)
-      if (amountNeeded >= Number(wallet.balance[0].amount))
-        throw new Error(
-          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-            amountNeeded / 1000000
-          ).toString()} STARS`,
-        )
-    }
+            : Number(vendingMinterCreationFee))
+        if (amountNeeded >= Number(balance.amount))
+          throw new Error(
+            `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+              amountNeeded / 1000000
+            ).toString()} STARS`,
+          )
+      } else {
+        const amountNeeded =
+          minterType === 'vending'
+            ? whitelistDetails?.whitelistState === 'existing' && whitelistDetails.whitelistType === 'flex'
+              ? Number(vendingMinterFlexCreationFee)
+              : collectionDetails?.updatable
+              ? Number(vendingMinterUpdatableCreationFee)
+              : Number(vendingMinterCreationFee)
+            : collectionDetails?.updatable
+            ? Number(baseMinterUpdatableCreationFee)
+            : Number(baseMinterCreationFee)
+        if (amountNeeded >= Number(balance.amount))
+          throw new Error(
+            `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+              amountNeeded / 1000000
+            ).toString()} STARS`,
+          )
+      }
+    })
   }
 
   const syncCollections = useCallback(async () => {
