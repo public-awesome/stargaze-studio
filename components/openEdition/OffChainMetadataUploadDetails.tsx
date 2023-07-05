@@ -294,7 +294,7 @@ export const OffChainMetadataUploadDetails = ({
             <div>
               <Tooltip
                 backgroundColor="bg-blue-500"
-                className="mb-2 ml-28"
+                className="mb-2 ml-4"
                 label="The token URI that points directly to the metadata file stored on IPFS."
                 placement="top"
               >
