@@ -538,7 +538,11 @@ const CollectionCreationPage: NextPage = () => {
           whitelist,
         },
         collection_params: {
-          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
+          code_id: collectionDetails?.updatable
+            ? whitelistDetails?.whitelistType === 'flex'
+              ? SG721_CODE_ID
+              : SG721_UPDATABLE_CODE_ID
+            : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
