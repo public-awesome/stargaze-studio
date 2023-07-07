@@ -243,7 +243,17 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
     }
 
     const increaseMemberLimit = async (limit: number): Promise<string> => {
-      const res = await client.execute(txSigner, contractAddress, { increase_member_limit: limit }, 'auto')
+      const whitelistConfig = await config()
+      const currentLimit = Number(whitelistConfig.member_limit)
+      const upgradeFee = (Math.ceil(limit / 1000) - Math.ceil(currentLimit / 1000)) * 100000000
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        { increase_member_limit: limit },
+        'auto',
+        'Increase Member Limit',
+        upgradeFee === 0 ? undefined : [coin(upgradeFee.toString(), 'ustars')],
+      )
       return res.transactionHash
     }
     /// EXECUTE END
