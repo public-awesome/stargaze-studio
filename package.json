@@ -1,6 +1,6 @@
 {
   "name": "stargaze-studio",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "workspaces": [
     "packages/*"
   ],
