@@ -106,8 +106,8 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
-          .replace(/ /g, '')
-          .replace(regex, ''),
+          .replace(regex, '')
+          .trim(),
       }
       onChange(data)
     } catch (error: any) {
