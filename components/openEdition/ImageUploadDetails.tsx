@@ -115,8 +115,8 @@ export const ImageUploadDetails = ({ onChange }: ImageUploadDetailsProps) => {
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
-          .replace(/ /g, '')
-          .replace(regex, ''),
+          .replace(regex, '')
+          .trim(),
         coverImageUrl: coverImageUrlState.value.trim(),
       }
       onChange(data)

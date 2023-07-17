@@ -239,15 +239,15 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
-          .replace(/ /g, '')
-          .replace(regex, ''),
+          .replace(regex, '')
+          .trim(),
         imageUrl: coverImageUrlState.value
           .replace('IPFS://', 'ipfs://')
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
-          .replace(/ /g, '')
-          .replace(regex, ''),
+          .replace(regex, '')
+          .trim(),
         baseMinterMetadataFile,
       }
       onChange(data)

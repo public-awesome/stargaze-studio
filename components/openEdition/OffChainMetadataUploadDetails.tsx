@@ -194,15 +194,15 @@ export const OffChainMetadataUploadDetails = ({
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
-          .replace(/ /g, '')
-          .replace(regex, ''),
+          .replace(regex, '')
+          .trim(),
         imageUrl: coverImageUrlState.value
           .replace('IPFS://', 'ipfs://')
           .replace(/,/g, '')
           .replace(/"/g, '')
           .replace(/'/g, '')
-          .replace(/ /g, '')
-          .replace(regex, ''),
+          .replace(regex, '')
+          .trim(),
         openEditionMinterMetadataFile,
       }
       onChange(data)
