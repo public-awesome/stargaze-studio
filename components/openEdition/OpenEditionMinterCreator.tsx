@@ -47,13 +47,24 @@ import { type RoyaltyDetailsDataProps, RoyaltyDetails } from './RoyaltyDetails'
 
 export type MetadataStorageMethod = 'off-chain' | 'on-chain'
 
+export interface OpenEditionMinterDetailsDataProps {
+  imageUploadDetails?: ImageUploadDetailsDataProps
+  collectionDetails?: CollectionDetailsDataProps
+  royaltyDetails?: RoyaltyDetailsDataProps
+  onChainMetadataInputDetails?: OnChainMetadataInputDetailsDataProps
+  offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
+  mintingDetails?: MintingDetailsDataProps
+}
+
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
+  onDetailsChange: (data: OpenEditionMinterDetailsDataProps) => void
   openEditionMinterUpdatableCreationFee?: string
   openEditionMinterCreationFee?: string
   minimumMintPrice?: string
   minimumUpdatableMintPrice?: string
   minterType?: MinterType
+  importedOpenEditionMinterDetails?: OpenEditionMinterCreatorDataProps
 }
 
 export interface OpenEditionMinterCreatorDataProps {
@@ -65,6 +76,7 @@ export interface OpenEditionMinterCreatorDataProps {
 
 export const OpenEditionMinterCreator = ({
   onChange,
+  onDetailsChange,
   openEditionMinterCreationFee,
   openEditionMinterUpdatableCreationFee,
   minimumMintPrice,
@@ -584,6 +596,26 @@ export const OpenEditionMinterCreator = ({
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadataStorageMethod, openEditionMinterContractAddress, sg721ContractAddress, transactionHash])
+
+  useEffect(() => {
+    const data: OpenEditionMinterDetailsDataProps = {
+      imageUploadDetails: imageUploadDetails ? imageUploadDetails : undefined,
+      collectionDetails: collectionDetails ? collectionDetails : undefined,
+      royaltyDetails: royaltyDetails ? royaltyDetails : undefined,
+      onChainMetadataInputDetails: onChainMetadataInputDetails ? onChainMetadataInputDetails : undefined,
+      offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
+      mintingDetails: mintingDetails ? mintingDetails : undefined,
+    }
+    onDetailsChange(data)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    imageUploadDetails,
+    collectionDetails,
+    royaltyDetails,
+    onChainMetadataInputDetails,
+    offChainMetadataUploadDetails,
+    mintingDetails,
+  ])
 
   return (
     <div>
