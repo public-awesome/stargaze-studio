@@ -31,6 +31,7 @@ export function AddressList(props: AddressListProps) {
       {entries.map(([id], i) => (
         <Address
           key={`ib-${id}`}
+          defaultValue={entries[i][1]}
           id={id}
           isLast={i === entries.length - 1}
           onAdd={onAdd}
@@ -48,9 +49,10 @@ export interface AddressProps {
   onAdd: AddressListProps['onAdd']
   onChange: AddressListProps['onChange']
   onRemove: AddressListProps['onRemove']
+  defaultValue?: Address
 }
 
-export function Address({ id, isLast, onAdd, onChange, onRemove }: AddressProps) {
+export function Address({ id, isLast, onAdd, onChange, onRemove, defaultValue }: AddressProps) {
   const wallet = useWallet()
   const Icon = useMemo(() => (isLast ? FaPlus : FaMinus), [isLast])
 
@@ -60,6 +62,7 @@ export function Address({ id, isLast, onAdd, onChange, onRemove }: AddressProps)
     id: `ib-address-${htmlId}`,
     name: `ib-address-${htmlId}`,
     title: ``,
+    defaultValue: defaultValue?.address,
   })
 
   const resolveAddress = async (name: string) => {
