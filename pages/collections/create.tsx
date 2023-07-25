@@ -42,6 +42,7 @@ import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'c
 import { dispatchExecute as vendingFactoryDispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
@@ -71,6 +72,7 @@ import { uid } from 'utils/random'
 import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
+import type { OpenEditionMinterDetailsDataProps } from '../../components/openEdition/OpenEditionMinterCreator'
 import { getAssetType } from '../../utils/getAssetType'
 import { isValidAddress } from '../../utils/isValidAddress'
 
@@ -96,10 +98,23 @@ const CollectionCreationPage: NextPage = () => {
     [baseFactoryContract, wallet.address],
   )
 
+  const [importedDetails, setImportedDetails] = useState<{
+    minterType: MinterType
+    collectionDetails: CollectionDetailsDataProps
+    uploadDetails: UploadDetailsDataProps
+    mintingDetails: MintingDetailsDataProps
+    whitelistDetails: WhitelistDetailsDataProps
+    royaltyDetails: RoyaltyDetailsDataProps
+    baseMinterDetails: BaseMinterDetailsDataProps
+    openEditionMinterDetails: OpenEditionMinterDetailsDataProps
+  }>()
+
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
   const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
-  const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterCreatorDataProps | null>(
+  const [openEditionMinterCreatorData, setOpenEditionMinterCreatorData] =
+    useState<OpenEditionMinterCreatorDataProps | null>(null)
+  const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterDetailsDataProps | null>(
     null,
   )
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
@@ -1159,27 +1174,60 @@ const CollectionCreationPage: NextPage = () => {
     })
   }
 
+  // function to export all details as a .json file
+  const exportDetails = () => {
+    const details = {
+      minterType,
+      collectionDetails,
+      uploadDetails,
+      mintingDetails,
+      whitelistDetails,
+      royaltyDetails,
+      baseMinterDetails,
+      openEditionMinterDetails,
+    }
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(details)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = 'details.json'
+    document.body.appendChild(element) // Required for this to work in FireFox
+    element.click()
+  }
+  // function to import all details from a .json file
+  const importDetails = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files === null) return toast.error('No files selected.')
+    const file = event.target.files[0]
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const contents = e.target?.result
+      const details = JSON.parse(contents as string)
+      setMinterType(details.minterType)
+      setImportedDetails(details)
+    }
+    reader.readAsText(file)
+  }
+
   const syncCollections = useCallback(async () => {
     const collectionAddress =
-      minterType === 'openEdition' ? openEditionMinterDetails?.sg721ContractAddress : sg721ContractAddress
+      minterType === 'openEdition' ? openEditionMinterCreatorData?.sg721ContractAddress : sg721ContractAddress
     if (collectionAddress && SYNC_COLLECTIONS_API_URL) {
       await axios.get(`${SYNC_COLLECTIONS_API_URL}/${collectionAddress}`).catch((error) => {
         console.error('Sync collections: ', error)
       })
     }
-  }, [minterType, openEditionMinterDetails?.sg721ContractAddress, sg721ContractAddress])
+  }, [minterType, openEditionMinterCreatorData?.sg721ContractAddress, sg721ContractAddress])
 
   useEffect(() => {
     if (
       vendingMinterContractAddress !== null ||
-      openEditionMinterDetails?.openEditionMinterContractAddress ||
+      openEditionMinterCreatorData?.openEditionMinterContractAddress ||
       isMintingComplete
     ) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
     if (
       (minterType === 'vending' && vendingMinterContractAddress !== null) ||
-      (minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress) ||
+      (minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress) ||
       (minterType === 'base' && vendingMinterContractAddress !== null && isMintingComplete)
     ) {
       void syncCollections()
@@ -1192,7 +1240,7 @@ const CollectionCreationPage: NextPage = () => {
     }
   }, [
     vendingMinterContractAddress,
-    openEditionMinterDetails?.openEditionMinterContractAddress,
+    openEditionMinterCreatorData?.openEditionMinterContractAddress,
     isMintingComplete,
     minterType,
     syncCollections,
@@ -1222,7 +1270,15 @@ const CollectionCreationPage: NextPage = () => {
             : 'Create Collection'
         }
       />
-
+      <Button className="absolute top-5 right-5" onClick={() => exportDetails()}>
+        Export Details
+      </Button>
+      <input
+        accept="application/json"
+        className="absolute top-5 right-20"
+        onChange={(e) => importDetails(e)}
+        type="file"
+      />
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
           {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
@@ -1244,7 +1300,7 @@ const CollectionCreationPage: NextPage = () => {
       </div>
       <div className="mx-10" ref={scrollRef}>
         <Conditional
-          test={minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress !== null}
+          test={minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress !== null}
         >
           <Alert className="mt-5" type="info">
             <div>
@@ -1253,10 +1309,10 @@ const CollectionCreationPage: NextPage = () => {
                 className="text-stargaze hover:underline"
                 external
                 href={`/contracts/openEditionMinter/query/?contractAddress=${
-                  openEditionMinterDetails?.openEditionMinterContractAddress as string
+                  openEditionMinterCreatorData?.openEditionMinterContractAddress as string
                 }`}
               >
-                {openEditionMinterDetails?.openEditionMinterContractAddress as string}
+                {openEditionMinterCreatorData?.openEditionMinterContractAddress as string}
               </Anchor>
               <br />
               SG721 Contract Address:{'  '}
@@ -1264,10 +1320,10 @@ const CollectionCreationPage: NextPage = () => {
                 className="text-stargaze hover:underline"
                 external
                 href={`/contracts/sg721/query/?contractAddress=${
-                  openEditionMinterDetails?.sg721ContractAddress as string
+                  openEditionMinterCreatorData?.sg721ContractAddress as string
                 }`}
               >
-                {openEditionMinterDetails?.sg721ContractAddress as string}
+                {openEditionMinterCreatorData?.sg721ContractAddress as string}
               </Anchor>
               <br />
               Transaction Hash: {'  '}
@@ -1275,18 +1331,18 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`${BLOCK_EXPLORER_URL}/tx/${openEditionMinterDetails?.transactionHash as string}`}
+                  href={`${BLOCK_EXPLORER_URL}/tx/${openEditionMinterCreatorData?.transactionHash as string}`}
                 >
-                  {openEditionMinterDetails?.transactionHash}
+                  {openEditionMinterCreatorData?.transactionHash}
                 </Anchor>
               </Conditional>
               <Conditional test={NETWORK === 'mainnet'}>
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`${BLOCK_EXPLORER_URL}/txs/${openEditionMinterDetails?.transactionHash as string}`}
+                  href={`${BLOCK_EXPLORER_URL}/txs/${openEditionMinterCreatorData?.transactionHash as string}`}
                 >
-                  {openEditionMinterDetails?.transactionHash}
+                  {openEditionMinterCreatorData?.transactionHash}
                 </Anchor>
               </Conditional>
               <br />
@@ -1295,7 +1351,7 @@ const CollectionCreationPage: NextPage = () => {
                   className="text-white"
                   external
                   href={`${STARGAZE_URL}/launchpad/${
-                    openEditionMinterDetails?.openEditionMinterContractAddress as string
+                    openEditionMinterCreatorData?.openEditionMinterContractAddress as string
                   }`}
                 >
                   View on Launchpad
@@ -1564,7 +1620,8 @@ const CollectionCreationPage: NextPage = () => {
           minimumMintPrice={minimumOpenEditionMintPrice as string}
           minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
           minterType={minterType}
-          onChange={setOpenEditionMinterDetails}
+          onChange={setOpenEditionMinterCreatorData}
+          onDetailsChange={setOpenEditionMinterDetails}
           openEditionMinterCreationFee={openEditionMinterCreationFee as string}
           openEditionMinterUpdatableCreationFee={openEditionMinterUpdatableCreationFee as string}
         />
@@ -1573,6 +1630,7 @@ const CollectionCreationPage: NextPage = () => {
         <Conditional test={minterType === 'vending' || minterType === 'base'}>
           <UploadDetails
             baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
+            importedUploadDetails={importedDetails?.uploadDetails}
             minterType={minterType}
             onChange={setUploadDetails}
           />
@@ -1593,6 +1651,7 @@ const CollectionCreationPage: NextPage = () => {
             >
               <CollectionDetails
                 coverImageUrl={coverImageUrl as string}
+                importedCollectionDetails={importedDetails?.collectionDetails}
                 minterType={minterType}
                 onChange={setCollectionDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
@@ -1600,6 +1659,7 @@ const CollectionCreationPage: NextPage = () => {
             </Conditional>
             <Conditional test={minterType === 'vending'}>
               <MintingDetails
+                importedMintingDetails={importedDetails?.mintingDetails}
                 minimumMintPrice={
                   collectionDetails?.updatable
                     ? Number(minimumUpdatableMintPrice) / 1000000
@@ -1633,10 +1693,13 @@ const CollectionCreationPage: NextPage = () => {
         >
           <div className="my-6">
             <Conditional test={minterType === 'vending'}>
-              <WhitelistDetails onChange={setWhitelistDetails} />
+              <WhitelistDetails
+                importedWhitelistDetails={importedDetails?.whitelistDetails}
+                onChange={setWhitelistDetails}
+              />
               <div className="my-6" />
             </Conditional>
-            <RoyaltyDetails onChange={setRoyaltyDetails} />
+            <RoyaltyDetails importedRoyaltyDetails={importedDetails?.royaltyDetails} onChange={setRoyaltyDetails} />
           </div>
         </Conditional>
         <Conditional test={readyToCreateVm && minterType === 'vending'}>
