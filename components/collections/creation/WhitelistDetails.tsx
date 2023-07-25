@@ -18,6 +18,7 @@ import { WhitelistUpload } from '../../WhitelistUpload'
 
 interface WhitelistDetailsProps {
   onChange: (data: WhitelistDetailsDataProps) => void
+  importedWhitelistDetails?: WhitelistDetailsDataProps
 }
 
 export interface WhitelistDetailsDataProps {
@@ -38,7 +39,7 @@ type WhitelistState = 'none' | 'existing' | 'new'
 
 type WhitelistType = 'standard' | 'flex'
 
-export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
+export const WhitelistDetails = ({ onChange, importedWhitelistDetails }: WhitelistDetailsProps) => {
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
@@ -89,8 +90,10 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   }
 
   useEffect(() => {
-    setWhitelistStandardArray([])
-    setWhitelistFlexArray([])
+    if (!importedWhitelistDetails) {
+      setWhitelistStandardArray([])
+      setWhitelistFlexArray([])
+    }
   }, [whitelistType])
 
   useEffect(() => {
@@ -137,6 +140,53 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     addressListState.values,
     adminsMutable,
   ])
+
+  // make the necessary changes with respect to imported whitelist details
+  useEffect(() => {
+    if (importedWhitelistDetails) {
+      setWhitelistState(importedWhitelistDetails.whitelistState)
+      setWhitelistType(importedWhitelistDetails.whitelistType)
+      whitelistAddressState.onChange(
+        importedWhitelistDetails.contractAddress ? importedWhitelistDetails.contractAddress : '',
+      )
+      unitPriceState.onChange(importedWhitelistDetails.unitPrice ? Number(importedWhitelistDetails.unitPrice) : 0)
+      memberLimitState.onChange(importedWhitelistDetails.memberLimit ? importedWhitelistDetails.memberLimit : 0)
+      perAddressLimitState.onChange(
+        importedWhitelistDetails.perAddressLimit ? importedWhitelistDetails.perAddressLimit : 0,
+      )
+      setStartDate(
+        importedWhitelistDetails.startTime
+          ? new Date(Number(importedWhitelistDetails.startTime) / 1_000_000)
+          : undefined,
+      )
+      setEndDate(
+        importedWhitelistDetails.endTime ? new Date(Number(importedWhitelistDetails.endTime) / 1_000_000) : undefined,
+      )
+      setAdminsMutable(importedWhitelistDetails.adminsMutable ? importedWhitelistDetails.adminsMutable : true)
+      importedWhitelistDetails.admins?.forEach((admin) => {
+        addressListState.reset()
+        addressListState.add({ address: admin })
+      })
+      if (importedWhitelistDetails.whitelistType === 'standard') {
+        setWhitelistStandardArray([])
+        importedWhitelistDetails.members?.forEach((member) => {
+          setWhitelistStandardArray((standardArray) => [...standardArray, member as string])
+        })
+      } else {
+        setWhitelistFlexArray([])
+        importedWhitelistDetails.members?.forEach((member) => {
+          setWhitelistFlexArray((flexArray) => [
+            ...flexArray,
+            {
+              address: (member as WhitelistFlexMember).address,
+              mint_count: (member as WhitelistFlexMember).mint_count,
+            },
+          ])
+        })
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedWhitelistDetails])
 
   return (
     <div className="py-3 px-8 rounded border-2 border-white/20">

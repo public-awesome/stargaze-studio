@@ -31,6 +31,7 @@ interface UploadDetailsProps {
   onChange: (value: UploadDetailsDataProps) => void
   minterType: MinterType
   baseMinterAcquisitionMethod?: BaseMinterAcquisitionMethod
+  importedUploadDetails?: UploadDetailsDataProps
 }
 
 export interface UploadDetailsDataProps {
@@ -46,7 +47,12 @@ export interface UploadDetailsDataProps {
   baseMinterMetadataFile?: File
 }
 
-export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMethod }: UploadDetailsProps) => {
+export const UploadDetails = ({
+  onChange,
+  minterType,
+  baseMinterAcquisitionMethod,
+  importedUploadDetails,
+}: UploadDetailsProps) => {
   const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
   const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
@@ -274,9 +280,30 @@ export const UploadDetails = ({ onChange, minterType, baseMinterAcquisitionMetho
     setMetadataFilesArray([])
     if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
-    baseTokenUriState.onChange('')
-    coverImageUrlState.onChange('')
+    if (!importedUploadDetails) {
+      baseTokenUriState.onChange('')
+      coverImageUrlState.onChange('')
+    }
   }, [uploadMethod, minterType, baseMinterAcquisitionMethod])
+
+  useEffect(() => {
+    if (importedUploadDetails) {
+      if (importedUploadDetails.uploadMethod === 'new') {
+        setUploadMethod('existing')
+        setUploadService(importedUploadDetails.uploadService)
+        nftStorageApiKeyState.onChange(importedUploadDetails.nftStorageApiKey || '')
+        pinataApiKeyState.onChange(importedUploadDetails.pinataApiKey || '')
+        pinataSecretKeyState.onChange(importedUploadDetails.pinataSecretKey || '')
+        baseTokenUriState.onChange(importedUploadDetails.baseTokenURI || '')
+        coverImageUrlState.onChange(importedUploadDetails.imageUrl || '')
+      } else if (importedUploadDetails.uploadMethod === 'existing') {
+        setUploadMethod('existing')
+        baseTokenUriState.onChange(importedUploadDetails.baseTokenURI || '')
+        coverImageUrlState.onChange(importedUploadDetails.imageUrl || '')
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedUploadDetails])
 
   return (
     <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">

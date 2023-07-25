@@ -16,6 +16,7 @@ interface MintingDetailsProps {
   numberOfTokens: number | undefined
   uploadMethod: UploadMethod
   minimumMintPrice: number
+  importedMintingDetails?: MintingDetailsDataProps
 }
 
 export interface MintingDetailsDataProps {
@@ -26,7 +27,13 @@ export interface MintingDetailsDataProps {
   paymentAddress?: string
 }
 
-export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod, minimumMintPrice }: MintingDetailsProps) => {
+export const MintingDetails = ({
+  onChange,
+  numberOfTokens,
+  uploadMethod,
+  minimumMintPrice,
+  importedMintingDetails,
+}: MintingDetailsProps) => {
   const wallet = useWallet()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
@@ -96,6 +103,17 @@ export const MintingDetails = ({ onChange, numberOfTokens, uploadMethod, minimum
     timestamp,
     paymentAddressState.value,
   ])
+
+  useEffect(() => {
+    if (importedMintingDetails) {
+      numberOfTokensState.onChange(importedMintingDetails.numTokens)
+      unitPriceState.onChange(Number(importedMintingDetails.unitPrice) / 1_000_000)
+      perAddressLimitState.onChange(importedMintingDetails.perAddressLimit)
+      setTimestamp(new Date(Number(importedMintingDetails.startTime) / 1_000_000))
+      paymentAddressState.onChange(importedMintingDetails.paymentAddress ? importedMintingDetails.paymentAddress : '')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedMintingDetails])
 
   return (
     <div>

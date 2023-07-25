@@ -28,6 +28,7 @@ export interface MinterInfo {
 interface BaseMinterDetailsProps {
   onChange: (data: BaseMinterDetailsDataProps) => void
   minterType: MinterType
+  importedBaseMinterDetails?: BaseMinterDetailsDataProps
 }
 
 export interface BaseMinterDetailsDataProps {
@@ -37,7 +38,7 @@ export interface BaseMinterDetailsDataProps {
   collectionTokenCount: number | undefined
 }
 
-export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsProps) => {
+export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDetails }: BaseMinterDetailsProps) => {
   const wallet = useWallet()
 
   const [myBaseMinterContracts, setMyBaseMinterContracts] = useState<MinterInfo[]>([])
@@ -197,6 +198,15 @@ export const BaseMinterDetails = ({ onChange, minterType }: BaseMinterDetailsPro
     selectedCollectionAddress,
     collectionTokenCount,
   ])
+
+  useEffect(() => {
+    if (importedBaseMinterDetails) {
+      setBaseMinterAcquisitionMethod(importedBaseMinterDetails.baseMinterAcquisitionMethod)
+      existingBaseMinterState.onChange(
+        importedBaseMinterDetails.existingBaseMinter ? importedBaseMinterDetails.existingBaseMinter : '',
+      )
+    }
+  }, [importedBaseMinterDetails])
 
   return (
     <div className="mx-10 mb-4 rounded border-2 border-white/20">
