@@ -9,6 +9,7 @@ import { NumberInput, TextInput } from '../forms/FormInput'
 
 interface RoyaltyDetailsProps {
   onChange: (data: RoyaltyDetailsDataProps) => void
+  importedRoyaltyDetails?: RoyaltyDetailsDataProps
 }
 
 export interface RoyaltyDetailsDataProps {
@@ -19,7 +20,7 @@ export interface RoyaltyDetailsDataProps {
 
 type RoyaltyState = 'none' | 'new'
 
-export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
+export const RoyaltyDetails = ({ onChange, importedRoyaltyDetails }: RoyaltyDetailsProps) => {
   const wallet = useWallet()
   const [royaltyState, setRoyaltyState] = useState<RoyaltyState>('none')
 
@@ -59,6 +60,15 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [royaltyState, royaltyPaymentAddressState.value, royaltyShareState.value])
+
+  useEffect(() => {
+    if (importedRoyaltyDetails) {
+      setRoyaltyState(importedRoyaltyDetails.royaltyType)
+      royaltyPaymentAddressState.onChange(importedRoyaltyDetails.paymentAddress)
+      royaltyShareState.onChange(importedRoyaltyDetails.share.toString())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedRoyaltyDetails])
 
   return (
     <div className="py-3 px-8 mx-10 rounded border-2 border-white/20">

@@ -28,6 +28,7 @@ interface CollectionDetailsProps {
   uploadMethod: UploadMethod
   coverImageUrl: string
   metadataStorageMethod: MetadataStorageMethod
+  importedCollectionDetails?: CollectionDetailsDataProps
 }
 
 export interface CollectionDetailsDataProps {
@@ -46,6 +47,7 @@ export const CollectionDetails = ({
   uploadMethod,
   metadataStorageMethod,
   coverImageUrl,
+  importedCollectionDetails,
 }: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
@@ -151,6 +153,23 @@ export const CollectionDetails = ({
       })
     }
   }, [updatable])
+
+  useEffect(() => {
+    if (importedCollectionDetails) {
+      nameState.onChange(importedCollectionDetails.name)
+      descriptionState.onChange(importedCollectionDetails.description)
+      symbolState.onChange(importedCollectionDetails.symbol)
+      setCoverImage(importedCollectionDetails.imageFile[0] || null)
+      externalLinkState.onChange(importedCollectionDetails.externalLink || '')
+      setTimestamp(
+        importedCollectionDetails.startTradingTime
+          ? new Date(parseInt(importedCollectionDetails.startTradingTime) / 1_000_000)
+          : undefined,
+      )
+      setExplicit(importedCollectionDetails.explicit)
+      setUpdatable(importedCollectionDetails.updatable)
+    }
+  }, [importedCollectionDetails])
 
   const videoPreview = useMemo(() => {
     if (uploadMethod === 'new' && coverImage) {

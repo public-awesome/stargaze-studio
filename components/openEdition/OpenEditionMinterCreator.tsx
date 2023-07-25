@@ -54,6 +54,7 @@ export interface OpenEditionMinterDetailsDataProps {
   onChainMetadataInputDetails?: OnChainMetadataInputDetailsDataProps
   offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
   mintingDetails?: MintingDetailsDataProps
+  metadataStorageMethod?: MetadataStorageMethod
 }
 
 interface OpenEditionMinterCreatorProps {
@@ -64,7 +65,7 @@ interface OpenEditionMinterCreatorProps {
   minimumMintPrice?: string
   minimumUpdatableMintPrice?: string
   minterType?: MinterType
-  importedOpenEditionMinterDetails?: OpenEditionMinterCreatorDataProps
+  importedOpenEditionMinterDetails?: OpenEditionMinterDetailsDataProps
 }
 
 export interface OpenEditionMinterCreatorDataProps {
@@ -82,6 +83,7 @@ export const OpenEditionMinterCreator = ({
   minimumMintPrice,
   minimumUpdatableMintPrice,
   minterType,
+  importedOpenEditionMinterDetails,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
   const { openEditionMinter: openEditionMinterContract, openEditionFactory: openEditionFactoryContract } =
@@ -605,6 +607,7 @@ export const OpenEditionMinterCreator = ({
       onChainMetadataInputDetails: onChainMetadataInputDetails ? onChainMetadataInputDetails : undefined,
       offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
       mintingDetails: mintingDetails ? mintingDetails : undefined,
+      metadataStorageMethod,
     }
     onDetailsChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -616,6 +619,12 @@ export const OpenEditionMinterCreator = ({
     offChainMetadataUploadDetails,
     mintingDetails,
   ])
+
+  useEffect(() => {
+    if (importedOpenEditionMinterDetails) {
+      setMetadataStorageMethod(importedOpenEditionMinterDetails.metadataStorageMethod as MetadataStorageMethod)
+    }
+  }, [importedOpenEditionMinterDetails])
 
   return (
     <div>
@@ -667,13 +676,20 @@ export const OpenEditionMinterCreator = ({
       <div className={clsx('my-4 mx-10')}>
         <Conditional test={metadataStorageMethod === 'off-chain'}>
           <div>
-            <OffChainMetadataUploadDetails onChange={setOffChainMetadataUploadDetails} />
+            <OffChainMetadataUploadDetails
+              importedOffChainMetadataUploadDetails={importedOpenEditionMinterDetails?.offChainMetadataUploadDetails}
+              onChange={setOffChainMetadataUploadDetails}
+            />
           </div>
         </Conditional>
         <Conditional test={metadataStorageMethod === 'on-chain'}>
           <div>
-            <ImageUploadDetails onChange={setImageUploadDetails} />
+            <ImageUploadDetails
+              importedImageUploadDetails={importedOpenEditionMinterDetails?.imageUploadDetails}
+              onChange={setImageUploadDetails}
+            />
             <OnChainMetadataInputDetails
+              importedOnChainMetadataInputDetails={importedOpenEditionMinterDetails?.onChainMetadataInputDetails}
               onChange={setOnChainMetadataInputDetails}
               uploadMethod={imageUploadDetails?.uploadMethod}
             />
@@ -687,6 +703,7 @@ export const OpenEditionMinterCreator = ({
               ? (offChainMetadataUploadDetails?.imageUrl as string)
               : (imageUploadDetails?.coverImageUrl as string)
           }
+          importedCollectionDetails={importedOpenEditionMinterDetails?.collectionDetails}
           metadataStorageMethod={metadataStorageMethod}
           onChange={setCollectionDetails}
           uploadMethod={
@@ -696,6 +713,7 @@ export const OpenEditionMinterCreator = ({
           }
         />
         <MintingDetails
+          importedMintingDetails={importedOpenEditionMinterDetails?.mintingDetails}
           minimumMintPrice={
             collectionDetails?.updatable
               ? Number(minimumUpdatableMintPrice) / 1000000
@@ -706,7 +724,10 @@ export const OpenEditionMinterCreator = ({
         />
       </div>
       <div className="my-6">
-        <RoyaltyDetails onChange={setRoyaltyDetails} />
+        <RoyaltyDetails
+          importedRoyaltyDetails={importedOpenEditionMinterDetails?.royaltyDetails}
+          onChange={setRoyaltyDetails}
+        />
       </div>
       <div className="flex justify-end w-full">
         <Button

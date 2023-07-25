@@ -20,6 +20,7 @@ export type UploadMethod = 'new' | 'existing'
 
 interface ImageUploadDetailsProps {
   onChange: (value: ImageUploadDetailsDataProps) => void
+  importedImageUploadDetails?: ImageUploadDetailsDataProps
 }
 
 export interface ImageUploadDetailsDataProps {
@@ -33,7 +34,7 @@ export interface ImageUploadDetailsDataProps {
   coverImageUrl?: string
 }
 
-export const ImageUploadDetails = ({ onChange }: ImageUploadDetailsProps) => {
+export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: ImageUploadDetailsProps) => {
   const [assetFile, setAssetFile] = useState<File>()
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
@@ -139,6 +140,18 @@ export const ImageUploadDetails = ({ onChange }: ImageUploadDetailsProps) => {
     setAssetFile(undefined)
     imageUrlState.onChange('')
   }, [uploadMethod])
+
+  useEffect(() => {
+    if (importedImageUploadDetails) {
+      setUploadMethod(importedImageUploadDetails.uploadMethod)
+      setUploadService(importedImageUploadDetails.uploadService)
+      nftStorageApiKeyState.onChange(importedImageUploadDetails.nftStorageApiKey || '')
+      pinataApiKeyState.onChange(importedImageUploadDetails.pinataApiKey || '')
+      pinataSecretKeyState.onChange(importedImageUploadDetails.pinataSecretKey || '')
+      imageUrlState.onChange(importedImageUploadDetails.imageUrl || '')
+      coverImageUrlState.onChange(importedImageUploadDetails.coverImageUrl || '')
+    }
+  }, [importedImageUploadDetails])
 
   const previewUrl = imageUrlState.value.toLowerCase().trim().startsWith('ipfs://')
     ? `https://ipfs-gw.stargaze-apis.com/ipfs/${imageUrlState.value.substring(7)}`
