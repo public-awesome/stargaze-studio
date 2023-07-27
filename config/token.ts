@@ -7,16 +7,25 @@ export interface TokenInfo {
   symbol?: string
 }
 
-export const ibcAtom: TokenInfo = {
-  id: 'ibc-atom',
-  denom: 'ibc/',
-  displayName: 'ATOM',
-  decimalPlaces: 6,
-}
-
 export const stars: TokenInfo = {
   id: 'stars',
   denom: 'ustars',
   displayName: 'STARS',
   decimalPlaces: 6,
 }
+
+export const ibcAtom: TokenInfo = {
+  id: 'ibc-atom',
+  denom: 'ibc/atom',
+  displayName: 'ATOM',
+  decimalPlaces: 6,
+}
+
+export const ibcFrenz: TokenInfo = {
+  id: 'ibc-frenz',
+  denom: 'ibc/frenz',
+  displayName: 'FRENZ',
+  decimalPlaces: 6,
+}
+
+export const tokensList = [stars, ibcAtom, ibcFrenz]
