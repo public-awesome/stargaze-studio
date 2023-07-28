@@ -12,6 +12,7 @@ import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
+import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
@@ -47,13 +48,25 @@ import { type RoyaltyDetailsDataProps, RoyaltyDetails } from './RoyaltyDetails'
 
 export type MetadataStorageMethod = 'off-chain' | 'on-chain'
 
+export interface OpenEditionMinterDetailsDataProps {
+  imageUploadDetails?: ImageUploadDetailsDataProps
+  collectionDetails?: CollectionDetailsDataProps
+  royaltyDetails?: RoyaltyDetailsDataProps
+  onChainMetadataInputDetails?: OnChainMetadataInputDetailsDataProps
+  offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
+  mintingDetails?: MintingDetailsDataProps
+  metadataStorageMethod?: MetadataStorageMethod
+}
+
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
+  onDetailsChange: (data: OpenEditionMinterDetailsDataProps) => void
   openEditionMinterUpdatableCreationFee?: string
   openEditionMinterCreationFee?: string
   minimumMintPrice?: string
   minimumUpdatableMintPrice?: string
   minterType?: MinterType
+  mintTokenFromFactory?: TokenInfo | undefined
 }
 
 export interface OpenEditionMinterCreatorDataProps {
@@ -65,11 +78,13 @@ export interface OpenEditionMinterCreatorDataProps {
 
 export const OpenEditionMinterCreator = ({
   onChange,
+  onDetailsChange,
   openEditionMinterCreationFee,
   openEditionMinterUpdatableCreationFee,
   minimumMintPrice,
   minimumUpdatableMintPrice,
   minterType,
+  mintTokenFromFactory,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
   const { openEditionMinter: openEditionMinterContract, openEditionFactory: openEditionFactoryContract } =
@@ -585,6 +600,27 @@ export const OpenEditionMinterCreator = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadataStorageMethod, openEditionMinterContractAddress, sg721ContractAddress, transactionHash])
 
+  useEffect(() => {
+    const data: OpenEditionMinterDetailsDataProps = {
+      imageUploadDetails: imageUploadDetails ? imageUploadDetails : undefined,
+      collectionDetails: collectionDetails ? collectionDetails : undefined,
+      royaltyDetails: royaltyDetails ? royaltyDetails : undefined,
+      onChainMetadataInputDetails: onChainMetadataInputDetails ? onChainMetadataInputDetails : undefined,
+      offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
+      mintingDetails: mintingDetails ? mintingDetails : undefined,
+      metadataStorageMethod,
+    }
+    onDetailsChange(data)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    imageUploadDetails,
+    collectionDetails,
+    royaltyDetails,
+    onChainMetadataInputDetails,
+    offChainMetadataUploadDetails,
+    mintingDetails,
+  ])
+
   return (
     <div>
       {/* TODO: Cancel once we're able to index on-chain metadata */}
@@ -669,6 +705,7 @@ export const OpenEditionMinterCreator = ({
               ? Number(minimumUpdatableMintPrice) / 1000000
               : Number(minimumMintPrice) / 1000000
           }
+          mintTokenFromFactory={mintTokenFromFactory}
           onChange={setMintingDetails}
           uploadMethod={offChainMetadataUploadDetails?.uploadMethod as UploadMethod}
         />
