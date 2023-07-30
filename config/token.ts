@@ -21,6 +21,13 @@ export const ibcAtom: TokenInfo = {
   decimalPlaces: 6,
 }
 
+export const ibcUsdc: TokenInfo = {
+  id: 'ibc-usdc',
+  denom: 'ibc/usdc',
+  displayName: 'USDC',
+  decimalPlaces: 6,
+}
+
 export const ibcFrenz: TokenInfo = {
   id: 'ibc-frenz',
   denom: 'ibc/frenz',
@@ -28,4 +35,4 @@ export const ibcFrenz: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcFrenz]
+export const tokensList = [stars, ibcAtom, ibcUsdc, ibcFrenz]
