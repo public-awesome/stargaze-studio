@@ -284,10 +284,16 @@ export const OpenEditionMinterCreator = ({
     if (collectionDetails?.updatable) {
       if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
         throw new Error(
-          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
+          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} ${
+            mintTokenFromFactory?.displayName
+          }`,
         )
     } else if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
-      throw new Error(`Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} STARS`)
+      throw new Error(
+        `Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} ${
+          mintTokenFromFactory?.displayName
+        }`,
+      )
     if (!mintingDetails.perAddressLimit || mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
       throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
