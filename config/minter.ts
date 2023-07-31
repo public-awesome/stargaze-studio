@@ -27,7 +27,7 @@ export const openEditionStarsMinter: MinterInfo = {
 }
 
 export const openEditionUpdatableStarsMinter: MinterInfo = {
-  id: 'open-edition-stars-minter',
+  id: 'open-edition-updatable-stars-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: stars,
   updatable: true,
@@ -41,7 +41,7 @@ export const openEditionIbcAtomMinter: MinterInfo = {
 }
 
 export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
-  id: 'open-edition-ibc-atom-minter',
+  id: 'open-edition-updatable-ibc-atom-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   supportedToken: ibcAtom,
   updatable: true,
@@ -55,7 +55,7 @@ export const openEditionIbcUsdcMinter: MinterInfo = {
 }
 
 export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
-  id: 'open-edition-ibc-usdc-minter',
+  id: 'open-edition-updatable-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
   updatable: false,
@@ -69,10 +69,19 @@ export const openEditionIbcFrenzMinter: MinterInfo = {
 }
 
 export const openEditionUpdatableIbcFrenzMinter: MinterInfo = {
-  id: 'open-edition-ibc-frenz-minter',
+  id: 'open-edition-updatable-ibc-frenz-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_FRENZ_FACTORY_ADDRESS,
   supportedToken: ibcFrenz,
   updatable: true,
 }
 
-export const openEditionMinterList = [openEditionStarsMinter, openEditionIbcAtomMinter, openEditionIbcFrenzMinter]
+export const openEditionMinterList = [
+  openEditionStarsMinter,
+  openEditionUpdatableStarsMinter,
+  openEditionUpdatableIbcAtomMinter,
+  openEditionIbcAtomMinter,
+  openEditionIbcFrenzMinter,
+  openEditionUpdatableIbcFrenzMinter,
+  openEditionIbcUsdcMinter,
+  openEditionUpdatableIbcUsdcMinter,
+]
