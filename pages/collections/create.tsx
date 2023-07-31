@@ -74,7 +74,7 @@ import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import type { OpenEditionMinterDetailsDataProps } from '../../components/openEdition/OpenEditionMinterCreator'
-import { tokensList } from '../../config/token'
+import { stars, tokensList } from '../../config/token'
 import { getAssetType } from '../../utils/getAssetType'
 import { isValidAddress } from '../../utils/isValidAddress'
 
@@ -128,9 +128,7 @@ const CollectionCreationPage: NextPage = () => {
   const [minimumOpenEditionUpdatableMintPrice, setMinimumOpenEditionUpdatableMintPrice] = useState<string | null>('0')
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
-  const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(
-    undefined,
-  )
+  const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(stars)
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
@@ -1153,6 +1151,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
+      console.log('Open Edition Factory Parameters: ', openEditionFactoryParameters)
       setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
       if (!openEditionMinterDetails?.collectionDetails?.updatable) {
         setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)

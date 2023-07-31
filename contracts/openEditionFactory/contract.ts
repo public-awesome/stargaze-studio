@@ -3,7 +3,6 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import { OPEN_EDITION_FACTORY_ADDRESS, OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS } from 'utils/constants'
 
 export interface CreateOpenEditionMinterResponse {
   readonly openEditionMinterAddress: string
@@ -23,6 +22,7 @@ export interface OpenEditionFactoryInstance {
     msg: Record<string, unknown>,
     funds: Coin[],
     updatable?: boolean,
+    selectedFactoryAddress?: string,
   ) => Promise<CreateOpenEditionMinterResponse>
 }
 
@@ -56,16 +56,9 @@ export const openEditionFactory = (client: SigningCosmWasmClient, txSigner: stri
       senderAddress: string,
       msg: Record<string, unknown>,
       funds: Coin[],
-      updatable?: boolean,
     ): Promise<CreateOpenEditionMinterResponse> => {
-      const result = await client.execute(
-        senderAddress,
-        updatable ? OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS : OPEN_EDITION_FACTORY_ADDRESS,
-        msg,
-        'auto',
-        '',
-        funds,
-      )
+      console.log('Contract Address: ', contractAddress)
+      const result = await client.execute(senderAddress, contractAddress, msg, 'auto', '', funds)
 
       return {
         openEditionMinterAddress: result.logs[0].events[5].attributes[0].value,

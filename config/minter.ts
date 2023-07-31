@@ -58,7 +58,7 @@ export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'open-edition-updatable-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
-  updatable: false,
+  updatable: true,
 }
 
 export const openEditionIbcFrenzMinter: MinterInfo = {
