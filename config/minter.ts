@@ -7,6 +7,12 @@ import {
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRENZ_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
+  VENDING_FACTORY_ADDRESS,
+  VENDING_FACTORY_UPDATABLE_ADDRESS,
+  VENDING_IBC_ATOM_FACTORY_ADDRESS,
+  VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_IBC_USDC_FACTORY_ADDRESS,
+  VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
@@ -84,4 +90,55 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcFrenzMinter,
   openEditionIbcUsdcMinter,
   openEditionUpdatableIbcUsdcMinter,
+]
+
+export const vendingStarsMinter: MinterInfo = {
+  id: 'vending-stars-minter',
+  factoryAddress: VENDING_FACTORY_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+}
+
+export const vendingUpdatableStarsMinter: MinterInfo = {
+  id: 'vending-updatable-stars-minter',
+  factoryAddress: VENDING_FACTORY_UPDATABLE_ADDRESS,
+  supportedToken: stars,
+  updatable: true,
+}
+
+export const vendingIbcAtomMinter: MinterInfo = {
+  id: 'vending-ibc-atom-minter',
+  factoryAddress: VENDING_IBC_ATOM_FACTORY_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+}
+
+export const vendingUpdatableIbcAtomMinter: MinterInfo = {
+  id: 'vending-updatable-ibc-atom-minter',
+  factoryAddress: VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: true,
+}
+
+export const vendingIbcUsdcMinter: MinterInfo = {
+  id: 'vending-ibc-usdc-minter',
+  factoryAddress: VENDING_IBC_USDC_FACTORY_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: false,
+}
+
+export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
+  id: 'vending-updatable-ibc-usdc-minter',
+  factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: true,
+}
+
+export const vendingMinterList = [
+  vendingStarsMinter,
+  vendingUpdatableStarsMinter,
+  vendingIbcAtomMinter,
+  vendingUpdatableIbcAtomMinter,
+  vendingIbcUsdcMinter,
+  vendingUpdatableIbcUsdcMinter,
 ]
