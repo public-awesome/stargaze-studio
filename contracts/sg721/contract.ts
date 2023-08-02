@@ -87,7 +87,7 @@ export interface SG721Instance {
   batchBurn: (tokenIds: string) => Promise<string>
   batchTransfer: (recipient: string, tokenIds: string) => Promise<string>
   updateTokenMetadata: (tokenId: string, tokenURI: string) => Promise<string>
-  batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => Promise<string>
+  batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string, jsonExtensions: boolean) => Promise<string>
   freezeTokenMetadata: () => Promise<string>
   enableUpdatable: () => Promise<string>
 }
@@ -106,7 +106,11 @@ export interface Sg721Messages {
   updateCollectionInfo: (collectionInfo: CollectionInfo) => UpdateCollectionInfoMessage
   freezeCollectionInfo: () => FreezeCollectionInfoMessage
   updateTokenMetadata: (tokenId: string, tokenURI: string) => UpdateTokenMetadataMessage
-  batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string) => BatchUpdateTokenMetadataMessage
+  batchUpdateTokenMetadata: (
+    tokenIds: string,
+    tokenURI: string,
+    jsonExtensions: boolean,
+  ) => BatchUpdateTokenMetadataMessage
   freezeTokenMetadata: () => FreezeTokenMetadataMessage
   enableUpdatable: () => EnableUpdatableMessage
 }
@@ -611,13 +615,20 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
-    const batchUpdateTokenMetadata = async (tokenIds: string, baseURI: string): Promise<string> => {
+    const batchUpdateTokenMetadata = async (
+      tokenIds: string,
+      baseURI: string,
+      jsonExtensions: boolean,
+    ): Promise<string> => {
       const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
       if (tokenIds.includes(':')) {
         const [start, end] = tokenIds.split(':').map(Number)
         for (let i = start; i <= end; i++) {
           const msg = {
-            update_token_metadata: { token_id: i.toString(), token_uri: `${baseURI}/${i}` },
+            update_token_metadata: {
+              token_id: i.toString(),
+              token_uri: `${baseURI}/${i}${jsonExtensions ? '.json' : ''}`,
+            },
           }
           const executeContractMsg: MsgExecuteContractEncodeObject = {
             typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
@@ -634,7 +645,10 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         const tokenNumbers = tokenIds.split(',').map(Number)
         for (let i = 0; i < tokenNumbers.length; i++) {
           const msg = {
-            update_token_metadata: { token_id: tokenNumbers[i].toString(), token_uri: `${baseURI}/${tokenNumbers[i]}` },
+            update_token_metadata: {
+              token_id: tokenNumbers[i].toString(),
+              token_uri: `${baseURI}/${tokenNumbers[i]}${jsonExtensions ? '.json' : ''}`,
+            },
           }
           const executeContractMsg: MsgExecuteContractEncodeObject = {
             typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
@@ -936,20 +950,30 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
-    const batchUpdateTokenMetadata = (tokenIds: string, baseURI: string): BatchUpdateTokenMetadataMessage => {
+    const batchUpdateTokenMetadata = (
+      tokenIds: string,
+      baseURI: string,
+      jsonExtensions: boolean,
+    ): BatchUpdateTokenMetadataMessage => {
       const msg: Record<string, unknown>[] = []
       if (tokenIds.includes(':')) {
         const [start, end] = tokenIds.split(':').map(Number)
         for (let i = start; i <= end; i++) {
           msg.push({
-            update_token_metadata: { token_id: i.toString(), token_uri: `${baseURI}/${i}` },
+            update_token_metadata: {
+              token_id: i.toString(),
+              token_uri: `${baseURI}/${i}${jsonExtensions ? '.json' : ''}`,
+            },
           })
         }
       } else {
         const tokenNumbers = tokenIds.split(',').map(Number)
         for (let i = 0; i < tokenNumbers.length; i++) {
           msg.push({
-            update_token_metadata: { token_id: tokenNumbers[i].toString(), token_uri: `${baseURI}/${tokenNumbers[i]}` },
+            update_token_metadata: {
+              token_id: tokenNumbers[i].toString(),
+              token_uri: `${baseURI}/${tokenNumbers[i]}${jsonExtensions ? '.json' : ''}`,
+            },
           })
         }
       }

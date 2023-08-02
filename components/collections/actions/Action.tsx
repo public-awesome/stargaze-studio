@@ -12,6 +12,7 @@ import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
+import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
 import { useWallet } from 'contexts/wallet'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
@@ -63,6 +64,7 @@ export const CollectionActions = ({
   const [collectionInfo, setCollectionInfo] = useState<CollectionInfo>()
   const [explicitContent, setExplicitContent] = useState<ExplicitContentType>(undefined)
   const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
+  const [jsonExtensions, setJsonExtensions] = useState<boolean>(false)
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -228,6 +230,7 @@ export const CollectionActions = ({
       ? baseURIState.value.trim().slice(0, -1)
       : baseURIState.value.trim(),
     collectionInfo,
+    jsonExtensions,
   }
   const resolveRecipientAddress = async () => {
     await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
@@ -506,6 +509,26 @@ export const CollectionActions = ({
             <FormControl className="mt-2" htmlId="end-date" title="End Time">
               <InputDateTime minDate={new Date()} onChange={(date) => setEndTimestamp(date)} value={endTimestamp} />
             </FormControl>
+          </Conditional>
+          <Conditional test={showBaseUriField}>
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              className="ml-7"
+              label="Please toggle this on if the IPFS folder contains files with .json extensions."
+              placement="bottom"
+            >
+              <div className="mt-2 w-3/4 form-control">
+                <label className="justify-start cursor-pointer label">
+                  <span className="mr-4 font-bold">Metadata files with .json extensions?</span>
+                  <input
+                    checked={jsonExtensions}
+                    className={`toggle ${jsonExtensions ? `bg-stargaze` : `bg-gray-600`}`}
+                    onClick={() => setJsonExtensions(!jsonExtensions)}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+            </Tooltip>
           </Conditional>
         </div>
         <div className="-mt-6">

@@ -327,6 +327,7 @@ export interface DispatchExecuteArgs {
   tokenRecipients: AirdropAllocation[]
   collectionInfo: CollectionInfo | undefined
   baseUri: string
+  jsonExtensions: boolean
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -387,7 +388,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return sg721Messages.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
     }
     case 'batch_update_token_metadata': {
-      return sg721Messages.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+      return sg721Messages.batchUpdateTokenMetadata(args.tokenIds, args.baseUri, args.jsonExtensions)
     }
     case 'freeze_token_metadata': {
       return sg721Messages.freezeTokenMetadata()
@@ -494,7 +495,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return sg721Messages(sg721Contract)?.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
     }
     case 'batch_update_token_metadata': {
-      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(args.tokenIds, args.baseUri)
+      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(args.tokenIds, args.baseUri, args.jsonExtensions)
     }
     case 'freeze_token_metadata': {
       return sg721Messages(sg721Contract)?.freezeTokenMetadata()
