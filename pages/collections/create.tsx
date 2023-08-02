@@ -33,7 +33,7 @@ import { Conditional } from 'components/Conditional'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
-import { openEditionMinterList } from 'config/minter'
+import { flexibleVendingMinterList, openEditionMinterList, vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
@@ -129,6 +129,7 @@ const CollectionCreationPage: NextPage = () => {
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
   const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(stars)
+  const [mintTokenFromVendingFactory, setMintTokenFromVendingFactory] = useState<TokenInfo | undefined>(stars)
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
@@ -540,7 +541,7 @@ const CollectionCreationPage: NextPage = () => {
           payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress : undefined,
           mint_price: {
             amount: mintingDetails?.unitPrice,
-            denom: 'ustars',
+            denom: (mintTokenFromVendingFactory?.denom as string) || 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           whitelist,
@@ -1184,6 +1185,34 @@ const CollectionCreationPage: NextPage = () => {
     openEditionMinterDetails?.collectionDetails?.updatable,
     wallet.client,
   ])
+
+  const fetchVendingFactoryParameters = useCallback(async () => {
+    const client = wallet.client
+    if (!client) return
+    const vendingFactoryForSelectedDenom = vendingMinterList
+      .concat(flexibleVendingMinterList)
+      .find(
+        (minter) =>
+          minter.supportedToken === mintingDetails?.selectedMintToken &&
+          minter.updatable === collectionDetails?.updatable &&
+          minter.flexible === (whitelistDetails?.whitelistType === 'flex'),
+      )?.factoryAddress
+    if (vendingFactoryForSelectedDenom) {
+      const vendingFactoryParameters = await client
+        .queryContractSmart(vendingFactoryForSelectedDenom, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+      if (!collectionDetails?.updatable) {
+        setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
+        setMintTokenFromVendingFactory(
+          tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
+        )
+      }
+    }
+  }, [collectionDetails?.updatable, mintingDetails?.selectedMintToken, tokensList, whitelistDetails?.whitelistType])
 
   const checkwalletBalance = async () => {
     const walletBalance = await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
