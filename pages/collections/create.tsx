@@ -547,7 +547,7 @@ const CollectionCreationPage: NextPage = () => {
           symbol: collectionDetails?.symbol,
           info: {
             creator: wallet.address,
-            description: collectionDetails?.description,
+            description: collectionDetails?.description.replace('\\n', '\n'),
             image: `${
               uploadDetails?.uploadMethod === 'new'
                 ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
@@ -613,7 +613,7 @@ const CollectionCreationPage: NextPage = () => {
           symbol: collectionDetails?.symbol,
           info: {
             creator: wallet.address,
-            description: collectionDetails?.description,
+            description: collectionDetails?.description.replace('\\n', '\n'),
             image: `${
               uploadDetails?.uploadMethod === 'new'
                 ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
@@ -735,6 +735,8 @@ const CollectionCreationPage: NextPage = () => {
                 if (getAssetType(uploadDetails.assetFiles[i].name) !== 'html')
                   data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                data.description = data.description.replace('\\n', '\n')
                 const metadataFileBlob = new Blob([JSON.stringify(data)], {
                   type: 'application/json',
                 })
@@ -789,6 +791,8 @@ const CollectionCreationPage: NextPage = () => {
                 type: 'application/json',
               })
 
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              data.description = data.description.replace('\\n', '\n')
               console.log('Name: ', (uploadDetails.baseMinterMetadataFile as File).name)
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
