@@ -435,6 +435,8 @@ export const OpenEditionMinterCreator = ({
             if (getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) !== 'html')
               data.image = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            data.description = data.description.replace('\\n', '\n')
             const metadataFileBlob = new Blob([JSON.stringify(data)], {
               type: 'application/json',
             })
@@ -496,7 +498,7 @@ export const OpenEditionMinterCreator = ({
                 ? {
                     image: uri,
                     name: onChainMetadataInputDetails?.name,
-                    description: onChainMetadataInputDetails?.description,
+                    description: onChainMetadataInputDetails?.description?.replace('\\n', '\n'),
                     attributes: onChainMetadataInputDetails?.attributes,
                     external_url: onChainMetadataInputDetails?.external_url,
                     animation_url:
@@ -524,7 +526,7 @@ export const OpenEditionMinterCreator = ({
           symbol: collectionDetails?.symbol,
           info: {
             creator: wallet.address,
-            description: collectionDetails?.description,
+            description: collectionDetails?.description.replace('\\n', '\n'),
             image: coverImageUri,
             explicit_content: collectionDetails?.explicit || false,
             royalty_info: royaltyInfo,
