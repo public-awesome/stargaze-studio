@@ -189,7 +189,7 @@ const BadgeCreationPage: NextPage = () => {
         manager: badgeDetails?.manager as string,
         metadata: {
           name: badgeDetails?.name || undefined,
-          description: badgeDetails?.description?.replace('\\n', '\n') || undefined,
+          description: badgeDetails?.description?.replaceAll('\\n', '\n') || undefined,
           image: coverUrl || undefined,
           image_data: badgeDetails?.image_data || undefined,
           external_url: badgeDetails?.external_url || undefined,
