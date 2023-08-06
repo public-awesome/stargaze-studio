@@ -8,11 +8,17 @@ import {
   OPEN_EDITION_UPDATABLE_IBC_FRENZ_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
+  VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
+  VENDING_FACTORY_UPDATABLE_FLEX_ADDRESS,
   VENDING_IBC_ATOM_FACTORY_ADDRESS,
+  VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
+  VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
@@ -23,6 +29,7 @@ export interface MinterInfo {
   factoryAddress: string
   supportedToken: TokenInfo
   updatable?: boolean
+  flexible?: boolean
 }
 
 export const openEditionStarsMinter: MinterInfo = {
@@ -97,6 +104,7 @@ export const vendingStarsMinter: MinterInfo = {
   factoryAddress: VENDING_FACTORY_ADDRESS,
   supportedToken: stars,
   updatable: false,
+  flexible: false,
 }
 
 export const vendingUpdatableStarsMinter: MinterInfo = {
@@ -104,6 +112,7 @@ export const vendingUpdatableStarsMinter: MinterInfo = {
   factoryAddress: VENDING_FACTORY_UPDATABLE_ADDRESS,
   supportedToken: stars,
   updatable: true,
+  flexible: false,
 }
 
 export const vendingIbcAtomMinter: MinterInfo = {
@@ -111,6 +120,7 @@ export const vendingIbcAtomMinter: MinterInfo = {
   factoryAddress: VENDING_IBC_ATOM_FACTORY_ADDRESS,
   supportedToken: ibcAtom,
   updatable: false,
+  flexible: false,
 }
 
 export const vendingUpdatableIbcAtomMinter: MinterInfo = {
@@ -118,6 +128,7 @@ export const vendingUpdatableIbcAtomMinter: MinterInfo = {
   factoryAddress: VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: ibcAtom,
   updatable: true,
+  flexible: false,
 }
 
 export const vendingIbcUsdcMinter: MinterInfo = {
@@ -125,6 +136,7 @@ export const vendingIbcUsdcMinter: MinterInfo = {
   factoryAddress: VENDING_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
   updatable: false,
+  flexible: false,
 }
 
 export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
@@ -132,6 +144,7 @@ export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
   factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
   updatable: true,
+  flexible: false,
 }
 
 export const vendingMinterList = [
@@ -141,4 +154,61 @@ export const vendingMinterList = [
   vendingUpdatableIbcAtomMinter,
   vendingIbcUsdcMinter,
   vendingUpdatableIbcUsdcMinter,
+]
+
+export const flexibleVendingStarsMinter: MinterInfo = {
+  id: 'flexible-vending-stars-minter',
+  factoryAddress: VENDING_FACTORY_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: true,
+}
+
+export const flexibleVendingUpdatableStarsMinter: MinterInfo = {
+  id: 'flexible-vending-updatable-stars-minter',
+  factoryAddress: VENDING_FACTORY_UPDATABLE_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: true,
+  flexible: true,
+}
+
+export const flexibleVendingIbcAtomMinter: MinterInfo = {
+  id: 'flexible-vending-ibc-atom-minter',
+  factoryAddress: VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: true,
+}
+
+export const flexibleVendingUpdatableIbcAtomMinter: MinterInfo = {
+  id: 'flexible-vending-updatable-ibc-atom-minter',
+  factoryAddress: VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: true,
+  flexible: true,
+}
+
+export const flexibleVendingIbcUsdcMinter: MinterInfo = {
+  id: 'flexible-vending-ibc-usdc-minter',
+  factoryAddress: VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: false,
+  flexible: true,
+}
+
+export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
+  id: 'flexible-vending-updatable-ibc-usdc-minter',
+  factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: true,
+  flexible: true,
+}
+
+export const flexibleVendingMinterList = [
+  flexibleVendingStarsMinter,
+  flexibleVendingUpdatableStarsMinter,
+  flexibleVendingIbcAtomMinter,
+  flexibleVendingUpdatableIbcAtomMinter,
+  flexibleVendingIbcUsdcMinter,
+  flexibleVendingUpdatableIbcUsdcMinter,
 ]
