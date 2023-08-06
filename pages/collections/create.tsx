@@ -494,7 +494,10 @@ const CollectionCreationPage: NextPage = () => {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
-      mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
+      mint_price: coin(
+        String(Number(whitelistDetails?.unitPrice)),
+        mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+      ),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
       admins: whitelistDetails?.admins || [wallet.address],
@@ -505,7 +508,10 @@ const CollectionCreationPage: NextPage = () => {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
-      mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
+      mint_price: coin(
+        String(Number(whitelistDetails?.unitPrice)),
+        mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+      ),
       member_limit: whitelistDetails?.memberLimit,
       admins: whitelistDetails?.admins || [wallet.address],
       admins_mutable: whitelistDetails?.adminsMutable,
@@ -1221,7 +1227,7 @@ const CollectionCreationPage: NextPage = () => {
         setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
         setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
       }
-
+      console.log('Vending Factory Parameters: ', vendingFactoryParameters)
       setMintTokenFromVendingFactory(
         tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
       )
@@ -1729,6 +1735,7 @@ const CollectionCreationPage: NextPage = () => {
                     ? Number(minimumUpdatableMintPrice) / 1000000
                     : Number(minimumMintPrice) / 1000000
                 }
+                mintingTokenFromFactory={mintTokenFromVendingFactory}
                 numberOfTokens={uploadDetails?.assetFiles.length}
                 onChange={setMintingDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
@@ -1757,7 +1764,7 @@ const CollectionCreationPage: NextPage = () => {
         >
           <div className="my-6">
             <Conditional test={minterType === 'vending'}>
-              <WhitelistDetails onChange={setWhitelistDetails} />
+              <WhitelistDetails mintingTokenFromFactory={mintTokenFromVendingFactory} onChange={setWhitelistDetails} />
               <div className="my-6" />
             </Conditional>
             <RoyaltyDetails onChange={setRoyaltyDetails} />

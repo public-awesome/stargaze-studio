@@ -8,6 +8,7 @@ import { useInputState, useNumberInputState } from 'components/forms/FormInput.h
 import { InputDateTime } from 'components/InputDateTime'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
+import type { TokenInfo } from 'config/token'
 import React, { useEffect, useState } from 'react'
 import { isValidAddress } from 'utils/isValidAddress'
 
@@ -18,6 +19,7 @@ import { WhitelistUpload } from '../../WhitelistUpload'
 
 interface WhitelistDetailsProps {
   onChange: (data: WhitelistDetailsDataProps) => void
+  mintingTokenFromFactory?: TokenInfo
 }
 
 export interface WhitelistDetailsDataProps {
@@ -38,7 +40,7 @@ type WhitelistState = 'none' | 'existing' | 'new'
 
 type WhitelistType = 'standard' | 'flex'
 
-export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
+export const WhitelistDetails = ({ onChange, mintingTokenFromFactory }: WhitelistDetailsProps) => {
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
@@ -58,7 +60,9 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: 'Token price for whitelisted addresses \n (min. 0 STARS)',
+    subtitle: `Token price for whitelisted addresses \n (min. 0 ${
+      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
+    })`,
     placeholder: '25',
   })
 
