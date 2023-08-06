@@ -90,16 +90,6 @@ const CollectionCreationPage: NextPage = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const sidetabRef = useRef<any>(null)
 
-  const vendingFactoryMessages = useMemo(
-    () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
-    [vendingFactoryContract, wallet.address],
-  )
-
-  const baseFactoryMessages = useMemo(
-    () => baseFactoryContract?.use(BASE_FACTORY_ADDRESS),
-    [baseFactoryContract, wallet.address],
-  )
-
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
   const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
@@ -130,6 +120,17 @@ const CollectionCreationPage: NextPage = () => {
 
   const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(stars)
   const [mintTokenFromVendingFactory, setMintTokenFromVendingFactory] = useState<TokenInfo | undefined>(stars)
+  const [vendingFactoryAddress, setVendingFactoryAddress] = useState<string | null>(VENDING_FACTORY_ADDRESS)
+
+  const vendingFactoryMessages = useMemo(
+    () => vendingFactoryContract?.use(vendingFactoryAddress as string),
+    [vendingFactoryContract, wallet.address],
+  )
+
+  const baseFactoryMessages = useMemo(
+    () => baseFactoryContract?.use(BASE_FACTORY_ADDRESS),
+    [baseFactoryContract, wallet.address],
+  )
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
@@ -547,11 +548,7 @@ const CollectionCreationPage: NextPage = () => {
           whitelist,
         },
         collection_params: {
-          code_id: collectionDetails?.updatable
-            ? whitelistDetails?.whitelistType === 'flex'
-              ? SG721_CODE_ID
-              : SG721_UPDATABLE_CODE_ID
-            : SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_CODE_ID : SG721_UPDATABLE_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -572,12 +569,7 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const payload: VendingFactoryDispatchExecuteArgs = {
-      contract:
-        whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
-          ? VENDING_FACTORY_FLEX_ADDRESS
-          : collectionDetails?.updatable
-          ? VENDING_FACTORY_UPDATABLE_ADDRESS
-          : VENDING_FACTORY_ADDRESS,
+      contract: vendingFactoryAddress as string,
       messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
@@ -912,14 +904,24 @@ const CollectionCreationPage: NextPage = () => {
     if (mintingDetails.unitPrice === '') throw new Error('Public mint price is required')
     if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
       if (Number(mintingDetails.unitPrice) < Number(minimumFlexMintPrice))
-        throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} STARS`)
+        throw new Error(
+          `Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} ${
+            mintTokenFromVendingFactory ? mintTokenFromVendingFactory.displayName : 'STARS'
+          }`,
+        )
     } else if (collectionDetails?.updatable) {
       if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
         throw new Error(
-          `Invalid unit price: The minimum unit price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
+          `Invalid unit price: The minimum unit price is ${Number(minimumUpdatableMintPrice) / 1000000} ${
+            mintTokenFromVendingFactory ? mintTokenFromVendingFactory.displayName : 'STARS'
+          }`,
         )
     } else if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
-      throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumMintPrice) / 1000000} STARS`)
+      throw new Error(
+        `Invalid unit price: The minimum unit price is ${Number(minimumMintPrice) / 1000000} ${
+          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.displayName : 'STARS'
+        }`,
+      )
     if (
       !mintingDetails.perAddressLimit ||
       mintingDetails.perAddressLimit < 1 ||
@@ -1128,7 +1130,7 @@ const CollectionCreationPage: NextPage = () => {
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
       setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
-      setMinimumOpenEditionMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+      setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
     }
   }
 
@@ -1187,8 +1189,10 @@ const CollectionCreationPage: NextPage = () => {
   ])
 
   const fetchVendingFactoryParameters = useCallback(async () => {
+    console.log('Here')
     const client = wallet.client
     if (!client) return
+    console.log('Selected Token: ', mintingDetails?.selectedMintToken)
     const vendingFactoryForSelectedDenom = vendingMinterList
       .concat(flexibleVendingMinterList)
       .find(
@@ -1197,22 +1201,38 @@ const CollectionCreationPage: NextPage = () => {
           minter.updatable === collectionDetails?.updatable &&
           minter.flexible === (whitelistDetails?.whitelistType === 'flex'),
       )?.factoryAddress
+    console.log(vendingFactoryForSelectedDenom)
     if (vendingFactoryForSelectedDenom) {
+      setVendingFactoryAddress(vendingFactoryForSelectedDenom)
       const vendingFactoryParameters = await client
         .queryContractSmart(vendingFactoryForSelectedDenom, { params: {} })
         .catch((error) => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
-      if (!collectionDetails?.updatable) {
+
+      if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
+        setVendingMinterFlexCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setMinimumFlexMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
+      } else if (collectionDetails?.updatable) {
+        setVendingMinterUpdatableCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setMinimumUpdatableMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
+      } else {
+        setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
         setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
-        setMintTokenFromVendingFactory(
-          tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
-        )
       }
+
+      setMintTokenFromVendingFactory(
+        tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
+      )
     }
-  }, [collectionDetails?.updatable, mintingDetails?.selectedMintToken, tokensList, whitelistDetails?.whitelistType])
+  }, [
+    collectionDetails?.updatable,
+    mintingDetails?.selectedMintToken,
+    wallet.client,
+    whitelistDetails?.whitelistState,
+    whitelistDetails?.whitelistType,
+  ])
 
   const checkwalletBalance = async () => {
     const walletBalance = await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
@@ -1308,6 +1328,10 @@ const CollectionCreationPage: NextPage = () => {
   useEffect(() => {
     void fetchOpenEditionFactoryParameters()
   }, [fetchOpenEditionFactoryParameters])
+
+  useEffect(() => {
+    void fetchVendingFactoryParameters()
+  }, [fetchVendingFactoryParameters])
 
   return (
     <div>
@@ -1699,7 +1723,9 @@ const CollectionCreationPage: NextPage = () => {
             <Conditional test={minterType === 'vending'}>
               <MintingDetails
                 minimumMintPrice={
-                  collectionDetails?.updatable
+                  whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
+                    ? Number(minimumFlexMintPrice) / 1000000
+                    : collectionDetails?.updatable
                     ? Number(minimumUpdatableMintPrice) / 1000000
                     : Number(minimumMintPrice) / 1000000
                 }

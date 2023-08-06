@@ -1,11 +1,8 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable no-nested-ternary */
+
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import { VENDING_FACTORY_ADDRESS, VENDING_FACTORY_FLEX_ADDRESS } from 'utils/constants'
-
-import { VENDING_FACTORY_UPDATABLE_ADDRESS } from '../../utils/constants'
 
 export interface CreateVendingMinterResponse {
   readonly vendingMinterAddress: string
@@ -63,14 +60,7 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
       updatable?: boolean,
       flex?: boolean,
     ): Promise<CreateVendingMinterResponse> => {
-      const result = await client.execute(
-        senderAddress,
-        flex ? VENDING_FACTORY_FLEX_ADDRESS : updatable ? VENDING_FACTORY_UPDATABLE_ADDRESS : VENDING_FACTORY_ADDRESS,
-        msg,
-        'auto',
-        '',
-        funds,
-      )
+      const result = await client.execute(senderAddress, contractAddress, msg, 'auto', '', funds)
 
       return {
         vendingMinterAddress: result.logs[0].events[5].attributes[0].value,
