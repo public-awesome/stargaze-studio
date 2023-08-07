@@ -1,11 +1,11 @@
 import {
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
-  OPEN_EDITION_IBC_FRENZ_FACTORY_ADDRESS,
+  OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
-  OPEN_EDITION_UPDATABLE_IBC_FRENZ_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
@@ -22,7 +22,7 @@ import {
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
-import { ibcAtom, ibcFrenz, ibcUsdc, stars } from './token'
+import { ibcAtom, ibcFrnz, ibcUsdc, stars } from './token'
 
 export interface MinterInfo {
   id: string
@@ -74,17 +74,17 @@ export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   updatable: true,
 }
 
-export const openEditionIbcFrenzMinter: MinterInfo = {
-  id: 'open-edition-ibc-frenz-minter',
-  factoryAddress: OPEN_EDITION_IBC_FRENZ_FACTORY_ADDRESS,
-  supportedToken: ibcFrenz,
+export const openEditionIbcFrnzMinter: MinterInfo = {
+  id: 'open-edition-ibc-frnz-minter',
+  factoryAddress: OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
+  supportedToken: ibcFrnz,
   updatable: false,
 }
 
-export const openEditionUpdatableIbcFrenzMinter: MinterInfo = {
-  id: 'open-edition-updatable-ibc-frenz-minter',
-  factoryAddress: OPEN_EDITION_UPDATABLE_IBC_FRENZ_FACTORY_ADDRESS,
-  supportedToken: ibcFrenz,
+export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
+  id: 'open-edition-updatable-ibc-frnz-minter',
+  factoryAddress: OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
+  supportedToken: ibcFrnz,
   updatable: true,
 }
 
@@ -93,8 +93,8 @@ export const openEditionMinterList = [
   openEditionUpdatableStarsMinter,
   openEditionUpdatableIbcAtomMinter,
   openEditionIbcAtomMinter,
-  openEditionIbcFrenzMinter,
-  openEditionUpdatableIbcFrenzMinter,
+  openEditionIbcFrnzMinter,
+  openEditionUpdatableIbcFrnzMinter,
   openEditionIbcUsdcMinter,
   openEditionUpdatableIbcUsdcMinter,
 ]
