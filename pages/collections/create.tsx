@@ -675,8 +675,6 @@ const CollectionCreationPage: NextPage = () => {
               setCreatingCollection(false)
             })
         } else {
-          console.log('Here')
-          console.log(data.baseMinterAddress)
           await toast
             .promise(
               baseMinterContract
@@ -1160,7 +1158,6 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      console.log('Open Edition Factory Parameters: ', openEditionFactoryParameters)
       setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
       if (!openEditionMinterDetails?.collectionDetails?.updatable) {
         setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
@@ -1168,8 +1165,6 @@ const CollectionCreationPage: NextPage = () => {
           tokensList.find((token) => token.denom === openEditionFactoryParameters?.params?.min_mint_price?.denom),
         )
       }
-      console.log('Selected OE Factory: ', factoryForSelectedDenom)
-      console.log('Selected Updatable OE Factory: ', updatableFactoryForSelectedDenom)
     }
     if (updatableFactoryForSelectedDenom?.factoryAddress) {
       const openEditionUpdatableFactoryParameters = await client
@@ -1195,10 +1190,8 @@ const CollectionCreationPage: NextPage = () => {
   ])
 
   const fetchVendingFactoryParameters = useCallback(async () => {
-    console.log('Here')
     const client = wallet.client
     if (!client) return
-    console.log('Selected Token: ', mintingDetails?.selectedMintToken)
     const vendingFactoryForSelectedDenom = vendingMinterList
       .concat(flexibleVendingMinterList)
       .find(
@@ -1207,7 +1200,6 @@ const CollectionCreationPage: NextPage = () => {
           minter.updatable === collectionDetails?.updatable &&
           minter.flexible === (whitelistDetails?.whitelistType === 'flex'),
       )?.factoryAddress
-    console.log(vendingFactoryForSelectedDenom)
     if (vendingFactoryForSelectedDenom) {
       setVendingFactoryAddress(vendingFactoryForSelectedDenom)
       const vendingFactoryParameters = await client
@@ -1227,7 +1219,6 @@ const CollectionCreationPage: NextPage = () => {
         setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
         setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
       }
-      console.log('Vending Factory Parameters: ', vendingFactoryParameters)
       setMintTokenFromVendingFactory(
         tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
       )
