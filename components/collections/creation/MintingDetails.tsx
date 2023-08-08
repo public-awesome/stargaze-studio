@@ -4,6 +4,9 @@ import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
+import { vendingMinterList } from 'config/minter'
+import type { TokenInfo } from 'config/token'
+import { stars, tokensList } from 'config/token'
 import React, { useEffect, useState } from 'react'
 import { resolveAddress } from 'utils/resolveAddress'
 
@@ -16,6 +19,7 @@ interface MintingDetailsProps {
   numberOfTokens: number | undefined
   uploadMethod: UploadMethod
   minimumMintPrice: number
+  mintingTokenFromFactory?: TokenInfo
   importedMintingDetails?: MintingDetailsDataProps
 }
 
@@ -25,6 +29,7 @@ export interface MintingDetailsDataProps {
   perAddressLimit: number
   startTime: string
   paymentAddress?: string
+  selectedMintToken?: TokenInfo
 }
 
 export const MintingDetails = ({
@@ -32,11 +37,13 @@ export const MintingDetails = ({
   numberOfTokens,
   uploadMethod,
   minimumMintPrice,
+  mintingTokenFromFactory,
   importedMintingDetails,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
 
   const numberOfTokensState = useNumberInputState({
     id: 'numberoftokens',
@@ -50,7 +57,9 @@ export const MintingDetails = ({
     id: 'unitPrice',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: `Price of each token (min. ${minimumMintPrice} STARS)`,
+    subtitle: `Price of each token (min. ${minimumMintPrice} ${
+      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
+    })`,
     placeholder: '50',
   })
 
@@ -92,6 +101,7 @@ export const MintingDetails = ({
       perAddressLimit: perAddressLimitState.value,
       startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
       paymentAddress: paymentAddressState.value.trim(),
+      selectedMintToken,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,6 +112,7 @@ export const MintingDetails = ({
     perAddressLimitState.value,
     timestamp,
     paymentAddressState.value,
+    selectedMintToken,
   ])
 
   useEffect(() => {
@@ -124,7 +135,22 @@ export const MintingDetails = ({
           isRequired
           value={uploadMethod === 'new' ? numberOfTokens : numberOfTokensState.value}
         />
-        <NumberInput {...unitPriceState} isRequired />
+        <div className="flex flex-row items-center">
+          <NumberInput {...unitPriceState} isRequired />
+          <select
+            className="py-[9px] px-4 mt-14 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+            onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
+          >
+            {vendingMinterList
+              .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+              .map((minter) => (
+                <option key={minter.id} className="bg-black" value={minter.supportedToken.displayName}>
+                  {minter.supportedToken.displayName}
+                </option>
+              ))}
+          </select>
+        </div>
+
         <NumberInput {...perAddressLimitState} isRequired />
         <FormControl htmlId="timestamp" isRequired subtitle="Minting start time (local)" title="Start Time">
           <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
