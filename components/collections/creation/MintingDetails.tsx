@@ -22,6 +22,7 @@ interface MintingDetailsProps {
   mintingTokenFromFactory?: TokenInfo
 }
 
+export type TokenType = 'fungible' | 'non-fungible'
 export interface MintingDetailsDataProps {
   numTokens: number
   unitPrice: string
@@ -29,6 +30,7 @@ export interface MintingDetailsDataProps {
   startTime: string
   paymentAddress?: string
   selectedMintToken?: TokenInfo
+  selectesTokenType?: TokenType
 }
 
 export const MintingDetails = ({
