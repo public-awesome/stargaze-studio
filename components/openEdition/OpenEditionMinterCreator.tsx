@@ -57,6 +57,9 @@ export interface OpenEditionMinterDetailsDataProps {
   offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
   mintingDetails?: MintingDetailsDataProps
   metadataStorageMethod?: MetadataStorageMethod
+  openEditionMinterContractAddress?: string | null
+  coverImageUrl?: string | null
+  tokenUri?: string | null
 }
 
 interface OpenEditionMinterCreatorProps {
@@ -627,6 +630,9 @@ export const OpenEditionMinterCreator = ({
       offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
       mintingDetails: mintingDetails ? mintingDetails : undefined,
       metadataStorageMethod,
+      openEditionMinterContractAddress,
+      coverImageUrl,
+      tokenUri,
     }
     onDetailsChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -637,6 +643,10 @@ export const OpenEditionMinterCreator = ({
     onChainMetadataInputDetails,
     offChainMetadataUploadDetails,
     mintingDetails,
+    metadataStorageMethod,
+    openEditionMinterContractAddress,
+    coverImageUrl,
+    tokenUri,
   ])
 
   useEffect(() => {
