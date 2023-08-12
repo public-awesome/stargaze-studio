@@ -60,6 +60,7 @@ export interface OpenEditionMinterDetailsDataProps {
   openEditionMinterContractAddress?: string | null
   coverImageUrl?: string | null
   tokenUri?: string | null
+  tokenImageUri?: string | null
 }
 
 interface OpenEditionMinterCreatorProps {
@@ -633,6 +634,7 @@ export const OpenEditionMinterCreator = ({
       openEditionMinterContractAddress,
       coverImageUrl,
       tokenUri,
+      tokenImageUri,
     }
     onDetailsChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -647,6 +649,7 @@ export const OpenEditionMinterCreator = ({
     openEditionMinterContractAddress,
     coverImageUrl,
     tokenUri,
+    tokenImageUri,
   ])
 
   useEffect(() => {
