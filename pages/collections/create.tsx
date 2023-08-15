@@ -134,6 +134,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
+  const [initialParametersFetched, setInitialParametersFetched] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreateVm, setReadyToCreateVm] = useState(false)
   const [readyToCreateBm, setReadyToCreateBm] = useState(false)
@@ -1115,7 +1116,6 @@ const CollectionCreationPage: NextPage = () => {
       setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
       setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
     }
-
     if (OPEN_EDITION_FACTORY_ADDRESS) {
       const openEditionFactoryParameters = await client
         .queryContractSmart(OPEN_EDITION_FACTORY_ADDRESS, { params: {} })
@@ -1136,6 +1136,7 @@ const CollectionCreationPage: NextPage = () => {
       setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
       setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
     }
+    setInitialParametersFetched(true)
   }
 
   const fetchOpenEditionFactoryParameters = useCallback(async () => {
@@ -1175,7 +1176,7 @@ const CollectionCreationPage: NextPage = () => {
         })
       setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
       if (openEditionMinterDetails?.collectionDetails?.updatable) {
-        setMinimumOpenEditionMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+        setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
         setMintTokenFromOpenEditionFactory(
           tokensList.find(
             (token) => token.denom === openEditionUpdatableFactoryParameters?.params?.min_mint_price?.denom,
@@ -1319,7 +1320,9 @@ const CollectionCreationPage: NextPage = () => {
   }, [minterType, baseMinterDetails?.baseMinterAcquisitionMethod, uploadDetails?.uploadMethod])
 
   useEffect(() => {
-    void fetchInitialFactoryParameters()
+    if (!initialParametersFetched) {
+      void fetchInitialFactoryParameters()
+    }
   }, [wallet.client])
 
   useEffect(() => {
