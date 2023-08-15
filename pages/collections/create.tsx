@@ -1280,7 +1280,6 @@ const CollectionCreationPage: NextPage = () => {
     })
   }
 
-  // function to export all details as a .json file
   const exportDetails = () => {
     const details = {
       minterType,
@@ -1291,6 +1290,12 @@ const CollectionCreationPage: NextPage = () => {
       royaltyDetails,
       baseMinterDetails,
       openEditionMinterDetails,
+      vendingMinterContractAddress,
+      baseTokenUri: `ipfs://${baseTokenUri}`,
+      coverImageUrl:
+        uploadDetails?.uploadMethod === 'new'
+          ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0].name as string}`
+          : `${coverImageUrl}`,
     }
     const element = document.createElement('a')
     const file = new Blob([JSON.stringify(details)], { type: 'text/plain' })
@@ -1299,7 +1304,6 @@ const CollectionCreationPage: NextPage = () => {
     document.body.appendChild(element) // Required for this to work in FireFox
     element.click()
   }
-  // function to import all details from a .json file
   const importDetails = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files === null) return toast.error('No files selected.')
     const file = event.target.files[0]
@@ -1308,6 +1312,11 @@ const CollectionCreationPage: NextPage = () => {
       const contents = e.target?.result
       const details = JSON.parse(contents as string)
       setMinterType(details.minterType)
+      if (details.vendingMinterContractAddress) {
+        details.uploadDetails.uploadMethod = 'existing'
+        details.uploadDetails.baseTokenURI = details.baseTokenUri
+        details.uploadDetails.imageUrl = details.coverImageUrl
+      }
       setImportedDetails(details)
     }
     reader.readAsText(file)
