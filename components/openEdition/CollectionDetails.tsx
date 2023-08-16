@@ -159,7 +159,7 @@ export const CollectionDetails = ({
       nameState.onChange(importedCollectionDetails.name)
       descriptionState.onChange(importedCollectionDetails.description)
       symbolState.onChange(importedCollectionDetails.symbol)
-      setCoverImage(importedCollectionDetails.imageFile[0] || null)
+      //setCoverImage(importedCollectionDetails.imageFile[0] || null)
       externalLinkState.onChange(importedCollectionDetails.externalLink || '')
       setTimestamp(
         importedCollectionDetails.startTradingTime

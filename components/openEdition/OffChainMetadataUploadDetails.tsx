@@ -231,8 +231,10 @@ export const OffChainMetadataUploadDetails = ({
     setMetadataFilesArray([])
     if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
-    tokenUriState.onChange('')
-    coverImageUrlState.onChange('')
+    if (!importedOffChainMetadataUploadDetails) {
+      tokenUriState.onChange('')
+      coverImageUrlState.onChange('')
+    }
   }, [uploadMethod, metadataStorageMethod])
 
   useEffect(() => {
@@ -241,7 +243,7 @@ export const OffChainMetadataUploadDetails = ({
       nftStorageApiKeyState.onChange(importedOffChainMetadataUploadDetails.nftStorageApiKey || '')
       pinataApiKeyState.onChange(importedOffChainMetadataUploadDetails.pinataApiKey || '')
       pinataSecretKeyState.onChange(importedOffChainMetadataUploadDetails.pinataSecretKey || '')
-      setUploadMethod('existing')
+      setUploadMethod(importedOffChainMetadataUploadDetails.uploadMethod)
       tokenUriState.onChange(importedOffChainMetadataUploadDetails.tokenURI || '')
       coverImageUrlState.onChange(importedOffChainMetadataUploadDetails.imageUrl || '')
       setOpenEditionMinterMetadataFile(importedOffChainMetadataUploadDetails.openEditionMinterMetadataFile)

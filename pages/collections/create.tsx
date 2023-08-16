@@ -1294,7 +1294,7 @@ const CollectionCreationPage: NextPage = () => {
       baseTokenUri: `ipfs://${baseTokenUri}`,
       coverImageUrl:
         uploadDetails?.uploadMethod === 'new'
-          ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0].name as string}`
+          ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0]?.name as string}`
           : `${coverImageUrl}`,
     }
     const element = document.createElement('a')
@@ -1317,6 +1317,14 @@ const CollectionCreationPage: NextPage = () => {
         details.uploadDetails.baseTokenURI = details.baseTokenUri
         details.uploadDetails.imageUrl = details.coverImageUrl
       }
+      if (details.openEditionMinterDetails.openEditionMinterContractAddress) {
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.uploadMethod = 'existing'
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.tokenURI =
+          details.openEditionMinterDetails.tokenUri
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.imageUrl =
+          details.openEditionMinterDetails.coverImageUrl
+      }
+
       setImportedDetails(details)
     }
     reader.readAsText(file)
@@ -1740,6 +1748,7 @@ const CollectionCreationPage: NextPage = () => {
       )}
       <Conditional test={minterType === 'openEdition'}>
         <OpenEditionMinterCreator
+          importedOpenEditionMinterDetails={importedDetails?.openEditionMinterDetails}
           minimumMintPrice={minimumOpenEditionMintPrice as string}
           minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
           mintTokenFromFactory={mintTokenFromOpenEditionFactory}
