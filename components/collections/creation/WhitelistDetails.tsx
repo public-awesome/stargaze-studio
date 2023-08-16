@@ -9,6 +9,7 @@ import { InputDateTime } from 'components/InputDateTime'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import type { TokenInfo } from 'config/token'
+import { useWallet } from 'contexts/wallet'
 import React, { useEffect, useState } from 'react'
 import { isValidAddress } from 'utils/isValidAddress'
 
@@ -46,6 +47,8 @@ export const WhitelistDetails = ({
   mintingTokenFromFactory,
   importedWhitelistDetails,
 }: WhitelistDetailsProps) => {
+  const wallet = useWallet()
+
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
@@ -196,6 +199,14 @@ export const WhitelistDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedWhitelistDetails])
 
+  useEffect(() => {
+    if (whitelistState === 'new' && wallet.address) {
+      addressListState.reset()
+      addressListState.add({ address: wallet.address })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whitelistState, wallet.address])
+
   return (
     <div className="py-3 px-8 rounded border-2 border-white/20">
       <div className="flex justify-center">
@@ -344,7 +355,6 @@ export const WhitelistDetails = ({
             <div className="my-4 ml-4">
               <AddressList
                 entries={addressListState.entries}
-                isRequired
                 onAdd={addressListState.add}
                 onChange={addressListState.update}
                 onRemove={addressListState.remove}
