@@ -42,6 +42,7 @@ export interface OffChainMetadataUploadDetailsDataProps {
   tokenURI?: string
   imageUrl?: string
   openEditionMinterMetadataFile?: File
+  exportedMetadata?: any
 }
 
 export const OffChainMetadataUploadDetails = ({
@@ -55,6 +56,7 @@ export const OffChainMetadataUploadDetails = ({
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
+  const [exportedMetadata, setExportedMetadata] = useState(undefined)
 
   const [openEditionMinterMetadataFile, setOpenEditionMinterMetadataFile] = useState<File | undefined>()
 
@@ -206,6 +208,7 @@ export const OffChainMetadataUploadDetails = ({
           .replace(regex, '')
           .trim(),
         openEditionMinterMetadataFile,
+        exportedMetadata,
       }
       onChange(data)
     } catch (error: any) {
@@ -224,6 +227,7 @@ export const OffChainMetadataUploadDetails = ({
     coverImageUrlState.value,
     refreshMetadata,
     openEditionMinterMetadataFile,
+    exportedMetadata,
   ])
 
   useEffect(() => {
@@ -246,7 +250,7 @@ export const OffChainMetadataUploadDetails = ({
       setUploadMethod(importedOffChainMetadataUploadDetails.uploadMethod)
       tokenUriState.onChange(importedOffChainMetadataUploadDetails.tokenURI || '')
       coverImageUrlState.onChange(importedOffChainMetadataUploadDetails.imageUrl || '')
-      setOpenEditionMinterMetadataFile(importedOffChainMetadataUploadDetails.openEditionMinterMetadataFile)
+      //setOpenEditionMinterMetadataFile(importedOffChainMetadataUploadDetails.openEditionMinterMetadataFile)
     }
   }, [importedOffChainMetadataUploadDetails])
 
@@ -464,6 +468,8 @@ export const OffChainMetadataUploadDetails = ({
                 />
               </div>
               <MetadataInput
+                importedMetadata={importedOffChainMetadataUploadDetails?.exportedMetadata}
+                onChange={setExportedMetadata}
                 selectedAssetFile={assetFilesArray[0]}
                 selectedMetadataFile={metadataFilesArray[0]}
                 updateMetadataToUpload={updateOpenEditionMinterMetadataFile}
