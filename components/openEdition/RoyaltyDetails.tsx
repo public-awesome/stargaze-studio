@@ -23,6 +23,7 @@ type RoyaltyState = 'none' | 'new'
 export const RoyaltyDetails = ({ onChange, importedRoyaltyDetails }: RoyaltyDetailsProps) => {
   const wallet = useWallet()
   const [royaltyState, setRoyaltyState] = useState<RoyaltyState>('none')
+  const [royaltyDetailsImported, setRoyaltyDetailsImported] = useState(false)
 
   const royaltyPaymentAddressState = useInputState({
     id: 'royalty-payment-address',
@@ -41,31 +42,34 @@ export const RoyaltyDetails = ({ onChange, importedRoyaltyDetails }: RoyaltyDeta
   })
 
   useEffect(() => {
-    void resolveAddress(
-      royaltyPaymentAddressState.value
-        .toLowerCase()
-        .replace(/,/g, '')
-        .replace(/"/g, '')
-        .replace(/'/g, '')
-        .replace(/ /g, ''),
-      wallet,
-    ).then((royaltyPaymentAddress) => {
-      royaltyPaymentAddressState.onChange(royaltyPaymentAddress)
-      const data: RoyaltyDetailsDataProps = {
-        royaltyType: royaltyState,
-        paymentAddress: royaltyPaymentAddressState.value,
-        share: Number(royaltyShareState.value),
-      }
-      onChange(data)
-    })
+    if (!importedRoyaltyDetails || (importedRoyaltyDetails && royaltyDetailsImported)) {
+      void resolveAddress(
+        royaltyPaymentAddressState.value
+          .toLowerCase()
+          .replace(/,/g, '')
+          .replace(/"/g, '')
+          .replace(/'/g, '')
+          .replace(/ /g, ''),
+        wallet,
+      ).then((royaltyPaymentAddress) => {
+        royaltyPaymentAddressState.onChange(royaltyPaymentAddress)
+        const data: RoyaltyDetailsDataProps = {
+          royaltyType: royaltyState,
+          paymentAddress: royaltyPaymentAddressState.value,
+          share: Number(royaltyShareState.value),
+        }
+        onChange(data)
+      })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [royaltyState, royaltyPaymentAddressState.value, royaltyShareState.value])
 
   useEffect(() => {
     if (importedRoyaltyDetails) {
       setRoyaltyState(importedRoyaltyDetails.royaltyType)
-      royaltyPaymentAddressState.onChange(importedRoyaltyDetails.paymentAddress)
+      royaltyPaymentAddressState.onChange(importedRoyaltyDetails.paymentAddress.toString())
       royaltyShareState.onChange(importedRoyaltyDetails.share.toString())
+      setRoyaltyDetailsImported(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedRoyaltyDetails])
