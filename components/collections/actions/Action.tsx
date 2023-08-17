@@ -244,7 +244,7 @@ export const CollectionActions = ({
   const resolveRoyaltyPaymentAddress = async () => {
     await resolveAddress(royaltyPaymentAddressState.value.trim(), wallet).then((resolvedAddress) => {
       setCollectionInfo({
-        description: descriptionState.value || undefined,
+        description: descriptionState.value.replaceAll('\\n', '\n') || undefined,
         image: imageState.value || undefined,
         explicit_content: explicitContent,
         external_link: externalLinkState.value || undefined,
@@ -265,7 +265,7 @@ export const CollectionActions = ({
 
   useEffect(() => {
     setCollectionInfo({
-      description: descriptionState.value || undefined,
+      description: descriptionState.value.replaceAll('\\n', '\n') || undefined,
       image: imageState.value || undefined,
       explicit_content: explicitContent,
       external_link: externalLinkState.value || undefined,

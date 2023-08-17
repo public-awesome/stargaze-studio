@@ -146,6 +146,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
+  const [initialParametersFetched, setInitialParametersFetched] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreateVm, setReadyToCreateVm] = useState(false)
   const [readyToCreateBm, setReadyToCreateBm] = useState(false)
@@ -571,7 +572,7 @@ const CollectionCreationPage: NextPage = () => {
           symbol: collectionDetails?.symbol,
           info: {
             creator: wallet.address,
-            description: collectionDetails?.description,
+            description: collectionDetails?.description.replaceAll('\\n', '\n'),
             image: `${
               uploadDetails?.uploadMethod === 'new'
                 ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
@@ -632,7 +633,7 @@ const CollectionCreationPage: NextPage = () => {
           symbol: collectionDetails?.symbol,
           info: {
             creator: wallet.address,
-            description: collectionDetails?.description,
+            description: collectionDetails?.description.replaceAll('\\n', '\n'),
             image: `${
               uploadDetails?.uploadMethod === 'new'
                 ? `ipfs://${coverImageUri}/${collectionDetails?.imageFile[0].name as string}`
@@ -752,6 +753,8 @@ const CollectionCreationPage: NextPage = () => {
                 if (getAssetType(uploadDetails.assetFiles[i].name) !== 'html')
                   data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                data.description = data.description.replaceAll('\\n', '\n')
                 const metadataFileBlob = new Blob([JSON.stringify(data)], {
                   type: 'application/json',
                 })
@@ -806,6 +809,8 @@ const CollectionCreationPage: NextPage = () => {
                 type: 'application/json',
               })
 
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              data.description = data.description.replaceAll('\\n', '\n')
               console.log('Name: ', (uploadDetails.baseMinterMetadataFile as File).name)
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
@@ -1127,7 +1132,6 @@ const CollectionCreationPage: NextPage = () => {
       setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
       setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
     }
-
     if (OPEN_EDITION_FACTORY_ADDRESS) {
       const openEditionFactoryParameters = await client
         .queryContractSmart(OPEN_EDITION_FACTORY_ADDRESS, { params: {} })
@@ -1148,6 +1152,7 @@ const CollectionCreationPage: NextPage = () => {
       setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
       setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
     }
+    setInitialParametersFetched(true)
   }
 
   const fetchOpenEditionFactoryParameters = useCallback(async () => {
@@ -1187,7 +1192,7 @@ const CollectionCreationPage: NextPage = () => {
         })
       setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
       if (openEditionMinterDetails?.collectionDetails?.updatable) {
-        setMinimumOpenEditionMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+        setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
         setMintTokenFromOpenEditionFactory(
           tokensList.find(
             (token) => token.denom === openEditionUpdatableFactoryParameters?.params?.min_mint_price?.denom,
@@ -1381,7 +1386,9 @@ const CollectionCreationPage: NextPage = () => {
   }, [minterType, baseMinterDetails?.baseMinterAcquisitionMethod, uploadDetails?.uploadMethod])
 
   useEffect(() => {
-    void fetchInitialFactoryParameters()
+    if (!initialParametersFetched) {
+      void fetchInitialFactoryParameters()
+    }
   }, [wallet.client])
 
   useEffect(() => {

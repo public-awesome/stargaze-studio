@@ -1,3 +1,5 @@
+import { NETWORK } from 'utils/constants'
+
 export interface TokenInfo {
   id: string
   denom: string
@@ -30,7 +32,10 @@ export const ibcUsdc: TokenInfo = {
 
 export const ibcFrnz: TokenInfo = {
   id: 'ibc-frnz',
-  denom: 'ibc/7FA7EC64490E3BDE5A1A28CBE73CC0AD22522794957BC891C46321E3A6074DB9',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/7FA7EC64490E3BDE5A1A28CBE73CC0AD22522794957BC891C46321E3A6074DB9'
+      : 'factory/stars10w5eulj60qp3cfqa0hkmke78qdy2feq6x9xdmd/ufrnz',
   displayName: 'FRNZ',
   decimalPlaces: 6,
 }
