@@ -41,6 +41,7 @@ import * as secp256k1 from 'secp256k1'
 import { upload } from 'services/upload'
 import { copy } from 'utils/clipboard'
 import { BADGE_HUB_ADDRESS, BLOCK_EXPLORER_URL, NETWORK } from 'utils/constants'
+import { getAssetType } from 'utils/getAssetType'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { uid } from 'utils/random'
@@ -184,7 +185,6 @@ const BadgeCreationPage: NextPage = () => {
       if (!badgeHubContract) throw new Error('Contract not found')
       setCreatingBadge(true)
       const coverUrl = await handleImageUrl()
-
       const badge = {
         manager: badgeDetails?.manager as string,
         metadata: {
@@ -195,7 +195,11 @@ const BadgeCreationPage: NextPage = () => {
           external_url: badgeDetails?.external_url || undefined,
           attributes: badgeDetails?.attributes || undefined,
           background_color: badgeDetails?.background_color || undefined,
-          animation_url: badgeDetails?.animation_url || undefined,
+          animation_url: badgeDetails?.animation_url
+            ? badgeDetails.animation_url
+            : imageUploadDetails?.assetFile && getAssetType(imageUploadDetails.assetFile.name) === 'video'
+            ? coverUrl
+            : undefined,
           youtube_url: badgeDetails?.youtube_url || undefined,
         },
         transferrable: badgeDetails?.transferrable as boolean,
