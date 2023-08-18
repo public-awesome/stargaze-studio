@@ -44,7 +44,7 @@ export interface BadgeDetailsDataProps {
   youtube_url?: string
 }
 
-export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
+export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDetailsProps) => {
   const wallet = useWallet()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
@@ -193,6 +193,10 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
   }, [metadataFile])
 
   useEffect(() => {
+    animationUrlState.onChange('')
+  }, [uploadMethod])
+
+  useEffect(() => {
     try {
       const data: BadgeDetailsDataProps = {
         manager: managerState.value,
@@ -266,6 +270,7 @@ export const BadgeDetails = ({ metadataSize, onChange }: BadgeDetailsProps) => {
           <TextInput className="mt-2" {...nameState} />
           <TextInput className="mt-2" {...descriptionState} />
           <NumberInput className="mt-2" {...maxSupplyState} />
+          {uploadMethod === 'existing' ? <TextInput className="mt-2" {...animationUrlState} /> : null}
           <TextInput className="mt-2" {...externalUrlState} />
 
           <FormControl className="mt-2" htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
