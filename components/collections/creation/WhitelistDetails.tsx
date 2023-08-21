@@ -160,7 +160,9 @@ export const WhitelistDetails = ({
       whitelistAddressState.onChange(
         importedWhitelistDetails.contractAddress ? importedWhitelistDetails.contractAddress : '',
       )
-      unitPriceState.onChange(importedWhitelistDetails.unitPrice ? Number(importedWhitelistDetails.unitPrice) : 0)
+      unitPriceState.onChange(
+        importedWhitelistDetails.unitPrice ? Number(importedWhitelistDetails.unitPrice) / 1000000 : 0,
+      )
       memberLimitState.onChange(importedWhitelistDetails.memberLimit ? importedWhitelistDetails.memberLimit : 0)
       perAddressLimitState.onChange(
         importedWhitelistDetails.perAddressLimit ? importedWhitelistDetails.perAddressLimit : 0,
