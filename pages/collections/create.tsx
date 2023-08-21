@@ -1297,7 +1297,7 @@ const CollectionCreationPage: NextPage = () => {
       baseMinterDetails,
       openEditionMinterDetails,
       vendingMinterContractAddress,
-      baseTokenUri: `ipfs://${baseTokenUri}`,
+      baseTokenUri: `${baseTokenUri?.startsWith('ipfs://') ? baseTokenUri : `ipfs://${baseTokenUri}`}`,
       coverImageUrl:
         uploadDetails?.uploadMethod === 'new'
           ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0]?.name as string}`
