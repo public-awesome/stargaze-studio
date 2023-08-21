@@ -280,7 +280,7 @@ export const UploadDetails = ({
     setMetadataFilesArray([])
     if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
-    if (!importedUploadDetails) {
+    if (!importedUploadDetails || minterType === 'base') {
       baseTokenUriState.onChange('')
       coverImageUrlState.onChange('')
     }
