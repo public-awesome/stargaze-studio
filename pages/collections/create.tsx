@@ -1322,7 +1322,7 @@ const CollectionCreationPage: NextPage = () => {
         details.uploadDetails.baseTokenURI = details.baseTokenUri
         details.uploadDetails.imageUrl = details.coverImageUrl
       }
-      if (details.openEditionMinterDetails.openEditionMinterContractAddress) {
+      if (details.openEditionMinterDetails?.openEditionMinterContractAddress) {
         details.openEditionMinterDetails.offChainMetadataUploadDetails.uploadMethod = 'existing'
         details.openEditionMinterDetails.offChainMetadataUploadDetails.tokenURI =
           details.openEditionMinterDetails.tokenUri

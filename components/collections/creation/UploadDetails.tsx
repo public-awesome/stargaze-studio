@@ -289,7 +289,7 @@ export const UploadDetails = ({
   useEffect(() => {
     if (importedUploadDetails) {
       if (importedUploadDetails.uploadMethod === 'new') {
-        setUploadMethod('existing')
+        setUploadMethod('new')
         setUploadService(importedUploadDetails.uploadService)
         nftStorageApiKeyState.onChange(importedUploadDetails.nftStorageApiKey || '')
         pinataApiKeyState.onChange(importedUploadDetails.pinataApiKey || '')
