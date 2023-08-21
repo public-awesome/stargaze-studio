@@ -30,6 +30,7 @@ import type { RoyaltyDetailsDataProps } from 'components/collections/creation/Ro
 import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
 import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
 import { Conditional } from 'components/Conditional'
+import { FormControl } from 'components/FormControl'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
@@ -1305,12 +1306,20 @@ const CollectionCreationPage: NextPage = () => {
     const element = document.createElement('a')
     const file = new Blob([JSON.stringify(details)], { type: 'text/plain' })
     element.href = URL.createObjectURL(file)
-    element.download = 'details.json'
+    element.download = `${
+      minterType === 'vending'
+        ? collectionDetails?.name
+          ? `${collectionDetails.name}-`
+          : ''
+        : openEditionMinterDetails?.collectionDetails
+        ? `${openEditionMinterDetails.collectionDetails.name}-`
+        : ''
+    }configuration-${new Date().toLocaleString().replaceAll(',', '_')}.json`
     document.body.appendChild(element) // Required for this to work in FireFox
     element.click()
   }
   const importDetails = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files === null) return toast.error('No files selected.')
+    if (event.target.files === null || event.target.files.length === 0) return toast.error('No files selected.')
     const file = event.target.files[0]
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -1408,15 +1417,7 @@ const CollectionCreationPage: NextPage = () => {
             : 'Create Collection'
         }
       />
-      <Button className="absolute top-5 right-5" onClick={() => exportDetails()}>
-        Export Details
-      </Button>
-      <input
-        accept="application/json"
-        className="absolute top-5 right-20"
-        onChange={(e) => importDetails(e)}
-        type="file"
-      />
+
       <div className="mt-5 space-y-5 text-center">
         <h1 className="font-heading text-4xl font-bold">
           {minterType === 'base' && baseMinterDetails?.baseMinterAcquisitionMethod === 'existing'
@@ -1436,6 +1437,7 @@ const CollectionCreationPage: NextPage = () => {
           on how to create your collection
         </p>
       </div>
+
       <div className="mx-10" ref={scrollRef}>
         <Conditional
           test={minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress !== null}
@@ -1674,7 +1676,8 @@ const CollectionCreationPage: NextPage = () => {
           className={clsx(
             'mx-10 mt-5',
             'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
-            'before:inset-x-0 before:bottom-0 before:border-white/25',
+            'before:inset-x-0 before:bottom-0  before:border-white/25',
+            minterType !== 'base' ? 'rounded-none border-b-2 border-white/25' : 'border-0',
           )}
         >
           <div
@@ -1747,6 +1750,22 @@ const CollectionCreationPage: NextPage = () => {
           </div>
         </div>
       </div>
+
+      <Conditional test={minterType !== 'base'}>
+        <FormControl className={clsx('py-4 px-10 w-full')} title="Import Creation Configuration">
+          <div className="flex flex-row justify-between mt-5 space-x-2">
+            <input
+              accept="application/json"
+              className="py-4 px-4 w-1/3 rounded-sm border-[1px] border-zinc-500 border-dashed"
+              onChange={(e) => importDetails(e)}
+              type="file"
+            />
+            <Button className="mt-3 h-1/2 w-1/8" onClick={() => exportDetails()}>
+              Export Creation Configuration
+            </Button>
+          </div>
+        </FormControl>
+      </Conditional>
 
       {minterType === 'base' && (
         <div>

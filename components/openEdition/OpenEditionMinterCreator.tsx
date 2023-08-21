@@ -713,7 +713,7 @@ export const OpenEditionMinterCreator = ({
           </div>
         </div>
       </Conditional>
-      <div className={clsx('my-4 mx-10')}>
+      <div className={clsx('my-0 mx-10')}>
         <Conditional test={metadataStorageMethod === 'off-chain'}>
           <div>
             <OffChainMetadataUploadDetails
