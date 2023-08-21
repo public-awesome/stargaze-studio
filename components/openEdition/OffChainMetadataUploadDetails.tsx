@@ -250,7 +250,7 @@ export const OffChainMetadataUploadDetails = ({
       setUploadMethod(importedOffChainMetadataUploadDetails.uploadMethod)
       tokenUriState.onChange(importedOffChainMetadataUploadDetails.tokenURI || '')
       coverImageUrlState.onChange(importedOffChainMetadataUploadDetails.imageUrl || '')
-      //setOpenEditionMinterMetadataFile(importedOffChainMetadataUploadDetails.openEditionMinterMetadataFile)
+      // setOpenEditionMinterMetadataFile(importedOffChainMetadataUploadDetails.openEditionMinterMetadataFile)
     }
   }, [importedOffChainMetadataUploadDetails])
 

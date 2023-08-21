@@ -158,7 +158,7 @@ export const MetadataInput = (props: MetadataInputProps) => {
     } else if (!props.importedMetadata) {
       void parseMetadata(emptyMetadataFile)
     }
-  }, [props.selectedMetadataFile?.name])
+  }, [props.selectedMetadataFile?.name, props.importedMetadata])
 
   const nameStateMemo = useMemo(() => nameState, [nameState.value])
   const descriptionStateMemo = useMemo(() => descriptionState, [descriptionState.value])
@@ -183,26 +183,28 @@ export const MetadataInput = (props: MetadataInputProps) => {
 
   useEffect(() => {
     if (props.importedMetadata) {
-      console.log('Imported metadata: ', props.importedMetadata)
-      nameState.onChange(props.importedMetadata.name || '')
-      descriptionState.onChange(props.importedMetadata.description || '')
-      externalUrlState.onChange(props.importedMetadata.external_url || '')
-      youtubeUrlState.onChange(props.importedMetadata.youtube_url || '')
-      if (props.importedMetadata?.attributes && props.importedMetadata?.attributes?.length > 0) {
-        attributesState.reset()
-        props.importedMetadata?.attributes?.forEach((attribute: { trait_type: string; value: string }) => {
-          attributesState.add({
-            trait_type: attribute.trait_type,
-            value: attribute.value,
+      void parseMetadata(emptyMetadataFile).then(() => {
+        console.log('Imported metadata: ', props.importedMetadata)
+        nameState.onChange(props.importedMetadata.name || '')
+        descriptionState.onChange(props.importedMetadata.description || '')
+        externalUrlState.onChange(props.importedMetadata.external_url || '')
+        youtubeUrlState.onChange(props.importedMetadata.youtube_url || '')
+        if (props.importedMetadata?.attributes && props.importedMetadata?.attributes?.length > 0) {
+          attributesState.reset()
+          props.importedMetadata?.attributes?.forEach((attribute: { trait_type: string; value: string }) => {
+            attributesState.add({
+              trait_type: attribute.trait_type,
+              value: attribute.value,
+            })
           })
-        })
-      } else {
-        attributesState.reset()
-        attributesState.add({
-          trait_type: '',
-          value: '',
-        })
-      }
+        } else {
+          attributesState.reset()
+          attributesState.add({
+            trait_type: '',
+            value: '',
+          })
+        }
+      })
     }
   }, [props.importedMetadata])
 
