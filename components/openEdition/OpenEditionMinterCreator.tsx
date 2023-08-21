@@ -303,6 +303,7 @@ export const OpenEditionMinterCreator = ({
     if (!mintingDetails.perAddressLimit || mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
       throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
+    if (mintingDetails.endTime === '') throw new Error('End time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
     if (
       mintingDetails.paymentAddress &&
