@@ -305,6 +305,11 @@ export const OpenEditionMinterCreator = ({
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
     if (mintingDetails.endTime === '') throw new Error('End time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
+    if (Number(mintingDetails.endTime) < Number(mintingDetails.startTime))
+      throw new Error('End time cannot be earlier than start time')
+    if (Number(mintingDetails.endTime) === Number(mintingDetails.startTime))
+      throw new Error('End time cannot be equal to the start time')
+
     if (
       mintingDetails.paymentAddress &&
       (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
