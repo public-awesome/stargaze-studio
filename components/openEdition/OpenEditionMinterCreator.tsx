@@ -468,8 +468,10 @@ export const OpenEditionMinterCreator = ({
             if (getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) !== 'html')
               data.image = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            data.description = data.description.replaceAll('\\n', '\n')
+            if (data.description) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              data.description = data.description.replaceAll('\\n', '\n')
+            }
             const metadataFileBlob = new Blob([JSON.stringify(data)], {
               type: 'application/json',
             })
