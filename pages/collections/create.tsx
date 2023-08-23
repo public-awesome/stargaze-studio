@@ -741,8 +741,10 @@ const CollectionCreationPage: NextPage = () => {
                 if (getAssetType(uploadDetails.assetFiles[i].name) !== 'html')
                   data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
 
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                data.description = data.description.replaceAll('\\n', '\n')
+                if (data.description) {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                  data.description = data.description.replaceAll('\\n', '\n')
+                }
                 const metadataFileBlob = new Blob([JSON.stringify(data)], {
                   type: 'application/json',
                 })
@@ -797,8 +799,10 @@ const CollectionCreationPage: NextPage = () => {
                 type: 'application/json',
               })
 
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              data.description = data.description.replaceAll('\\n', '\n')
+              if (data.description) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                data.description = data.description.replaceAll('\\n', '\n')
+              }
               console.log('Name: ', (uploadDetails.baseMinterMetadataFile as File).name)
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
