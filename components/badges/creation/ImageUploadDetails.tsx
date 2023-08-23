@@ -1,5 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-
+/* eslint-disable jsx-a11y/media-has-caption */
 /* eslint-disable no-misleading-character-class */
 /* eslint-disable no-control-regex */
 
@@ -10,9 +10,10 @@ import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { SingleAssetPreview } from 'components/SingleAssetPreview'
 import type { ChangeEvent } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
+import { getAssetType } from 'utils/getAssetType'
 
 export type UploadMethod = 'new' | 'existing'
 export type MintRule = 'by_key' | 'by_minter' | 'by_keys' | 'not_resolved'
@@ -129,6 +130,22 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
     imageUrlState.onChange('')
   }, [uploadMethod, mintRule])
 
+  const videoPreview = useMemo(
+    () => (
+      <video
+        className="ml-4"
+        controls
+        id="video"
+        onMouseEnter={(e) => e.currentTarget.play()}
+        onMouseLeave={(e) => e.currentTarget.pause()}
+        src={
+          imageUrlState.value ? imageUrlState.value.replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/') : ''
+        }
+      />
+    ),
+    [imageUrlState.value],
+  )
+
   return (
     <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">
       <div className="flex justify-center">
@@ -190,13 +207,16 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
             <div className="flex flex-row w-full">
               <TextInput {...imageUrlState} className="mt-2 ml-6 w-full max-w-2xl" />
               <Conditional test={imageUrlState.value !== ''}>
-                <div className="mt-2 ml-4 w-1/4 border-2 border-dashed">
-                  <img
-                    alt="badge-preview"
-                    className="w-full"
-                    src={imageUrlState.value.replace('IPFS://', 'ipfs://').replace(/,/g, '').replace(/"/g, '').trim()}
-                  />
-                </div>
+                {getAssetType(imageUrlState.value) === 'image' && (
+                  <div className="mt-2 ml-4 w-1/4 border-2 border-dashed">
+                    <img
+                      alt="badge-preview"
+                      className="w-full"
+                      src={imageUrlState.value.replace('IPFS://', 'ipfs://').replace(/,/g, '').replace(/"/g, '').trim()}
+                    />
+                  </div>
+                )}
+                {getAssetType(imageUrlState.value) === 'video' && videoPreview}
               </Conditional>
             </div>
           </div>
@@ -277,7 +297,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
                         )}
                       >
                         <input
-                          accept="image/*"
+                          accept="image/*, video/*"
                           className={clsx(
                             'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
                             'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
