@@ -25,7 +25,10 @@ export const ibcAtom: TokenInfo = {
 
 export const ibcUsdc: TokenInfo = {
   id: 'ibc-usdc',
-  denom: 'ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858'
+      : 'factory/stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3/uusdc',
   displayName: 'USDC',
   decimalPlaces: 6,
 }
