@@ -719,7 +719,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         },
         'auto',
         '',
-        [coin('500000000', 'ustars')],
+        [coin('2000000000', 'ustars')],
       )
       return res.transactionHash
     }
@@ -1018,7 +1018,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         msg: {
           enable_updatable: {},
         },
-        funds: [coin('500000000', 'ustars')],
+        funds: [coin('2000000000', 'ustars')],
       }
     }
 
