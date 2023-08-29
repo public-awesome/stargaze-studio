@@ -123,7 +123,13 @@ export const OpenEditionMinterCreator = ({
       openEditionFactoryContract?.use(
         collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
       ),
-    [openEditionFactoryContract, wallet.address],
+    [
+      openEditionFactoryContract,
+      wallet.address,
+      collectionDetails?.updatable,
+      factoryAddressForSelectedDenom,
+      updatableFactoryAddressForSelectedDenom,
+    ],
   )
 
   const performOpenEditionMinterChecks = () => {

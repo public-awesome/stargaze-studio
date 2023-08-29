@@ -124,7 +124,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const vendingFactoryMessages = useMemo(
     () => vendingFactoryContract?.use(vendingFactoryAddress as string),
-    [vendingFactoryContract, wallet.address],
+    [vendingFactoryContract, wallet.address, vendingFactoryAddress],
   )
 
   const baseFactoryMessages = useMemo(
