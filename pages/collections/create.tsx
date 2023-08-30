@@ -30,6 +30,7 @@ import type { RoyaltyDetailsDataProps } from 'components/collections/creation/Ro
 import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
 import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
 import { Conditional } from 'components/Conditional'
+import { FormControl } from 'components/FormControl'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
@@ -44,6 +45,7 @@ import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'c
 import { dispatchExecute as vendingFactoryDispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
@@ -89,6 +91,17 @@ const CollectionCreationPage: NextPage = () => {
   } = useContracts()
   const scrollRef = useRef<HTMLDivElement>(null)
   const sidetabRef = useRef<any>(null)
+
+  const [importedDetails, setImportedDetails] = useState<{
+    minterType: MinterType
+    collectionDetails: CollectionDetailsDataProps
+    uploadDetails: UploadDetailsDataProps
+    mintingDetails: MintingDetailsDataProps
+    whitelistDetails: WhitelistDetailsDataProps
+    royaltyDetails: RoyaltyDetailsDataProps
+    baseMinterDetails: BaseMinterDetailsDataProps
+    openEditionMinterDetails: OpenEditionMinterDetailsDataProps
+  }>()
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
@@ -1277,6 +1290,64 @@ const CollectionCreationPage: NextPage = () => {
     })
   }
 
+  const exportDetails = () => {
+    const details = {
+      minterType,
+      collectionDetails,
+      uploadDetails,
+      mintingDetails,
+      whitelistDetails,
+      royaltyDetails,
+      baseMinterDetails,
+      openEditionMinterDetails,
+      vendingMinterContractAddress,
+      baseTokenUri: `${baseTokenUri?.startsWith('ipfs://') ? baseTokenUri : `ipfs://${baseTokenUri}`}`,
+      coverImageUrl:
+        uploadDetails?.uploadMethod === 'new'
+          ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0]?.name as string}`
+          : `${coverImageUrl}`,
+    }
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(details)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `${
+      minterType === 'vending'
+        ? collectionDetails?.name
+          ? `${collectionDetails.name}-`
+          : ''
+        : openEditionMinterDetails?.collectionDetails
+        ? `${openEditionMinterDetails.collectionDetails.name}-`
+        : ''
+    }configuration-${new Date().toLocaleString().replaceAll(',', '_')}.json`
+    document.body.appendChild(element) // Required for this to work in FireFox
+    element.click()
+  }
+  const importDetails = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files === null || event.target.files.length === 0) return toast.error('No files selected.')
+    const file = event.target.files[0]
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const contents = e.target?.result
+      const details = JSON.parse(contents as string)
+      setMinterType(details.minterType)
+      if (details.vendingMinterContractAddress) {
+        details.uploadDetails.uploadMethod = 'existing'
+        details.uploadDetails.baseTokenURI = details.baseTokenUri
+        details.uploadDetails.imageUrl = details.coverImageUrl
+      }
+      if (details.openEditionMinterDetails?.openEditionMinterContractAddress) {
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.uploadMethod = 'existing'
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.tokenURI =
+          details.openEditionMinterDetails.tokenUri
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.imageUrl =
+          details.openEditionMinterDetails.coverImageUrl
+      }
+
+      setImportedDetails(details)
+    }
+    reader.readAsText(file)
+  }
+
   const syncCollections = useCallback(async () => {
     const collectionAddress =
       minterType === 'openEdition' ? openEditionMinterCreatorData?.sg721ContractAddress : sg721ContractAddress
@@ -1370,6 +1441,7 @@ const CollectionCreationPage: NextPage = () => {
           on how to create your collection
         </p>
       </div>
+
       <div className="mx-10" ref={scrollRef}>
         <Conditional
           test={minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress !== null}
@@ -1608,7 +1680,8 @@ const CollectionCreationPage: NextPage = () => {
           className={clsx(
             'mx-10 mt-5',
             'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
-            'before:inset-x-0 before:bottom-0 before:border-white/25',
+            'before:inset-x-0 before:bottom-0  before:border-white/25',
+            minterType !== 'base' ? 'rounded-none border-b-2 border-white/25' : 'border-0',
           )}
         >
           <div
@@ -1682,6 +1755,22 @@ const CollectionCreationPage: NextPage = () => {
         </div>
       </div>
 
+      <Conditional test={minterType !== 'base'}>
+        <FormControl className={clsx('py-4 px-10 w-full')} title="Import Creation Configuration">
+          <div className="flex flex-row justify-between mt-5 space-x-2">
+            <input
+              accept="application/json"
+              className="py-4 px-4 w-1/3 rounded-sm border-[1px] border-zinc-500 border-dashed"
+              onChange={(e) => importDetails(e)}
+              type="file"
+            />
+            <Button className="mt-3 h-1/2 w-1/8" onClick={() => exportDetails()}>
+              Export Creation Configuration
+            </Button>
+          </div>
+        </FormControl>
+      </Conditional>
+
       {minterType === 'base' && (
         <div>
           <BaseMinterDetails minterType={minterType} onChange={setBaseMinterDetails} />
@@ -1689,6 +1778,7 @@ const CollectionCreationPage: NextPage = () => {
       )}
       <Conditional test={minterType === 'openEdition'}>
         <OpenEditionMinterCreator
+          importedOpenEditionMinterDetails={importedDetails?.openEditionMinterDetails}
           minimumMintPrice={minimumOpenEditionMintPrice as string}
           minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
           mintTokenFromFactory={mintTokenFromOpenEditionFactory}
@@ -1703,6 +1793,7 @@ const CollectionCreationPage: NextPage = () => {
         <Conditional test={minterType === 'vending' || minterType === 'base'}>
           <UploadDetails
             baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
+            importedUploadDetails={importedDetails?.uploadDetails}
             minterType={minterType}
             onChange={setUploadDetails}
           />
@@ -1723,6 +1814,7 @@ const CollectionCreationPage: NextPage = () => {
             >
               <CollectionDetails
                 coverImageUrl={coverImageUrl as string}
+                importedCollectionDetails={importedDetails?.collectionDetails}
                 minterType={minterType}
                 onChange={setCollectionDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
@@ -1730,6 +1822,7 @@ const CollectionCreationPage: NextPage = () => {
             </Conditional>
             <Conditional test={minterType === 'vending'}>
               <MintingDetails
+                importedMintingDetails={importedDetails?.mintingDetails}
                 minimumMintPrice={
                   whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
                     ? Number(minimumFlexMintPrice) / 1000000
@@ -1766,10 +1859,14 @@ const CollectionCreationPage: NextPage = () => {
         >
           <div className="my-6">
             <Conditional test={minterType === 'vending'}>
-              <WhitelistDetails mintingTokenFromFactory={mintTokenFromVendingFactory} onChange={setWhitelistDetails} />
+              <WhitelistDetails
+                importedWhitelistDetails={importedDetails?.whitelistDetails}
+                mintingTokenFromFactory={mintTokenFromVendingFactory}
+                onChange={setWhitelistDetails}
+              />
               <div className="my-6" />
             </Conditional>
-            <RoyaltyDetails onChange={setRoyaltyDetails} />
+            <RoyaltyDetails importedRoyaltyDetails={importedDetails?.royaltyDetails} onChange={setRoyaltyDetails} />
           </div>
         </Conditional>
         <Conditional test={readyToCreateVm && minterType === 'vending'}>

@@ -13,6 +13,8 @@ export interface MetadataInputProps {
   selectedAssetFile: File
   selectedMetadataFile: File
   updateMetadataToUpload: (metadataFile: File) => void
+  onChange?: (metadata: any) => void
+  importedMetadata?: any
 }
 
 export const MetadataInput = (props: MetadataInputProps) => {
@@ -151,9 +153,12 @@ export const MetadataInput = (props: MetadataInputProps) => {
 
   useEffect(() => {
     console.log(props.selectedMetadataFile?.name)
-    if (props.selectedMetadataFile) void parseMetadata(props.selectedMetadataFile)
-    else void parseMetadata(emptyMetadataFile)
-  }, [props.selectedMetadataFile?.name])
+    if (props.selectedMetadataFile) {
+      void parseMetadata(props.selectedMetadataFile)
+    } else if (!props.importedMetadata) {
+      void parseMetadata(emptyMetadataFile)
+    }
+  }, [props.selectedMetadataFile?.name, props.importedMetadata])
 
   const nameStateMemo = useMemo(() => nameState, [nameState.value])
   const descriptionStateMemo = useMemo(() => descriptionState, [descriptionState.value])
@@ -163,7 +168,10 @@ export const MetadataInput = (props: MetadataInputProps) => {
 
   useEffect(() => {
     console.log('Update metadata')
-    if (metadata) generateUpdatedMetadata()
+    if (metadata) {
+      generateUpdatedMetadata()
+      if (props.onChange) props.onChange(metadata)
+    }
     console.log(metadata)
   }, [
     nameStateMemo.value,
@@ -172,6 +180,33 @@ export const MetadataInput = (props: MetadataInputProps) => {
     youtubeUrlStateMemo.value,
     attributesStateMemo.entries,
   ])
+
+  useEffect(() => {
+    if (props.importedMetadata) {
+      void parseMetadata(emptyMetadataFile).then(() => {
+        console.log('Imported metadata: ', props.importedMetadata)
+        nameState.onChange(props.importedMetadata.name || '')
+        descriptionState.onChange(props.importedMetadata.description || '')
+        externalUrlState.onChange(props.importedMetadata.external_url || '')
+        youtubeUrlState.onChange(props.importedMetadata.youtube_url || '')
+        if (props.importedMetadata?.attributes && props.importedMetadata?.attributes?.length > 0) {
+          attributesState.reset()
+          props.importedMetadata?.attributes?.forEach((attribute: { trait_type: string; value: string }) => {
+            attributesState.add({
+              trait_type: attribute.trait_type,
+              value: attribute.value,
+            })
+          })
+        } else {
+          attributesState.reset()
+          attributesState.add({
+            trait_type: '',
+            value: '',
+          })
+        }
+      })
+    }
+  }, [props.importedMetadata])
 
   return (
     <div>

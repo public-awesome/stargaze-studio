@@ -57,6 +57,10 @@ export interface OpenEditionMinterDetailsDataProps {
   offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
   mintingDetails?: MintingDetailsDataProps
   metadataStorageMethod?: MetadataStorageMethod
+  openEditionMinterContractAddress?: string | null
+  coverImageUrl?: string | null
+  tokenUri?: string | null
+  tokenImageUri?: string | null
 }
 
 interface OpenEditionMinterCreatorProps {
@@ -68,6 +72,7 @@ interface OpenEditionMinterCreatorProps {
   minimumUpdatableMintPrice?: string
   minterType?: MinterType
   mintTokenFromFactory?: TokenInfo | undefined
+  importedOpenEditionMinterDetails?: OpenEditionMinterDetailsDataProps
 }
 
 export interface OpenEditionMinterCreatorDataProps {
@@ -86,6 +91,7 @@ export const OpenEditionMinterCreator = ({
   minimumUpdatableMintPrice,
   minterType,
   mintTokenFromFactory,
+  importedOpenEditionMinterDetails,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
   const { openEditionMinter: openEditionMinterContract, openEditionFactory: openEditionFactoryContract } =
@@ -303,7 +309,13 @@ export const OpenEditionMinterCreator = ({
     if (!mintingDetails.perAddressLimit || mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
       throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
+    if (mintingDetails.endTime === '') throw new Error('End time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
+    if (Number(mintingDetails.endTime) < Number(mintingDetails.startTime))
+      throw new Error('End time cannot be earlier than start time')
+    if (Number(mintingDetails.endTime) === Number(mintingDetails.startTime))
+      throw new Error('End time cannot be equal to the start time')
+
     if (
       mintingDetails.paymentAddress &&
       (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
@@ -577,8 +589,6 @@ export const OpenEditionMinterCreator = ({
       },
     }
 
-    console.log('msg: ', msg)
-    console.log('Using factory address: ', factoryAddressForSelectedDenom)
     const payload: OpenEditionFactoryDispatchExecuteArgs = {
       contract: collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
       messages: openEditionFactoryMessages,
@@ -637,6 +647,10 @@ export const OpenEditionMinterCreator = ({
       offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
       mintingDetails: mintingDetails ? mintingDetails : undefined,
       metadataStorageMethod,
+      openEditionMinterContractAddress,
+      coverImageUrl,
+      tokenUri,
+      tokenImageUri,
     }
     onDetailsChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -647,7 +661,18 @@ export const OpenEditionMinterCreator = ({
     onChainMetadataInputDetails,
     offChainMetadataUploadDetails,
     mintingDetails,
+    metadataStorageMethod,
+    openEditionMinterContractAddress,
+    coverImageUrl,
+    tokenUri,
+    tokenImageUri,
   ])
+
+  useEffect(() => {
+    if (importedOpenEditionMinterDetails) {
+      setMetadataStorageMethod(importedOpenEditionMinterDetails.metadataStorageMethod as MetadataStorageMethod)
+    }
+  }, [importedOpenEditionMinterDetails])
 
   return (
     <div>
@@ -696,16 +721,23 @@ export const OpenEditionMinterCreator = ({
           </div>
         </div>
       </Conditional>
-      <div className={clsx('my-4 mx-10')}>
+      <div className={clsx('my-0 mx-10')}>
         <Conditional test={metadataStorageMethod === 'off-chain'}>
           <div>
-            <OffChainMetadataUploadDetails onChange={setOffChainMetadataUploadDetails} />
+            <OffChainMetadataUploadDetails
+              importedOffChainMetadataUploadDetails={importedOpenEditionMinterDetails?.offChainMetadataUploadDetails}
+              onChange={setOffChainMetadataUploadDetails}
+            />
           </div>
         </Conditional>
         <Conditional test={metadataStorageMethod === 'on-chain'}>
           <div>
-            <ImageUploadDetails onChange={setImageUploadDetails} />
+            <ImageUploadDetails
+              importedImageUploadDetails={importedOpenEditionMinterDetails?.imageUploadDetails}
+              onChange={setImageUploadDetails}
+            />
             <OnChainMetadataInputDetails
+              importedOnChainMetadataInputDetails={importedOpenEditionMinterDetails?.onChainMetadataInputDetails}
               onChange={setOnChainMetadataInputDetails}
               uploadMethod={imageUploadDetails?.uploadMethod}
             />
@@ -719,6 +751,7 @@ export const OpenEditionMinterCreator = ({
               ? (offChainMetadataUploadDetails?.imageUrl as string)
               : (imageUploadDetails?.coverImageUrl as string)
           }
+          importedCollectionDetails={importedOpenEditionMinterDetails?.collectionDetails}
           metadataStorageMethod={metadataStorageMethod}
           onChange={setCollectionDetails}
           uploadMethod={
@@ -728,6 +761,7 @@ export const OpenEditionMinterCreator = ({
           }
         />
         <MintingDetails
+          importedMintingDetails={importedOpenEditionMinterDetails?.mintingDetails}
           minimumMintPrice={
             collectionDetails?.updatable
               ? Number(minimumUpdatableMintPrice) / 1000000
@@ -739,7 +773,10 @@ export const OpenEditionMinterCreator = ({
         />
       </div>
       <div className="my-6">
-        <RoyaltyDetails onChange={setRoyaltyDetails} />
+        <RoyaltyDetails
+          importedRoyaltyDetails={importedOpenEditionMinterDetails?.royaltyDetails}
+          onChange={setRoyaltyDetails}
+        />
       </div>
       <div className="flex justify-end w-full">
         <Button

@@ -19,6 +19,7 @@ interface MintingDetailsProps {
   uploadMethod: UploadMethod
   minimumMintPrice: number
   mintTokenFromFactory?: TokenInfo | undefined
+  importedMintingDetails?: MintingDetailsDataProps
 }
 
 export interface MintingDetailsDataProps {
@@ -35,12 +36,14 @@ export const MintingDetails = ({
   uploadMethod,
   minimumMintPrice,
   mintTokenFromFactory,
+  importedMintingDetails,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>()
   const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
+  const [mintingDetailsImported, setMintingDetailsImported] = useState(false)
 
   const unitPriceState = useNumberInputState({
     id: 'unitPrice',
@@ -75,7 +78,9 @@ export const MintingDetails = ({
   }
 
   useEffect(() => {
-    void resolvePaymentAddress()
+    if (!importedMintingDetails || (importedMintingDetails && mintingDetailsImported)) {
+      void resolvePaymentAddress()
+    }
   }, [paymentAddressState.value])
 
   useEffect(() => {
@@ -102,6 +107,20 @@ export const MintingDetails = ({
     selectedMintToken,
   ])
 
+  useEffect(() => {
+    if (importedMintingDetails) {
+      console.log('Selected Token ID: ', importedMintingDetails.selectedMintToken?.id)
+      unitPriceState.onChange(Number(importedMintingDetails.unitPrice) / 1000000)
+      perAddressLimitState.onChange(importedMintingDetails.perAddressLimit)
+      setTimestamp(new Date(Number(importedMintingDetails.startTime) / 1_000_000))
+      setEndTimestamp(new Date(Number(importedMintingDetails.endTime) / 1_000_000))
+      paymentAddressState.onChange(importedMintingDetails.paymentAddress ? importedMintingDetails.paymentAddress : '')
+      setSelectedMintToken(tokensList.find((token) => token.id === importedMintingDetails.selectedMintToken?.id))
+      setMintingDetailsImported(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedMintingDetails])
+
   return (
     <div className="border-l-[1px] border-gray-500 border-opacity-20">
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
@@ -110,6 +129,7 @@ export const MintingDetails = ({
           <select
             className="py-[9px] px-4 mt-14 ml-4 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
             onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
+            value={selectedMintToken?.displayName}
           >
             {openEditionMinterList
               .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)

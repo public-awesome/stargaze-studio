@@ -20,6 +20,7 @@ interface MintingDetailsProps {
   uploadMethod: UploadMethod
   minimumMintPrice: number
   mintingTokenFromFactory?: TokenInfo
+  importedMintingDetails?: MintingDetailsDataProps
 }
 
 export interface MintingDetailsDataProps {
@@ -37,6 +38,7 @@ export const MintingDetails = ({
   uploadMethod,
   minimumMintPrice,
   mintingTokenFromFactory,
+  importedMintingDetails,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
 
@@ -113,6 +115,18 @@ export const MintingDetails = ({
     selectedMintToken,
   ])
 
+  useEffect(() => {
+    if (importedMintingDetails) {
+      numberOfTokensState.onChange(importedMintingDetails.numTokens)
+      unitPriceState.onChange(Number(importedMintingDetails.unitPrice) / 1_000_000)
+      perAddressLimitState.onChange(importedMintingDetails.perAddressLimit)
+      setTimestamp(new Date(Number(importedMintingDetails.startTime) / 1_000_000))
+      paymentAddressState.onChange(importedMintingDetails.paymentAddress ? importedMintingDetails.paymentAddress : '')
+      setSelectedMintToken(tokensList.find((token) => token.id === importedMintingDetails.selectedMintToken?.id))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedMintingDetails])
+
   return (
     <div>
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
@@ -127,6 +141,7 @@ export const MintingDetails = ({
           <select
             className="py-[9px] px-4 mt-14 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
             onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
+            value={selectedMintToken?.displayName}
           >
             {vendingMinterList
               .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)

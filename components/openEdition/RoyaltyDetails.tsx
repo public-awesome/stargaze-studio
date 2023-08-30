@@ -9,6 +9,7 @@ import { NumberInput, TextInput } from '../forms/FormInput'
 
 interface RoyaltyDetailsProps {
   onChange: (data: RoyaltyDetailsDataProps) => void
+  importedRoyaltyDetails?: RoyaltyDetailsDataProps
 }
 
 export interface RoyaltyDetailsDataProps {
@@ -19,9 +20,10 @@ export interface RoyaltyDetailsDataProps {
 
 type RoyaltyState = 'none' | 'new'
 
-export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
+export const RoyaltyDetails = ({ onChange, importedRoyaltyDetails }: RoyaltyDetailsProps) => {
   const wallet = useWallet()
   const [royaltyState, setRoyaltyState] = useState<RoyaltyState>('none')
+  const [royaltyDetailsImported, setRoyaltyDetailsImported] = useState(false)
 
   const royaltyPaymentAddressState = useInputState({
     id: 'royalty-payment-address',
@@ -40,25 +42,37 @@ export const RoyaltyDetails = ({ onChange }: RoyaltyDetailsProps) => {
   })
 
   useEffect(() => {
-    void resolveAddress(
-      royaltyPaymentAddressState.value
-        .toLowerCase()
-        .replace(/,/g, '')
-        .replace(/"/g, '')
-        .replace(/'/g, '')
-        .replace(/ /g, ''),
-      wallet,
-    ).then((royaltyPaymentAddress) => {
-      royaltyPaymentAddressState.onChange(royaltyPaymentAddress)
-      const data: RoyaltyDetailsDataProps = {
-        royaltyType: royaltyState,
-        paymentAddress: royaltyPaymentAddressState.value,
-        share: Number(royaltyShareState.value),
-      }
-      onChange(data)
-    })
+    if (!importedRoyaltyDetails || (importedRoyaltyDetails && royaltyDetailsImported)) {
+      void resolveAddress(
+        royaltyPaymentAddressState.value
+          .toLowerCase()
+          .replace(/,/g, '')
+          .replace(/"/g, '')
+          .replace(/'/g, '')
+          .replace(/ /g, ''),
+        wallet,
+      ).then((royaltyPaymentAddress) => {
+        royaltyPaymentAddressState.onChange(royaltyPaymentAddress)
+        const data: RoyaltyDetailsDataProps = {
+          royaltyType: royaltyState,
+          paymentAddress: royaltyPaymentAddressState.value,
+          share: Number(royaltyShareState.value),
+        }
+        onChange(data)
+      })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [royaltyState, royaltyPaymentAddressState.value, royaltyShareState.value])
+
+  useEffect(() => {
+    if (importedRoyaltyDetails) {
+      setRoyaltyState(importedRoyaltyDetails.royaltyType)
+      royaltyPaymentAddressState.onChange(importedRoyaltyDetails.paymentAddress.toString())
+      royaltyShareState.onChange(importedRoyaltyDetails.share.toString())
+      setRoyaltyDetailsImported(true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedRoyaltyDetails])
 
   return (
     <div className="py-3 px-8 mx-10 rounded border-2 border-white/20">
