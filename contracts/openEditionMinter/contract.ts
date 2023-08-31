@@ -356,9 +356,10 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         console.log(factoryParameters?.params?.extension?.airdrop_mint_fee_bps)
 
         const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
+        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ustars'
         if (!price) {
           throw new Error(
-            'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
+            'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to an Open Edition Factory.',
           )
         }
         const airdropFee = Number(price) * Number(factoryParameters.params.extension?.airdrop_mint_fee_bps)
@@ -370,7 +371,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
           },
           'auto',
           '',
-          airdropFee > 0 ? [coin(airdropFee / 100 / 100, 'ustars')] : [],
+          airdropFee > 0 ? [coin(airdropFee / 100 / 100, denom as string)] : [],
         )
         return res.transactionHash
       })
@@ -386,6 +387,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         })
 
         const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
+        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ustars'
         if (!price) {
           throw new Error(
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
@@ -403,7 +405,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
               sender: senderAddress,
               contract: contractAddress,
               msg: toUtf8(JSON.stringify(msg)),
-              funds: airdropFee > 0 ? [coin(airdropFee / 100 / 100, 'ustars')] : [],
+              funds: airdropFee > 0 ? [coin(airdropFee / 100 / 100, denom as string)] : [],
             }),
           }
 
@@ -426,6 +428,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         })
 
         const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
+        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ustars'
         if (!price) {
           throw new Error(
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
@@ -443,7 +446,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
               sender: senderAddress,
               contract: contractAddress,
               msg: toUtf8(JSON.stringify(msg)),
-              funds: airdropFee > 0 ? [coin(airdropFee / 100 / 100, 'ustars')] : [],
+              funds: airdropFee > 0 ? [coin(airdropFee / 100 / 100, denom as string)] : [],
             }),
           }
 

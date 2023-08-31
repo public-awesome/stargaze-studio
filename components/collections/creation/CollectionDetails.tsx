@@ -26,6 +26,7 @@ interface CollectionDetailsProps {
   uploadMethod: UploadMethod
   coverImageUrl: string
   minterType: MinterType
+  importedCollectionDetails?: CollectionDetailsDataProps
 }
 
 export interface CollectionDetailsDataProps {
@@ -39,7 +40,13 @@ export interface CollectionDetailsDataProps {
   updatable: boolean
 }
 
-export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minterType }: CollectionDetailsProps) => {
+export const CollectionDetails = ({
+  onChange,
+  uploadMethod,
+  coverImageUrl,
+  minterType,
+  importedCollectionDetails,
+}: CollectionDetailsProps) => {
   const [coverImage, setCoverImage] = useState<File | null>(null)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
@@ -104,6 +111,23 @@ export const CollectionDetails = ({ onChange, uploadMethod, coverImageUrl, minte
     explicit,
     updatable,
   ])
+
+  useEffect(() => {
+    if (importedCollectionDetails) {
+      nameState.onChange(importedCollectionDetails.name)
+      descriptionState.onChange(importedCollectionDetails.description)
+      symbolState.onChange(importedCollectionDetails.symbol)
+      externalLinkState.onChange(importedCollectionDetails.externalLink || '')
+      setTimestamp(
+        importedCollectionDetails.startTradingTime
+          ? new Date(parseInt(importedCollectionDetails.startTradingTime) / 1_000_000)
+          : undefined,
+      )
+      setExplicit(importedCollectionDetails.explicit)
+      setUpdatable(importedCollectionDetails.updatable)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedCollectionDetails])
 
   const selectCoverImage = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files === null) return toast.error('Error selecting cover image')

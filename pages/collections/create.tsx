@@ -30,9 +30,12 @@ import type { RoyaltyDetailsDataProps } from 'components/collections/creation/Ro
 import type { UploadDetailsDataProps } from 'components/collections/creation/UploadDetails'
 import type { WhitelistDetailsDataProps } from 'components/collections/creation/WhitelistDetails'
 import { Conditional } from 'components/Conditional'
+import { FormControl } from 'components/FormControl'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
+import { flexibleVendingMinterList, openEditionMinterList, vendingMinterList } from 'config/minter'
+import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
@@ -42,6 +45,7 @@ import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'c
 import { dispatchExecute as vendingFactoryDispatchExecute } from 'contracts/vendingFactory/messages/execute'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
+import type { ChangeEvent } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
@@ -71,6 +75,8 @@ import { uid } from 'utils/random'
 import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
+import type { OpenEditionMinterDetailsDataProps } from '../../components/openEdition/OpenEditionMinterCreator'
+import { stars, tokensList } from '../../config/token'
 import { getAssetType } from '../../utils/getAssetType'
 import { isValidAddress } from '../../utils/isValidAddress'
 
@@ -86,20 +92,23 @@ const CollectionCreationPage: NextPage = () => {
   const scrollRef = useRef<HTMLDivElement>(null)
   const sidetabRef = useRef<any>(null)
 
-  const vendingFactoryMessages = useMemo(
-    () => vendingFactoryContract?.use(VENDING_FACTORY_ADDRESS),
-    [vendingFactoryContract, wallet.address],
-  )
-
-  const baseFactoryMessages = useMemo(
-    () => baseFactoryContract?.use(BASE_FACTORY_ADDRESS),
-    [baseFactoryContract, wallet.address],
-  )
+  const [importedDetails, setImportedDetails] = useState<{
+    minterType: MinterType
+    collectionDetails: CollectionDetailsDataProps
+    uploadDetails: UploadDetailsDataProps
+    mintingDetails: MintingDetailsDataProps
+    whitelistDetails: WhitelistDetailsDataProps
+    royaltyDetails: RoyaltyDetailsDataProps
+    baseMinterDetails: BaseMinterDetailsDataProps
+    openEditionMinterDetails: OpenEditionMinterDetailsDataProps
+  }>()
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
   const [baseMinterDetails, setBaseMinterDetails] = useState<BaseMinterDetailsDataProps | null>(null)
-  const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterCreatorDataProps | null>(
+  const [openEditionMinterCreatorData, setOpenEditionMinterCreatorData] =
+    useState<OpenEditionMinterCreatorDataProps | null>(null)
+  const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterDetailsDataProps | null>(
     null,
   )
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
@@ -122,8 +131,23 @@ const CollectionCreationPage: NextPage = () => {
   const [minimumOpenEditionUpdatableMintPrice, setMinimumOpenEditionUpdatableMintPrice] = useState<string | null>('0')
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
+  const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(stars)
+  const [mintTokenFromVendingFactory, setMintTokenFromVendingFactory] = useState<TokenInfo | undefined>(stars)
+  const [vendingFactoryAddress, setVendingFactoryAddress] = useState<string | null>(VENDING_FACTORY_ADDRESS)
+
+  const vendingFactoryMessages = useMemo(
+    () => vendingFactoryContract?.use(vendingFactoryAddress as string),
+    [vendingFactoryContract, wallet.address, vendingFactoryAddress],
+  )
+
+  const baseFactoryMessages = useMemo(
+    () => baseFactoryContract?.use(BASE_FACTORY_ADDRESS),
+    [baseFactoryContract, wallet.address],
+  )
+
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
+  const [initialParametersFetched, setInitialParametersFetched] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [readyToCreateVm, setReadyToCreateVm] = useState(false)
   const [readyToCreateBm, setReadyToCreateBm] = useState(false)
@@ -484,7 +508,10 @@ const CollectionCreationPage: NextPage = () => {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
-      mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
+      mint_price: coin(
+        String(Number(whitelistDetails?.unitPrice)),
+        mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+      ),
       per_address_limit: whitelistDetails?.perAddressLimit,
       member_limit: whitelistDetails?.memberLimit,
       admins: whitelistDetails?.admins || [wallet.address],
@@ -495,7 +522,10 @@ const CollectionCreationPage: NextPage = () => {
       members: whitelistDetails?.members,
       start_time: whitelistDetails?.startTime,
       end_time: whitelistDetails?.endTime,
-      mint_price: coin(String(Number(whitelistDetails?.unitPrice)), 'ustars'),
+      mint_price: coin(
+        String(Number(whitelistDetails?.unitPrice)),
+        mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+      ),
       member_limit: whitelistDetails?.memberLimit,
       admins: whitelistDetails?.admins || [wallet.address],
       admins_mutable: whitelistDetails?.adminsMutable,
@@ -532,17 +562,13 @@ const CollectionCreationPage: NextPage = () => {
           payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress : undefined,
           mint_price: {
             amount: mintingDetails?.unitPrice,
-            denom: 'ustars',
+            denom: (mintTokenFromVendingFactory?.denom as string) || 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           whitelist,
         },
         collection_params: {
-          code_id: collectionDetails?.updatable
-            ? whitelistDetails?.whitelistType === 'flex'
-              ? SG721_CODE_ID
-              : SG721_UPDATABLE_CODE_ID
-            : SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -563,12 +589,7 @@ const CollectionCreationPage: NextPage = () => {
     }
 
     const payload: VendingFactoryDispatchExecuteArgs = {
-      contract:
-        whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
-          ? VENDING_FACTORY_FLEX_ADDRESS
-          : collectionDetails?.updatable
-          ? VENDING_FACTORY_UPDATABLE_ADDRESS
-          : VENDING_FACTORY_ADDRESS,
+      contract: vendingFactoryAddress as string,
       messages: vendingFactoryMessages,
       txSigner: wallet.address,
       msg,
@@ -668,8 +689,6 @@ const CollectionCreationPage: NextPage = () => {
               setCreatingCollection(false)
             })
         } else {
-          console.log('Here')
-          console.log(data.baseMinterAddress)
           await toast
             .promise(
               baseMinterContract
@@ -735,8 +754,10 @@ const CollectionCreationPage: NextPage = () => {
                 if (getAssetType(uploadDetails.assetFiles[i].name) !== 'html')
                   data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
 
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-                data.description = data.description.replaceAll('\\n', '\n')
+                if (data.description) {
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                  data.description = data.description.replaceAll('\\n', '\n')
+                }
                 const metadataFileBlob = new Blob([JSON.stringify(data)], {
                   type: 'application/json',
                 })
@@ -791,8 +812,10 @@ const CollectionCreationPage: NextPage = () => {
                 type: 'application/json',
               })
 
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              data.description = data.description.replaceAll('\\n', '\n')
+              if (data.description) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                data.description = data.description.replaceAll('\\n', '\n')
+              }
               console.log('Name: ', (uploadDetails.baseMinterMetadataFile as File).name)
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
@@ -907,14 +930,24 @@ const CollectionCreationPage: NextPage = () => {
     if (mintingDetails.unitPrice === '') throw new Error('Public mint price is required')
     if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
       if (Number(mintingDetails.unitPrice) < Number(minimumFlexMintPrice))
-        throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} STARS`)
+        throw new Error(
+          `Invalid unit price: The minimum unit price is ${Number(minimumFlexMintPrice) / 1000000} ${
+            mintTokenFromVendingFactory ? mintTokenFromVendingFactory.displayName : 'STARS'
+          }`,
+        )
     } else if (collectionDetails?.updatable) {
       if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
         throw new Error(
-          `Invalid unit price: The minimum unit price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
+          `Invalid unit price: The minimum unit price is ${Number(minimumUpdatableMintPrice) / 1000000} ${
+            mintTokenFromVendingFactory ? mintTokenFromVendingFactory.displayName : 'STARS'
+          }`,
         )
     } else if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
-      throw new Error(`Invalid unit price: The minimum unit price is ${Number(minimumMintPrice) / 1000000} STARS`)
+      throw new Error(
+        `Invalid unit price: The minimum unit price is ${Number(minimumMintPrice) / 1000000} ${
+          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.displayName : 'STARS'
+        }`,
+      )
     if (
       !mintingDetails.perAddressLimit ||
       mintingDetails.perAddressLimit < 1 ||
@@ -1047,7 +1080,7 @@ const CollectionCreationPage: NextPage = () => {
     }
   }
 
-  const fetchFactoryParameters = async () => {
+  const fetchInitialFactoryParameters = async () => {
     const client = wallet.client
     if (!client) return
     if (BASE_FACTORY_ADDRESS) {
@@ -1122,9 +1155,103 @@ const CollectionCreationPage: NextPage = () => {
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
       setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
-      setMinimumOpenEditionMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+      setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
     }
+    setInitialParametersFetched(true)
   }
+
+  const fetchOpenEditionFactoryParameters = useCallback(async () => {
+    const client = wallet.client
+    if (!client) return
+    const factoryForSelectedDenom = openEditionMinterList.find(
+      (minter) =>
+        minter.supportedToken === openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
+        minter.updatable === false,
+    )
+    const updatableFactoryForSelectedDenom = openEditionMinterList.find(
+      (minter) =>
+        minter.supportedToken === openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
+        minter.updatable === true,
+    )
+    if (factoryForSelectedDenom?.factoryAddress) {
+      const openEditionFactoryParameters = await client
+        .queryContractSmart(factoryForSelectedDenom.factoryAddress, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
+      if (!openEditionMinterDetails?.collectionDetails?.updatable) {
+        setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
+        setMintTokenFromOpenEditionFactory(
+          tokensList.find((token) => token.denom === openEditionFactoryParameters?.params?.min_mint_price?.denom),
+        )
+      }
+    }
+    if (updatableFactoryForSelectedDenom?.factoryAddress) {
+      const openEditionUpdatableFactoryParameters = await client
+        .queryContractSmart(updatableFactoryForSelectedDenom.factoryAddress, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
+      if (openEditionMinterDetails?.collectionDetails?.updatable) {
+        setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
+        setMintTokenFromOpenEditionFactory(
+          tokensList.find(
+            (token) => token.denom === openEditionUpdatableFactoryParameters?.params?.min_mint_price?.denom,
+          ),
+        )
+      }
+    }
+  }, [
+    openEditionMinterDetails?.mintingDetails?.selectedMintToken,
+    openEditionMinterDetails?.collectionDetails?.updatable,
+    wallet.client,
+  ])
+
+  const fetchVendingFactoryParameters = useCallback(async () => {
+    const client = wallet.client
+    if (!client) return
+    const vendingFactoryForSelectedDenom = vendingMinterList
+      .concat(flexibleVendingMinterList)
+      .find(
+        (minter) =>
+          minter.supportedToken === mintingDetails?.selectedMintToken &&
+          minter.updatable === collectionDetails?.updatable &&
+          minter.flexible === (whitelistDetails?.whitelistType === 'flex'),
+      )?.factoryAddress
+    if (vendingFactoryForSelectedDenom) {
+      setVendingFactoryAddress(vendingFactoryForSelectedDenom)
+      const vendingFactoryParameters = await client
+        .queryContractSmart(vendingFactoryForSelectedDenom, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+
+      if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
+        setVendingMinterFlexCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setMinimumFlexMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
+      } else if (collectionDetails?.updatable) {
+        setVendingMinterUpdatableCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setMinimumUpdatableMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
+      } else {
+        setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
+      }
+      setMintTokenFromVendingFactory(
+        tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
+      )
+    }
+  }, [
+    collectionDetails?.updatable,
+    mintingDetails?.selectedMintToken,
+    wallet.client,
+    whitelistDetails?.whitelistState,
+    whitelistDetails?.whitelistType,
+  ])
 
   const checkwalletBalance = async () => {
     const walletBalance = await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
@@ -1163,27 +1290,85 @@ const CollectionCreationPage: NextPage = () => {
     })
   }
 
+  const exportDetails = () => {
+    const details = {
+      minterType,
+      collectionDetails,
+      uploadDetails,
+      mintingDetails,
+      whitelistDetails,
+      royaltyDetails,
+      baseMinterDetails,
+      openEditionMinterDetails,
+      vendingMinterContractAddress,
+      baseTokenUri: `${baseTokenUri?.startsWith('ipfs://') ? baseTokenUri : `ipfs://${baseTokenUri}`}`,
+      coverImageUrl:
+        uploadDetails?.uploadMethod === 'new'
+          ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0]?.name as string}`
+          : `${coverImageUrl}`,
+    }
+    const element = document.createElement('a')
+    const file = new Blob([JSON.stringify(details)], { type: 'text/plain' })
+    element.href = URL.createObjectURL(file)
+    element.download = `${
+      minterType === 'vending'
+        ? collectionDetails?.name
+          ? `${collectionDetails.name}-`
+          : ''
+        : openEditionMinterDetails?.collectionDetails
+        ? `${openEditionMinterDetails.collectionDetails.name}-`
+        : ''
+    }configuration-${new Date().toLocaleString().replaceAll(',', '_')}.json`
+    document.body.appendChild(element) // Required for this to work in FireFox
+    element.click()
+  }
+  const importDetails = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files === null || event.target.files.length === 0) return toast.error('No files selected.')
+    const file = event.target.files[0]
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const contents = e.target?.result
+      const details = JSON.parse(contents as string)
+      setMinterType(details.minterType)
+      if (details.vendingMinterContractAddress) {
+        details.uploadDetails.uploadMethod = 'existing'
+        details.uploadDetails.baseTokenURI = details.baseTokenUri
+        details.uploadDetails.imageUrl = details.coverImageUrl
+      }
+      if (details.openEditionMinterDetails?.openEditionMinterContractAddress) {
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.uploadMethod = 'existing'
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.tokenURI =
+          details.openEditionMinterDetails.tokenUri
+        details.openEditionMinterDetails.offChainMetadataUploadDetails.imageUrl =
+          details.openEditionMinterDetails.coverImageUrl
+      }
+
+      setImportedDetails(details)
+    }
+    reader.readAsText(file)
+  }
+
   const syncCollections = useCallback(async () => {
     const collectionAddress =
-      minterType === 'openEdition' ? openEditionMinterDetails?.sg721ContractAddress : sg721ContractAddress
+      minterType === 'openEdition' ? openEditionMinterCreatorData?.sg721ContractAddress : sg721ContractAddress
     if (collectionAddress && SYNC_COLLECTIONS_API_URL) {
       await axios.get(`${SYNC_COLLECTIONS_API_URL}/${collectionAddress}`).catch((error) => {
         console.error('Sync collections: ', error)
       })
     }
-  }, [minterType, openEditionMinterDetails?.sg721ContractAddress, sg721ContractAddress])
+  }, [minterType, openEditionMinterCreatorData?.sg721ContractAddress, sg721ContractAddress])
 
   useEffect(() => {
     if (
       vendingMinterContractAddress !== null ||
-      openEditionMinterDetails?.openEditionMinterContractAddress ||
+      openEditionMinterCreatorData?.openEditionMinterContractAddress ||
       isMintingComplete
     ) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
     if (
       (minterType === 'vending' && vendingMinterContractAddress !== null) ||
-      (minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress) ||
+      (minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress) ||
       (minterType === 'base' && vendingMinterContractAddress !== null && isMintingComplete)
     ) {
       void syncCollections()
@@ -1196,7 +1381,7 @@ const CollectionCreationPage: NextPage = () => {
     }
   }, [
     vendingMinterContractAddress,
-    openEditionMinterDetails?.openEditionMinterContractAddress,
+    openEditionMinterCreatorData?.openEditionMinterContractAddress,
     isMintingComplete,
     minterType,
     syncCollections,
@@ -1214,8 +1399,18 @@ const CollectionCreationPage: NextPage = () => {
   }, [minterType, baseMinterDetails?.baseMinterAcquisitionMethod, uploadDetails?.uploadMethod])
 
   useEffect(() => {
-    void fetchFactoryParameters()
+    if (!initialParametersFetched) {
+      void fetchInitialFactoryParameters()
+    }
   }, [wallet.client])
+
+  useEffect(() => {
+    void fetchOpenEditionFactoryParameters()
+  }, [fetchOpenEditionFactoryParameters])
+
+  useEffect(() => {
+    void fetchVendingFactoryParameters()
+  }, [fetchVendingFactoryParameters])
 
   return (
     <div>
@@ -1246,9 +1441,10 @@ const CollectionCreationPage: NextPage = () => {
           on how to create your collection
         </p>
       </div>
+
       <div className="mx-10" ref={scrollRef}>
         <Conditional
-          test={minterType === 'openEdition' && openEditionMinterDetails?.openEditionMinterContractAddress !== null}
+          test={minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress !== null}
         >
           <Alert className="mt-5" type="info">
             <div>
@@ -1257,10 +1453,10 @@ const CollectionCreationPage: NextPage = () => {
                 className="text-stargaze hover:underline"
                 external
                 href={`/contracts/openEditionMinter/query/?contractAddress=${
-                  openEditionMinterDetails?.openEditionMinterContractAddress as string
+                  openEditionMinterCreatorData?.openEditionMinterContractAddress as string
                 }`}
               >
-                {openEditionMinterDetails?.openEditionMinterContractAddress as string}
+                {openEditionMinterCreatorData?.openEditionMinterContractAddress as string}
               </Anchor>
               <br />
               SG721 Contract Address:{'  '}
@@ -1268,10 +1464,10 @@ const CollectionCreationPage: NextPage = () => {
                 className="text-stargaze hover:underline"
                 external
                 href={`/contracts/sg721/query/?contractAddress=${
-                  openEditionMinterDetails?.sg721ContractAddress as string
+                  openEditionMinterCreatorData?.sg721ContractAddress as string
                 }`}
               >
-                {openEditionMinterDetails?.sg721ContractAddress as string}
+                {openEditionMinterCreatorData?.sg721ContractAddress as string}
               </Anchor>
               <br />
               Transaction Hash: {'  '}
@@ -1279,18 +1475,18 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`${BLOCK_EXPLORER_URL}/tx/${openEditionMinterDetails?.transactionHash as string}`}
+                  href={`${BLOCK_EXPLORER_URL}/tx/${openEditionMinterCreatorData?.transactionHash as string}`}
                 >
-                  {openEditionMinterDetails?.transactionHash}
+                  {openEditionMinterCreatorData?.transactionHash}
                 </Anchor>
               </Conditional>
               <Conditional test={NETWORK === 'mainnet'}>
                 <Anchor
                   className="text-stargaze hover:underline"
                   external
-                  href={`${BLOCK_EXPLORER_URL}/txs/${openEditionMinterDetails?.transactionHash as string}`}
+                  href={`${BLOCK_EXPLORER_URL}/txs/${openEditionMinterCreatorData?.transactionHash as string}`}
                 >
-                  {openEditionMinterDetails?.transactionHash}
+                  {openEditionMinterCreatorData?.transactionHash}
                 </Anchor>
               </Conditional>
               <br />
@@ -1299,7 +1495,7 @@ const CollectionCreationPage: NextPage = () => {
                   className="text-white"
                   external
                   href={`${STARGAZE_URL}/launchpad/${
-                    openEditionMinterDetails?.openEditionMinterContractAddress as string
+                    openEditionMinterCreatorData?.openEditionMinterContractAddress as string
                   }`}
                 >
                   View on Launchpad
@@ -1484,7 +1680,8 @@ const CollectionCreationPage: NextPage = () => {
           className={clsx(
             'mx-10 mt-5',
             'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
-            'before:inset-x-0 before:bottom-0 before:border-white/25',
+            'before:inset-x-0 before:bottom-0  before:border-white/25',
+            minterType !== 'base' ? 'rounded-none border-b-2 border-white/25' : 'border-0',
           )}
         >
           <div
@@ -1558,6 +1755,22 @@ const CollectionCreationPage: NextPage = () => {
         </div>
       </div>
 
+      <Conditional test={minterType !== 'base'}>
+        <FormControl className={clsx('py-4 px-10 w-full')} title="Import Creation Configuration">
+          <div className="flex flex-row justify-between mt-5 space-x-2">
+            <input
+              accept="application/json"
+              className="py-4 px-4 w-1/3 rounded-sm border-[1px] border-zinc-500 border-dashed"
+              onChange={(e) => importDetails(e)}
+              type="file"
+            />
+            <Button className="mt-3 h-1/2 w-1/8" onClick={() => exportDetails()}>
+              Export Creation Configuration
+            </Button>
+          </div>
+        </FormControl>
+      </Conditional>
+
       {minterType === 'base' && (
         <div>
           <BaseMinterDetails minterType={minterType} onChange={setBaseMinterDetails} />
@@ -1565,10 +1778,13 @@ const CollectionCreationPage: NextPage = () => {
       )}
       <Conditional test={minterType === 'openEdition'}>
         <OpenEditionMinterCreator
+          importedOpenEditionMinterDetails={importedDetails?.openEditionMinterDetails}
           minimumMintPrice={minimumOpenEditionMintPrice as string}
           minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
+          mintTokenFromFactory={mintTokenFromOpenEditionFactory}
           minterType={minterType}
-          onChange={setOpenEditionMinterDetails}
+          onChange={setOpenEditionMinterCreatorData}
+          onDetailsChange={setOpenEditionMinterDetails}
           openEditionMinterCreationFee={openEditionMinterCreationFee as string}
           openEditionMinterUpdatableCreationFee={openEditionMinterUpdatableCreationFee as string}
         />
@@ -1577,6 +1793,7 @@ const CollectionCreationPage: NextPage = () => {
         <Conditional test={minterType === 'vending' || minterType === 'base'}>
           <UploadDetails
             baseMinterAcquisitionMethod={baseMinterDetails?.baseMinterAcquisitionMethod}
+            importedUploadDetails={importedDetails?.uploadDetails}
             minterType={minterType}
             onChange={setUploadDetails}
           />
@@ -1597,6 +1814,7 @@ const CollectionCreationPage: NextPage = () => {
             >
               <CollectionDetails
                 coverImageUrl={coverImageUrl as string}
+                importedCollectionDetails={importedDetails?.collectionDetails}
                 minterType={minterType}
                 onChange={setCollectionDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
@@ -1604,11 +1822,15 @@ const CollectionCreationPage: NextPage = () => {
             </Conditional>
             <Conditional test={minterType === 'vending'}>
               <MintingDetails
+                importedMintingDetails={importedDetails?.mintingDetails}
                 minimumMintPrice={
-                  collectionDetails?.updatable
+                  whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
+                    ? Number(minimumFlexMintPrice) / 1000000
+                    : collectionDetails?.updatable
                     ? Number(minimumUpdatableMintPrice) / 1000000
                     : Number(minimumMintPrice) / 1000000
                 }
+                mintingTokenFromFactory={mintTokenFromVendingFactory}
                 numberOfTokens={uploadDetails?.assetFiles.length}
                 onChange={setMintingDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
@@ -1637,10 +1859,14 @@ const CollectionCreationPage: NextPage = () => {
         >
           <div className="my-6">
             <Conditional test={minterType === 'vending'}>
-              <WhitelistDetails onChange={setWhitelistDetails} />
+              <WhitelistDetails
+                importedWhitelistDetails={importedDetails?.whitelistDetails}
+                mintingTokenFromFactory={mintTokenFromVendingFactory}
+                onChange={setWhitelistDetails}
+              />
               <div className="my-6" />
             </Conditional>
-            <RoyaltyDetails onChange={setRoyaltyDetails} />
+            <RoyaltyDetails importedRoyaltyDetails={importedDetails?.royaltyDetails} onChange={setRoyaltyDetails} />
           </div>
         </Conditional>
         <Conditional test={readyToCreateVm && minterType === 'vending'}>

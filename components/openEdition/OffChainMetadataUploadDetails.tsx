@@ -28,6 +28,7 @@ export type UploadMethod = 'new' | 'existing'
 interface OffChainMetadataUploadDetailsProps {
   onChange: (value: OffChainMetadataUploadDetailsDataProps) => void
   metadataStorageMethod?: MetadataStorageMethod
+  importedOffChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
 }
 
 export interface OffChainMetadataUploadDetailsDataProps {
@@ -41,11 +42,13 @@ export interface OffChainMetadataUploadDetailsDataProps {
   tokenURI?: string
   imageUrl?: string
   openEditionMinterMetadataFile?: File
+  exportedMetadata?: any
 }
 
 export const OffChainMetadataUploadDetails = ({
   onChange,
   metadataStorageMethod,
+  importedOffChainMetadataUploadDetails,
 }: OffChainMetadataUploadDetailsProps) => {
   const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
   const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
@@ -53,6 +56,7 @@ export const OffChainMetadataUploadDetails = ({
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
+  const [exportedMetadata, setExportedMetadata] = useState(undefined)
 
   const [openEditionMinterMetadataFile, setOpenEditionMinterMetadataFile] = useState<File | undefined>()
 
@@ -204,6 +208,7 @@ export const OffChainMetadataUploadDetails = ({
           .replace(regex, '')
           .trim(),
         openEditionMinterMetadataFile,
+        exportedMetadata,
       }
       onChange(data)
     } catch (error: any) {
@@ -222,6 +227,7 @@ export const OffChainMetadataUploadDetails = ({
     coverImageUrlState.value,
     refreshMetadata,
     openEditionMinterMetadataFile,
+    exportedMetadata,
   ])
 
   useEffect(() => {
@@ -229,9 +235,24 @@ export const OffChainMetadataUploadDetails = ({
     setMetadataFilesArray([])
     if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
-    tokenUriState.onChange('')
-    coverImageUrlState.onChange('')
+    if (!importedOffChainMetadataUploadDetails) {
+      tokenUriState.onChange('')
+      coverImageUrlState.onChange('')
+    }
   }, [uploadMethod, metadataStorageMethod])
+
+  useEffect(() => {
+    if (importedOffChainMetadataUploadDetails) {
+      setUploadService(importedOffChainMetadataUploadDetails.uploadService)
+      nftStorageApiKeyState.onChange(importedOffChainMetadataUploadDetails.nftStorageApiKey || '')
+      pinataApiKeyState.onChange(importedOffChainMetadataUploadDetails.pinataApiKey || '')
+      pinataSecretKeyState.onChange(importedOffChainMetadataUploadDetails.pinataSecretKey || '')
+      setUploadMethod(importedOffChainMetadataUploadDetails.uploadMethod)
+      tokenUriState.onChange(importedOffChainMetadataUploadDetails.tokenURI || '')
+      coverImageUrlState.onChange(importedOffChainMetadataUploadDetails.imageUrl || '')
+      // setOpenEditionMinterMetadataFile(importedOffChainMetadataUploadDetails.openEditionMinterMetadataFile)
+    }
+  }, [importedOffChainMetadataUploadDetails])
 
   return (
     <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">
@@ -447,6 +468,8 @@ export const OffChainMetadataUploadDetails = ({
                 />
               </div>
               <MetadataInput
+                importedMetadata={importedOffChainMetadataUploadDetails?.exportedMetadata}
+                onChange={setExportedMetadata}
                 selectedAssetFile={assetFilesArray[0]}
                 selectedMetadataFile={metadataFilesArray[0]}
                 updateMetadataToUpload={updateOpenEditionMinterMetadataFile}

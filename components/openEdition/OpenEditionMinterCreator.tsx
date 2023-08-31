@@ -12,6 +12,8 @@ import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
+import { openEditionMinterList } from 'config/minter'
+import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
@@ -47,13 +49,30 @@ import { type RoyaltyDetailsDataProps, RoyaltyDetails } from './RoyaltyDetails'
 
 export type MetadataStorageMethod = 'off-chain' | 'on-chain'
 
+export interface OpenEditionMinterDetailsDataProps {
+  imageUploadDetails?: ImageUploadDetailsDataProps
+  collectionDetails?: CollectionDetailsDataProps
+  royaltyDetails?: RoyaltyDetailsDataProps
+  onChainMetadataInputDetails?: OnChainMetadataInputDetailsDataProps
+  offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
+  mintingDetails?: MintingDetailsDataProps
+  metadataStorageMethod?: MetadataStorageMethod
+  openEditionMinterContractAddress?: string | null
+  coverImageUrl?: string | null
+  tokenUri?: string | null
+  tokenImageUri?: string | null
+}
+
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
+  onDetailsChange: (data: OpenEditionMinterDetailsDataProps) => void
   openEditionMinterUpdatableCreationFee?: string
   openEditionMinterCreationFee?: string
   minimumMintPrice?: string
   minimumUpdatableMintPrice?: string
   minterType?: MinterType
+  mintTokenFromFactory?: TokenInfo | undefined
+  importedOpenEditionMinterDetails?: OpenEditionMinterDetailsDataProps
 }
 
 export interface OpenEditionMinterCreatorDataProps {
@@ -65,20 +84,19 @@ export interface OpenEditionMinterCreatorDataProps {
 
 export const OpenEditionMinterCreator = ({
   onChange,
+  onDetailsChange,
   openEditionMinterCreationFee,
   openEditionMinterUpdatableCreationFee,
   minimumMintPrice,
   minimumUpdatableMintPrice,
   minterType,
+  mintTokenFromFactory,
+  importedOpenEditionMinterDetails,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
   const { openEditionMinter: openEditionMinterContract, openEditionFactory: openEditionFactoryContract } =
     useContracts()
 
-  const openEditionFactoryMessages = useMemo(
-    () => openEditionFactoryContract?.use(OPEN_EDITION_FACTORY_ADDRESS),
-    [openEditionFactoryContract, wallet.address],
-  )
   const [metadataStorageMethod, setMetadataStorageMethod] = useState<MetadataStorageMethod>('off-chain')
   const [imageUploadDetails, setImageUploadDetails] = useState<ImageUploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
@@ -98,6 +116,27 @@ export const OpenEditionMinterCreator = ({
   const [openEditionMinterContractAddress, setOpenEditionMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+
+  const factoryAddressForSelectedDenom =
+    openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === false)
+      ?.factoryAddress || OPEN_EDITION_FACTORY_ADDRESS
+  const updatableFactoryAddressForSelectedDenom =
+    openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === true)
+      ?.factoryAddress || OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS
+
+  const openEditionFactoryMessages = useMemo(
+    () =>
+      openEditionFactoryContract?.use(
+        collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
+      ),
+    [
+      openEditionFactoryContract,
+      wallet.address,
+      collectionDetails?.updatable,
+      factoryAddressForSelectedDenom,
+      updatableFactoryAddressForSelectedDenom,
+    ],
+  )
 
   const performOpenEditionMinterChecks = () => {
     try {
@@ -257,14 +296,26 @@ export const OpenEditionMinterCreator = ({
     if (collectionDetails?.updatable) {
       if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
         throw new Error(
-          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} STARS`,
+          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} ${
+            mintTokenFromFactory?.displayName
+          }`,
         )
     } else if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
-      throw new Error(`Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} STARS`)
+      throw new Error(
+        `Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} ${
+          mintTokenFromFactory?.displayName
+        }`,
+      )
     if (!mintingDetails.perAddressLimit || mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
       throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
+    if (mintingDetails.endTime === '') throw new Error('End time is required')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
+    if (Number(mintingDetails.endTime) < Number(mintingDetails.startTime))
+      throw new Error('End time cannot be earlier than start time')
+    if (Number(mintingDetails.endTime) === Number(mintingDetails.startTime))
+      throw new Error('End time cannot be equal to the start time')
+
     if (
       mintingDetails.paymentAddress &&
       (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
@@ -435,8 +486,10 @@ export const OpenEditionMinterCreator = ({
             if (getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) !== 'html')
               data.image = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-            data.description = data.description.replaceAll('\\n', '\n')
+            if (data.description) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              data.description = data.description.replaceAll('\\n', '\n')
+            }
             const metadataFileBlob = new Blob([JSON.stringify(data)], {
               type: 'application/json',
             })
@@ -515,7 +568,7 @@ export const OpenEditionMinterCreator = ({
           end_time: mintingDetails?.endTime,
           mint_price: {
             amount: Number(mintingDetails?.unitPrice).toString(),
-            denom: 'ustars',
+            denom: (mintTokenFromFactory?.denom as string) || 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           payment_address: mintingDetails?.paymentAddress || null,
@@ -536,10 +589,8 @@ export const OpenEditionMinterCreator = ({
       },
     }
 
-    console.log('msg: ', msg)
-
     const payload: OpenEditionFactoryDispatchExecuteArgs = {
-      contract: collectionDetails?.updatable ? OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS : OPEN_EDITION_FACTORY_ADDRESS,
+      contract: collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
       messages: openEditionFactoryMessages,
       txSigner: wallet.address,
       msg,
@@ -586,6 +637,42 @@ export const OpenEditionMinterCreator = ({
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadataStorageMethod, openEditionMinterContractAddress, sg721ContractAddress, transactionHash])
+
+  useEffect(() => {
+    const data: OpenEditionMinterDetailsDataProps = {
+      imageUploadDetails: imageUploadDetails ? imageUploadDetails : undefined,
+      collectionDetails: collectionDetails ? collectionDetails : undefined,
+      royaltyDetails: royaltyDetails ? royaltyDetails : undefined,
+      onChainMetadataInputDetails: onChainMetadataInputDetails ? onChainMetadataInputDetails : undefined,
+      offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
+      mintingDetails: mintingDetails ? mintingDetails : undefined,
+      metadataStorageMethod,
+      openEditionMinterContractAddress,
+      coverImageUrl,
+      tokenUri,
+      tokenImageUri,
+    }
+    onDetailsChange(data)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    imageUploadDetails,
+    collectionDetails,
+    royaltyDetails,
+    onChainMetadataInputDetails,
+    offChainMetadataUploadDetails,
+    mintingDetails,
+    metadataStorageMethod,
+    openEditionMinterContractAddress,
+    coverImageUrl,
+    tokenUri,
+    tokenImageUri,
+  ])
+
+  useEffect(() => {
+    if (importedOpenEditionMinterDetails) {
+      setMetadataStorageMethod(importedOpenEditionMinterDetails.metadataStorageMethod as MetadataStorageMethod)
+    }
+  }, [importedOpenEditionMinterDetails])
 
   return (
     <div>
@@ -634,16 +721,23 @@ export const OpenEditionMinterCreator = ({
           </div>
         </div>
       </Conditional>
-      <div className={clsx('my-4 mx-10')}>
+      <div className={clsx('my-0 mx-10')}>
         <Conditional test={metadataStorageMethod === 'off-chain'}>
           <div>
-            <OffChainMetadataUploadDetails onChange={setOffChainMetadataUploadDetails} />
+            <OffChainMetadataUploadDetails
+              importedOffChainMetadataUploadDetails={importedOpenEditionMinterDetails?.offChainMetadataUploadDetails}
+              onChange={setOffChainMetadataUploadDetails}
+            />
           </div>
         </Conditional>
         <Conditional test={metadataStorageMethod === 'on-chain'}>
           <div>
-            <ImageUploadDetails onChange={setImageUploadDetails} />
+            <ImageUploadDetails
+              importedImageUploadDetails={importedOpenEditionMinterDetails?.imageUploadDetails}
+              onChange={setImageUploadDetails}
+            />
             <OnChainMetadataInputDetails
+              importedOnChainMetadataInputDetails={importedOpenEditionMinterDetails?.onChainMetadataInputDetails}
               onChange={setOnChainMetadataInputDetails}
               uploadMethod={imageUploadDetails?.uploadMethod}
             />
@@ -657,6 +751,7 @@ export const OpenEditionMinterCreator = ({
               ? (offChainMetadataUploadDetails?.imageUrl as string)
               : (imageUploadDetails?.coverImageUrl as string)
           }
+          importedCollectionDetails={importedOpenEditionMinterDetails?.collectionDetails}
           metadataStorageMethod={metadataStorageMethod}
           onChange={setCollectionDetails}
           uploadMethod={
@@ -666,17 +761,22 @@ export const OpenEditionMinterCreator = ({
           }
         />
         <MintingDetails
+          importedMintingDetails={importedOpenEditionMinterDetails?.mintingDetails}
           minimumMintPrice={
             collectionDetails?.updatable
               ? Number(minimumUpdatableMintPrice) / 1000000
               : Number(minimumMintPrice) / 1000000
           }
+          mintTokenFromFactory={mintTokenFromFactory}
           onChange={setMintingDetails}
           uploadMethod={offChainMetadataUploadDetails?.uploadMethod as UploadMethod}
         />
       </div>
       <div className="my-6">
-        <RoyaltyDetails onChange={setRoyaltyDetails} />
+        <RoyaltyDetails
+          importedRoyaltyDetails={importedOpenEditionMinterDetails?.royaltyDetails}
+          onChange={setRoyaltyDetails}
+        />
       </div>
       <div className="flex justify-end w-full">
         <Button

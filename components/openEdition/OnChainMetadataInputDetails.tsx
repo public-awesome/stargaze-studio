@@ -21,6 +21,7 @@ import type { UploadMethod } from './ImageUploadDetails'
 interface OnChainMetadataInputDetailsProps {
   onChange: (data: OnChainMetadataInputDetailsDataProps) => void
   uploadMethod: UploadMethod | undefined
+  importedOnChainMetadataInputDetails?: OnChainMetadataInputDetailsDataProps
 }
 
 export interface OnChainMetadataInputDetailsDataProps {
@@ -34,7 +35,11 @@ export interface OnChainMetadataInputDetailsDataProps {
   youtube_url?: string
 }
 
-export const OnChainMetadataInputDetails = ({ onChange, uploadMethod }: OnChainMetadataInputDetailsProps) => {
+export const OnChainMetadataInputDetails = ({
+  onChange,
+  uploadMethod,
+  importedOnChainMetadataInputDetails,
+}: OnChainMetadataInputDetailsProps) => {
   const wallet = useWallet()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [metadataFile, setMetadataFile] = useState<File>()
@@ -195,6 +200,26 @@ export const OnChainMetadataInputDetails = ({ onChange, uploadMethod }: OnChainM
     animationUrlState.value,
     youtubeUrlState.value,
   ])
+
+  useEffect(() => {
+    if (importedOnChainMetadataInputDetails) {
+      nameState.onChange(importedOnChainMetadataInputDetails.name || '')
+      descriptionState.onChange(importedOnChainMetadataInputDetails.description || '')
+      externalUrlState.onChange(importedOnChainMetadataInputDetails.external_url || '')
+      youtubeUrlState.onChange(importedOnChainMetadataInputDetails.youtube_url || '')
+      animationUrlState.onChange(importedOnChainMetadataInputDetails.animation_url || '')
+      imageDataState.onChange(importedOnChainMetadataInputDetails.image_data || '')
+      if (importedOnChainMetadataInputDetails.attributes) {
+        attributesState.reset()
+        importedOnChainMetadataInputDetails.attributes.forEach((attr) => {
+          attributesState.add({
+            trait_type: attr.trait_type,
+            value: attr.value,
+          })
+        })
+      }
+    }
+  }, [importedOnChainMetadataInputDetails])
 
   return (
     <div className="py-3 px-8 rounded border-2 border-white/20">

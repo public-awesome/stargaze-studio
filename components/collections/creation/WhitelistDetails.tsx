@@ -8,6 +8,8 @@ import { useInputState, useNumberInputState } from 'components/forms/FormInput.h
 import { InputDateTime } from 'components/InputDateTime'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
+import type { TokenInfo } from 'config/token'
+import { useWallet } from 'contexts/wallet'
 import React, { useEffect, useState } from 'react'
 import { isValidAddress } from 'utils/isValidAddress'
 
@@ -18,6 +20,8 @@ import { WhitelistUpload } from '../../WhitelistUpload'
 
 interface WhitelistDetailsProps {
   onChange: (data: WhitelistDetailsDataProps) => void
+  mintingTokenFromFactory?: TokenInfo
+  importedWhitelistDetails?: WhitelistDetailsDataProps
 }
 
 export interface WhitelistDetailsDataProps {
@@ -38,7 +42,13 @@ type WhitelistState = 'none' | 'existing' | 'new'
 
 type WhitelistType = 'standard' | 'flex'
 
-export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
+export const WhitelistDetails = ({
+  onChange,
+  mintingTokenFromFactory,
+  importedWhitelistDetails,
+}: WhitelistDetailsProps) => {
+  const wallet = useWallet()
+
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
@@ -58,7 +68,9 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: 'Token price for whitelisted addresses \n (min. 0 STARS)',
+    subtitle: `Token price for whitelisted addresses \n (min. 0 ${
+      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
+    })`,
     placeholder: '25',
   })
 
@@ -89,8 +101,10 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
   }
 
   useEffect(() => {
-    setWhitelistStandardArray([])
-    setWhitelistFlexArray([])
+    if (!importedWhitelistDetails) {
+      setWhitelistStandardArray([])
+      setWhitelistFlexArray([])
+    }
   }, [whitelistType])
 
   useEffect(() => {
@@ -137,6 +151,63 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
     addressListState.values,
     adminsMutable,
   ])
+
+  // make the necessary changes with respect to imported whitelist details
+  useEffect(() => {
+    if (importedWhitelistDetails) {
+      setWhitelistState(importedWhitelistDetails.whitelistState)
+      setWhitelistType(importedWhitelistDetails.whitelistType)
+      whitelistAddressState.onChange(
+        importedWhitelistDetails.contractAddress ? importedWhitelistDetails.contractAddress : '',
+      )
+      unitPriceState.onChange(
+        importedWhitelistDetails.unitPrice ? Number(importedWhitelistDetails.unitPrice) / 1000000 : 0,
+      )
+      memberLimitState.onChange(importedWhitelistDetails.memberLimit ? importedWhitelistDetails.memberLimit : 0)
+      perAddressLimitState.onChange(
+        importedWhitelistDetails.perAddressLimit ? importedWhitelistDetails.perAddressLimit : 0,
+      )
+      setStartDate(
+        importedWhitelistDetails.startTime
+          ? new Date(Number(importedWhitelistDetails.startTime) / 1_000_000)
+          : undefined,
+      )
+      setEndDate(
+        importedWhitelistDetails.endTime ? new Date(Number(importedWhitelistDetails.endTime) / 1_000_000) : undefined,
+      )
+      setAdminsMutable(importedWhitelistDetails.adminsMutable ? importedWhitelistDetails.adminsMutable : true)
+      importedWhitelistDetails.admins?.forEach((admin) => {
+        addressListState.reset()
+        addressListState.add({ address: admin })
+      })
+      if (importedWhitelistDetails.whitelistType === 'standard') {
+        setWhitelistStandardArray([])
+        importedWhitelistDetails.members?.forEach((member) => {
+          setWhitelistStandardArray((standardArray) => [...standardArray, member as string])
+        })
+      } else {
+        setWhitelistFlexArray([])
+        importedWhitelistDetails.members?.forEach((member) => {
+          setWhitelistFlexArray((flexArray) => [
+            ...flexArray,
+            {
+              address: (member as WhitelistFlexMember).address,
+              mint_count: (member as WhitelistFlexMember).mint_count,
+            },
+          ])
+        })
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [importedWhitelistDetails])
+
+  useEffect(() => {
+    if (whitelistState === 'new' && wallet.address) {
+      addressListState.reset()
+      addressListState.add({ address: wallet.address })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whitelistState, wallet.address])
 
   return (
     <div className="py-3 px-8 rounded border-2 border-white/20">
@@ -286,7 +357,6 @@ export const WhitelistDetails = ({ onChange }: WhitelistDetailsProps) => {
             <div className="my-4 ml-4">
               <AddressList
                 entries={addressListState.entries}
-                isRequired
                 onAdd={addressListState.add}
                 onChange={addressListState.update}
                 onRemove={addressListState.remove}
