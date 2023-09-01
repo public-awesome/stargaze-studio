@@ -60,8 +60,8 @@ export const SettingsModal = (props: SettingsModalProps) => {
               className="w-[30%] max-h-12 bg-blue-500 hover:bg-blue-600"
               isWide
               onClick={() => {
-                setTimezone('Local' as Timezone)
-                window.localStorage.setItem('timezone', 'Local')
+                setTimezone('UTC' as Timezone)
+                window.localStorage.setItem('timezone', 'UTC')
               }}
             >
               Use Defaults

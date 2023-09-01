@@ -39,7 +39,7 @@ export const Sidebar = () => {
     setTimezone(
       (window.localStorage.getItem('timezone') as Timezone)
         ? (window.localStorage.getItem('timezone') as Timezone)
-        : 'Local',
+        : 'UTC',
     )
   }, [])
 
