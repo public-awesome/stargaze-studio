@@ -23,6 +23,7 @@ import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/whitelist/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/whitelist/messages/execute'
@@ -42,6 +43,7 @@ import { links } from 'utils/links'
 const WhitelistExecutePage: NextPage = () => {
   const { whitelist: contract } = useContracts()
   const wallet = useWallet()
+  const { timezone } = useGlobalSettings()
 
   const [lastTx, setLastTx] = useState('')
   const [memberList, setMemberList] = useState<string[]>([])
@@ -238,10 +240,28 @@ const WhitelistExecutePage: NextPage = () => {
             <FormControl
               htmlId="timestamp"
               isRequired
-              subtitle={`${type === 'update_start_time' ? 'Start' : 'End'} time for the minting`}
+              subtitle={`${type === 'update_start_time' ? 'Start' : 'End'} time for minting ${
+                timezone === 'Local' ? '(local)' : '(UTC)'
+              }`}
               title={`${type === 'update_start_time' ? 'Start' : 'End'} Time`}
             >
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setTimestamp(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? timestamp
+                    : timestamp
+                    ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
           </Conditional>
           <Conditional test={(whitelistType === 'standard' && showMemberList) || showAdminList || showRemoveMemberList}>

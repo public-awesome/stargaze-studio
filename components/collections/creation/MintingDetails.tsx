@@ -7,6 +7,7 @@ import { InputDateTime } from 'components/InputDateTime'
 import { vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
 import { stars, tokensList } from 'config/token'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import React, { useEffect, useState } from 'react'
 import { resolveAddress } from 'utils/resolveAddress'
 
@@ -41,7 +42,7 @@ export const MintingDetails = ({
   importedMintingDetails,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
-
+  const { timezone } = useGlobalSettings()
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
 
@@ -103,6 +104,7 @@ export const MintingDetails = ({
       paymentAddress: paymentAddressState.value.trim(),
       selectedMintToken,
     }
+    console.log('Timestamp:', timestamp?.getTime())
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -154,8 +156,29 @@ export const MintingDetails = ({
         </div>
 
         <NumberInput {...perAddressLimitState} isRequired />
-        <FormControl htmlId="timestamp" isRequired subtitle="Minting start time (local)" title="Start Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        <FormControl
+          htmlId="timestamp"
+          isRequired
+          subtitle={`Minting start time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Start Time"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setTimestamp(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? timestamp
+                : timestamp
+                ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
       </FormGroup>
       <TextInput className="p-4 mt-5" {...paymentAddressState} />

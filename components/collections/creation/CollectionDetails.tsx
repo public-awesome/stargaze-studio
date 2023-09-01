@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -10,6 +11,7 @@ import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { Tooltip } from 'components/Tooltip'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { addLogItem } from 'contexts/log'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -51,6 +53,7 @@ export const CollectionDetails = ({
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
   const [updatable, setUpdatable] = useState<boolean>(false)
+  const { timezone } = useGlobalSettings()
 
   const initialRender = useRef(true)
 
@@ -178,9 +181,29 @@ export const CollectionDetails = ({
                 className={clsx(minterType === 'base' ? 'mt-10' : 'mt-2')}
                 htmlId="timestamp"
                 subtitle="Trading start time offset will be set as 2 weeks by default."
-                title="Trading Start Time (optional)"
+                title={`Trading Start Time (optional | ${timezone === 'Local' ? 'local)' : 'UTC)'}`}
               >
-                <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+                <InputDateTime
+                  minDate={
+                    timezone === 'Local'
+                      ? new Date()
+                      : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                  }
+                  onChange={(date) =>
+                    setTimestamp(
+                      timezone === 'Local'
+                        ? date
+                        : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                    )
+                  }
+                  value={
+                    timezone === 'Local'
+                      ? timestamp
+                      : timestamp
+                      ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                      : undefined
+                  }
+                />
               </FormControl>
             </Conditional>
             <Conditional test={minterType === 'base'}>

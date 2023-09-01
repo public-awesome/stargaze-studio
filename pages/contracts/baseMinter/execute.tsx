@@ -12,6 +12,7 @@ import { LinkTabs } from 'components/LinkTabs'
 import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/baseMinter/messages/execute'
 import { dispatchExecute, previewExecutePayload } from 'contracts/baseMinter/messages/execute'
@@ -30,6 +31,7 @@ const BaseMinterExecutePage: NextPage = () => {
   const { baseMinter: contract } = useContracts()
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
+  const { timezone } = useGlobalSettings()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
 
@@ -119,8 +121,29 @@ const BaseMinterExecutePage: NextPage = () => {
             <TextInput {...tokenUriState} />
           </Conditional>
           <Conditional test={showDateField}>
-            <FormControl htmlId="start-date" subtitle="Start time for trading." title="Trading Start Time">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+            <FormControl
+              htmlId="start-date"
+              subtitle={`Start time for trading ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              title="Trading Start Time"
+            >
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setTimestamp(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  // eslint-disable-next-line no-nested-ternary
+                  timezone === 'Local'
+                    ? timestamp
+                    : timestamp
+                    ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
           </Conditional>
         </div>

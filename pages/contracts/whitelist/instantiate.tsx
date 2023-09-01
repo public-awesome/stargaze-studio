@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { coin } from '@cosmjs/proto-signing'
 import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
@@ -16,6 +18,7 @@ import { whitelistLinkTabs } from 'components/LinkTabs.data'
 import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { InstantiateResponse } from 'contracts/sg721'
 import type { NextPage } from 'next'
@@ -33,6 +36,7 @@ import { WHITELIST_CODE_ID, WHITELIST_FLEX_CODE_ID } from '../../../utils/consta
 const WhitelistInstantiatePage: NextPage = () => {
   const wallet = useWallet()
   const { whitelist: contract } = useContracts()
+  const { timezone } = useGlobalSettings()
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
@@ -265,11 +269,53 @@ const WhitelistInstantiatePage: NextPage = () => {
         <Conditional test={whitelistType === 'flex'}>
           <NumberInput {...whaleCapState} />
         </Conditional>
-        <FormControl htmlId="start-date" isRequired subtitle="Start time for the minting" title="Start Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setStartDate(date)} value={startDate} />
+        <FormControl
+          htmlId="start-date"
+          isRequired
+          subtitle={`Start time for minting ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Start Time"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setStartDate(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? startDate
+                : startDate
+                ? new Date(startDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
-        <FormControl htmlId="end-date" isRequired subtitle="End time for the minting" title="End Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setEndDate(date)} value={endDate} />
+        <FormControl
+          htmlId="end-date"
+          isRequired
+          subtitle={`End time for minting ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="End Time"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setEndDate(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? endDate
+                : endDate
+                ? new Date(endDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
       </FormGroup>
 

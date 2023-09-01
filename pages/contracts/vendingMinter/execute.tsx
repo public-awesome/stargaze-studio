@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -12,6 +14,7 @@ import { LinkTabs } from 'components/LinkTabs'
 import { vendingMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/vendingMinter/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/vendingMinter/messages/execute'
@@ -31,6 +34,7 @@ const VendingMinterExecutePage: NextPage = () => {
   const { vendingMinter: contract } = useContracts()
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
+  const { timezone } = useGlobalSettings()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
@@ -228,8 +232,31 @@ const VendingMinterExecutePage: NextPage = () => {
           {showPriceField && <NumberInput {...priceState} />}
           {/* TODO: Fix address execute message */}
           <Conditional test={showDateField}>
-            <FormControl htmlId="start-date" subtitle="Start time for the minting" title="Start Time">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+            <FormControl
+              htmlId="timestamp"
+              isRequired
+              subtitle={`${type === 'update_start_time' ? 'Minting' : 'Trading'} start time ${
+                timezone === 'Local' ? '(local)' : '(UTC)'
+              }`}
+              title="Start Time"
+            >
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setTimestamp(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? timestamp
+                    : timestamp
+                    ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
           </Conditional>
         </div>
