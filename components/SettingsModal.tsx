@@ -19,7 +19,7 @@ export const SettingsModal = (props: SettingsModalProps) => {
       <input className="modal-toggle" defaultChecked={false} id="my-modal-9" ref={checkBoxRef} type="checkbox" />
       <label className="cursor-pointer modal" htmlFor="my-modal-9">
         <label
-          className={`absolute top-[42%] bottom-5 left-[13.5%] lg:max-w-[25%] max-h-[250px]
+          className={`absolute top-[42%] bottom-5 left-[260px] max-w-[450px] max-h-[250px]
           border-[1px] no-scrollbar modal-box`}
           htmlFor="temp"
         >
