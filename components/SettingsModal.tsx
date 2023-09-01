@@ -19,7 +19,7 @@ export const SettingsModal = (props: SettingsModalProps) => {
       <input className="modal-toggle" defaultChecked={false} id="my-modal-9" ref={checkBoxRef} type="checkbox" />
       <label className="cursor-pointer modal" htmlFor="my-modal-9">
         <label
-          className={`absolute top-[30%] bottom-5 left-[13.5%] lg:max-w-[30%] max-h-[350px]
+          className={`absolute top-[42%] bottom-5 left-[13.5%] lg:max-w-[25%] max-h-[250px]
           border-[1px] no-scrollbar modal-box`}
           htmlFor="temp"
         >
@@ -57,7 +57,7 @@ export const SettingsModal = (props: SettingsModalProps) => {
               </div>
             </div>
             <Button
-              className="w-[30%] max-h-12 bg-blue-500 hover:bg-blue-600"
+              className="w-[40%] max-h-12 bg-blue-500 hover:bg-blue-600"
               isWide
               onClick={() => {
                 setTimezone('UTC' as Timezone)
