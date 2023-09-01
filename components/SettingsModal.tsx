@@ -28,7 +28,7 @@ export const SettingsModal = (props: SettingsModalProps) => {
               <h1 className="text-2xl font-bold underline underline-offset-2">Settings</h1>
               <div className="flex justify-start w-full">
                 <div className="flex-row mt-2 w-full form-control">
-                  <h1 className="mt-[5px] text-lg font-bold">Time Input: </h1>
+                  <h1 className="mt-[5px] text-lg font-bold">Time & Date: </h1>
                   <label className="justify-start ml-6 cursor-pointer label">
                     <span className="mr-2 font-bold">Local</span>
                     <input
