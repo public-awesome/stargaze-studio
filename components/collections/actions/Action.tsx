@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { toUtf8 } from '@cosmjs/encoding'
 import { AirdropUpload } from 'components/AirdropUpload'
 import { Button } from 'components/Button'
@@ -14,6 +16,7 @@ import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
 import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter'
@@ -56,6 +59,7 @@ export const CollectionActions = ({
 }: CollectionActionsProps) => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
+  const { timezone } = useGlobalSettings()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>(undefined)
@@ -501,13 +505,53 @@ export const CollectionActions = ({
             </FormGroup>
           )}
           <Conditional test={showDateField}>
-            <FormControl className="mt-2" htmlId="start-date" title="Start Time">
-              <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+            <FormControl
+              className="mt-2"
+              htmlId="start-date"
+              title={`Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+            >
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setTimestamp(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? timestamp
+                    : timestamp
+                    ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
           </Conditional>
           <Conditional test={showEndDateField}>
-            <FormControl className="mt-2" htmlId="end-date" title="End Time">
-              <InputDateTime minDate={new Date()} onChange={(date) => setEndTimestamp(date)} value={endTimestamp} />
+            <FormControl
+              className="mt-2"
+              htmlId="end-date"
+              title={`End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+            >
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setEndTimestamp(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? endTimestamp
+                    : endTimestamp
+                    ? new Date(endTimestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
           </Conditional>
           <Conditional test={showBaseUriField}>

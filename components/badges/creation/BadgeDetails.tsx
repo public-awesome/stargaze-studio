@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -10,6 +11,7 @@ import { FormControl } from 'components/FormControl'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { InputDateTime } from 'components/InputDateTime'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { Trait } from 'contracts/badgeHub'
 import type { ChangeEvent } from 'react'
@@ -46,6 +48,7 @@ export interface BadgeDetailsDataProps {
 
 export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDetailsProps) => {
   const wallet = useWallet()
+  const { timezone } = useGlobalSettings()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
   const [metadataFile, setMetadataFile] = useState<File>()
@@ -273,8 +276,29 @@ export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDeta
           {uploadMethod === 'existing' ? <TextInput className="mt-2" {...animationUrlState} /> : null}
           <TextInput className="mt-2" {...externalUrlState} />
 
-          <FormControl className="mt-2" htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
-            <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+          <FormControl
+            className="mt-2"
+            htmlId="expiry-date"
+            subtitle={`Badge minting expiry date ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+            title="Expiry Date"
+          >
+            <InputDateTime
+              minDate={
+                timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+              }
+              onChange={(date) =>
+                setTimestamp(
+                  timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                )
+              }
+              value={
+                timezone === 'Local'
+                  ? timestamp
+                  : timestamp
+                  ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                  : undefined
+              }
+            />
           </FormControl>
           <div className="grid grid-cols-2">
             <div className="mt-2 w-1/3 form-control">

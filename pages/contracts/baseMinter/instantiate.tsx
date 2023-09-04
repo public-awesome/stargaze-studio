@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { coin } from '@cosmjs/proto-signing'
 import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
@@ -13,6 +15,7 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -32,6 +35,7 @@ import { resolveAddress } from '../../../utils/resolveAddress'
 const BaseMinterInstantiatePage: NextPage = () => {
   const wallet = useWallet()
   const contract = useContracts().baseFactory
+  const { timezone } = useGlobalSettings()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [explicit, setExplicit] = useState<boolean>(false)
@@ -204,8 +208,28 @@ const BaseMinterInstantiatePage: NextPage = () => {
         <FormTextArea isRequired {...descriptionState} />
         <TextInput isRequired {...imageState} />
         <TextInput {...externalLinkState} />
-        <FormControl htmlId="timestamp" subtitle="Trading start time (local)" title="Trading Start Time (optional)">
-          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        <FormControl
+          htmlId="timestamp"
+          subtitle={`Trading start time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Trading Start Time (optional)"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setTimestamp(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? timestamp
+                : timestamp
+                ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
         <div className="flex flex-col space-y-2">
           <div>

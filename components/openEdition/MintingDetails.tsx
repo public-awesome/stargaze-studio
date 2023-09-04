@@ -7,6 +7,7 @@ import { InputDateTime } from 'components/InputDateTime'
 import { openEditionMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
 import { stars, tokensList } from 'config/token'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import React, { useEffect, useState } from 'react'
 import { resolveAddress } from 'utils/resolveAddress'
 
@@ -44,6 +45,7 @@ export const MintingDetails = ({
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>()
   const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
   const [mintingDetailsImported, setMintingDetailsImported] = useState(false)
+  const { timezone } = useGlobalSettings()
 
   const unitPriceState = useNumberInputState({
     id: 'unitPrice',
@@ -142,11 +144,53 @@ export const MintingDetails = ({
         </div>
 
         <NumberInput {...perAddressLimitState} isRequired />
-        <FormControl htmlId="timestamp" isRequired subtitle="Minting start time (local)" title="Start Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        <FormControl
+          htmlId="timestamp"
+          isRequired
+          subtitle={`Minting start time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Start Time"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setTimestamp(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? timestamp
+                : timestamp
+                ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
-        <FormControl htmlId="endTimestamp" isRequired subtitle="Minting end time (local)" title="End Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setEndTimestamp(date)} value={endTimestamp} />
+        <FormControl
+          htmlId="endTimestamp"
+          isRequired
+          subtitle={`Minting end time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="End Time"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setEndTimestamp(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? endTimestamp
+                : endTimestamp
+                ? new Date(endTimestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
       </FormGroup>
       <TextInput className="pr-4 pl-4 mt-3" {...paymentAddressState} />

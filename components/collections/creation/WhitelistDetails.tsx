@@ -9,6 +9,7 @@ import { InputDateTime } from 'components/InputDateTime'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import type { TokenInfo } from 'config/token'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import React, { useEffect, useState } from 'react'
 import { isValidAddress } from 'utils/isValidAddress'
@@ -48,6 +49,7 @@ export const WhitelistDetails = ({
   importedWhitelistDetails,
 }: WhitelistDetailsProps) => {
   const wallet = useWallet()
+  const { timezone } = useGlobalSettings()
 
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
@@ -329,17 +331,49 @@ export const WhitelistDetails = ({
               htmlId="start-date"
               isRequired
               subtitle="Start time for minting tokens to whitelisted addresses"
-              title="Start Time"
+              title={`Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
             >
-              <InputDateTime minDate={new Date()} onChange={(date) => setStartDate(date)} value={startDate} />
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setStartDate(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? startDate
+                    : startDate
+                    ? new Date(startDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
             <FormControl
               htmlId="end-date"
               isRequired
               subtitle="End time for minting tokens to whitelisted addresses"
-              title="End Time"
+              title={`End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
             >
-              <InputDateTime minDate={new Date()} onChange={(date) => setEndDate(date)} value={endDate} />
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setEndDate(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? endDate
+                    : endDate
+                    ? new Date(endDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
             </FormControl>
           </FormGroup>
           <div>
