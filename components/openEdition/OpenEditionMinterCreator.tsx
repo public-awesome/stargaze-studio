@@ -677,7 +677,7 @@ export const OpenEditionMinterCreator = ({
   return (
     <div>
       {/* TODO: Cancel once we're able to index on-chain metadata */}
-      <Conditional test>
+      <Conditional test={false}>
         <div className="mx-10 mb-4 rounded border-2 border-white/20">
           <div className="flex justify-center mb-2">
             <div className="mt-3 ml-4 font-bold form-check form-check-inline">
