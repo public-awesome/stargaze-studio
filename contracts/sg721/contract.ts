@@ -962,7 +962,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
           msg.push({
             update_token_metadata: {
               token_id: i.toString(),
-              token_uri: `${baseURI}/${i}${jsonExtensions ? '.json' : ''}`,
+              token_uri: `${baseURI}`,
             },
           })
         }
