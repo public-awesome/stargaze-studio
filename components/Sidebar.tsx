@@ -3,11 +3,14 @@
 
 import clsx from 'clsx'
 import { Anchor } from 'components/Anchor'
+import type { Timezone } from 'contexts/globalSettings'
+import { setTimezone } from 'contexts/globalSettings'
 import { setLogItemList, useLogStore } from 'contexts/log'
 import { useWallet } from 'contexts/wallet'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
+import { FaCog } from 'react-icons/fa'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 
@@ -15,6 +18,7 @@ import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK, OPEN_EDITION_FACTORY_
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { LogModal } from './LogModal'
+import { SettingsModal } from './SettingsModal'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
@@ -32,6 +36,11 @@ export const Sidebar = () => {
   useEffect(() => {
     console.log(window.localStorage.getItem('logs'))
     setLogItemList(JSON.parse(window.localStorage.getItem('logs') || '[]'))
+    setTimezone(
+      (window.localStorage.getItem('timezone') as Timezone)
+        ? (window.localStorage.getItem('timezone') as Timezone)
+        : 'UTC',
+    )
   }, [])
 
   return (
@@ -231,16 +240,24 @@ export const Sidebar = () => {
 
       <IncomeDashboardDisclaimer creatorAddress={wallet.address ? wallet.address : ''} />
       <LogModal />
+      <SettingsModal />
 
       <div className="flex-grow" />
-      {logs.itemList.length > 0 && (
+      <div className="flex-row w-full h-full">
         <label
-          className="w-[65%] h-[4px] text-lg font-bold text-white normal-case bg-blue-500 hover:bg-blue-600 border-none animate-none btn modal-button"
+          className="absolute mb-8 w-[25%] text-lg font-bold text-white normal-case bg-zinc-500 hover:bg-zinc-600 border-none animate-none btn modal-button"
+          htmlFor="my-modal-9"
+        >
+          <FaCog className="justify-center align-bottom" size={20} />
+        </label>
+
+        <label
+          className="ml-16 w-[65%] text-lg font-bold text-white normal-case bg-blue-500 hover:bg-blue-600 border-none animate-none btn modal-button"
           htmlFor="my-modal-8"
         >
           View Logs
         </label>
-      )}
+      </div>
       {/* Stargaze network status */}
       <div className="text-sm capitalize">Network: {wallet.network}</div>
 

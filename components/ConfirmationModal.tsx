@@ -12,7 +12,7 @@ export const ConfirmationModal = (props: ConfirmationModalProps) => {
       <input className="modal-toggle" defaultChecked id="my-modal-2" type="checkbox" />
       <label className="cursor-pointer modal" htmlFor="my-modal-2">
         <label
-          className="absolute top-[25%] bottom-5 left-1/3 max-w-[600px] max-h-[400px] border-2 no-scrollbar modal-box"
+          className="absolute top-[23%] bottom-5 left-1/3 max-w-[600px] max-h-[440px] border-2 no-scrollbar modal-box"
           htmlFor="temp"
         >
           {/* <Alert type="warning"></Alert> */}
@@ -23,7 +23,9 @@ export const ConfirmationModal = (props: ConfirmationModalProps) => {
               submit, post, promote, or display on or through the Service. You represent and warrant that such contain
               material subject to copyright, trademark, publicity rights, or other intellectual property rights, unless
               you have necessary permission or are otherwise legally entitled to post the material and to grant Stargaze
-              Parties the license described above, and that the content does not violate any laws.
+              Parties the license described above, and that the content does not violate any laws. Stargaze.zone
+              reserves the right to exercise its discretion in concealing user-generated content, should such content be
+              determined to have a detrimental impact on the brand.
             </div>
             <br />
             <div className="flex flex-row pb-4">

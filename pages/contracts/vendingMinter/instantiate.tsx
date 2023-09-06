@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { coin } from '@cosmjs/proto-signing'
 import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
@@ -13,6 +15,7 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { vendingMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -31,6 +34,7 @@ import type { CreateVendingMinterResponse } from '../../../contracts/vendingFact
 const VendingMinterInstantiatePage: NextPage = () => {
   const wallet = useWallet()
   const contract = useContracts().vendingFactory
+  const { timezone } = useGlobalSettings()
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [timestamp, setTimestamp] = useState<Date | undefined>()
@@ -267,8 +271,28 @@ const VendingMinterInstantiatePage: NextPage = () => {
         <FormTextArea isRequired {...descriptionState} />
         <TextInput isRequired {...imageState} />
         <TextInput {...externalLinkState} />
-        <FormControl htmlId="timestamp" subtitle="Trading start time (local)" title="Trading Start Time (optional)">
-          <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+        <FormControl
+          htmlId="start-date"
+          subtitle={`Start time for trading ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Trading Start Time (optional)"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setTimestamp(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? timestamp
+                : timestamp
+                ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
         <div className="flex flex-col space-y-2">
           <div>
@@ -327,8 +351,29 @@ const VendingMinterInstantiatePage: NextPage = () => {
         <TextInput isRequired {...baseTokenUriState} />
         <NumberInput isRequired {...tokenNumberState} />
         <NumberInput isRequired {...perAddressLimitState} />
-        <FormControl htmlId="start-date" isRequired subtitle="Start time for the minting" title="Start Time">
-          <InputDateTime minDate={new Date()} onChange={(date) => setStartDate(date)} value={startDate} />
+        <FormControl
+          htmlId="start-date"
+          isRequired
+          subtitle={`Minting start time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Start Time"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              setStartDate(
+                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+              )
+            }
+            value={
+              timezone === 'Local'
+                ? startDate
+                : startDate
+                ? new Date(startDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
         </FormControl>
         <TextInput {...whitelistAddressState} />
       </FormGroup>

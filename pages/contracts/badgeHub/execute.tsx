@@ -27,6 +27,7 @@ import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
+import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { Badge } from 'contracts/badgeHub'
 import type { DispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
@@ -63,6 +64,7 @@ const BadgeHubExecutePage: NextPage = () => {
   const wallet = useWallet()
   const [lastTx, setLastTx] = useState('')
   const [badge, setBadge] = useState<Badge>()
+  const { timezone } = useGlobalSettings()
 
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
@@ -896,8 +898,32 @@ const BadgeHubExecutePage: NextPage = () => {
           </FormControl>
           <div className="pt-9">
             <Conditional test={showBadgeField}>
-              <FormControl htmlId="expiry-date" subtitle="Badge minting expiry date" title="Expiry Date">
-                <InputDateTime minDate={new Date()} onChange={(date) => setTimestamp(date)} value={timestamp} />
+              <FormControl
+                htmlId="expiry-date"
+                subtitle={`Badge minting expiry date ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+                title="Expiry Date"
+              >
+                <InputDateTime
+                  minDate={
+                    timezone === 'Local'
+                      ? new Date()
+                      : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                  }
+                  onChange={(date) =>
+                    setTimestamp(
+                      timezone === 'Local'
+                        ? date
+                        : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                    )
+                  }
+                  value={
+                    timezone === 'Local'
+                      ? timestamp
+                      : timestamp
+                      ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                      : undefined
+                  }
+                />
               </FormControl>
             </Conditional>
             {showBadgeField && <NumberInput className="mt-2" {...maxSupplyState} />}
