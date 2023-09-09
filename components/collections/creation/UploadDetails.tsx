@@ -115,14 +115,15 @@ export const UploadDetails = ({
     setAssetFilesArray([])
     setMetadataFilesArray([])
     setThumbnailFilesArray([])
+    setThumbnailCompatibleAssetFileNames([])
     if (event.target.files === null) return
+    const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
+    const thumbnailCompatibleFileNamesList: string[] = []
     if (minterType === 'vending' || (minterType === 'base' && event.target.files.length > 1)) {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
       const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
-      const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
-      const thumbnailCompatibleFileNamesList: string[] = []
       sortedFiles.map((file) => {
         if (thumbnailCompatibleAssetTypes.includes(getAssetType(file.name))) {
           thumbnailCompatibleFileNamesList.push(file.name.split('.')[0])
@@ -144,7 +145,14 @@ export const UploadDetails = ({
           return
         }
       }
+    } else if (minterType === 'base' && event.target.files.length === 1) {
+      if (thumbnailCompatibleAssetTypes.includes(getAssetType(event.target.files[0].name))) {
+        thumbnailCompatibleFileNamesList.push(event.target.files[0].name.split('.')[0])
+      }
+      setThumbnailCompatibleAssetFileNames(thumbnailCompatibleFileNamesList)
+      console.log('Thumbnail Compatible Files: ', thumbnailCompatibleFileNamesList)
     }
+
     let loadedFileCount = 0
     const files: File[] = []
     let reader: FileReader
@@ -256,7 +264,8 @@ export const UploadDetails = ({
     const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
     const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
     // make sure the sorted file names match thumbnail compatible asset file names
-    for (let i = 0; i < sortedFileNames.length; i++) {
+    for (let i = 0; i < thumbnailCompatibleAssetFileNames.length; i++) {
+      if (minterType === 'base' && assetFilesArray.length === 1) break
       if (sortedFileNames[i] !== thumbnailCompatibleAssetFileNames[i]) {
         toast.error('The thumbnail file names should match the thumbnail compatible asset file names.')
         addLogItem({
@@ -347,6 +356,9 @@ export const UploadDetails = ({
     setMetadataFilesArray([])
     if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
+    if (thumbnailFilesRef.current) thumbnailFilesRef.current.value = ''
+    setThumbnailFilesArray([])
+    setThumbnailCompatibleAssetFileNames([])
     if (!importedUploadDetails || minterType === 'base') {
       baseTokenUriState.onChange('')
       coverImageUrlState.onChange('')
