@@ -41,6 +41,7 @@ export interface UploadDetailsDataProps {
   assetFiles: File[]
   metadataFiles: File[]
   thumbnailFiles?: File[]
+  thumbnailCompatibleAssetFileNames?: string[]
   uploadService: UploadServiceType
   nftStorageApiKey?: string
   pinataApiKey?: string
@@ -113,6 +114,7 @@ export const UploadDetails = ({
   const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
     setAssetFilesArray([])
     setMetadataFilesArray([])
+    setThumbnailFilesArray([])
     if (event.target.files === null) return
     if (minterType === 'vending' || (minterType === 'base' && event.target.files.length > 1)) {
       //sort the files
@@ -250,25 +252,25 @@ export const UploadDetails = ({
     setThumbnailFilesArray([])
     if (event.target.files === null) return
 
-    if (minterType === 'vending' || (minterType === 'base' && thumbnailCompatibleAssetFileNames.length > 1)) {
-      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
-      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
-      // make sure the sorted file names match thumbnail compatible asset file names
-      for (let i = 0; i < sortedFileNames.length; i++) {
-        if (sortedFileNames[i] !== thumbnailCompatibleAssetFileNames[i]) {
-          toast.error('The thumbnail file names should match the thumbnail compatible asset file names.')
-          addLogItem({
-            id: uid(),
-            message: 'The thumbnail file names should match the thumbnail compatible asset file names.',
-            type: 'Error',
-            timestamp: new Date(),
-          })
-          //clear the input
-          event.target.value = ''
-          return
-        }
+    // if (minterType === 'vending' || (minterType === 'base' && thumbnailCompatibleAssetFileNames.length > 1)) {
+    const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+    const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+    // make sure the sorted file names match thumbnail compatible asset file names
+    for (let i = 0; i < sortedFileNames.length; i++) {
+      if (sortedFileNames[i] !== thumbnailCompatibleAssetFileNames[i]) {
+        toast.error('The thumbnail file names should match the thumbnail compatible asset file names.')
+        addLogItem({
+          id: uid(),
+          message: 'The thumbnail file names should match the thumbnail compatible asset file names.',
+          type: 'Error',
+          timestamp: new Date(),
+        })
+        //clear the input
+        event.target.value = ''
+        return
       }
     }
+    // }
     let loadedFileCount = 0
     const files: File[] = []
     let reader: FileReader
@@ -296,6 +298,8 @@ export const UploadDetails = ({
       const data: UploadDetailsDataProps = {
         assetFiles: assetFilesArray,
         metadataFiles: metadataFilesArray,
+        thumbnailFiles: thumbnailFilesArray,
+        thumbnailCompatibleAssetFileNames,
         uploadService,
         nftStorageApiKey: nftStorageApiKeyState.value,
         pinataApiKey: pinataApiKeyState.value,
@@ -325,6 +329,8 @@ export const UploadDetails = ({
   }, [
     assetFilesArray,
     metadataFilesArray,
+    thumbnailFilesArray,
+    thumbnailCompatibleAssetFileNames,
     uploadService,
     nftStorageApiKeyState.value,
     pinataApiKeyState.value,
@@ -602,6 +608,38 @@ export const UploadDetails = ({
                           multiple
                           onChange={selectMetadata}
                           ref={metadataFilesRef}
+                          type="file"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {thumbnailCompatibleAssetFileNames.length > 0 && (
+                    <div>
+                      <label
+                        className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
+                        htmlFor="thumbnailFiles"
+                      >
+                        {thumbnailCompatibleAssetFileNames.length > 1
+                          ? 'Thumbnail Selection for Compatible Assets (optional)'
+                          : 'Thumbnail Selection (optional)'}
+                      </label>
+                      <div
+                        className={clsx(
+                          'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
+                          'rounded border-2 border-white/20 border-dashed',
+                        )}
+                      >
+                        <input
+                          accept="image/*"
+                          className={clsx(
+                            'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                            'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                          )}
+                          id="thumbnailFiles"
+                          multiple
+                          onChange={selectThumbnails}
+                          ref={thumbnailFilesRef}
                           type="file"
                         />
                       </div>
