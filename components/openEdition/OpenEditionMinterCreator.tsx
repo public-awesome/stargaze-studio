@@ -29,7 +29,6 @@ import {
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
 } from 'utils/constants'
 import type { AssetType } from 'utils/getAssetType'
-import { getAssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
 import { checkTokenUri } from 'utils/isValidTokenUri'
 import { uid } from 'utils/random'
@@ -488,22 +487,35 @@ export const OpenEditionMinterCreator = ({
         offChainMetadataUploadDetails.pinataApiKey as string,
         offChainMetadataUploadDetails.pinataSecretKey as string,
       )
-        .then((assetUri: string) => {
+        .then(async (assetUri: string) => {
+          let thumbnailUri: string | undefined
+          if (offChainMetadataUploadDetails.isThumbnailCompatible && offChainMetadataUploadDetails.thumbnailFile)
+            thumbnailUri = await upload(
+              [offChainMetadataUploadDetails.thumbnailFile] as File[],
+              offChainMetadataUploadDetails.uploadService,
+              'thumbnail',
+              offChainMetadataUploadDetails.nftStorageApiKey as string,
+              offChainMetadataUploadDetails.pinataApiKey as string,
+              offChainMetadataUploadDetails.pinataSecretKey as string,
+            )
+          const thumbnailUriWithBase = thumbnailUri
+            ? `ipfs://${thumbnailUri}/${(offChainMetadataUploadDetails.thumbnailFile as File).name}`
+            : undefined
+
           const fileArray: File[] = []
           const reader: FileReader = new FileReader()
 
           reader.onload = (e) => {
             const data: any = JSON.parse(e.target?.result as string)
 
-            if (
-              getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'audio' ||
-              getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'video' ||
-              getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) === 'html'
-            ) {
+            if (offChainMetadataUploadDetails.isThumbnailCompatible) {
               data.animation_url = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
             }
-            if (getAssetType(offChainMetadataUploadDetails.assetFiles[0].name) !== 'html')
-              data.image = `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
+
+            data.image =
+              offChainMetadataUploadDetails.isThumbnailCompatible && offChainMetadataUploadDetails.thumbnailFile
+                ? thumbnailUriWithBase
+                : `ipfs://${assetUri}/${offChainMetadataUploadDetails.assetFiles[0].name}`
 
             if (data.description) {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-call
