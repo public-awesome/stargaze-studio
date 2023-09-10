@@ -28,6 +28,7 @@ import {
   SG721_OPEN_EDITION_CODE_ID,
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
 } from 'utils/constants'
+import type { AssetType } from 'utils/getAssetType'
 import { getAssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
 import { checkTokenUri } from 'utils/isValidTokenUri'
@@ -116,6 +117,9 @@ export const OpenEditionMinterCreator = ({
   const [openEditionMinterContractAddress, setOpenEditionMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const [thumbnailImageUri, setThumbnailImageUri] = useState<string | undefined>(undefined)
+
+  const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
 
   const factoryAddressForSelectedDenom =
     openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === false)
@@ -436,8 +440,23 @@ export const OpenEditionMinterCreator = ({
           const coverImageUriWithBase = `ipfs://${coverImageUri}/${(collectionDetails?.imageFile as File[])[0].name}`
           setCoverImageUrl(coverImageUriWithBase)
 
+          let thumbnailUri: string | undefined
+          if (imageUploadDetails.isThumbnailCompatible && imageUploadDetails.thumbnailFile)
+            thumbnailUri = await upload(
+              [imageUploadDetails.thumbnailFile] as File[],
+              imageUploadDetails.uploadService,
+              'thumbnail',
+              imageUploadDetails.nftStorageApiKey as string,
+              imageUploadDetails.pinataApiKey as string,
+              imageUploadDetails.pinataSecretKey as string,
+            )
+          const thumbnailUriWithBase = thumbnailUri
+            ? `ipfs://${thumbnailUri}/${(imageUploadDetails.thumbnailFile as File).name}`
+            : undefined
+          setThumbnailImageUri(thumbnailUriWithBase)
+
           setUploading(false)
-          await instantiateOpenEditionMinter(imageUriWithBase, coverImageUriWithBase)
+          await instantiateOpenEditionMinter(imageUriWithBase, coverImageUriWithBase, thumbnailUriWithBase)
         } else if (imageUploadDetails?.uploadMethod === 'existing') {
           setTokenImageUri(imageUploadDetails.imageUrl as string)
           setCoverImageUrl(imageUploadDetails.coverImageUrl as string)
@@ -527,7 +546,7 @@ export const OpenEditionMinterCreator = ({
     })
   }
 
-  const instantiateOpenEditionMinter = async (uri: string, coverImageUri: string) => {
+  const instantiateOpenEditionMinter = async (uri: string, coverImageUri: string, thumbnailUri?: string) => {
     if (!wallet.initialized) throw new Error('Wallet not connected')
     if (!openEditionFactoryContract) throw new Error('Contract not found')
     if (!openEditionMinterContract) throw new Error('Contract not found')
@@ -549,7 +568,10 @@ export const OpenEditionMinterCreator = ({
             extension:
               metadataStorageMethod === 'on-chain'
                 ? {
-                    image: uri,
+                    image:
+                      imageUploadDetails?.isThumbnailCompatible && imageUploadDetails.thumbnailFile
+                        ? thumbnailUri
+                        : uri,
                     name: onChainMetadataInputDetails?.name,
                     description: onChainMetadataInputDetails?.description?.replaceAll('\\n', '\n'),
                     attributes: onChainMetadataInputDetails?.attributes,
@@ -557,7 +579,7 @@ export const OpenEditionMinterCreator = ({
                     animation_url:
                       imageUploadDetails?.uploadMethod === 'existing'
                         ? onChainMetadataInputDetails?.animation_url
-                        : getAssetType(imageUploadDetails?.assetFile?.name as string) === 'video'
+                        : imageUploadDetails?.isThumbnailCompatible
                         ? uri
                         : undefined,
                     youtube_url: onChainMetadataInputDetails?.youtube_url,
@@ -677,7 +699,7 @@ export const OpenEditionMinterCreator = ({
   return (
     <div>
       {/* TODO: Cancel once we're able to index on-chain metadata */}
-      <Conditional test={false}>
+      <Conditional test>
         <div className="mx-10 mb-4 rounded border-2 border-white/20">
           <div className="flex justify-center mb-2">
             <div className="mt-3 ml-4 font-bold form-check form-check-inline">

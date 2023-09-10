@@ -134,6 +134,7 @@ export const UploadDetails = ({
       for (let i = 0; i < sortedFileNames.length; i++) {
         if (isNaN(Number(sortedFileNames[i])) || parseInt(sortedFileNames[i]) !== i + 1) {
           toast.error('The file names should be in numerical order starting from 1.')
+          setThumbnailCompatibleAssetFileNames([])
           addLogItem({
             id: uid(),
             message: 'The file names should be in numerical order starting from 1.',
