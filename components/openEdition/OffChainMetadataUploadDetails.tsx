@@ -18,6 +18,8 @@ import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
+import type { AssetType } from 'utils/getAssetType'
+import { getAssetType } from 'utils/getAssetType'
 import { uid } from 'utils/random'
 import { naturalCompare } from 'utils/sort'
 
@@ -34,6 +36,8 @@ interface OffChainMetadataUploadDetailsProps {
 export interface OffChainMetadataUploadDetailsDataProps {
   assetFiles: File[]
   metadataFiles: File[]
+  thumbnailFile?: File
+  isThumbnailCompatible?: boolean
   uploadService: UploadServiceType
   nftStorageApiKey?: string
   pinataApiKey?: string
@@ -52,16 +56,20 @@ export const OffChainMetadataUploadDetails = ({
 }: OffChainMetadataUploadDetailsProps) => {
   const [assetFilesArray, setAssetFilesArray] = useState<File[]>([])
   const [metadataFilesArray, setMetadataFilesArray] = useState<File[]>([])
+  const [thumbnailFile, setThumbnailFile] = useState<File>()
+  const [isThumbnailCompatible, setIsThumbnailCompatible] = useState<boolean>(false)
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
   const [exportedMetadata, setExportedMetadata] = useState(undefined)
-
   const [openEditionMinterMetadataFile, setOpenEditionMinterMetadataFile] = useState<File | undefined>()
+
+  const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
 
   const assetFilesRef = useRef<HTMLInputElement | null>(null)
   const metadataFilesRef = useRef<HTMLInputElement | null>(null)
+  const thumbnailFilesRef = useRef<HTMLInputElement | null>(null)
 
   const nftStorageApiKeyState = useInputState({
     id: 'nft-storage-api-key',
@@ -104,7 +112,12 @@ export const OffChainMetadataUploadDetails = ({
   const selectAssets = (event: ChangeEvent<HTMLInputElement>) => {
     setAssetFilesArray([])
     setMetadataFilesArray([])
+    setThumbnailFile(undefined)
+    setIsThumbnailCompatible(false)
     if (event.target.files === null) return
+    if (thumbnailCompatibleAssetTypes.includes(getAssetType(event.target.files[0].name))) {
+      setIsThumbnailCompatible(true)
+    }
     let loadedFileCount = 0
     const files: File[] = []
     let reader: FileReader
@@ -166,6 +179,26 @@ export const OffChainMetadataUploadDetails = ({
     }
   }
 
+  const selectThumbnail = (event: ChangeEvent<HTMLInputElement>) => {
+    setThumbnailFile(undefined)
+    if (event.target.files === null) return
+
+    let selectedFile: File
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (!event.target.files) return toast.error('No file selected.')
+      if (!e.target?.result) return toast.error('Error parsing file.')
+      selectedFile = new File([e.target.result], event.target.files[0].name, { type: 'image/*' })
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (event.target.files[0]) reader.readAsArrayBuffer(event.target.files[0])
+    else return toast.error('No file selected.')
+    reader.onloadend = () => {
+      if (!event.target.files) return toast.error('No file selected.')
+      setThumbnailFile(selectedFile)
+    }
+  }
+
   const updateMetadataFileIndex = (index: number) => {
     setMetadataFileArrayIndex(index)
     setRefreshMetadata((prev) => !prev)
@@ -188,6 +221,8 @@ export const OffChainMetadataUploadDetails = ({
       const data: OffChainMetadataUploadDetailsDataProps = {
         assetFiles: assetFilesArray,
         metadataFiles: metadataFilesArray,
+        thumbnailFile,
+        isThumbnailCompatible,
         uploadService,
         nftStorageApiKey: nftStorageApiKeyState.value,
         pinataApiKey: pinataApiKeyState.value,
@@ -218,6 +253,8 @@ export const OffChainMetadataUploadDetails = ({
   }, [
     assetFilesArray,
     metadataFilesArray,
+    thumbnailFile,
+    isThumbnailCompatible,
     uploadService,
     nftStorageApiKeyState.value,
     pinataApiKeyState.value,
@@ -235,6 +272,8 @@ export const OffChainMetadataUploadDetails = ({
     setMetadataFilesArray([])
     if (assetFilesRef.current) assetFilesRef.current.value = ''
     setAssetFilesArray([])
+    setThumbnailFile(undefined)
+    setIsThumbnailCompatible(false)
     if (!importedOffChainMetadataUploadDetails) {
       tokenUriState.onChange('')
       coverImageUrlState.onChange('')
@@ -423,6 +462,34 @@ export const OffChainMetadataUploadDetails = ({
                       />
                     </div>
                   </div>
+                  <Conditional test={isThumbnailCompatible}>
+                    <div>
+                      <label
+                        className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
+                        htmlFor="thumbnailFiles"
+                      >
+                        Thumbnail Selection (optional)
+                      </label>
+                      <div
+                        className={clsx(
+                          'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
+                          'rounded border-2 border-white/20 border-dashed',
+                        )}
+                      >
+                        <input
+                          accept="image/*"
+                          className={clsx(
+                            'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                            'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                          )}
+                          id="thumbnailFiles"
+                          onChange={selectThumbnail}
+                          ref={thumbnailFilesRef}
+                          type="file"
+                        />
+                      </div>
+                    </div>
+                  </Conditional>
 
                   {assetFilesArray.length > 0 && (
                     <div>

@@ -4,7 +4,7 @@
 import axios from 'axios'
 import { PINATA_ENDPOINT_URL } from 'utils/constants'
 
-export type UploadFileType = 'assets' | 'metadata' | 'cover'
+export type UploadFileType = 'assets' | 'metadata' | 'cover' | 'thumbnail'
 
 export const uploadToPinata = async (
   fileArray: File[],

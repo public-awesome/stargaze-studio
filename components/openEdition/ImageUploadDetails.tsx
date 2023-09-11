@@ -14,6 +14,7 @@ import type { ChangeEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
+import type { AssetType } from 'utils/getAssetType'
 import { getAssetType } from 'utils/getAssetType'
 
 export type UploadMethod = 'new' | 'existing'
@@ -25,6 +26,8 @@ interface ImageUploadDetailsProps {
 
 export interface ImageUploadDetailsDataProps {
   assetFile: File | undefined
+  thumbnailFile?: File | undefined
+  isThumbnailCompatible?: boolean
   uploadService: UploadServiceType
   nftStorageApiKey?: string
   pinataApiKey?: string
@@ -36,10 +39,13 @@ export interface ImageUploadDetailsDataProps {
 
 export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: ImageUploadDetailsProps) => {
   const [assetFile, setAssetFile] = useState<File>()
+  const [thumbnailFile, setThumbnailFile] = useState<File>()
+  const [isThumbnailCompatible, setIsThumbnailCompatible] = useState<boolean>(false)
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
 
   const assetFileRef = useRef<HTMLInputElement | null>(null)
+  const thumbnailFileRef = useRef<HTMLInputElement | null>(null)
 
   const nftStorageApiKeyState = useInputState({
     id: 'nft-storage-api-key',
@@ -79,8 +85,12 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     defaultValue: '',
   })
 
+  const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
+
   const selectAsset = (event: ChangeEvent<HTMLInputElement>) => {
     setAssetFile(undefined)
+    setThumbnailFile(undefined)
+    setIsThumbnailCompatible(false)
     if (event.target.files === null) return
 
     let selectedFile: File
@@ -95,7 +105,30 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     else return toast.error('No file selected.')
     reader.onloadend = () => {
       if (!event.target.files) return toast.error('No file selected.')
+      if (thumbnailCompatibleAssetTypes.includes(getAssetType(event.target.files[0].name))) {
+        setIsThumbnailCompatible(true)
+      }
       setAssetFile(selectedFile)
+    }
+  }
+
+  const selectThumbnail = (event: ChangeEvent<HTMLInputElement>) => {
+    setThumbnailFile(undefined)
+    if (event.target.files === null) return
+
+    let selectedFile: File
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (!event.target.files) return toast.error('No file selected.')
+      if (!e.target?.result) return toast.error('Error parsing file.')
+      selectedFile = new File([e.target.result], event.target.files[0].name, { type: 'image/*' })
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (event.target.files[0]) reader.readAsArrayBuffer(event.target.files[0])
+    else return toast.error('No file selected.')
+    reader.onloadend = () => {
+      if (!event.target.files) return toast.error('No file selected.')
+      setThumbnailFile(selectedFile)
     }
   }
 
@@ -106,6 +139,8 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     try {
       const data: ImageUploadDetailsDataProps = {
         assetFile,
+        thumbnailFile,
+        isThumbnailCompatible,
         uploadService,
         nftStorageApiKey: nftStorageApiKeyState.value,
         pinataApiKey: pinataApiKeyState.value,
@@ -126,6 +161,8 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     }
   }, [
     assetFile,
+    thumbnailFile,
+    isThumbnailCompatible,
     uploadService,
     nftStorageApiKeyState.value,
     pinataApiKeyState.value,
@@ -138,6 +175,8 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
   useEffect(() => {
     if (assetFileRef.current) assetFileRef.current.value = ''
     setAssetFile(undefined)
+    setThumbnailFile(undefined)
+    setIsThumbnailCompatible(false)
     imageUrlState.onChange('')
   }, [uploadMethod])
 
@@ -344,6 +383,34 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
                         />
                       </div>
                     </div>
+                    <Conditional test={isThumbnailCompatible}>
+                      <div>
+                        <label
+                          className="block mt-5 mr-1 mb-1 ml-8 w-full font-bold text-white dark:text-gray-300"
+                          htmlFor="thumbnailFile"
+                        >
+                          Thumbnail Selection (optional)
+                        </label>
+                        <div
+                          className={clsx(
+                            'flex relative justify-center items-center mx-8 mt-2 space-y-4 w-full h-32',
+                            'rounded border-2 border-white/20 border-dashed',
+                          )}
+                        >
+                          <input
+                            accept="image/*"
+                            className={clsx(
+                              'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+                              'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+                            )}
+                            id="thumbnailFile"
+                            onChange={selectThumbnail}
+                            ref={thumbnailFileRef}
+                            type="file"
+                          />
+                        </div>
+                      </div>
+                    </Conditional>
                   </div>
                 </div>
                 <Conditional test={assetFile !== undefined}>

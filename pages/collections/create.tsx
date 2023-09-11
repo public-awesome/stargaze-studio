@@ -734,7 +734,19 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails.pinataApiKey as string,
         uploadDetails.pinataSecretKey as string,
       )
-        .then((assetUri: string) => {
+        .then(async (assetUri: string) => {
+          let thumbnailUri: string | undefined
+          if (uploadDetails.thumbnailFiles && uploadDetails.thumbnailFiles.length > 0) {
+            thumbnailUri = await upload(
+              uploadDetails.thumbnailFiles,
+              uploadDetails.uploadService,
+              'thumbnail',
+              uploadDetails.nftStorageApiKey as string,
+              uploadDetails.pinataApiKey as string,
+              uploadDetails.pinataSecretKey as string,
+            )
+          }
+          console.log('Thumbnail URI: ', thumbnailUri)
           if (minterType === 'vending' || (minterType === 'base' && uploadDetails.assetFiles.length > 1)) {
             const fileArray: File[] = []
             let reader: FileReader
@@ -751,9 +763,24 @@ const CollectionCreationPage: NextPage = () => {
                 ) {
                   data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
                 }
-                if (getAssetType(uploadDetails.assetFiles[i].name) !== 'html')
-                  data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
-
+                data.image = `ipfs://${
+                  thumbnailUri &&
+                  (uploadDetails.thumbnailCompatibleAssetFileNames as string[]).includes(
+                    uploadDetails.assetFiles[i].name.split('.')[0],
+                  )
+                    ? thumbnailUri
+                    : assetUri
+                }/${
+                  thumbnailUri &&
+                  (uploadDetails.thumbnailCompatibleAssetFileNames as string[]).includes(
+                    uploadDetails.assetFiles[i].name.split('.')[0],
+                  )
+                    ? uploadDetails.thumbnailFiles?.find(
+                        (thumbnailFile) =>
+                          thumbnailFile.name.split('.')[0] === uploadDetails.assetFiles[i].name.split('.')[0],
+                      )?.name
+                    : uploadDetails.assetFiles[i].name
+                }`
                 if (data.description) {
                   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                   data.description = data.description.replaceAll('\\n', '\n')
@@ -805,8 +832,13 @@ const CollectionCreationPage: NextPage = () => {
               ) {
                 data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
               }
-              if (getAssetType(uploadDetails.assetFiles[0].name) !== 'html')
-                data.image = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
+              data.image = `ipfs://${
+                uploadDetails.thumbnailFiles && uploadDetails.thumbnailFiles.length > 0 ? thumbnailUri : assetUri
+              }/${
+                uploadDetails.thumbnailFiles && uploadDetails.thumbnailFiles.length > 0
+                  ? uploadDetails.thumbnailFiles[0].name
+                  : uploadDetails.assetFiles[0].name
+              }`
 
               const metadataFileBlob = new Blob([JSON.stringify(data)], {
                 type: 'application/json',
