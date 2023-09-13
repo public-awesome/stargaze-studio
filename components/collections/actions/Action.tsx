@@ -499,7 +499,9 @@ export const CollectionActions = ({
           )}
           {showAirdropFileField && (
             <FormGroup
-              subtitle={`CSV file that contains the airdrop addresses and the ${
+              subtitle={`CSV file that contains the ${
+                type === 'batch_transfer_multi_address' ? '' : 'airdrop'
+              } addresses and the ${
                 type === 'airdrop' ? 'amount of tokens' : 'token ID'
               } allocated for each address. Should start with the following header row: ${
                 type === 'airdrop' ? 'address,amount' : 'address,tokenId'
