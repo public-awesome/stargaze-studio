@@ -198,7 +198,12 @@ export const CollectionActions = ({
     'batch_transfer',
     'batch_mint_for',
   ])
-  const showAirdropFileField = isEitherType(type, ['airdrop', 'airdrop_open_edition', 'airdrop_specific'])
+  const showAirdropFileField = isEitherType(type, [
+    'airdrop',
+    'airdrop_open_edition',
+    'airdrop_specific',
+    'batch_transfer_multi_address',
+  ])
   const showPriceField = isEitherType(type, ['update_mint_price', 'update_discount_price'])
   const showDescriptionField = type === 'update_collection_info'
   const showImageField = type === 'update_collection_info'
@@ -499,7 +504,7 @@ export const CollectionActions = ({
               } allocated for each address. Should start with the following header row: ${
                 type === 'airdrop' ? 'address,amount' : 'address,tokenId'
               }`}
-              title="Airdrop File"
+              title={`${type === 'batch_transfer_multi_address' ? 'Multi-Recipient Transfer File' : 'Airdrop File'}`}
             >
               <AirdropUpload onChange={airdropFileOnChange} />
             </FormGroup>
