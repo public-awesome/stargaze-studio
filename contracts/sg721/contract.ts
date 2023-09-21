@@ -3,6 +3,7 @@ import { toBase64, toUtf8 } from '@cosmjs/encoding'
 import type { Coin, logs } from '@cosmjs/stargate'
 import { coin } from '@cosmjs/stargate'
 import { MsgExecuteContract } from 'cosmjs-types/cosmwasm/wasm/v1/tx'
+import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import type { RoyaltyInfo } from '../vendingMinter/contract'
 
@@ -86,6 +87,7 @@ export interface SG721Instance {
   burn: (tokenId: string) => Promise<string>
   batchBurn: (tokenIds: string) => Promise<string>
   batchTransfer: (recipient: string, tokenIds: string) => Promise<string>
+  batchTransferMultiAddress: (senderAddress: string, tokenRecipients: AirdropAllocation[]) => Promise<string>
   updateTokenMetadata: (tokenId: string, tokenURI: string) => Promise<string>
   batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string, jsonExtensions: boolean) => Promise<string>
   freezeTokenMetadata: () => Promise<string>
@@ -103,6 +105,7 @@ export interface Sg721Messages {
   burn: (tokenId: string) => BurnMessage
   batchBurn: (tokenIds: string) => BatchBurnMessage
   batchTransfer: (recipient: string, tokenIds: string) => BatchTransferMessage
+  batchTransferMultiAddress: (tokenRecipients: AirdropAllocation[]) => BatchTransferMultiAddressMessage
   updateCollectionInfo: (collectionInfo: CollectionInfo) => UpdateCollectionInfoMessage
   freezeCollectionInfo: () => FreezeCollectionInfoMessage
   updateTokenMetadata: (tokenId: string, tokenURI: string) => UpdateTokenMetadataMessage
@@ -221,6 +224,13 @@ export interface BatchBurnMessage {
 }
 
 export interface BatchTransferMessage {
+  sender: string
+  contract: string
+  msg: Record<string, unknown>[]
+  funds: Coin[]
+}
+
+export interface BatchTransferMultiAddressMessage {
   sender: string
   contract: string
   msg: Record<string, unknown>[]
@@ -601,6 +611,37 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       return res.transactionHash
     }
 
+    const batchTransferMultiAddress = async (
+      senderAddress: string,
+      recipients: AirdropAllocation[],
+    ): Promise<string> => {
+      const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        const msg = {
+          transfer_nft: { recipient: recipients[i].address, token_id: recipients[i].tokenId as string },
+        }
+        const executeContractMsg: MsgExecuteContractEncodeObject = {
+          typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
+          value: MsgExecuteContract.fromPartial({
+            sender: senderAddress,
+            contract: contractAddress,
+            msg: toUtf8(JSON.stringify(msg)),
+          }),
+        }
+
+        executeContractMsgs.push(executeContractMsg)
+      }
+
+      const res = await client.signAndBroadcast(
+        senderAddress,
+        executeContractMsgs,
+        'auto',
+        'batch transfer to multiple recipients',
+      )
+
+      return res.transactionHash
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-shadow
     const updateCollectionInfo = async (collectionInfo: CollectionInfo): Promise<string> => {
       const res = await client.execute(
@@ -748,6 +789,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       burn,
       batchBurn,
       batchTransfer,
+      batchTransferMultiAddress,
       updateCollectionInfo,
       freezeCollectionInfo,
       updateTokenMetadata,
@@ -950,6 +992,19 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       }
     }
 
+    const batchTransferMultiAddress = (recipients: AirdropAllocation[]): BatchTransferMultiAddressMessage => {
+      const msg: Record<string, unknown>[] = []
+      for (let i = 0; i < recipients.length; i++) {
+        msg.push({ transfer_nft: { recipient: recipients[i].address, token_id: recipients[i].tokenId } })
+      }
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg,
+        funds: [],
+      }
+    }
+
     const batchUpdateTokenMetadata = (
       tokenIds: string,
       baseURI: string,
@@ -1055,6 +1110,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       burn,
       batchBurn,
       batchTransfer,
+      batchTransferMultiAddress,
       updateCollectionInfo,
       freezeCollectionInfo,
       updateTokenMetadata,
