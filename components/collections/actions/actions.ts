@@ -31,6 +31,7 @@ export const ACTION_TYPES = [
   'freeze_collection_info',
   'transfer',
   'batch_transfer',
+  'batch_transfer_multi_address',
   'burn',
   'batch_burn',
   'batch_mint_for',
@@ -81,6 +82,11 @@ export const BASE_ACTION_LIST: ActionListItem[] = [
     id: 'batch_transfer',
     name: 'Batch Transfer Tokens',
     description: `Transfer a list of tokens to a recipient`,
+  },
+  {
+    id: 'batch_transfer_multi_address',
+    name: 'Transfer Tokens to Multiple Recipients',
+    description: `Transfer a list of tokens to multiple addresses`,
   },
   {
     id: 'burn',
@@ -171,6 +177,11 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     description: `Transfer a list of tokens to a recipient`,
   },
   {
+    id: 'batch_transfer_multi_address',
+    name: 'Transfer Tokens to Multiple Recipients',
+    description: `Transfer a list of tokens to multiple addresses`,
+  },
+  {
     id: 'burn',
     name: 'Burn Token',
     description: `Burn a specified token from the collection`,
@@ -257,6 +268,11 @@ export const OPEN_EDITION_ACTION_LIST: ActionListItem[] = [
     id: 'batch_transfer',
     name: 'Batch Transfer Tokens',
     description: `Transfer a list of tokens to a recipient`,
+  },
+  {
+    id: 'batch_transfer_multi_address',
+    name: 'Transfer Tokens to Multiple Recipients',
+    description: `Transfer a list of tokens to multiple addresses`,
   },
   {
     id: 'burn',
@@ -405,6 +421,9 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'batch_transfer': {
       return sg721Messages.batchTransfer(args.recipient, args.tokenIds)
     }
+    case 'batch_transfer_multi_address': {
+      return sg721Messages.batchTransferMultiAddress(txSigner, args.tokenRecipients)
+    }
     case 'burn': {
       return sg721Messages.burn(args.tokenId.toString())
     }
@@ -511,6 +530,9 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'batch_transfer': {
       return sg721Messages(sg721Contract)?.batchTransfer(args.recipient, args.tokenIds)
+    }
+    case 'batch_transfer_multi_address': {
+      return sg721Messages(sg721Contract)?.batchTransferMultiAddress(args.tokenRecipients)
     }
     case 'burn': {
       return sg721Messages(sg721Contract)?.burn(args.tokenId.toString())
