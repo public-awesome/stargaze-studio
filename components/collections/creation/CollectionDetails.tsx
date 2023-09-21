@@ -269,7 +269,10 @@ export const CollectionDetails = ({
                 >
                   <div className={clsx('flex flex-col mt-11 space-y-2 w-full form-control')}>
                     <label className="justify-start cursor-pointer label">
-                      <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                      <div className="flex flex-col">
+                        <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                        <span className="mr-4">(Price: 2000 STARS)</span>
+                      </div>
                       <input
                         checked={updatable}
                         className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
@@ -391,11 +394,14 @@ export const CollectionDetails = ({
                 className={clsx(
                   minterType === 'base'
                     ? 'flex flex-col -ml-16 space-y-2 w-1/2 form-control'
-                    : 'flex flex-col space-y-2 w-3/4 form-control',
+                    : 'flex flex-col space-y-2 w-full form-control',
                 )}
               >
                 <label className="justify-start cursor-pointer label">
-                  <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                  <div className="flex flex-col">
+                    <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                    <span className="mr-4">(Price: 2000 STARS)</span>
+                  </div>
                   <input
                     checked={updatable}
                     className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}

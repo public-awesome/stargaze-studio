@@ -370,9 +370,12 @@ export const CollectionDetails = ({
             }
             placement="bottom"
           >
-            <div className={clsx('flex flex-col space-y-2 w-3/4 form-control')}>
+            <div className={clsx('flex flex-col space-y-2 w-full form-control')}>
               <label className="justify-start cursor-pointer label">
-                <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                <div className="flex flex-col">
+                  <span className="mr-4 font-bold">Updatable Token Metadata</span>
+                  <span className="mr-4">(Price: 2000 STARS)</span>
+                </div>
                 <input
                   checked={updatable}
                   className={`toggle ${updatable ? `bg-stargaze` : `bg-gray-600`}`}
