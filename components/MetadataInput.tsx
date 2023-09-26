@@ -129,7 +129,7 @@ export const MetadataInput = (props: MetadataInputProps) => {
     if (nameState.value === '') delete metadata.name
     else metadata.name = nameState.value
     if (descriptionState.value === '') delete metadata.description
-    else metadata.description = descriptionState.value
+    else metadata.description = descriptionState.value.replaceAll('\\n', '\n')
     if (externalUrlState.value === '') delete metadata.external_url
     else metadata.external_url = externalUrlState.value
     if (youtubeUrlState.value === '') delete metadata.youtube_url
