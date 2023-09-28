@@ -28,7 +28,7 @@ export const ibcUsdc: TokenInfo = {
   denom:
     NETWORK === 'mainnet'
       ? 'ibc/D189335C6E4A68B513C10AB227BF1C1D38C746766278BA3EEB4FB14124F1D858'
-      : 'factory/stars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3/uusdc',
+      : 'factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/uusdc',
   displayName: 'USDC',
   decimalPlaces: 6,
 }
@@ -38,7 +38,7 @@ export const ibcFrnz: TokenInfo = {
   denom:
     NETWORK === 'mainnet'
       ? 'ibc/7FA7EC64490E3BDE5A1A28CBE73CC0AD22522794957BC891C46321E3A6074DB9'
-      : 'factory/stars10w5eulj60qp3cfqa0hkmke78qdy2feq6x9xdmd/ufrnz',
+      : 'factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies',
   displayName: 'FRNZ',
   decimalPlaces: 6,
 }
