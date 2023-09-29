@@ -37,7 +37,7 @@ export const ibcFrnz: TokenInfo = {
   id: 'ibc-frnz',
   denom:
     NETWORK === 'mainnet'
-      ? 'ibc/7FA7EC64490E3BDE5A1A28CBE73CC0AD22522794957BC891C46321E3A6074DB9'
+      ? 'ibc/9C40A8368C0E1CAA4144DBDEBBCE2E7A5CC2D128F0A9F785ECB71ECFF575114C'
       : 'factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies',
   displayName: 'FRNZ',
   decimalPlaces: 6,
