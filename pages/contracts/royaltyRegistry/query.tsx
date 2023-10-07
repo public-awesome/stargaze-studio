@@ -124,10 +124,16 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional test={type === 'collection_royalty_default'}>
+          <Conditional
+            test={
+              type === 'collection_royalty_default' ||
+              type === 'royalty_payment' ||
+              type === 'collection_royalty_protocol'
+            }
+          >
             <AddressInput {...collectionAddressState} />
           </Conditional>
-          <Conditional test={type === 'collection_royalty_protocol'}>
+          <Conditional test={type === 'collection_royalty_protocol' || type === 'royalty_payment'}>
             <AddressInput {...protocolAddressState} />
           </Conditional>
         </div>

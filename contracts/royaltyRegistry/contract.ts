@@ -203,7 +203,7 @@ export const RoyaltyRegistry = (client: SigningCosmWasmClient, txSigner: string)
         txSigner,
         contractAddress,
         {
-          set_collection_royalty_default: { collection, recipient, share: share / 100 },
+          set_collection_royalty_default: { collection, recipient, share: (share / 100).toString() },
         },
         'auto',
       )
@@ -223,7 +223,7 @@ export const RoyaltyRegistry = (client: SigningCosmWasmClient, txSigner: string)
           update_collection_royalty_default: {
             collection,
             recipient,
-            share_delta: shareDelta ? shareDelta / 100 : undefined,
+            share_delta: shareDelta ? (shareDelta / 100).toString() : undefined,
             decrement,
           },
         },
@@ -242,7 +242,7 @@ export const RoyaltyRegistry = (client: SigningCosmWasmClient, txSigner: string)
         txSigner,
         contractAddress,
         {
-          set_collection_royalty_protocol: { collection, protocol, recipient, share: share / 100 },
+          set_collection_royalty_protocol: { collection, protocol, recipient, share: (share / 100).toString() },
         },
         'auto',
       )
@@ -264,7 +264,7 @@ export const RoyaltyRegistry = (client: SigningCosmWasmClient, txSigner: string)
             collection,
             protocol,
             recipient,
-            share_delta: shareDelta ? shareDelta / 100 : undefined,
+            share_delta: shareDelta ? (shareDelta / 100).toString() : undefined,
             decrement,
           },
         },
