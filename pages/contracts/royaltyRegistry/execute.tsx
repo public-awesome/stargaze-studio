@@ -1,10 +1,11 @@
+import clsx from 'clsx'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { ExecuteCombobox } from 'components/contracts/royaltyRegistry/ExecuteCombobox'
 import { useExecuteComboboxState } from 'components/contracts/royaltyRegistry/ExecuteCombobox.hooks'
 import { FormControl } from 'components/FormControl'
-import { AddressInput } from 'components/forms/FormInput'
+import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
@@ -69,14 +70,16 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
     id: 'share',
     name: 'share',
     title: 'Share',
-    subtitle: 'Share',
+    subtitle: 'Share percentage',
+    placeholder: '4%',
   })
 
   const shareDeltaState = useNumberInputState({
     id: 'share-delta',
     name: 'share-delta',
     title: 'Share Delta',
-    subtitle: 'Share delta',
+    subtitle: 'The change of share percentage',
+    placeholder: '1%',
   })
 
   const [decrement, setDecrement] = useState(false)
@@ -152,10 +155,41 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
         <div className="space-y-8">
           <AddressInput {...contractState} />
           <ExecuteCombobox {...comboboxState} />
+          <AddressInput {...collectionAddressState} />
+          <Conditional
+            test={isEitherType(type, ['set_collection_royalty_protocol', 'update_collection_royalty_protocol'])}
+          >
+            <AddressInput {...protocolAddressState} />
+          </Conditional>
           <Conditional test={showRecipientAddress}>
             <AddressInput {...recipientAddressState} />
           </Conditional>
+          <Conditional test={isEitherType(type, ['set_collection_royalty_protocol', 'set_collection_royalty_default'])}>
+            <NumberInput {...shareState} />
+          </Conditional>
+          <Conditional
+            test={isEitherType(type, ['update_collection_royalty_default', 'update_collection_royalty_protocol'])}
+          >
+            <NumberInput {...shareDeltaState} />
+            <div className="flex flex-row space-y-2 w-1/4">
+              <div className={clsx('flex flex-col space-y-2 w-full form-control')}>
+                <label className="justify-start cursor-pointer label">
+                  <div className="flex flex-col">
+                    <span className="mr-4 font-bold">Increment</span>
+                  </div>
+                  <input
+                    checked={decrement}
+                    className={`toggle ${decrement ? `bg-stargaze` : `bg-gray-600`}`}
+                    onClick={() => setDecrement(!decrement)}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+              <span className="mx-4 font-bold">Decrement</span>
+            </div>
+          </Conditional>
         </div>
+
         <div className="space-y-8">
           <div className="relative">
             <Button className="absolute top-0 right-0" isLoading={isLoading} rightIcon={<FaArrowRight />} type="submit">
