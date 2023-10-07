@@ -52,35 +52,17 @@ export interface DispatchExecuteProps {
 
 type Select<T extends ExecuteType> = T
 /** @see {@link RoyaltyRegistryInstance} */
-export type DispatchExecuteArgs = {
+export interface DispatchExecuteArgs {
   contract: string
+  collection: string
+  protocol: string
+  recipient: string
+  share: number
+  shareDelta: number
+  decrement: boolean
   messages?: RoyaltyRegistryInstance
-} & (
-  | { type: Select<'initialize_collection_royalty'>; collection: string }
-  | { type: Select<'set_collection_royalty_default'>; collection: string; recipient: string; royalty: number }
-  | {
-      type: Select<'update_collection_royalty_default'>
-      collection: string
-      recipient: string
-      shareDelta: number
-      decrement: boolean
-    }
-  | {
-      type: Select<'set_collection_royalty_protocol'>
-      collection: string
-      protocol: string
-      recipient: string
-      royalty: number
-    }
-  | {
-      type: Select<'update_collection_royalty_protocol'>
-      collection: string
-      protocol: string
-      recipient: string
-      shareDelta: number
-      decrement: boolean
-    }
-)
+  type: string | undefined
+}
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   const { messages } = args
@@ -92,13 +74,13 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return messages.initializeCollectionRoyalty(args.collection)
     }
     case 'set_collection_royalty_default': {
-      return messages.setCollectionRoyaltyDefault(args.collection, args.recipient, args.royalty)
+      return messages.setCollectionRoyaltyDefault(args.collection, args.recipient, args.share)
     }
     case 'update_collection_royalty_default': {
       return messages.updateCollectionRoyaltyDefault(args.collection, args.recipient, args.shareDelta, args.decrement)
     }
     case 'set_collection_royalty_protocol': {
-      return messages.setCollectionRoyaltyProtocol(args.collection, args.protocol, args.recipient, args.royalty)
+      return messages.setCollectionRoyaltyProtocol(args.collection, args.protocol, args.recipient, args.share)
     }
     case 'update_collection_royalty_protocol': {
       return messages.updateCollectionRoyaltyProtocol(
@@ -124,7 +106,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return messages(contract)?.initializeCollectionRoyalty(args.collection)
     }
     case 'set_collection_royalty_default': {
-      return messages(contract)?.setCollectionRoyaltyDefault(args.collection, args.recipient, args.royalty)
+      return messages(contract)?.setCollectionRoyaltyDefault(args.collection, args.recipient, args.share)
     }
     case 'update_collection_royalty_default': {
       return messages(contract)?.updateCollectionRoyaltyDefault(
@@ -139,7 +121,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
         args.collection,
         args.protocol,
         args.recipient,
-        args.royalty,
+        args.share,
       )
     }
     case 'update_collection_royalty_protocol': {
