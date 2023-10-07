@@ -46,6 +46,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_BASE_FACTORY_ADDRESS: string
     readonly NEXT_PUBLIC_BASE_FACTORY_UPDATABLE_ADDRESS: string
     readonly NEXT_PUBLIC_SG721_NAME_ADDRESS: string
+    readonly NEXT_PUBLIC_ROYALTY_REGISTRY_ADDRESS: string
     readonly NEXT_PUBLIC_BASE_MINTER_CODE_ID: string
     readonly NEXT_PUBLIC_BADGE_HUB_CODE_ID: string
     readonly NEXT_PUBLIC_BADGE_HUB_ADDRESS: string

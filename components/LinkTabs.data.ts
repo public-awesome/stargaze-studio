@@ -145,3 +145,16 @@ export const splitsLinkTabs: LinkTabProps[] = [
     href: '/contracts/splits/migrate',
   },
 ]
+
+export const royaltyRegistryLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Query',
+    description: `Dispatch queries for your Royalty Registry contract`,
+    href: '/contracts/royaltyRegistry/query',
+  },
+  {
+    title: 'Execute',
+    description: `Execute Royalty Registry contract actions`,
+    href: '/contracts/royaltyRegistry/execute',
+  },
+]

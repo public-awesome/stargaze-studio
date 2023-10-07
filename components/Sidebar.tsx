@@ -233,6 +233,15 @@ export const Sidebar = () => {
               >
                 <Link href="/contracts/splits/">Splits Contract</Link>
               </li>
+              <li
+                className={clsx(
+                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/contracts/royaltyRegistry/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/contracts/royaltyRegistry/">Royalty Registry</Link>
+              </li>
             </ul>
           </li>
         </ul>
