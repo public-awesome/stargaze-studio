@@ -17,10 +17,12 @@ import { NextSeo } from 'next-seo'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
-import { ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
+import { INFINITY_SWAP_PROTOCOL_ADDRESS, ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+
+import { protocolList } from './execute'
 
 const RoyaltyRegistryQueryPage: NextPage = () => {
   const { royaltyRegistry: contract } = useContracts()
@@ -47,12 +49,14 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
     name: 'protocol-address',
     title: 'Protocol Address',
     subtitle: 'Address of the protocol',
+    defaultValue: INFINITY_SWAP_PROTOCOL_ADDRESS,
   })
 
   const collectionAddress = collectionAddressState.value
   const protocolAddress = protocolAddressState.value
 
   const [type, setType] = useState<QueryType>('config')
+  const [manualProtocolInput, setManualProtocolInput] = useState(false)
 
   const { data: response } = useQuery(
     [contractAddress, type, contract, wallet, collectionAddress, protocolAddress] as const,
@@ -82,14 +86,14 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    if (contractAddress.length > 0) {
-      void router.replace({ query: { contractAddress } })
+    if (collectionAddress.length > 0) {
+      void router.replace({ query: { collectionAddress } })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contractAddress])
+  }, [collectionAddress])
   useEffect(() => {
-    const initial = new URL(document.URL).searchParams.get('contractAddress')
-    if (initial && initial.length > 0) contractState.onChange(initial)
+    const initial = new URL(document.URL).searchParams.get('collectionAddress')
+    if (initial && initial.length > 0) collectionAddressState.onChange(initial)
   }, [])
 
   return (
@@ -104,7 +108,7 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
 
       <div className="grid grid-cols-2 p-4 space-x-8">
         <div className="space-y-8">
-          <AddressInput {...contractState} />
+          <AddressInput {...collectionAddressState} />
           <FormControl htmlId="contract-query-type" subtitle="Type of query to be dispatched" title="Query Type">
             <select
               className={clsx(
@@ -124,17 +128,30 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
-          <Conditional
-            test={
-              type === 'collection_royalty_default' ||
-              type === 'royalty_payment' ||
-              type === 'collection_royalty_protocol'
-            }
-          >
-            <AddressInput {...collectionAddressState} />
-          </Conditional>
           <Conditional test={type === 'collection_royalty_protocol' || type === 'royalty_payment'}>
-            <AddressInput {...protocolAddressState} />
+            <span className="mr-4 font-bold">Selected Protocol</span>
+            <select
+              className="py-2 px-4 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+              onChange={(e) => {
+                if (e.target.value) {
+                  protocolAddressState.onChange(e.target.value)
+                  setManualProtocolInput(false)
+                } else {
+                  protocolAddressState.onChange('')
+                  setManualProtocolInput(true)
+                }
+              }}
+            >
+              {protocolList.map((protocol) => (
+                <option key={protocol.address} value={protocol.address}>
+                  {protocol.name}
+                </option>
+              ))}
+              <option value="">Manual Input</option>
+            </select>
+            <Conditional test={manualProtocolInput}>
+              <AddressInput {...protocolAddressState} />
+            </Conditional>
           </Conditional>
         </div>
         <JsonPreview content={contractAddress ? { type, response } : null} title="Query Response" />

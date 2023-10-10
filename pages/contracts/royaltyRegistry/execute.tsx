@@ -27,7 +27,7 @@ import { INFINITY_SWAP_PROTOCOL_ADDRESS, ROYALTY_REGISTRY_ADDRESS } from 'utils/
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const protocolList = [{ name: 'Infinity Swap', address: INFINITY_SWAP_PROTOCOL_ADDRESS }]
+export const protocolList = [{ name: 'Infinity Swap', address: INFINITY_SWAP_PROTOCOL_ADDRESS }]
 
 const RoyaltyRegistryExecutePage: NextPage = () => {
   const { royaltyRegistry: contract } = useContracts()
