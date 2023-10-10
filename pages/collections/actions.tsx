@@ -246,6 +246,8 @@ const CollectionActionsPage: NextPage = () => {
                   minterContractAddress={minterContractState.value}
                   minterType={minterType}
                   openEditionMinterMessages={openEditionMinterMessages}
+                  royaltyRegistryContractAddress={ROYALTY_REGISTRY_ADDRESS}
+                  royaltyRegistryMessages={royaltyRegistryMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                   vendingMinterMessages={vendingMinterMessages}
