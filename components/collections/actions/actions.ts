@@ -1,10 +1,13 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 import { useBaseMinterContract } from 'contracts/baseMinter'
 import { useOpenEditionMinterContract } from 'contracts/openEditionMinter'
+import type { RoyaltyRegistryInstance } from 'contracts/royaltyRegistry'
+import { useRoyaltyRegistryContract } from 'contracts/royaltyRegistry'
 import type { CollectionInfo, SG721Instance } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { useVendingMinterContract } from 'contracts/vendingMinter'
+import { INFINITY_SWAP_PROTOCOL_ADDRESS } from 'utils/constants'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 
 import type { BaseMinterInstance } from '../../../contracts/baseMinter/contract'
@@ -29,6 +32,8 @@ export const ACTION_TYPES = [
   'update_per_address_limit',
   'update_collection_info',
   'freeze_collection_info',
+  'set_royalties_for_infinity_swap',
+  'update_royalties_for_infinity_swap',
   'transfer',
   'batch_transfer',
   'batch_transfer_multi_address',
@@ -72,6 +77,16 @@ export const BASE_ACTION_LIST: ActionListItem[] = [
     id: 'freeze_collection_info',
     name: 'Freeze Collection Info',
     description: `Freeze collection info to prevent further updates`,
+  },
+  {
+    id: 'set_royalties_for_infinity_swap',
+    name: 'Set Royalty Details for Infinity Swap',
+    description: `Set royalty details for Infinity Swap`,
+  },
+  {
+    id: 'update_royalties_for_infinity_swap',
+    name: 'Update Royalty Details for Infinity Swap',
+    description: `Update royalty details for Infinity Swap`,
   },
   {
     id: 'transfer',
@@ -167,6 +182,16 @@ export const VENDING_ACTION_LIST: ActionListItem[] = [
     description: `Freeze collection info to prevent further updates`,
   },
   {
+    id: 'set_royalties_for_infinity_swap',
+    name: 'Set Royalty Details for Infinity Swap',
+    description: `Set royalty details for Infinity Swap`,
+  },
+  {
+    id: 'update_royalties_for_infinity_swap',
+    name: 'Update Royalty Details for Infinity Swap',
+    description: `Update royalty details for Infinity Swap`,
+  },
+  {
     id: 'transfer',
     name: 'Transfer Tokens',
     description: `Transfer tokens from one address to another`,
@@ -260,6 +285,16 @@ export const OPEN_EDITION_ACTION_LIST: ActionListItem[] = [
     description: `Freeze collection info to prevent further updates`,
   },
   {
+    id: 'set_royalties_for_infinity_swap',
+    name: 'Set Royalty Details for Infinity Swap',
+    description: `Set royalty details for Infinity Swap`,
+  },
+  {
+    id: 'update_royalties_for_infinity_swap',
+    name: 'Update Royalty Details for Infinity Swap',
+    description: `Update royalty details for Infinity Swap`,
+  },
+  {
     id: 'transfer',
     name: 'Transfer Tokens',
     description: `Transfer tokens from one address to another`,
@@ -323,10 +358,12 @@ export interface DispatchExecuteProps {
 export interface DispatchExecuteArgs {
   minterContract: string
   sg721Contract: string
+  royaltyRegistryContract: string
   vendingMinterMessages?: VendingMinterInstance
   baseMinterMessages?: BaseMinterInstance
   openEditionMinterMessages?: OpenEditionMinterInstance
   sg721Messages?: SG721Instance
+  royaltyRegistryMessages?: RoyaltyRegistryInstance
   txSigner: string
   type: string | undefined
   tokenUri: string
@@ -344,11 +381,25 @@ export interface DispatchExecuteArgs {
   collectionInfo: CollectionInfo | undefined
   baseUri: string
   jsonExtensions: boolean
+  decrement: boolean
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
-  const { vendingMinterMessages, baseMinterMessages, openEditionMinterMessages, sg721Messages, txSigner } = args
-  if (!vendingMinterMessages || !baseMinterMessages || !openEditionMinterMessages || !sg721Messages) {
+  const {
+    vendingMinterMessages,
+    baseMinterMessages,
+    openEditionMinterMessages,
+    sg721Messages,
+    royaltyRegistryMessages,
+    txSigner,
+  } = args
+  if (
+    !vendingMinterMessages ||
+    !baseMinterMessages ||
+    !openEditionMinterMessages ||
+    !sg721Messages ||
+    !royaltyRegistryMessages
+  ) {
     throw new Error('Cannot execute actions')
   }
   switch (args.type) {
@@ -415,6 +466,23 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     case 'shuffle': {
       return vendingMinterMessages.shuffle(txSigner)
     }
+    case 'set_royalties_for_infinity_swap': {
+      return royaltyRegistryMessages.setCollectionRoyaltyProtocol(
+        args.sg721Contract,
+        INFINITY_SWAP_PROTOCOL_ADDRESS,
+        args.collectionInfo?.royalty_info?.payment_address as string,
+        Number(args.collectionInfo?.royalty_info?.share) * 100,
+      )
+    }
+    case 'update_royalties_for_infinity_swap': {
+      return royaltyRegistryMessages.updateCollectionRoyaltyProtocol(
+        args.sg721Contract,
+        INFINITY_SWAP_PROTOCOL_ADDRESS,
+        args.collectionInfo?.royalty_info?.payment_address as string,
+        Number(args.collectionInfo?.royalty_info?.share) * 100,
+        args.decrement,
+      )
+    }
     case 'transfer': {
       return sg721Messages.transferNft(args.recipient, args.tokenId.toString())
     }
@@ -460,7 +528,10 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages: baseMinterMessages } = useBaseMinterContract()
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { messages: openEditionMinterMessages } = useOpenEditionMinterContract()
-  const { minterContract, sg721Contract } = args
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { messages: royaltyRegistryMessages } = useRoyaltyRegistryContract()
+
+  const { minterContract, sg721Contract, royaltyRegistryContract } = args
   switch (args.type) {
     case 'mint_token_uri': {
       return baseMinterMessages(minterContract)?.mint(args.tokenUri)
@@ -524,6 +595,23 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'shuffle': {
       return vendingMinterMessages(minterContract)?.shuffle()
+    }
+    case 'set_royalties_for_infinity_swap': {
+      return royaltyRegistryMessages(royaltyRegistryContract)?.setCollectionRoyaltyProtocol(
+        args.sg721Contract,
+        INFINITY_SWAP_PROTOCOL_ADDRESS,
+        args.collectionInfo?.royalty_info?.payment_address as string,
+        Number(args.collectionInfo?.royalty_info?.share) * 100,
+      )
+    }
+    case 'update_royalties_for_infinity_swap': {
+      return royaltyRegistryMessages(royaltyRegistryContract)?.updateCollectionRoyaltyProtocol(
+        args.sg721Contract,
+        INFINITY_SWAP_PROTOCOL_ADDRESS,
+        args.collectionInfo?.royalty_info?.payment_address as string,
+        Number(args.collectionInfo?.royalty_info?.share) * 100,
+        args.decrement,
+      )
     }
     case 'transfer': {
       return sg721Messages(sg721Contract)?.transferNft(args.recipient, args.tokenId.toString())

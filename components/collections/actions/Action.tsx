@@ -1,6 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable no-nested-ternary */
 import { toUtf8 } from '@cosmjs/encoding'
+import clsx from 'clsx'
 import { AirdropUpload } from 'components/AirdropUpload'
 import { Button } from 'components/Button'
 import type { DispatchExecuteArgs } from 'components/collections/actions/actions'
@@ -20,6 +21,7 @@ import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
 import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter'
+import type { RoyaltyRegistryInstance } from 'contracts/royaltyRegistry'
 import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import type { FormEvent } from 'react'
@@ -27,6 +29,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
+import { ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 import { resolveAddress } from 'utils/resolveAddress'
 
@@ -41,6 +44,7 @@ interface CollectionActionsProps {
   vendingMinterMessages: VendingMinterInstance | undefined
   baseMinterMessages: BaseMinterInstance | undefined
   openEditionMinterMessages: OpenEditionMinterInstance | undefined
+  royaltyRegistryMessages: RoyaltyRegistryInstance | undefined
   minterType: MinterType
   sg721Type: Sg721Type
 }
@@ -54,6 +58,7 @@ export const CollectionActions = ({
   vendingMinterMessages,
   baseMinterMessages,
   openEditionMinterMessages,
+  royaltyRegistryMessages,
   minterType,
   sg721Type,
 }: CollectionActionsProps) => {
@@ -69,6 +74,7 @@ export const CollectionActions = ({
   const [explicitContent, setExplicitContent] = useState<ExplicitContentType>(undefined)
   const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
   const [jsonExtensions, setJsonExtensions] = useState<boolean>(false)
+  const [decrement, setDecrement] = useState<boolean>(false)
 
   const actionComboboxState = useActionsComboboxState()
   const type = actionComboboxState.value?.id
@@ -170,8 +176,11 @@ export const CollectionActions = ({
   const royaltyShareState = useInputState({
     id: 'royalty-share',
     name: 'royaltyShare',
-    title: 'Share Percentage',
-    subtitle: 'Percentage of royalties to be paid',
+    title: type !== 'update_royalties_for_infinity_swap' ? 'Share Percentage' : 'Share Delta',
+    subtitle:
+      type !== 'update_royalties_for_infinity_swap'
+        ? 'Percentage of royalties to be paid'
+        : 'Change in share percentage',
     placeholder: '5%',
   })
 
@@ -208,7 +217,10 @@ export const CollectionActions = ({
   const showDescriptionField = type === 'update_collection_info'
   const showImageField = type === 'update_collection_info'
   const showExternalLinkField = type === 'update_collection_info'
-  const showRoyaltyRelatedFields = type === 'update_collection_info'
+  const showRoyaltyRelatedFields =
+    type === 'update_collection_info' ||
+    type === 'set_royalties_for_infinity_swap' ||
+    type === 'update_royalties_for_infinity_swap'
   const showExplicitContentField = type === 'update_collection_info'
   const showBaseUriField = type === 'batch_update_token_metadata'
 
@@ -219,6 +231,7 @@ export const CollectionActions = ({
     limit: limitState.value,
     minterContract: minterContractAddress,
     sg721Contract: sg721ContractAddress,
+    royaltyRegistryContract: ROYALTY_REGISTRY_ADDRESS,
     tokenId: tokenIdState.value,
     tokenIds: tokenIdListState.value,
     tokenUri: tokenURIState.value.trim().endsWith('/')
@@ -229,6 +242,7 @@ export const CollectionActions = ({
     baseMinterMessages,
     openEditionMinterMessages,
     sg721Messages,
+    royaltyRegistryMessages,
     recipient: resolvedRecipientAddress,
     recipients: airdropArray,
     tokenRecipients: airdropAllocationArray,
@@ -240,6 +254,7 @@ export const CollectionActions = ({
       : baseURIState.value.trim(),
     collectionInfo,
     jsonExtensions,
+    decrement,
   }
   const resolveRecipientAddress = async () => {
     await resolveAddress(recipientState.value.trim(), wallet).then((resolvedAddress) => {
@@ -448,6 +463,24 @@ export const CollectionActions = ({
             <div className="p-2 my-4 rounded border-2 border-gray-500/50">
               <TextInput className="mb-2" {...royaltyPaymentAddressState} />
               <NumberInput className="mb-2" {...royaltyShareState} />
+              <Conditional test={type === 'update_royalties_for_infinity_swap'}>
+                <div className="flex flex-row space-y-2 w-1/4">
+                  <div className={clsx('flex flex-col space-y-2 w-full form-control')}>
+                    <label className="justify-start cursor-pointer label">
+                      <div className="flex flex-col">
+                        <span className="mr-4 font-bold">Increment</span>
+                      </div>
+                      <input
+                        checked={decrement}
+                        className={`toggle ${decrement ? `bg-stargaze` : `bg-gray-600`}`}
+                        onClick={() => setDecrement(!decrement)}
+                        type="checkbox"
+                      />
+                    </label>
+                  </div>
+                  <span className="mx-4 font-bold">Decrement</span>
+                </div>
+              </Conditional>
             </div>
           )}
           {showExplicitContentField && (
