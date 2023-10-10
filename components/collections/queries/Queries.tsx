@@ -7,6 +7,7 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { JsonPreview } from 'components/JsonPreview'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
 import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter'
+import type { RoyaltyRegistryInstance } from 'contracts/royaltyRegistry'
 import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { toast } from 'react-hot-toast'
@@ -19,10 +20,12 @@ import type { MinterType } from '../actions/Combobox'
 interface CollectionQueriesProps {
   minterContractAddress: string
   sg721ContractAddress: string
+  royaltyRegistryContractAddress: string
   sg721Messages: SG721Instance | undefined
   vendingMinterMessages: VendingMinterInstance | undefined
   baseMinterMessages: BaseMinterInstance | undefined
   openEditionMinterMessages: OpenEditionMinterInstance | undefined
+  royaltyRegistryMessages: RoyaltyRegistryInstance | undefined
   minterType: MinterType
 }
 export const CollectionQueries = ({
@@ -33,6 +36,7 @@ export const CollectionQueries = ({
   openEditionMinterMessages,
   baseMinterMessages,
   minterType,
+  royaltyRegistryMessages,
 }: CollectionQueriesProps) => {
   const wallet = useWallet()
 
@@ -65,9 +69,11 @@ export const CollectionQueries = ({
       baseMinterMessages,
       vendingMinterMessages,
       openEditionMinterMessages,
+      royaltyRegistryMessages,
       type,
       tokenId,
       address,
+      sg721ContractAddress,
     ] as const,
     async ({ queryKey }) => {
       const [
@@ -75,9 +81,11 @@ export const CollectionQueries = ({
         _baseMinterMessages_,
         _vendingMinterMessages,
         _openEditionMinterMessages,
+        _royaltyRegistryMessages,
         _type,
         _tokenId,
         _address,
+        _sg721ContractAddress,
       ] = queryKey
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
@@ -88,8 +96,10 @@ export const CollectionQueries = ({
           baseMinterMessages: _baseMinterMessages_,
           openEditionMinterMessages: _openEditionMinterMessages,
           sg721Messages: _sg721Messages,
+          royaltyRegistryMessages: _royaltyRegistryMessages,
           address: resolvedAddress,
           type: _type,
+          sg721ContractAddress: _sg721ContractAddress,
         })
         return result
       })
@@ -102,7 +112,9 @@ export const CollectionQueries = ({
           toast.error(error.message, { style: { maxWidth: 'none' } })
         }
       },
-      enabled: Boolean(sg721ContractAddress && minterContractAddress && type),
+      enabled:
+        Boolean(type && type === 'infinity_swap_royalties' && sg721ContractAddress) ||
+        Boolean(sg721ContractAddress && minterContractAddress && type),
       retry: false,
     },
   )
