@@ -12,6 +12,7 @@ import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
 import { useEffect, useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
+import { ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -24,6 +25,7 @@ const CollectionActionsPage: NextPage = () => {
     vendingMinter: vendingMinterContract,
     openEditionMinter: openEditionMinterContract,
     sg721: sg721Contract,
+    royaltyRegistry: royaltyRegistryContract,
   } = useContracts()
   const wallet = useWallet()
 
@@ -64,6 +66,11 @@ const CollectionActionsPage: NextPage = () => {
   const sg721Messages = useMemo(
     () => sg721Contract?.use(sg721ContractState.value),
     [sg721Contract, sg721ContractState.value],
+  )
+
+  const royaltyRegistryMessages = useMemo(
+    () => royaltyRegistryContract?.use(ROYALTY_REGISTRY_ADDRESS),
+    [royaltyRegistryContract],
   )
 
   const sg721ContractAddress = sg721ContractState.value
@@ -227,6 +234,7 @@ const CollectionActionsPage: NextPage = () => {
                   minterContractAddress={minterContractState.value}
                   minterType={minterType}
                   openEditionMinterMessages={openEditionMinterMessages}
+                  royaltyRegistryMessages={royaltyRegistryMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                   sg721Type={sg721Type}
@@ -238,6 +246,8 @@ const CollectionActionsPage: NextPage = () => {
                   minterContractAddress={minterContractState.value}
                   minterType={minterType}
                   openEditionMinterMessages={openEditionMinterMessages}
+                  royaltyRegistryContractAddress={ROYALTY_REGISTRY_ADDRESS}
+                  royaltyRegistryMessages={royaltyRegistryMessages}
                   sg721ContractAddress={sg721ContractState.value}
                   sg721Messages={sg721Messages}
                   vendingMinterMessages={vendingMinterMessages}

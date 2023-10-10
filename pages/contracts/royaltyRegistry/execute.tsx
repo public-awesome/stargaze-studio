@@ -23,15 +23,18 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
-import { ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
+import { INFINITY_SWAP_PROTOCOL_ADDRESS, ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+
+export const protocolList = [{ name: 'Infinity Swap', address: INFINITY_SWAP_PROTOCOL_ADDRESS }]
 
 const RoyaltyRegistryExecutePage: NextPage = () => {
   const { royaltyRegistry: contract } = useContracts()
   const wallet = useWallet()
 
   const [lastTx, setLastTx] = useState('')
+  const [manualProtocolInput, setManualProtocolInput] = useState(false)
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -52,11 +55,14 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
     subtitle: 'Address of the collection',
   })
 
+  const collectionAddress = collectionAddressState.value
+
   const protocolAddressState = useInputState({
     id: 'protocol-address',
     name: 'protocol-address',
     title: 'Protocol Address',
     subtitle: 'Address of the protocol',
+    defaultValue: INFINITY_SWAP_PROTOCOL_ADDRESS,
   })
 
   const recipientAddressState = useInputState({
@@ -131,14 +137,14 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
   const router = useRouter()
 
   useEffect(() => {
-    if (contractAddress.length > 0) {
-      void router.replace({ query: { contractAddress } })
+    if (collectionAddress.length > 0) {
+      void router.replace({ query: { collectionAddress } })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contractAddress])
+  }, [collectionAddress])
   useEffect(() => {
-    const initial = new URL(document.URL).searchParams.get('contractAddress')
-    if (initial && initial.length > 0) contractState.onChange(initial)
+    const initial = new URL(document.URL).searchParams.get('collectionAddress')
+    if (initial && initial.length > 0) collectionAddressState.onChange(initial)
   }, [])
 
   return (
@@ -153,13 +159,34 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
 
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
-          <AddressInput {...contractState} />
-          <ExecuteCombobox {...comboboxState} />
           <AddressInput {...collectionAddressState} />
+          <ExecuteCombobox {...comboboxState} />
           <Conditional
             test={isEitherType(type, ['set_collection_royalty_protocol', 'update_collection_royalty_protocol'])}
           >
-            <AddressInput {...protocolAddressState} />
+            <span className="mr-4 font-bold">Selected Protocol</span>
+            <select
+              className="py-2 px-4 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+              onChange={(e) => {
+                if (e.target.value) {
+                  protocolAddressState.onChange(e.target.value)
+                  setManualProtocolInput(false)
+                } else {
+                  protocolAddressState.onChange('')
+                  setManualProtocolInput(true)
+                }
+              }}
+            >
+              {protocolList.map((protocol) => (
+                <option key={protocol.address} value={protocol.address}>
+                  {protocol.name}
+                </option>
+              ))}
+              <option value="">Manual Input</option>
+            </select>
+            <Conditional test={manualProtocolInput}>
+              <AddressInput {...protocolAddressState} />
+            </Conditional>
           </Conditional>
           <Conditional test={showRecipientAddress}>
             <AddressInput {...recipientAddressState} />
