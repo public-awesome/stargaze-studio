@@ -25,23 +25,23 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
   },
   {
     id: 'set_collection_royalty_default',
-    name: 'Set Collection Royalty Default',
-    description: 'Set collection royalty default',
+    name: 'Set Default Collection Royalty',
+    description: 'Set default collection royalty for unknown protocols',
   },
   {
     id: 'update_collection_royalty_default',
-    name: 'Update Collection Royalty Default',
-    description: 'Update collection royalty default',
+    name: 'Update Default Collection Royalty',
+    description: 'Update default collection royalty for unknown protocols',
   },
   {
     id: 'set_collection_royalty_protocol',
-    name: 'Set Collection Royalty Protocol',
-    description: 'Set collection royalty protocol',
+    name: 'Set Protocol Collection Royalty',
+    description: 'Set collection royalty for a specific protocol',
   },
   {
     id: 'update_collection_royalty_protocol',
-    name: 'Update Collection Royalty Protocol',
-    description: 'Update collection royalty protocol',
+    name: 'Update Protocol Collection Royalty',
+    description: 'Update collection royalty for a specific protocol',
   },
 ]
 
