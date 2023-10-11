@@ -43,4 +43,14 @@ export const ibcFrnz: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcUsdc, ibcFrnz]
+export const nativeStardust: TokenInfo = {
+  id: 'native-strdst',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'factory/stars16da2uus9zrsy83h23ur42v3lglg5rmyrpqnju4/dust'
+      : 'factory/stars18vxuarvh44wxltxqsyac36972nvaqc377sdh40/dust',
+  displayName: 'STRDST',
+  decimalPlaces: 6,
+}
+
+export const tokensList = [stars, ibcAtom, ibcUsdc, ibcFrnz, nativeStardust]

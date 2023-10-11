@@ -19,10 +19,12 @@ import {
   VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  VENDING_NATIVE_STARDUST_FACTORY_ADDRESS,
+  VENDING_NATIVE_STARDUST_UPDATABLE_FACTORY_ADDRESS,
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
-import { ibcAtom, ibcFrnz, ibcUsdc, stars } from './token'
+import { ibcAtom, ibcFrnz, ibcUsdc, nativeStardust, stars } from './token'
 
 export interface MinterInfo {
   id: string
@@ -147,6 +149,22 @@ export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
   flexible: false,
 }
 
+export const vendingNativeStardustMinter: MinterInfo = {
+  id: 'vending-native-stardust-minter',
+  factoryAddress: VENDING_NATIVE_STARDUST_FACTORY_ADDRESS,
+  supportedToken: nativeStardust,
+  updatable: false,
+  flexible: false,
+}
+
+export const vendingUpdatableNativeStardustMinter: MinterInfo = {
+  id: 'vending-native-stardust-minter',
+  factoryAddress: VENDING_NATIVE_STARDUST_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: nativeStardust,
+  updatable: true,
+  flexible: false,
+}
+
 export const vendingMinterList = [
   vendingStarsMinter,
   vendingUpdatableStarsMinter,
@@ -154,6 +172,8 @@ export const vendingMinterList = [
   vendingUpdatableIbcAtomMinter,
   vendingIbcUsdcMinter,
   vendingUpdatableIbcUsdcMinter,
+  vendingNativeStardustMinter,
+  vendingUpdatableNativeStardustMinter,
 ]
 
 export const flexibleVendingStarsMinter: MinterInfo = {
