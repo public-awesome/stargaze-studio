@@ -8,7 +8,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { vendingMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { QueryType } from 'contracts/vendingMinter/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/vendingMinter/messages/query'
 import type { NextPage } from 'next'
@@ -20,6 +19,7 @@ import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 const VendingMinterQueryPage: NextPage = () => {
   const { vendingMinter: contract } = useContracts()
@@ -44,7 +44,7 @@ const VendingMinterQueryPage: NextPage = () => {
   const [type, setType] = useState<QueryType>('config')
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, address] as const,
+    [contractAddress, type, contract, wallet.address, address] as const,
     async ({ queryKey }) => {
       const [_contractAddress, _type, _contract, _wallet] = queryKey
       const messages = contract?.use(_contractAddress)
@@ -63,7 +63,7 @@ const VendingMinterQueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract && wallet),
+      enabled: Boolean(contractAddress && contract && wallet.isWalletConnected),
     },
   )
 

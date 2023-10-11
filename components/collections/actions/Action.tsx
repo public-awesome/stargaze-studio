@@ -18,7 +18,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { Tooltip } from 'components/Tooltip'
 import { TransactionHash } from 'components/TransactionHash'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { BaseMinterInstance } from 'contracts/baseMinter'
 import type { OpenEditionMinterInstance } from 'contracts/openEditionMinter'
 import type { RoyaltyRegistryInstance } from 'contracts/royaltyRegistry'
@@ -32,6 +31,7 @@ import { useMutation } from 'react-query'
 import { ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 import type { CollectionInfo } from '../../../contracts/sg721/contract'
 import { TextInput } from '../../forms/FormInput'
@@ -246,7 +246,7 @@ export const CollectionActions = ({
     recipient: resolvedRecipientAddress,
     recipients: airdropArray,
     tokenRecipients: airdropAllocationArray,
-    txSigner: wallet.address,
+    txSigner: wallet.address || '',
     type,
     price: priceState.value.toString(),
     baseUri: baseURIState.value.trim().endsWith('/')
@@ -335,13 +335,15 @@ export const CollectionActions = ({
         throw new Error('Please enter minter and sg721 contract addresses!')
       }
 
-      if (wallet.client && type === 'update_mint_price') {
-        const contractConfig = wallet.client.queryContractSmart(minterContractAddress, {
+      if (wallet.isWalletConnected && type === 'update_mint_price') {
+        const contractConfig = (await wallet.getCosmWasmClient()).queryContractSmart(minterContractAddress, {
           config: {},
         })
         await toast
           .promise(
-            wallet.client.queryContractSmart(minterContractAddress, {
+            (
+              await wallet.getCosmWasmClient()
+            ).queryContractSmart(minterContractAddress, {
               mint_price: {},
             }),
             {
@@ -373,7 +375,9 @@ export const CollectionActions = ({
                 })
             } else {
               await contractConfig.then(async (config) => {
-                const factoryParameters = await wallet.client?.queryContractSmart(config.factory, {
+                const factoryParameters = await (
+                  await wallet.getCosmWasmClient()
+                ).queryContractSmart(config.factory, {
                   params: {},
                 })
                 if (
@@ -403,8 +407,8 @@ export const CollectionActions = ({
         royaltyPaymentAddressState.value &&
         !royaltyPaymentAddressState.value.trim().endsWith('.stars')
       ) {
-        const contractInfoResponse = await wallet.client
-          ?.queryContractRaw(
+        const contractInfoResponse = await (await wallet.getCosmWasmClient())
+          .queryContractRaw(
             royaltyPaymentAddressState.value.trim(),
             toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
           )

@@ -1,7 +1,7 @@
 import type { Coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type { BaseMinterContract, BaseMinterInstance, BaseMinterMessages, MigrateResponse } from './contract'
 import { baseMinter as initContract } from './contract'
@@ -38,9 +38,19 @@ export function useBaseMinterContract(): UseBaseMinterContractProps {
   }, [])
 
   useEffect(() => {
-    const BaseMinterBaseContract = initContract(wallet.getClient(), wallet.address)
-    setBaseMinter(BaseMinterBaseContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const BaseMinterBaseContract = initContract(client, wallet.address || '')
+      setBaseMinter(BaseMinterBaseContract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)
@@ -53,7 +63,10 @@ export function useBaseMinterContract(): UseBaseMinterContractProps {
           reject(new Error('Contract is not initialized.'))
           return
         }
-        baseMinter.instantiate(wallet.address, codeId, initMsg, label, admin).then(resolve).catch(reject)
+        baseMinter
+          .instantiate(wallet.address || '', codeId, initMsg, label, admin)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [baseMinter, wallet],
@@ -67,7 +80,10 @@ export function useBaseMinterContract(): UseBaseMinterContractProps {
           return
         }
         console.log(wallet.address, contractAddress, codeId)
-        baseMinter.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+        baseMinter
+          .migrate(wallet.address || '', contractAddress, codeId, migrateMsg)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [baseMinter, wallet],

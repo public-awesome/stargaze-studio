@@ -13,7 +13,6 @@ import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/baseMinter/messages/execute'
 import { dispatchExecute, previewExecutePayload } from 'contracts/baseMinter/messages/execute'
 import type { NextPage } from 'next'
@@ -26,6 +25,7 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const BaseMinterExecutePage: NextPage = () => {
   const { baseMinter: contract } = useContracts()
@@ -62,7 +62,7 @@ const BaseMinterExecutePage: NextPage = () => {
     tokenUri: tokenUriState.value,
     contract: contractState.value,
     messages,
-    txSigner: wallet.address,
+    txSigner: wallet.address || '',
     type,
   }
   const { isLoading, mutate } = useMutation(
@@ -71,7 +71,7 @@ const BaseMinterExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {

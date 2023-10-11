@@ -9,7 +9,6 @@ import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -18,6 +17,7 @@ import toast from 'react-hot-toast'
 import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 import { BadgeActions } from '../../components/badges/actions/Action'
 import { useNumberInputState } from '../../components/forms/FormInput.hooks'
@@ -82,8 +82,8 @@ const BadgeActionsPage: NextPage = () => {
 
   useEffect(() => {
     async function getMintRule() {
-      if (wallet.client && debouncedBadgeHubContractState.length > 0 && debouncedBadgeIdState > 0) {
-        const client = wallet.client
+      if (wallet.isWalletConnected && debouncedBadgeHubContractState.length > 0 && debouncedBadgeIdState > 0) {
+        const client = await wallet.getCosmWasmClient()
         const data = await toast.promise(
           client.queryContractSmart(debouncedBadgeHubContractState, {
             badge: {
@@ -117,7 +117,8 @@ const BadgeActionsPage: NextPage = () => {
         setMintRule('not_resolved')
         console.log('Unable to retrieve Mint Rule. Defaulting to "by_key".')
       })
-  }, [debouncedBadgeHubContractState, debouncedBadgeIdState, wallet.client])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedBadgeHubContractState, debouncedBadgeIdState, wallet.isWalletConnected])
 
   return (
     <section className="py-6 px-12 space-y-4">

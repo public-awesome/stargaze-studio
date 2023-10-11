@@ -19,7 +19,6 @@ import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/Whitel
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { InstantiateResponse } from 'contracts/sg721'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -30,6 +29,7 @@ import { useMutation } from 'react-query'
 import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 import { WHITELIST_CODE_ID, WHITELIST_FLEX_CODE_ID } from '../../../utils/constants'
 

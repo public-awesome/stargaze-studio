@@ -8,7 +8,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { royaltyRegistryLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { QueryType } from 'contracts/royaltyRegistry/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/royaltyRegistry/messages/query'
 import type { NextPage } from 'next'
@@ -21,6 +20,7 @@ import { INFINITY_SWAP_PROTOCOL_ADDRESS, ROYALTY_REGISTRY_ADDRESS } from 'utils/
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 import { protocolList } from './execute'
 
@@ -59,7 +59,7 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
   const [manualProtocolInput, setManualProtocolInput] = useState(false)
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, collectionAddress, protocolAddress] as const,
+    [contractAddress, type, contract, wallet.address, collectionAddress, protocolAddress] as const,
     async ({ queryKey }) => {
       const [_contractAddress, _type, _contract, _wallet, _collectionAddress, _protocolAddress] = queryKey
       const messages = contract?.use(contractAddress)
@@ -79,7 +79,7 @@ const RoyaltyRegistryQueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract && wallet),
+      enabled: Boolean(contractAddress && contract && wallet.isWalletConnected),
     },
   )
 

@@ -1,7 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type {
   InstantiateResponse,
@@ -40,9 +40,19 @@ export function useRoyaltyRegistryContract(): UseRoyaltyRegistryContractProps {
   }, [])
 
   useEffect(() => {
-    const royaltyRegistryContract = initContract(wallet.getClient(), wallet.address)
-    setRoyaltyRegistry(royaltyRegistryContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const royaltyRegistryContract = initContract(client, wallet.address || '')
+      setRoyaltyRegistry(royaltyRegistryContract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)
@@ -69,7 +79,10 @@ export function useRoyaltyRegistryContract(): UseRoyaltyRegistryContractProps {
           return
         }
         console.log(wallet.address, contractAddress, codeId)
-        royaltyRegistry.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+        royaltyRegistry
+          .migrate(wallet.address || '', contractAddress, codeId, migrateMsg)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [royaltyRegistry, wallet],

@@ -6,7 +6,6 @@ import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
@@ -16,6 +15,7 @@ import { ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 import type { MinterType, Sg721Type } from '../../components/collections/actions/Combobox'
 
@@ -100,8 +100,8 @@ const CollectionActionsPage: NextPage = () => {
 
   useEffect(() => {
     async function getMinterContractType() {
-      if (wallet.client && debouncedMinterContractState.length > 0) {
-        const client = wallet.client
+      if (wallet.isWalletConnected && debouncedMinterContractState.length > 0) {
+        const client = await wallet.getCosmWasmClient()
         const data = await toast.promise(
           client.queryContractRaw(
             debouncedMinterContractState,
@@ -133,12 +133,13 @@ const CollectionActionsPage: NextPage = () => {
         setMinterType('vending')
         console.log('Unable to retrieve contract type. Defaulting to "vending".')
       })
-  }, [debouncedMinterContractState, wallet.client])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedMinterContractState, wallet.isWalletConnected])
 
   useEffect(() => {
     async function getSg721ContractType() {
-      if (wallet.client && debouncedSg721ContractState.length > 0) {
-        const client = wallet.client
+      if (wallet.isWalletConnected && debouncedSg721ContractState.length > 0) {
+        const client = await wallet.getCosmWasmClient()
         const data = await toast.promise(
           client.queryContractRaw(
             debouncedSg721ContractState,
@@ -168,7 +169,8 @@ const CollectionActionsPage: NextPage = () => {
         setSg721Type('base')
         console.log('Unable to retrieve contract type. Defaulting to "base".')
       })
-  }, [debouncedSg721ContractState, wallet.client])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSg721ContractState, wallet.isWalletConnected])
 
   return (
     <section className="py-6 px-12 space-y-4">

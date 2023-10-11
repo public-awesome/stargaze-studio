@@ -1,7 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type { InstantiateResponse, MigrateResponse, SplitsContract, SplitsInstance, SplitsMessages } from './contract'
 import { Splits as initContract } from './contract'
@@ -34,9 +34,19 @@ export function useSplitsContract(): UseSplitsContractProps {
   }, [])
 
   useEffect(() => {
-    const splitsContract = initContract(wallet.getClient(), wallet.address)
-    setSplits(splitsContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const contract = initContract(client, wallet.address || '')
+      setSplits(contract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)
@@ -63,7 +73,10 @@ export function useSplitsContract(): UseSplitsContractProps {
           return
         }
         console.log(wallet.address, contractAddress, codeId)
-        splits.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+        splits
+          .migrate(wallet.address || '', contractAddress, codeId, migrateMsg)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [splits, wallet],

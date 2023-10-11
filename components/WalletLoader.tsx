@@ -1,35 +1,60 @@
+import type { Coin } from '@cosmjs/proto-signing'
 import { Popover, Transition } from '@headlessui/react'
 import clsx from 'clsx'
-import { useWallet, useWalletStore } from 'contexts/wallet'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { FaCopy, FaPowerOff, FaRedo } from 'react-icons/fa'
 import { copy } from 'utils/clipboard'
 import { convertDenomToReadable } from 'utils/convertDenomToReadable'
 import { getShortAddress } from 'utils/getShortAddress'
+import { useWallet } from 'utils/wallet'
 
 import { WalletButton } from './WalletButton'
 import { WalletPanelButton } from './WalletPanelButton'
 
 export const WalletLoader = () => {
-  const { address, balance, connect, disconnect, initializing: isLoading, initialized: isReady } = useWallet()
+  const {
+    address = '',
+    username,
+    connect,
+    disconnect,
+    isWalletConnecting,
+    isWalletConnected,
+    getStargateClient,
+  } = useWallet()
 
-  const displayName = useWalletStore((store) => store.name || getShortAddress(store.address))
+  // Once wallet connects, load balances.
+  const [balances, setBalances] = useState<readonly Coin[] | undefined>()
+  useEffect(() => {
+    if (!isWalletConnected) {
+      setBalances(undefined)
+      return
+    }
+
+    const loadBalances = async () => {
+      const client = await getStargateClient()
+      setBalances(await client.getAllBalances(address))
+    }
+
+    loadBalances().catch(console.error)
+  }, [isWalletConnected, getStargateClient, address])
 
   return (
     <Popover className="mt-4 mb-2">
       {({ close }) => (
         <>
           <div className="grid -mx-4">
-            {!isReady && (
-              <WalletButton className="w-full" isLoading={isLoading} onClick={() => void connect()}>
+            {isWalletConnected ? (
+              <Popover.Button as={WalletButton} className="w-full">
+                {username || address}
+              </Popover.Button>
+            ) : (
+              <WalletButton
+                className="w-full"
+                isLoading={isWalletConnecting}
+                onClick={() => void connect().catch(console.error)}
+              >
                 Connect Wallet
               </WalletButton>
-            )}
-
-            {isReady && (
-              <Popover.Button as={WalletButton} className="w-full" isLoading={isLoading}>
-                {displayName}
-              </Popover.Button>
             )}
           </div>
 
@@ -54,7 +79,7 @@ export const WalletLoader = () => {
                   {getShortAddress(address)}
                 </span>
                 <div className="font-bold">Your Balances</div>
-                {balance.map((val) => (
+                {balances?.map((val) => (
                   <span key={`balance-${val.denom}`}>
                     {convertDenomToReadable(val.amount)} {val.denom.slice(1, val.denom.length)}
                   </span>

@@ -1,7 +1,7 @@
 import type { Coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type { BadgeHubContract, BadgeHubInstance, BadgeHubMessages, MigrateResponse } from './contract'
 import { badgeHub as initContract } from './contract'
@@ -50,9 +50,19 @@ export function useBadgeHubContract(): UseBadgeHubContractProps {
   }, [])
 
   useEffect(() => {
-    const BadgeHubBaseContract = initContract(wallet.getClient(), wallet.address)
-    setBadgeHub(BadgeHubBaseContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const BadgeHubBaseContract = initContract(client, wallet.address || '')
+      setBadgeHub(BadgeHubBaseContract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)
@@ -65,7 +75,10 @@ export function useBadgeHubContract(): UseBadgeHubContractProps {
           reject(new Error('Contract is not initialized.'))
           return
         }
-        badgeHub.instantiate(wallet.address, codeId, initMsg, label, admin).then(resolve).catch(reject)
+        badgeHub
+          .instantiate(wallet.address || '', codeId, initMsg, label, admin)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [badgeHub, wallet],
@@ -79,7 +92,10 @@ export function useBadgeHubContract(): UseBadgeHubContractProps {
           return
         }
         console.log(wallet.address, contractAddress, codeId)
-        badgeHub.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+        badgeHub
+          .migrate(wallet.address || '', contractAddress, codeId, migrateMsg)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [badgeHub, wallet],

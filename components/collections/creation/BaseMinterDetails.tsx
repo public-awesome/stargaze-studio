@@ -8,10 +8,10 @@ import clsx from 'clsx'
 import { Alert } from 'components/Alert'
 import { Conditional } from 'components/Conditional'
 import { useInputState } from 'components/forms/FormInput.hooks'
-import { useWallet } from 'contexts/wallet'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { API_URL } from 'utils/constants'
+import { useWallet } from 'utils/wallet'
 
 import { useDebounce } from '../../../utils/debounce'
 import { TextInput } from '../../forms/FormInput'
@@ -56,7 +56,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
 
   const fetchMinterContracts = async (): Promise<MinterInfo[]> => {
     const contracts: MinterInfo[] = await axios
-      .get(`${API_URL}/api/v1beta/collections/${wallet.address}`)
+      .get(`${API_URL}/api/v1beta/collections/${wallet.address || ''}`)
       .then((response) => {
         const collectionData = response.data
         const minterContracts = collectionData.map((collection: any) => {
@@ -70,8 +70,8 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
   }
 
   async function getMinterContractType(minterContractAddress: string) {
-    if (wallet.client && minterContractAddress.length > 0) {
-      const client = wallet.client
+    if (wallet.isWalletConnected && minterContractAddress.length > 0) {
+      const client = await wallet.getCosmWasmClient()
       const data = await client.queryContractRaw(
         minterContractAddress,
         toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
@@ -129,8 +129,10 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
 
   const fetchSg721Address = async () => {
     if (debouncedExistingBaseMinterContract.length === 0) return
-    await wallet.client
-      ?.queryContractSmart(debouncedExistingBaseMinterContract, {
+    await (
+      await wallet.getCosmWasmClient()
+    )
+      .queryContractSmart(debouncedExistingBaseMinterContract, {
         config: {},
       })
       .then((response) => {
@@ -145,8 +147,10 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
 
   const fetchCollectionTokenCount = async () => {
     if (selectedCollectionAddress === undefined) return
-    await wallet.client
-      ?.queryContractSmart(selectedCollectionAddress, {
+    await (
+      await wallet.getCosmWasmClient()
+    )
+      .queryContractSmart(selectedCollectionAddress, {
         num_tokens: {},
       })
       .then((response) => {
@@ -164,7 +168,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
       setMyBaseMinterContracts([])
       existingBaseMinterState.onChange('')
       void displayToast()
-    } else if (baseMinterAcquisitionMethod === 'new' || !wallet.initialized) {
+    } else if (baseMinterAcquisitionMethod === 'new' || !wallet.isWalletConnected) {
       setMyBaseMinterContracts([])
       existingBaseMinterState.onChange('')
     }
@@ -194,7 +198,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
   }, [
     existingBaseMinterState.value,
     baseMinterAcquisitionMethod,
-    wallet.initialized,
+    wallet.isWalletConnected,
     selectedCollectionAddress,
     collectionTokenCount,
   ])
@@ -270,7 +274,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
             </Conditional>
             <Conditional test={myBaseMinterContracts.length === 0}>
               <div className="flex flex-col">
-                <Conditional test={wallet.initialized}>
+                <Conditional test={wallet.isWalletConnected}>
                   <Alert className="my-2 w-[90%]" type="info">
                     No previous 1/1 collections were found. You may create a new 1/1 collection or fill in the minter
                     contract address manually.
@@ -282,7 +286,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
                     isRequired
                   />
                 </Conditional>
-                <Conditional test={!wallet.initialized}>
+                <Conditional test={!wallet.isWalletConnected}>
                   <Alert className="my-2 w-[90%]" type="warning">
                     Please connect your wallet first.
                   </Alert>

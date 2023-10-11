@@ -1,6 +1,6 @@
 import type { Coin } from '@cosmjs/proto-signing'
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type { MigrateResponse, SG721Contract, SG721Instance, Sg721Messages } from './contract'
 import { SG721 as initContract } from './contract'
@@ -35,9 +35,19 @@ export function useSG721Contract(): UseSG721ContractProps {
   }, [])
 
   useEffect(() => {
-    const contract = initContract(wallet.getClient(), wallet.address)
-    setSG721(contract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const contract = initContract(client, wallet.address || '')
+      setSG721(contract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)
@@ -50,7 +60,9 @@ export function useSG721Contract(): UseSG721ContractProps {
           reject(new Error('Contract is not initialized.'))
           return
         }
-        SG721.instantiate(wallet.address, codeId, initMsg, label, admin).then(resolve).catch(reject)
+        SG721.instantiate(wallet.address || '', codeId, initMsg, label, admin)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [SG721, wallet],
@@ -64,7 +76,9 @@ export function useSG721Contract(): UseSG721ContractProps {
           return
         }
         console.log(wallet.address, contractAddress, codeId)
-        SG721.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+        SG721.migrate(wallet.address || '', contractAddress, codeId, migrateMsg)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [SG721, wallet],

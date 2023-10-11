@@ -1,5 +1,5 @@
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type { InstantiateResponse, WhiteListContract, WhiteListInstance, WhitelistMessages } from './contract'
 import { WhiteList as initContract } from './contract'
@@ -30,9 +30,19 @@ export function useWhiteListContract(): UseWhiteListContractProps {
   }, [])
 
   useEffect(() => {
-    const whiteListContract = initContract(wallet.getClient(), wallet.address)
-    setWhiteList(whiteListContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const contract = initContract(client, wallet.address || '')
+      setWhiteList(contract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)

@@ -1,6 +1,6 @@
 import type { logs } from '@cosmjs/stargate'
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type { OpenEditionFactoryContract, OpenEditionFactoryInstance, OpenEditionFactoryMessages } from './contract'
 import { openEditionFactory as initContract } from './contract'
@@ -41,9 +41,19 @@ export function useOpenEditionFactoryContract(): UseOpenEditionFactoryContractPr
   }, [])
 
   useEffect(() => {
-    const OpenEditionFactoryBaseContract = initContract(wallet.getClient(), wallet.address)
-    setOpenEditionFactory(OpenEditionFactoryBaseContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const OpenEditionFactoryBaseContract = initContract(client, wallet.address || '')
+      setOpenEditionFactory(OpenEditionFactoryBaseContract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)

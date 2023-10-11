@@ -8,7 +8,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { badgeHubLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { QueryType } from 'contracts/badgeHub/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/badgeHub/messages/query'
 import type { NextPage } from 'next'
@@ -19,6 +18,7 @@ import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 import { BADGE_HUB_ADDRESS } from '../../../utils/constants'
 
@@ -79,7 +79,7 @@ const BadgeHubQueryPage: NextPage = () => {
       contractAddress,
       type,
       contract,
-      wallet,
+      wallet.address,
       idState.value,
       pubkeyState.value,
       startAfterNumberState.value,
@@ -106,7 +106,7 @@ const BadgeHubQueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract && wallet),
+      enabled: Boolean(contractAddress && contract && wallet.isWalletConnected),
     },
   )
 

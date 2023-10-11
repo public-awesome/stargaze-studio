@@ -16,7 +16,6 @@ import { LinkTabs } from 'components/LinkTabs'
 import { vendingMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import type { FormEvent } from 'react'
@@ -28,6 +27,7 @@ import { VENDING_FACTORY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 import type { CreateVendingMinterResponse } from '../../../contracts/vendingFactory/contract'
 
@@ -211,7 +211,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
       return toast.promise(
         contract
           .use(VENDING_FACTORY_ADDRESS)
-          ?.createVendingMinter(wallet.address, msg, [
+          ?.createVendingMinter(wallet.address || '', msg, [
             coin('3000000000', 'ustars'),
           ]) as Promise<CreateVendingMinterResponse>,
         {

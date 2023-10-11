@@ -9,7 +9,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { badgeHubLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { InstantiateResponse } from 'contracts/sg721'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -20,6 +19,7 @@ import { useMutation } from 'react-query'
 import { BADGE_HUB_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 export interface FeeRate {
   metadata: number
