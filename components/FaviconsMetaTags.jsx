@@ -8,7 +8,7 @@ export function FaviconsMetaTags() {
       <link href="/assets/manifest.webmanifest" rel="manifest" />
       <meta content="yes" name="mobile-web-app-capable" />
       <meta content="#F0827D" name="theme-color" />
-      <meta content="StargazeStudio" name="application-name" />
+      <meta content="Stargaze Studio" name="application-name" />
       <link href="/assets/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57" />
       <link href="/assets/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60" />
       <link href="/assets/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72" />
@@ -22,7 +22,7 @@ export function FaviconsMetaTags() {
       <link href="/assets/apple-touch-icon-1024x1024.png" rel="apple-touch-icon" sizes="1024x1024" />
       <meta content="yes" name="apple-mobile-web-app-capable" />
       <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style" />
-      <meta content="StargazeStudio" name="apple-mobile-web-app-title" />
+      <meta content="Stargaze Studio" name="apple-mobile-web-app-title" />
       <link
         href="/assets/apple-touch-startup-image-640x1136.png"
         media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
