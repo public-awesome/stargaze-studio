@@ -21,6 +21,7 @@ import {
   VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_NATIVE_STARDUST_FACTORY_ADDRESS,
   VENDING_NATIVE_STARDUST_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_NATIVE_STRDST_FLEX_FACTORY_ADDRESS,
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
@@ -224,6 +225,14 @@ export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
   flexible: true,
 }
 
+export const flexibleVendingStrdstMinter: MinterInfo = {
+  id: 'flexible-vending-native-strdst-minter',
+  factoryAddress: VENDING_NATIVE_STRDST_FLEX_FACTORY_ADDRESS,
+  supportedToken: nativeStardust,
+  updatable: false,
+  flexible: true,
+}
+
 export const flexibleVendingMinterList = [
   flexibleVendingStarsMinter,
   flexibleVendingUpdatableStarsMinter,
@@ -231,4 +240,5 @@ export const flexibleVendingMinterList = [
   flexibleVendingUpdatableIbcAtomMinter,
   flexibleVendingIbcUsdcMinter,
   flexibleVendingUpdatableIbcUsdcMinter,
+  flexibleVendingStrdstMinter,
 ]
