@@ -449,7 +449,12 @@ const CollectionCreationPage: NextPage = () => {
             setBaseTokenUri(baseUri)
             const result = await baseMinterContract
               .use(baseMinterDetails?.existingBaseMinter as string)
-              ?.batchMint(wallet.address, `ipfs://${baseUri}`, uploadDetails.assetFiles.length)
+              ?.batchMint(
+                wallet.address,
+                `ipfs://${baseUri}`,
+                uploadDetails.assetFiles.length,
+                parseInt(uploadDetails.assetFiles[0].name.split('.')[0]),
+              )
             console.log(result)
             return result
           })
@@ -698,7 +703,12 @@ const CollectionCreationPage: NextPage = () => {
             .promise(
               baseMinterContract
                 .use(data.baseMinterAddress)
-                ?.batchMint(wallet.address, baseUri, uploadDetails?.assetFiles.length as number) as Promise<string>,
+                ?.batchMint(
+                  wallet.address,
+                  baseUri,
+                  uploadDetails?.assetFiles.length as number,
+                  parseInt(uploadDetails?.assetFiles[0].name.split('.')[0] as string),
+                ) as Promise<string>,
               {
                 loading: 'Minting tokens...',
                 success: (result) => {

@@ -33,13 +33,13 @@ export interface BaseMinterInstance {
   //Execute
   mint: (senderAddress: string, tokenUri: string) => Promise<string>
   updateStartTradingTime: (senderAddress: string, time?: Timestamp) => Promise<string>
-  batchMint: (senderAddress: string, recipient: string, batchCount: number) => Promise<string>
+  batchMint: (senderAddress: string, recipient: string, batchCount: number, startFrom: number) => Promise<string>
 }
 
 export interface BaseMinterMessages {
   mint: (tokenUri: string) => MintMessage
   updateStartTradingTime: (time: Timestamp) => UpdateStartTradingTimeMessage
-  batchMint: (recipient: string, batchNumber: number) => CustomMessage
+  batchMint: (recipient: string, batchNumber: number, startFrom: number) => CustomMessage
 }
 
 export interface MintMessage {
@@ -178,7 +178,12 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
       return res.transactionHash
     }
 
-    const batchMint = async (senderAddress: string, baseUri: string, batchCount: number): Promise<string> => {
+    const batchMint = async (
+      senderAddress: string,
+      baseUri: string,
+      batchCount: number,
+      startFrom: number,
+    ): Promise<string> => {
       const txHash = await getConfig().then(async (response) => {
         const factoryParameters = await toast.promise(getFactoryParameters(response?.config?.factory), {
           loading: 'Querying Factory Parameters...',
@@ -198,7 +203,7 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
         const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
         for (let i = 0; i < batchCount; i++) {
           const msg = {
-            mint: { token_uri: `${baseUri}/${i + 1}` },
+            mint: { token_uri: `${baseUri}/${i + startFrom}` },
           }
           const executeContractMsg: MsgExecuteContractEncodeObject = {
             typeUrl: '/cosmwasm.wasm.v1.MsgExecuteContract',
@@ -282,10 +287,10 @@ export const baseMinter = (client: SigningCosmWasmClient, txSigner: string): Bas
       }
     }
 
-    const batchMint = (baseUri: string, batchCount: number): CustomMessage => {
+    const batchMint = (baseUri: string, batchCount: number, startFrom: number): CustomMessage => {
       const msg: Record<string, unknown>[] = []
       for (let i = 0; i < batchCount; i++) {
-        msg.push({ mint: { token_uri: `${baseUri}/${i + 1}` } })
+        msg.push({ mint: { token_uri: `${baseUri}/${i + startFrom}` } })
       }
       return {
         sender: txSigner,
