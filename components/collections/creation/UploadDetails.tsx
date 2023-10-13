@@ -119,7 +119,7 @@ export const UploadDetails = ({
     if (event.target.files === null) return
     const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
     const thumbnailCompatibleFileNamesList: string[] = []
-    if (minterType === 'vending' || (minterType === 'base' && event.target.files.length > 1)) {
+    if (minterType === 'vending') {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
@@ -138,6 +138,38 @@ export const UploadDetails = ({
           addLogItem({
             id: uid(),
             message: 'The file names should be in numerical order starting from 1.',
+            type: 'Error',
+            timestamp: new Date(),
+          })
+          //clear the input
+          event.target.value = ''
+          return
+        }
+      }
+    } else if (minterType === 'base' && event.target.files.length > 1) {
+      //sort the files
+      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+      //check if the sorted file names are in numerical order
+      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+      sortedFiles.map((file) => {
+        if (thumbnailCompatibleAssetTypes.includes(getAssetType(file.name))) {
+          thumbnailCompatibleFileNamesList.push(file.name.split('.')[0])
+        }
+      })
+      setThumbnailCompatibleAssetFileNames(thumbnailCompatibleFileNamesList)
+      console.log('Thumbnail Compatible Files: ', thumbnailCompatibleFileNamesList)
+
+      for (let i = 0; i < sortedFileNames.length - 1; i++) {
+        if (
+          isNaN(Number(sortedFileNames[i])) ||
+          isNaN(Number(sortedFileNames[i + 1])) ||
+          parseInt(sortedFileNames[i]) !== parseInt(sortedFileNames[i + 1]) - 1
+        ) {
+          toast.error('The file names should be in numerical order.')
+          setThumbnailCompatibleAssetFileNames([])
+          addLogItem({
+            id: uid(),
+            message: 'The file names should be in numerical order.',
             type: 'Error',
             timestamp: new Date(),
           })
@@ -186,7 +218,23 @@ export const UploadDetails = ({
       event.target.value = ''
       return toast.error('The number of metadata files should be equal to the number of asset files.')
     }
-    if (minterType === 'vending' || (minterType === 'base' && assetFilesArray.length > 1)) {
+    // compare the first file name for asset and metadata files
+    if (
+      minterType === 'base' &&
+      assetFilesArray.length > 1 &&
+      event.target.files[0].name.split('.')[0] !== assetFilesArray[0].name.split('.')[0]
+    ) {
+      event.target.value = ''
+      toast.error('The metadata file names should match the asset file names.')
+      addLogItem({
+        id: uid(),
+        message: 'The metadata file names should match the asset file names.',
+        type: 'Error',
+        timestamp: new Date(),
+      })
+      return
+    }
+    if (minterType === 'vending') {
       //sort the files
       const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
       //check if the sorted file names are in numerical order
@@ -197,6 +245,28 @@ export const UploadDetails = ({
           addLogItem({
             id: uid(),
             message: 'The file names should be in numerical order starting from 1.',
+            type: 'Error',
+            timestamp: new Date(),
+          })
+          event.target.value = ''
+          return
+        }
+      }
+    } else if (minterType === 'base' && assetFilesArray.length > 1) {
+      //sort the files
+      const sortedFiles = Array.from(event.target.files).sort((a, b) => naturalCompare(a.name, b.name))
+      //check if the sorted file names are in numerical order
+      const sortedFileNames = sortedFiles.map((file) => file.name.split('.')[0])
+      for (let i = 0; i < sortedFileNames.length - 1; i++) {
+        if (
+          isNaN(Number(sortedFileNames[i])) ||
+          isNaN(Number(sortedFileNames[i + 1])) ||
+          parseInt(sortedFileNames[i]) !== parseInt(sortedFileNames[i + 1]) - 1
+        ) {
+          toast.error('The file names should be in numerical order.')
+          addLogItem({
+            id: uid(),
+            message: 'The file names should be in numerical order.',
             type: 'Error',
             timestamp: new Date(),
           })
