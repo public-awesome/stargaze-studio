@@ -17,6 +17,9 @@ import { LinkTabs } from 'components/LinkTabs'
 import { whitelistLinkTabs } from 'components/LinkTabs.data'
 import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
+import { vendingMinterList } from 'config/minter'
+import type { TokenInfo } from 'config/token'
+import { stars, tokensList } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import { useWallet } from 'contexts/wallet'
@@ -45,6 +48,8 @@ const WhitelistInstantiatePage: NextPage = () => {
 
   const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
   const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
+
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
 
   const unitPriceState = useNumberInputState({
     id: 'unit-price',
@@ -97,7 +102,7 @@ const WhitelistInstantiatePage: NextPage = () => {
         members: whitelistStandardArray,
         start_time: (startDate.getTime() * 1_000_000).toString(),
         end_time: (endDate.getTime() * 1_000_000).toString(),
-        mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
+        mint_price: coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars'),
         per_address_limit: perAddressLimitState.value,
         member_limit: memberLimitState.value,
         admins: [
@@ -114,7 +119,7 @@ const WhitelistInstantiatePage: NextPage = () => {
         members: whitelistFlexArray,
         start_time: (startDate.getTime() * 1_000_000).toString(),
         end_time: (endDate.getTime() * 1_000_000).toString(),
-        mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
+        mint_price: coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars'),
         whale_cap: whaleCapState.value || undefined,
         member_limit: memberLimitState.value,
         admins: [
@@ -261,7 +266,23 @@ const WhitelistInstantiatePage: NextPage = () => {
       </FormGroup>
 
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
-        <NumberInput isRequired {...unitPriceState} />
+        <div className="flex flex-row items-center">
+          <NumberInput {...unitPriceState} isRequired />
+          <select
+            className="py-[9px] px-4 mt-14 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+            onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
+            value={selectedMintToken?.displayName}
+          >
+            {vendingMinterList
+              .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+              .map((minter) => (
+                <option key={minter.id} className="bg-black" value={minter.supportedToken.displayName}>
+                  {minter.supportedToken.displayName}
+                </option>
+              ))}
+          </select>
+        </div>
+
         <NumberInput isRequired {...memberLimitState} />
         <Conditional test={whitelistType === 'standard'}>
           <NumberInput isRequired {...perAddressLimitState} />
