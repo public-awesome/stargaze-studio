@@ -12,12 +12,12 @@ import { useInputState, useNumberInputState } from 'components/forms/FormInput.h
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { Trait } from 'contracts/badgeHub'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { BADGE_HUB_ADDRESS } from 'utils/constants'
+import { useWallet } from 'utils/wallet'
 
 import { AddressInput, NumberInput, TextInput } from '../../forms/FormInput'
 import { MetadataAttributes } from '../../forms/MetadataAttributes'
@@ -47,7 +47,7 @@ export interface BadgeDetailsDataProps {
 }
 
 export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDetailsProps) => {
-  const wallet = useWallet()
+  const { address = '', isWalletConnected, getCosmWasmClient } = useWallet()
   const { timezone } = useGlobalSettings()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [transferrable, setTransferrable] = useState<boolean>(false)
@@ -61,7 +61,7 @@ export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDeta
     name: 'manager',
     title: 'Manager',
     subtitle: 'Badge Hub Manager',
-    defaultValue: wallet.address ? wallet.address : '',
+    defaultValue: address,
   })
 
   const nameState = useInputState({
@@ -247,8 +247,10 @@ export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDeta
   useEffect(() => {
     const retrieveFeeRate = async () => {
       try {
-        if (wallet.client) {
-          const feeRateRaw = await wallet.client.queryContractRaw(
+        if (isWalletConnected) {
+          const feeRateRaw = await (
+            await getCosmWasmClient()
+          ).queryContractRaw(
             BADGE_HUB_ADDRESS,
             toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
           )
@@ -263,7 +265,7 @@ export const BadgeDetails = ({ metadataSize, onChange, uploadMethod }: BadgeDeta
       }
     }
     void retrieveFeeRate()
-  }, [wallet.client])
+  }, [isWalletConnected, getCosmWasmClient])
 
   return (
     <div>

@@ -5,8 +5,8 @@ import { toUtf8 } from '@cosmjs/encoding'
 import clsx from 'clsx'
 import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
+import { useWallet } from 'utils/wallet'
 
-import { useWallet } from '../contexts/wallet'
 import { SG721_NAME_ADDRESS } from '../utils/constants'
 import { isValidAddress } from '../utils/isValidAddress'
 
@@ -22,8 +22,10 @@ export const WhitelistUpload = ({ onChange }: WhitelistUploadProps) => {
     await new Promise((resolve) => {
       let i = 0
       names.map(async (name) => {
-        if (!wallet.client) throw new Error('Wallet not connected')
-        await wallet.client
+        if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
+        await (
+          await wallet.getCosmWasmClient()
+        )
           .queryContractRaw(
             SG721_NAME_ADDRESS,
             toUtf8(

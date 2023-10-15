@@ -38,7 +38,6 @@ import { flexibleVendingMinterList, openEditionMinterList, vendingMinterList } f
 import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as BaseFactoryDispatchExecuteArgs } from 'contracts/baseFactory/messages/execute'
 import { dispatchExecute as baseFactoryDispatchExecute } from 'contracts/baseFactory/messages/execute'
 import type { DispatchExecuteArgs as VendingFactoryDispatchExecuteArgs } from 'contracts/vendingFactory/messages/execute'
@@ -72,6 +71,7 @@ import { checkTokenUri } from 'utils/isValidTokenUri'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { uid } from 'utils/random'
+import { useWallet } from 'utils/wallet'
 
 import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
@@ -411,7 +411,7 @@ const CollectionCreationPage: NextPage = () => {
 
   const uploadAndMint = async () => {
     try {
-      if (!wallet.initialized) throw new Error('Wallet not connected')
+      if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
       if (!baseMinterContract) throw new Error('Contract not found')
       setCreatingCollection(true)
       setIsMintingComplete(false)
@@ -437,7 +437,7 @@ const CollectionCreationPage: NextPage = () => {
                 .use(baseMinterDetails?.existingBaseMinter as string)
 
                 ?.mint(
-                  wallet.address,
+                  wallet.address || '',
                   `ipfs://${baseUri}/${(uploadDetails.baseMinterMetadataFile as File).name.substring(
                     0,
                     (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
@@ -450,7 +450,7 @@ const CollectionCreationPage: NextPage = () => {
             const result = await baseMinterContract
               .use(baseMinterDetails?.existingBaseMinter as string)
               ?.batchMint(
-                wallet.address,
+                wallet.address || '',
                 `ipfs://${baseUri}`,
                 uploadDetails.assetFiles.length,
                 parseInt(uploadDetails.assetFiles[0].name.split('.')[0]),
@@ -479,7 +479,7 @@ const CollectionCreationPage: NextPage = () => {
         setUploading(false)
         await baseMinterContract
           .use(baseMinterDetails?.existingBaseMinter as string)
-          ?.mint(wallet.address, `${uploadDetails?.baseTokenURI?.trim()}`)
+          ?.mint(wallet.address || '', `${uploadDetails?.baseTokenURI?.trim()}`)
           .then((result) => {
             toast.success(`Token minted & added to the collection successfully! Tx Hash: ${result}`, {
               style: { maxWidth: 'none' },
@@ -507,7 +507,7 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const instantiateWhitelist = async () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!whitelistContract) throw new Error('Contract not found')
 
     const standardMsg = {
@@ -548,7 +548,7 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const instantiateVendingMinter = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
-    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!vendingFactoryContract) throw new Error('Contract not found')
 
     let royaltyInfo = null
@@ -601,7 +601,7 @@ const CollectionCreationPage: NextPage = () => {
     const payload: VendingFactoryDispatchExecuteArgs = {
       contract: vendingFactoryAddress as string,
       messages: vendingFactoryMessages,
-      txSigner: wallet.address,
+      txSigner: wallet.address || '',
       msg,
       funds: [
         coin(
@@ -623,7 +623,7 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const instantiateBaseMinter = async (baseUri: string, coverImageUri: string) => {
-    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!baseFactoryContract) throw new Error('Contract not found')
     if (!baseMinterContract) throw new Error('Contract not found')
 
@@ -662,7 +662,7 @@ const CollectionCreationPage: NextPage = () => {
     const payload: BaseFactoryDispatchExecuteArgs = {
       contract: collectionDetails?.updatable ? BASE_FACTORY_UPDATABLE_ADDRESS : BASE_FACTORY_ADDRESS,
       messages: baseFactoryMessages,
-      txSigner: wallet.address,
+      txSigner: wallet.address || '',
       msg,
       funds: [
         coin(
@@ -680,7 +680,7 @@ const CollectionCreationPage: NextPage = () => {
         if (uploadDetails?.assetFiles.length === 1 || uploadDetails?.uploadMethod === 'existing') {
           await toast
             .promise(
-              baseMinterContract.use(data.baseMinterAddress)?.mint(wallet.address, baseUri) as Promise<string>,
+              baseMinterContract.use(data.baseMinterAddress)?.mint(wallet.address || '', baseUri) as Promise<string>,
               {
                 loading: 'Minting token...',
                 success: (result) => {
@@ -704,7 +704,7 @@ const CollectionCreationPage: NextPage = () => {
               baseMinterContract
                 .use(data.baseMinterAddress)
                 ?.batchMint(
-                  wallet.address,
+                  wallet.address || '',
                   baseUri,
                   uploadDetails?.assetFiles.length as number,
                   parseInt(uploadDetails?.assetFiles[0].name.split('.')[0] as string),
@@ -898,7 +898,7 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const checkUploadDetails = () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
     if (!uploadDetails) {
       throw new Error('Please select assets and metadata')
     }
@@ -1107,8 +1107,8 @@ const CollectionCreationPage: NextPage = () => {
         }
         throw new Error('Invalid royalty payment address')
       }
-      const contractInfoResponse = await wallet.client
-        ?.queryContractRaw(
+      const contractInfoResponse = await (await wallet.getCosmWasmClient())
+        .queryContractRaw(
           royaltyDetails.paymentAddress.trim(),
           toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
         )
@@ -1128,8 +1128,8 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const fetchInitialFactoryParameters = async () => {
-    const client = wallet.client
-    if (!client) return
+    if (!wallet.isWalletConnected) return
+    const client = await wallet.getCosmWasmClient()
     if (BASE_FACTORY_ADDRESS) {
       const baseFactoryParameters = await client
         .queryContractSmart(BASE_FACTORY_ADDRESS, { params: {} })
@@ -1208,8 +1208,8 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const fetchOpenEditionFactoryParameters = useCallback(async () => {
-    const client = wallet.client
-    if (!client) return
+    if (!wallet.isWalletConnected) return
+    const client = await wallet.getCosmWasmClient()
     const factoryForSelectedDenom = openEditionMinterList.find(
       (minter) =>
         minter.supportedToken === openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
@@ -1252,15 +1252,16 @@ const CollectionCreationPage: NextPage = () => {
         )
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     openEditionMinterDetails?.mintingDetails?.selectedMintToken,
     openEditionMinterDetails?.collectionDetails?.updatable,
-    wallet.client,
+    wallet.isWalletConnected,
   ])
 
   const fetchVendingFactoryParameters = useCallback(async () => {
-    const client = wallet.client
-    if (!client) return
+    if (!wallet.isWalletConnected) return
+    const client = await wallet.getCosmWasmClient()
     const vendingFactoryForSelectedDenom = vendingMinterList
       .concat(flexibleVendingMinterList)
       .find(
@@ -1295,13 +1296,13 @@ const CollectionCreationPage: NextPage = () => {
   }, [
     collectionDetails?.updatable,
     mintingDetails?.selectedMintToken,
-    wallet.client,
+    wallet.isWalletConnected,
     whitelistDetails?.whitelistState,
     whitelistDetails?.whitelistType,
   ])
 
   const checkwalletBalance = async () => {
-    const walletBalance = await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
+    await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
       if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
         const amountNeeded =
           Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
@@ -1453,7 +1454,8 @@ const CollectionCreationPage: NextPage = () => {
     if (!initialParametersFetched) {
       void fetchInitialFactoryParameters()
     }
-  }, [wallet.client])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected])
 
   useEffect(() => {
     void fetchOpenEditionFactoryParameters()

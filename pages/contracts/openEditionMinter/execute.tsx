@@ -15,7 +15,6 @@ import { openEditionMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/openEditionMinter/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/openEditionMinter/messages/execute'
 import type { NextPage } from 'next'
@@ -29,6 +28,7 @@ import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 const OpenEditionMinterExecutePage: NextPage = () => {
   const { openEditionMinter: contract } = useContracts()
@@ -93,7 +93,7 @@ const OpenEditionMinterExecutePage: NextPage = () => {
     contract: contractState.value,
     messages,
     recipient: resolvedRecipientAddress,
-    txSigner: wallet.address,
+    txSigner: wallet.address || '',
     price: priceState.value ? priceState.value.toString() : '0',
     type,
   }
@@ -103,20 +103,21 @@ const OpenEditionMinterExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       if (contractState.value === '') {
         throw new Error('Please enter the contract address.')
       }
 
-      if (wallet.client && type === 'update_mint_price') {
-        const contractConfig = wallet.client.queryContractSmart(contractState.value, {
+      if (type === 'update_mint_price') {
+        const client = await wallet.getCosmWasmClient()
+        const contractConfig = client.queryContractSmart(contractState.value, {
           config: {},
         })
         await toast
           .promise(
-            wallet.client.queryContractSmart(contractState.value, {
+            client.queryContractSmart(contractState.value, {
               mint_price: {},
             }),
             {
@@ -148,7 +149,7 @@ const OpenEditionMinterExecutePage: NextPage = () => {
                 })
             } else {
               await contractConfig.then(async (config) => {
-                const factoryParameters = await wallet.client?.queryContractSmart(config.factory, {
+                const factoryParameters = await client.queryContractSmart(config.factory, {
                   params: {},
                 })
                 if (

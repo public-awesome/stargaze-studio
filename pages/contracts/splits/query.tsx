@@ -8,7 +8,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { splitsLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { QueryType } from 'contracts/splits/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/splits/messages/query'
 import type { NextPage } from 'next'
@@ -20,6 +19,7 @@ import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 const SplitsQueryPage: NextPage = () => {
   const { splits: contract } = useContracts()
@@ -64,7 +64,7 @@ const SplitsQueryPage: NextPage = () => {
       contractAddress,
       type,
       contract,
-      wallet,
+      wallet.address,
       memberAddress,
       startAfterStringState.value,
       paginationLimitState.value,
@@ -89,7 +89,7 @@ const SplitsQueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract && wallet),
+      enabled: Boolean(contractAddress && contract && wallet.isWalletConnected),
     },
   )
 

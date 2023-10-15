@@ -12,7 +12,6 @@ import { LinkTabs } from 'components/LinkTabs'
 import { royaltyRegistryLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/royaltyRegistry/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/royaltyRegistry/messages/execute'
 import type { NextPage } from 'next'
@@ -26,6 +25,7 @@ import { useMutation } from 'react-query'
 import { INFINITY_SWAP_PROTOCOL_ADDRESS, ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 export const protocolList = [{ name: 'Infinity Swap', address: INFINITY_SWAP_PROTOCOL_ADDRESS }]
 
@@ -115,7 +115,7 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {

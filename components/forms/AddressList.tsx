@@ -1,12 +1,12 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import { FormControl } from 'components/FormControl'
 import { AddressInput } from 'components/forms/FormInput'
-import { useWallet } from 'contexts/wallet'
 import { useEffect, useId, useMemo } from 'react'
 import toast from 'react-hot-toast'
 import { FaMinus, FaPlus } from 'react-icons/fa'
 import { SG721_NAME_ADDRESS } from 'utils/constants'
 import { isValidAddress } from 'utils/isValidAddress'
+import { useWallet } from 'utils/wallet'
 
 import { useInputState } from './FormInput.hooks'
 
@@ -66,8 +66,10 @@ export function Address({ id, isLast, onAdd, onChange, onRemove, defaultValue }:
   })
 
   const resolveAddress = async (name: string) => {
-    if (!wallet.client) throw new Error('Wallet not connected')
-    await wallet.client
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
+    await (
+      await wallet.getCosmWasmClient()
+    )
       .queryContractRaw(
         SG721_NAME_ADDRESS,
         toUtf8(

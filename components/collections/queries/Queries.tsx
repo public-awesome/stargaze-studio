@@ -12,8 +12,8 @@ import type { SG721Instance } from 'contracts/sg721'
 import type { VendingMinterInstance } from 'contracts/vendingMinter'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
+import { useWallet } from 'utils/wallet'
 
-import { useWallet } from '../../../contexts/wallet'
 import { resolveAddress } from '../../../utils/resolveAddress'
 import type { MinterType } from '../actions/Combobox'
 

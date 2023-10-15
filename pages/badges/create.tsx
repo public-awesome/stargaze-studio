@@ -24,7 +24,6 @@ import { useInputState } from 'components/forms/FormInput.hooks'
 import { Tooltip } from 'components/Tooltip'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
-import { useWallet } from 'contexts/wallet'
 import type { Badge } from 'contracts/badgeHub'
 import type { DispatchExecuteArgs as BadgeHubDispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute as badgeHubDispatchExecute } from 'contracts/badgeHub/messages/execute'
@@ -47,6 +46,7 @@ import { links } from 'utils/links'
 import { uid } from 'utils/random'
 import { resolveAddress } from 'utils/resolveAddress'
 import { truncateMiddle } from 'utils/text'
+import { useWallet } from 'utils/wallet'
 
 import { generateKeyPairs } from '../../utils/hash'
 
@@ -181,7 +181,7 @@ const BadgeCreationPage: NextPage = () => {
 
   const createNewBadge = async () => {
     try {
-      if (!wallet.initialized) throw new Error('Wallet not connected')
+      if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
       if (!badgeHubContract) throw new Error('Contract not found')
       setCreatingBadge(true)
       const coverUrl = await handleImageUrl()
@@ -220,7 +220,7 @@ const BadgeCreationPage: NextPage = () => {
       const payload: BadgeHubDispatchExecuteArgs = {
         contract: BADGE_HUB_ADDRESS,
         messages: badgeHubMessages,
-        txSigner: wallet.address,
+        txSigner: wallet.address || '',
         badge,
         type: 'create_badge',
       }
@@ -245,7 +245,7 @@ const BadgeCreationPage: NextPage = () => {
             setBadgeId(data.split(':')[1])
             const res = await toast.promise(
               badgeHubContract.use(BADGE_HUB_ADDRESS)?.addKeys(
-                wallet.address,
+                wallet.address || '',
                 Number(data.split(':')[1]),
                 generatedKeyPairs.map((key) => key.publicKey),
               ) as Promise<string>,
@@ -276,7 +276,7 @@ const BadgeCreationPage: NextPage = () => {
   }
 
   const checkImageUploadDetails = () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
     if (!imageUploadDetails) {
       throw new Error('Please specify the image related details.')
     }
@@ -359,7 +359,7 @@ const BadgeCreationPage: NextPage = () => {
   }
 
   const checkwalletBalance = () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
     // TODO: estimate creation cost and check wallet balance
   }
   useEffect(() => {

@@ -10,8 +10,8 @@ import { stars, tokensList } from 'config/token'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import React, { useEffect, useState } from 'react'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
-import { useWallet } from '../../contexts/wallet'
 import { NumberInput, TextInput } from '../forms/FormInput'
 import type { UploadMethod } from './OffChainMetadataUploadDetails'
 

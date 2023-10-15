@@ -4,17 +4,16 @@ import { coins } from '@cosmjs/proto-signing'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const RevokeAuthorization: NextPage = () => {
   const wallet = useWallet()
-  const client = wallet.getClient()
 
   const [transactionHash, setTransactionHash] = useState<string | undefined>(undefined)
 
@@ -39,9 +38,11 @@ const RevokeAuthorization: NextPage = () => {
   const revokeAuthorization = async (granteeAddress: string, msg: string) => {
     console.log('Wallet Address: ', wallet.address)
     try {
-      await wallet.connect()
-      const result = await client.signAndBroadcast(
-        wallet.address,
+      if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
+      const result = await (
+        await wallet.getSigningCosmWasmClient()
+      ).signAndBroadcast(
+        wallet.address || '',
         [
           {
             typeUrl: '/cosmos.authz.v1beta1.MsgRevoke',

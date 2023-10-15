@@ -6,13 +6,13 @@ import { Anchor } from 'components/Anchor'
 import type { Timezone } from 'contexts/globalSettings'
 import { setTimezone } from 'contexts/globalSettings'
 import { setLogItemList, useLogStore } from 'contexts/log'
-import { useWallet } from 'contexts/wallet'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { FaCog } from 'react-icons/fa'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK, OPEN_EDITION_FACTORY_ADDRESS } from '../utils/constants'
 import { Conditional } from './Conditional'
@@ -268,7 +268,7 @@ export const Sidebar = () => {
         </label>
       </div>
       {/* Stargaze network status */}
-      <div className="text-sm capitalize">Network: {wallet.network}</div>
+      <div className="text-sm capitalize">Network: {wallet.chain.pretty_name}</div>
 
       {/* footer reference links */}
       <ul className="text-sm list-disc list-inside">

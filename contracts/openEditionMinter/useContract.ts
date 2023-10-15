@@ -1,7 +1,7 @@
 import type { Coin } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
-import { useWallet } from 'contexts/wallet'
 import { useCallback, useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import type {
   MigrateResponse,
@@ -55,9 +55,19 @@ export function useOpenEditionMinterContract(): UseOpenEditionMinterContractProp
   }, [])
 
   useEffect(() => {
-    const OpenEditionMinterBaseContract = initContract(wallet.getClient(), wallet.address)
-    setOpenEditionMinter(OpenEditionMinterBaseContract)
-  }, [wallet])
+    if (!wallet.isWalletConnected) {
+      return
+    }
+
+    const load = async () => {
+      const client = await wallet.getSigningCosmWasmClient()
+      const OpenEditionMinterBaseContract = initContract(client, wallet.address || '')
+      setOpenEditionMinter(OpenEditionMinterBaseContract)
+    }
+
+    load().catch(console.error)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallet.isWalletConnected, wallet.address])
 
   const updateContractAddress = (contractAddress: string) => {
     setAddress(contractAddress)
@@ -70,7 +80,10 @@ export function useOpenEditionMinterContract(): UseOpenEditionMinterContractProp
           reject(new Error('Contract is not initialized.'))
           return
         }
-        openEditionMinter.instantiate(wallet.address, codeId, initMsg, label, admin).then(resolve).catch(reject)
+        openEditionMinter
+          .instantiate(wallet.address || '', codeId, initMsg, label, admin)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [openEditionMinter, wallet],
@@ -84,7 +97,10 @@ export function useOpenEditionMinterContract(): UseOpenEditionMinterContractProp
           return
         }
         console.log(wallet.address, contractAddress, codeId)
-        openEditionMinter.migrate(wallet.address, contractAddress, codeId, migrateMsg).then(resolve).catch(reject)
+        openEditionMinter
+          .migrate(wallet.address || '', contractAddress, codeId, migrateMsg)
+          .then(resolve)
+          .catch(reject)
       })
     },
     [openEditionMinter, wallet],

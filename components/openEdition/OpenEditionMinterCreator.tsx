@@ -16,7 +16,6 @@ import { openEditionMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs as OpenEditionFactoryDispatchExecuteArgs } from 'contracts/openEditionFactory/messages/execute'
 import { dispatchExecute as openEditionFactoryDispatchExecute } from 'contracts/openEditionFactory/messages/execute'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -32,6 +31,7 @@ import type { AssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
 import { checkTokenUri } from 'utils/isValidTokenUri'
 import { uid } from 'utils/random'
+import { useWallet } from 'utils/wallet'
 
 import { type CollectionDetailsDataProps, CollectionDetails } from './CollectionDetails'
 import type { ImageUploadDetailsDataProps } from './ImageUploadDetails'
@@ -180,7 +180,7 @@ export const OpenEditionMinterCreator = ({
   }
 
   const checkUploadDetails = async () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
     if (
       (metadataStorageMethod === 'off-chain' && !offChainMetadataUploadDetails) ||
       (metadataStorageMethod === 'on-chain' && !imageUploadDetails)
@@ -338,8 +338,8 @@ export const OpenEditionMinterCreator = ({
         }
         throw new Error('Invalid royalty payment address')
       }
-      const contractInfoResponse = await wallet.client
-        ?.queryContractRaw(
+      const contractInfoResponse = await (await wallet.getCosmWasmClient())
+        .queryContractRaw(
           royaltyDetails.paymentAddress.trim(),
           toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
         )
@@ -359,11 +359,11 @@ export const OpenEditionMinterCreator = ({
   }
 
   const checkwalletBalance = async () => {
-    if (!wallet.initialized) throw new Error('Wallet not connected.')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
     const amountNeeded = collectionDetails?.updatable
       ? Number(openEditionMinterUpdatableCreationFee)
       : Number(openEditionMinterCreationFee)
-    await wallet.client?.getBalance(wallet.address, 'ustars').then((balance) => {
+    await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
       if (amountNeeded >= Number(balance.amount))
         throw new Error(
           `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
@@ -559,7 +559,7 @@ export const OpenEditionMinterCreator = ({
   }
 
   const instantiateOpenEditionMinter = async (uri: string, coverImageUri: string, thumbnailUri?: string) => {
-    if (!wallet.initialized) throw new Error('Wallet not connected')
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!openEditionFactoryContract) throw new Error('Contract not found')
     if (!openEditionMinterContract) throw new Error('Contract not found')
 
@@ -626,7 +626,7 @@ export const OpenEditionMinterCreator = ({
     const payload: OpenEditionFactoryDispatchExecuteArgs = {
       contract: collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
       messages: openEditionFactoryMessages,
-      txSigner: wallet.address,
+      txSigner: wallet.address || '',
       msg,
       funds: [
         coin(
