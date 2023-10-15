@@ -8,7 +8,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { sg721LinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { QueryType } from 'contracts/sg721/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/sg721/messages/query'
 import type { NextPage } from 'next'
@@ -20,6 +19,7 @@ import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 const Sg721QueryPage: NextPage = () => {
   const { sg721: contract } = useContracts()
@@ -55,7 +55,7 @@ const Sg721QueryPage: NextPage = () => {
   const tokenIdVisible = ['owner_of', 'approval', 'approvals', 'nft_info', 'all_nft_info'].includes(type)
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, tokenId, address] as const,
+    [contractAddress, type, contract, wallet.address, tokenId, address] as const,
     async ({ queryKey }) => {
       const [_contractAddress, _type, _contract, _wallet, _tokenId, _address] = queryKey
       const messages = contract?.use(contractAddress)
@@ -75,7 +75,7 @@ const Sg721QueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract && wallet),
+      enabled: Boolean(contractAddress && contract && wallet.isWalletConnected),
     },
   )
 

@@ -18,8 +18,7 @@ import type { UseWhiteListContractProps } from 'contracts/whitelist'
 import { useWhiteListContract } from 'contracts/whitelist'
 import type { ReactNode, VFC } from 'react'
 import { Fragment, useEffect } from 'react'
-import type { State } from 'zustand'
-import create from 'zustand'
+import { create } from 'zustand'
 
 import type { UseSplitsContractProps } from '../contracts/splits/useContract'
 import { useSplitsContract } from '../contracts/splits/useContract'
@@ -27,7 +26,7 @@ import { useSplitsContract } from '../contracts/splits/useContract'
 /**
  * Contracts store type definitions
  */
-export interface ContractsStore extends State {
+export interface ContractsStore {
   sg721: UseSG721ContractProps | null
   vendingMinter: UseVendingMinterContractProps | null
   baseMinter: UseBaseMinterContractProps | null

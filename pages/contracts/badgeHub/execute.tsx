@@ -28,7 +28,6 @@ import { TransactionHash } from 'components/TransactionHash'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { Badge } from 'contracts/badgeHub'
 import type { DispatchExecuteArgs } from 'contracts/badgeHub/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/badgeHub/messages/execute'
@@ -53,6 +52,7 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { resolveAddress } from 'utils/resolveAddress'
 import { truncateMiddle } from 'utils/text'
+import { useWallet } from 'utils/wallet'
 
 import { TextInput } from '../../../components/forms/FormInput'
 import { MetadataAttributes } from '../../../components/forms/MetadataAttributes'
@@ -323,7 +323,7 @@ const BadgeHubExecutePage: NextPage = () => {
     editFee,
     contract: contractState.value,
     messages,
-    txSigner: wallet.address,
+    txSigner: wallet.address || '',
     type,
   }
   const { isLoading, mutate } = useMutation(
@@ -332,14 +332,15 @@ const BadgeHubExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       if (contractState.value === '') {
         throw new Error('Please enter the contract address.')
       }
-      if (wallet.client && type === 'edit_badge') {
-        const feeRateRaw = await wallet.client.queryContractRaw(
+      if (type === 'edit_badge') {
+        const client = await wallet.getCosmWasmClient()
+        const feeRateRaw = await client.queryContractRaw(
           contractAddress,
           toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
         )
@@ -347,7 +348,7 @@ const BadgeHubExecutePage: NextPage = () => {
 
         await toast
           .promise(
-            wallet.client.queryContractSmart(contractAddress, {
+            client.queryContractSmart(contractAddress, {
               badge: { id: badgeIdState.value },
             }),
             {

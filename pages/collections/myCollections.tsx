@@ -11,7 +11,6 @@ import { Anchor } from 'components/Anchor'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { Tooltip } from 'components/Tooltip'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useCallback, useEffect, useState } from 'react'
@@ -21,6 +20,7 @@ import { API_URL, STARGAZE_URL } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { truncateMiddle } from 'utils/text'
+import { useWallet } from 'utils/wallet'
 
 const CollectionList: NextPage = () => {
   const wallet = useWallet()
@@ -30,8 +30,8 @@ const CollectionList: NextPage = () => {
   const [myOpenEditionCollections, setMyOpenEditionCollections] = useState<any[]>([])
 
   async function getMinterContractType(minterContractAddress: string) {
-    if (wallet.client && minterContractAddress.length > 0) {
-      const client = wallet.client
+    if (wallet.isWalletConnected && minterContractAddress.length > 0) {
+      const client = await wallet.getCosmWasmClient()
       const data = await client.queryContractRaw(
         minterContractAddress,
         toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),

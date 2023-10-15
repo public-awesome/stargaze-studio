@@ -9,7 +9,6 @@ import { LinkTabs } from 'components/LinkTabs'
 import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { MigrateResponse } from 'contracts/baseMinter'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
@@ -21,6 +20,7 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const BaseMinterMigratePage: NextPage = () => {
   const { baseMinter: contract } = useContracts()
@@ -52,7 +52,7 @@ const BaseMinterMigratePage: NextPage = () => {
       if (!contract) {
         throw new Error('Smart contract connection failed')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
 

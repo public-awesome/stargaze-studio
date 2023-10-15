@@ -11,7 +11,6 @@ import { LinkTabs } from 'components/LinkTabs'
 import { splitsLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/splits/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/splits/messages/execute'
 import type { NextPage } from 'next'
@@ -24,6 +23,7 @@ import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const SplitsExecutePage: NextPage = () => {
   const { splits: contract } = useContracts()
@@ -64,7 +64,7 @@ const SplitsExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {

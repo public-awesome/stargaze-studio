@@ -10,7 +10,6 @@ import type { BadgeHubInstance } from 'contracts/badgeHub'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 
-import { useWallet } from '../../../contexts/wallet'
 import type { MintRule } from '../creation/ImageUploadDetails'
 
 interface BadgeQueriesProps {
@@ -20,8 +19,6 @@ interface BadgeQueriesProps {
   mintRule: MintRule
 }
 export const BadgeQueries = ({ badgeHubContractAddress, badgeId, badgeHubMessages, mintRule }: BadgeQueriesProps) => {
-  const wallet = useWallet()
-
   const comboboxState = useQueryComboboxState()
   const type = comboboxState.value?.id
 

@@ -7,7 +7,6 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
-import { useWallet } from 'contexts/wallet'
 import type { QueryType } from 'contracts/baseMinter/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/baseMinter/messages/query'
 import type { NextPage } from 'next'
@@ -18,6 +17,7 @@ import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const BaseMinterQueryPage: NextPage = () => {
   const { baseMinter: contract } = useContracts()
@@ -42,7 +42,7 @@ const BaseMinterQueryPage: NextPage = () => {
   const [type, setType] = useState<QueryType>('config')
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet, address] as const,
+    [contractAddress, type, contract, wallet.address, address] as const,
     async ({ queryKey }) => {
       const [_contractAddress, _type, _contract, _wallet] = queryKey
       const messages = contract?.use(_contractAddress)
@@ -58,7 +58,7 @@ const BaseMinterQueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract && wallet),
+      enabled: Boolean(contractAddress && contract && wallet.isWalletConnected),
     },
   )
 

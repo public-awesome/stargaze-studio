@@ -7,7 +7,6 @@ import { Alert } from 'components/Alert'
 import { Anchor } from 'components/Anchor'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useCallback, useEffect, useState } from 'react'
@@ -15,6 +14,7 @@ import { FaSlidersH, FaUser } from 'react-icons/fa'
 import { API_URL, BADGE_HUB_ADDRESS, STARGAZE_URL } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const BadgeList: NextPage = () => {
   const wallet = useWallet()
@@ -23,7 +23,7 @@ const BadgeList: NextPage = () => {
   useEffect(() => {
     const fetchBadges = async () => {
       await axios
-        .get(`${API_URL}/api/v1beta/badges/${wallet.address}`)
+        .get(`${API_URL}/api/v1beta/badges/${wallet.address || ''}`)
         .then((response) => {
           const badgeData = response.data
           setMyBadges(badgeData)
@@ -90,7 +90,7 @@ const BadgeList: NextPage = () => {
                         <Anchor
                           className="text-xl text-plumbus"
                           external
-                          href={`${STARGAZE_URL}/profile/${wallet.address}`}
+                          href={`${STARGAZE_URL}/profile/${wallet.address || ''}`}
                         >
                           <FaUser />
                         </Anchor>

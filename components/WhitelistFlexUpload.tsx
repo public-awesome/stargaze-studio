@@ -1,12 +1,12 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import clsx from 'clsx'
-import { useWallet } from 'contexts/wallet'
 import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { SG721_NAME_ADDRESS } from 'utils/constants'
 import { csvToFlexList } from 'utils/csvToFlexList'
 import { isValidAddress } from 'utils/isValidAddress'
 import { isValidFlexListFile } from 'utils/isValidFlexListFile'
+import { useWallet } from 'utils/wallet'
 
 export interface WhitelistFlexMember {
   address: string
@@ -26,8 +26,10 @@ export const WhitelistFlexUpload = ({ onChange }: WhitelistFlexUploadProps) => {
     await new Promise((resolve) => {
       let i = 0
       memberData.map(async (data) => {
-        if (!wallet.client) throw new Error('Wallet not connected')
-        await wallet.client
+        if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
+        await (
+          await wallet.getCosmWasmClient()
+        )
           .queryContractRaw(
             SG721_NAME_ADDRESS,
             toUtf8(

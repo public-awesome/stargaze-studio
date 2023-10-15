@@ -24,7 +24,6 @@ import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { DispatchExecuteArgs } from 'contracts/whitelist/messages/execute'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'contracts/whitelist/messages/execute'
 import type { NextPage } from 'next'
@@ -39,6 +38,7 @@ import { useDebounce } from 'utils/debounce'
 import { isValidAddress } from 'utils/isValidAddress'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 const WhitelistExecutePage: NextPage = () => {
   const { whitelist: contract } = useContracts()
@@ -143,7 +143,7 @@ const WhitelistExecutePage: NextPage = () => {
       if (!type) {
         throw new Error('Please select message type!')
       }
-      if (!wallet.initialized) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       const txHash = await toast.promise(dispatchExecute(payload), {
@@ -186,8 +186,8 @@ const WhitelistExecutePage: NextPage = () => {
 
   useEffect(() => {
     async function getWhitelistContractType() {
-      if (wallet.client && debouncedWhitelistContractState.length > 0) {
-        const client = wallet.client
+      if (wallet.isWalletConnected && debouncedWhitelistContractState.length > 0) {
+        const client = await wallet.getCosmWasmClient()
         const data = await toast.promise(
           client.queryContractRaw(
             debouncedWhitelistContractState,
@@ -217,7 +217,8 @@ const WhitelistExecutePage: NextPage = () => {
         setWhitelistType('standard')
         console.log('Unable to retrieve contract type. Defaulting to "standard".')
       })
-  }, [debouncedWhitelistContractState, wallet.client])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedWhitelistContractState, wallet.isWalletConnected])
 
   return (
     <section className="py-6 px-12 space-y-4">

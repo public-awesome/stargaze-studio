@@ -16,7 +16,6 @@ import { LinkTabs } from 'components/LinkTabs'
 import { baseMinterLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
-import { useWallet } from 'contexts/wallet'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import type { FormEvent } from 'react'
@@ -27,6 +26,7 @@ import { useMutation } from 'react-query'
 import { BASE_FACTORY_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
+import { useWallet } from 'utils/wallet'
 
 import type { CreateBaseMinterResponse } from '../../../contracts/baseFactory/contract'
 import { SG721_CODE_ID } from '../../../utils/constants'
@@ -149,7 +149,9 @@ const BaseMinterInstantiatePage: NextPage = () => {
       return toast.promise(
         contract
           .use(BASE_FACTORY_ADDRESS)
-          ?.createBaseMinter(wallet.address, msg, [coin('250000000', 'ustars')]) as Promise<CreateBaseMinterResponse>,
+          ?.createBaseMinter(wallet.address || '', msg, [
+            coin('250000000', 'ustars'),
+          ]) as Promise<CreateBaseMinterResponse>,
         {
           loading: 'Instantiating contract...',
           error: 'Instantiation failed!',

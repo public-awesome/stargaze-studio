@@ -1,15 +1,17 @@
 import { toUtf8 } from '@cosmjs/encoding'
+import type { ChainContext } from '@cosmos-kit/core'
 import toast from 'react-hot-toast'
 
-import type { KeplrWalletStore } from '../contexts/wallet'
 import { SG721_NAME_ADDRESS } from './constants'
 import { isValidAddress } from './isValidAddress'
 
-export const resolveAddress = async (name: string, wallet: KeplrWalletStore): Promise<string> => {
+export const resolveAddress = async (name: string, wallet: ChainContext): Promise<string> => {
   if (!name.trim().endsWith('.stars')) return name.trim()
 
-  if (wallet.client) {
-    const tokenUri = await wallet.client
+  if (wallet.isWalletConnected) {
+    const tokenUri = await (
+      await wallet.getCosmWasmClient()
+    )
       .queryContractRaw(
         SG721_NAME_ADDRESS,
         toUtf8(

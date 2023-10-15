@@ -7,7 +7,6 @@ import clsx from 'clsx'
 import { Conditional } from 'components/Conditional'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.hooks'
-import { useWallet } from 'contexts/wallet'
 import type { Trait } from 'contracts/badgeHub'
 import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -40,7 +39,6 @@ export const OnChainMetadataInputDetails = ({
   uploadMethod,
   importedOnChainMetadataInputDetails,
 }: OnChainMetadataInputDetailsProps) => {
-  const wallet = useWallet()
   const [timestamp, setTimestamp] = useState<Date | undefined>(undefined)
   const [metadataFile, setMetadataFile] = useState<File>()
   const [metadataFeeRate, setMetadataFeeRate] = useState<number>(0)

@@ -1,8 +1,8 @@
 import { Conditional } from 'components/Conditional'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState } from 'components/forms/FormInput.hooks'
-import { useWallet } from 'contexts/wallet'
 import React, { useEffect, useState } from 'react'
+import { useWallet } from 'utils/wallet'
 
 import { resolveAddress } from '../../../utils/resolveAddress'
 import { NumberInput, TextInput } from '../../forms/FormInput'

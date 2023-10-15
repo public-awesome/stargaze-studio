@@ -1,6 +1,5 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import clsx from 'clsx'
-import { useWallet } from 'contexts/wallet'
 import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { SG721_NAME_ADDRESS } from 'utils/constants'
@@ -8,6 +7,7 @@ import { csvToArray } from 'utils/csvToArray'
 import type { AirdropAllocation } from 'utils/isValidAccountsFile'
 import { isValidAccountsFile } from 'utils/isValidAccountsFile'
 import { isValidAddress } from 'utils/isValidAddress'
+import { useWallet } from 'utils/wallet'
 
 interface AirdropUploadProps {
   onChange: (data: AirdropAllocation[]) => void
@@ -22,8 +22,10 @@ export const AirdropUpload = ({ onChange }: AirdropUploadProps) => {
     await new Promise((resolve) => {
       let i = 0
       allocationData.map(async (data) => {
-        if (!wallet.client) throw new Error('Wallet not connected')
-        await wallet.client
+        if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
+        await (
+          await wallet.getCosmWasmClient()
+        )
           .queryContractRaw(
             SG721_NAME_ADDRESS,
             toUtf8(

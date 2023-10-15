@@ -20,7 +20,6 @@ import { useMetadataAttributesState } from 'components/forms/MetadataAttributes.
 import { JsonPreview } from 'components/JsonPreview'
 import { TransactionHash } from 'components/TransactionHash'
 import { WhitelistUpload } from 'components/WhitelistUpload'
-import { useWallet } from 'contexts/wallet'
 import type { Badge, BadgeHubInstance } from 'contracts/badgeHub'
 import sizeof from 'object-sizeof'
 import type { FormEvent } from 'react'
@@ -32,6 +31,7 @@ import * as secp256k1 from 'secp256k1'
 import { generateKeyPairs, sha256 } from 'utils/hash'
 import { isValidAddress } from 'utils/isValidAddress'
 import { resolveAddress } from 'utils/resolveAddress'
+import { useWallet } from 'utils/wallet'
 
 import { BadgeAirdropListUpload } from '../../BadgeAirdropListUpload'
 import { AddressInput, NumberInput, TextInput } from '../../forms/FormInput'
@@ -266,7 +266,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
     nft: nftState.value,
     badgeHubMessages,
     badgeHubContract: badgeHubContractAddress,
-    txSigner: wallet.address,
+    txSigner: wallet.address || '',
     type,
   }
 
@@ -397,7 +397,7 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
 
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
-      if (!wallet.client) {
+      if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
       event.preventDefault()
@@ -412,8 +412,10 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
         throw new Error('Please enter a valid private key.')
       }
 
-      if (wallet.client && type === 'edit_badge') {
-        const feeRateRaw = await wallet.client.queryContractRaw(
+      if (type === 'edit_badge') {
+        const feeRateRaw = await (
+          await wallet.getCosmWasmClient()
+        ).queryContractRaw(
           badgeHubContractAddress,
           toUtf8(Buffer.from(Buffer.from('fee_rate').toString('hex'), 'hex').toString()),
         )
@@ -421,7 +423,9 @@ export const BadgeActions = ({ badgeHubContractAddress, badgeId, badgeHubMessage
 
         await toast
           .promise(
-            wallet.client.queryContractSmart(badgeHubContractAddress, {
+            (
+              await wallet.getCosmWasmClient()
+            ).queryContractSmart(badgeHubContractAddress, {
               badge: { id: badgeId },
             }),
             {

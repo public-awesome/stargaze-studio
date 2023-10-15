@@ -11,13 +11,11 @@ export const checkFiles = (images: string[], metadata: string[]) => {
     }
 
     // Extract fileName from path
-    const fileName = path.match(
-      /([a-zA-Z0-9\s_\\.\-:]+)(.png|.jpg|.gif|.json)?$/i
-    )![1]
+    const fileName = /([a-zA-Z0-9\s_\\.\-:]+)(.png|.jpg|.gif|.json)?$/i.exec(path)![1]
 
     // Check that file name is an Integer
     if (isNaN(parseInt(fileName, 10))) {
-      throw Error('Filenames must be numbers. Invalid fileName: ' + fileName)
+      throw Error(`Filenames must be numbers. Invalid fileName: ${fileName}`)
     }
     return parseInt(fileName, 10)
   }
