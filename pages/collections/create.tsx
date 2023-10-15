@@ -59,6 +59,7 @@ import {
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
+  STRDST_SG721_CODE_ID,
   SYNC_COLLECTIONS_API_URL,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
@@ -448,7 +449,12 @@ const CollectionCreationPage: NextPage = () => {
             setBaseTokenUri(baseUri)
             const result = await baseMinterContract
               .use(baseMinterDetails?.existingBaseMinter as string)
-              ?.batchMint(wallet.address || '', `ipfs://${baseUri}`, uploadDetails.assetFiles.length)
+              ?.batchMint(
+                wallet.address || '',
+                `ipfs://${baseUri}`,
+                uploadDetails.assetFiles.length,
+                parseInt(uploadDetails.assetFiles[0].name.split('.')[0]),
+              )
             console.log(result)
             return result
           })
@@ -568,7 +574,11 @@ const CollectionCreationPage: NextPage = () => {
           whitelist,
         },
         collection_params: {
-          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
+          code_id: collectionDetails?.updatable
+            ? SG721_UPDATABLE_CODE_ID
+            : mintingDetails?.selectedMintToken?.displayName === 'STRDST'
+            ? STRDST_SG721_CODE_ID
+            : SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
@@ -697,6 +707,7 @@ const CollectionCreationPage: NextPage = () => {
                   wallet.address || '',
                   baseUri,
                   uploadDetails?.assetFiles.length as number,
+                  parseInt(uploadDetails?.assetFiles[0].name.split('.')[0] as string),
                 ) as Promise<string>,
               {
                 loading: 'Minting tokens...',

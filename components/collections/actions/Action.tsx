@@ -181,7 +181,9 @@ export const CollectionActions = ({
       type !== 'update_royalties_for_infinity_swap'
         ? 'Percentage of royalties to be paid'
         : 'Change in share percentage',
-    placeholder: '5%',
+    placeholder: isEitherType(type, ['set_royalties_for_infinity_swap', 'update_royalties_for_infinity_swap'])
+      ? '0.5%'
+      : '5%',
   })
 
   const showTokenUriField = isEitherType(type, ['mint_token_uri', 'update_token_metadata'])
@@ -309,6 +311,13 @@ export const CollectionActions = ({
     royaltyPaymentAddressState.value,
     royaltyShareState.value,
   ])
+
+  useEffect(() => {
+    if (isEitherType(type, ['set_royalties_for_infinity_swap']) && Number(royaltyShareState.value) > 5) {
+      royaltyShareState.onChange('5')
+      toast.error('Royalty share cannot be greater than 5% for Infinity Swap')
+    }
+  }, [royaltyShareState.value])
 
   useEffect(() => {
     const addresses: string[] = []

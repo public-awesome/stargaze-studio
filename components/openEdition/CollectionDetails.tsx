@@ -226,7 +226,7 @@ export const CollectionDetails = ({
             <FormControl
               className={clsx('mt-2')}
               htmlId="timestamp"
-              subtitle="Trading start time offset will be set as 2 weeks by default."
+              subtitle="Trading start time offset will be set as 1 week by default."
               title={`Trading Start Time (optional | ${timezone === 'Local' ? 'local)' : 'UTC)'}`}
             >
               <InputDateTime
