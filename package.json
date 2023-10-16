@@ -1,6 +1,6 @@
 {
   "name": "stargaze-studio",
-  "version": "0.7.11",
+  "version": "0.8.0",
   "workspaces": [
     "packages/*"
   ],
@@ -19,10 +19,13 @@
     "@cosmjs/proto-signing": "^0",
     "@cosmjs/stargate": "^0",
     "@cosmos-kit/keplr": "^2.4.0",
+    "@cosmos-kit/leap": "2.4.0",
+    "@cosmos-kit/leap-metamask-cosmos-snap": "0.3.0",
     "@cosmos-kit/react": "^2.9.0",
     "@fontsource/jetbrains-mono": "^4",
     "@fontsource/roboto": "^4",
     "@headlessui/react": "^1",
+    "@leapwallet/cosmos-snap-provider": "0.1.24",
     "@pinata/sdk": "^1.1.26",
     "@popperjs/core": "^2",
     "@svgr/webpack": "^6",
