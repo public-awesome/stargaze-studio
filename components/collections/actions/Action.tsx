@@ -337,8 +337,11 @@ export const CollectionActions = ({
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
       event.preventDefault()
+      if (!wallet.isWalletConnected) {
+        throw new Error('Please connect your wallet first.')
+      }
       if (!type) {
-        throw new Error('Please select an action!')
+        throw new Error('Please select an action.')
       }
       if (minterContractAddress === '' && sg721ContractAddress === '') {
         throw new Error('Please enter minter and sg721 contract addresses!')
