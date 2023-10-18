@@ -60,4 +60,4 @@ export const nativeStardust: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcUsdc, ibcFrnz, nativeStardust]
+export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, nativeStardust]
