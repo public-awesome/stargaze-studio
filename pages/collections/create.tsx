@@ -576,7 +576,8 @@ const CollectionCreationPage: NextPage = () => {
         collection_params: {
           code_id: collectionDetails?.updatable
             ? SG721_UPDATABLE_CODE_ID
-            : mintingDetails?.selectedMintToken?.displayName === 'STRDST'
+            : mintingDetails?.selectedMintToken?.displayName === 'STRDST' ||
+              mintingDetails?.selectedMintToken?.displayName === 'USK'
             ? STRDST_SG721_CODE_ID
             : SG721_CODE_ID,
           name: collectionDetails?.name,
