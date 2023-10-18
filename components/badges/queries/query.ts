@@ -51,7 +51,7 @@ export type DispatchQueryArgs = {
 export const dispatchQuery = async (args: DispatchQueryArgs) => {
   const { badgeHubMessages } = args
   if (!badgeHubMessages) {
-    throw new Error('Cannot perform a query')
+    throw new Error('Cannot perform a query. Please connect your wallet first.')
   }
   switch (args.type) {
     case 'config': {
