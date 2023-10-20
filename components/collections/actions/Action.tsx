@@ -551,7 +551,7 @@ export const CollectionActions = ({
               subtitle={`CSV file that contains the ${
                 type === 'batch_transfer_multi_address' ? '' : 'airdrop'
               } addresses and the ${
-                type === 'airdrop' ? 'amount of tokens' : 'token ID'
+                type === 'airdrop' || type === 'airdrop_open_edition' ? 'amount of tokens' : 'token ID'
               } allocated for each address. Should start with the following header row: ${
                 type === 'airdrop' || type === 'airdrop_open_edition' ? 'address,amount' : 'address,tokenId'
               }`}
