@@ -553,7 +553,7 @@ export const CollectionActions = ({
               } addresses and the ${
                 type === 'airdrop' ? 'amount of tokens' : 'token ID'
               } allocated for each address. Should start with the following header row: ${
-                type === 'airdrop' ? 'address,amount' : 'address,tokenId'
+                type === 'airdrop' || type === 'airdrop_open_edition' ? 'address,amount' : 'address,tokenId'
               }`}
               title={`${type === 'batch_transfer_multi_address' ? 'Multi-Recipient Transfer File' : 'Airdrop File'}`}
             >
