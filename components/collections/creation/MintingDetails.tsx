@@ -138,10 +138,10 @@ export const MintingDetails = ({
           isRequired
           value={uploadMethod === 'new' ? numberOfTokens : numberOfTokensState.value}
         />
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-end">
           <NumberInput {...unitPriceState} isRequired />
           <select
-            className="py-[9px] px-4 mt-14 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+            className="py-[9px] px-4 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
             onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
             value={selectedMintToken?.displayName}
           >
