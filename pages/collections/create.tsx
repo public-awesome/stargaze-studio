@@ -1130,7 +1130,6 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const fetchInitialFactoryParameters = async () => {
-    if (!wallet.isWalletConnected) return
     const client = await wallet.getCosmWasmClient()
     if (BASE_FACTORY_ADDRESS) {
       const baseFactoryParameters = await client
@@ -1210,7 +1209,6 @@ const CollectionCreationPage: NextPage = () => {
   }
 
   const fetchOpenEditionFactoryParameters = useCallback(async () => {
-    if (!wallet.isWalletConnected) return
     const client = await wallet.getCosmWasmClient()
     const factoryForSelectedDenom = openEditionMinterList.find(
       (minter) =>
@@ -1262,7 +1260,6 @@ const CollectionCreationPage: NextPage = () => {
   ])
 
   const fetchVendingFactoryParameters = useCallback(async () => {
-    if (!wallet.isWalletConnected) return
     const client = await wallet.getCosmWasmClient()
     const vendingFactoryForSelectedDenom = vendingMinterList
       .concat(flexibleVendingMinterList)
