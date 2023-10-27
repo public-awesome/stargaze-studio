@@ -50,6 +50,13 @@ export const ibcFrnz: TokenInfo = {
   decimalPlaces: 6,
 }
 
+export const ibcNbtc: TokenInfo = {
+  id: 'ibc-nBTC',
+  denom: NETWORK === 'mainnet' ? 'Not available' : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/unbtc',
+  displayName: 'nBTC',
+  decimalPlaces: 6,
+}
+
 export const nativeStardust: TokenInfo = {
   id: 'native-strdst',
   denom:
@@ -60,4 +67,4 @@ export const nativeStardust: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, nativeStardust]
+export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, ibcNbtc, nativeStardust]

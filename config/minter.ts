@@ -2,10 +2,12 @@ import {
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
+  OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
@@ -15,6 +17,10 @@ import {
   VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_NBTC_FACTORY_ADDRESS,
+  VENDING_IBC_NBTC_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_NBTC_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_IBC_NBTC_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
   VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
@@ -29,7 +35,7 @@ import {
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
-import { ibcAtom, ibcFrnz, ibcUsdc, ibcUsk, nativeStardust, stars } from './token'
+import { ibcAtom, ibcFrnz, ibcNbtc, ibcUsdc, ibcUsk, nativeStardust, stars } from './token'
 
 export interface MinterInfo {
   id: string
@@ -74,10 +80,24 @@ export const openEditionIbcUsdcMinter: MinterInfo = {
   updatable: false,
 }
 
+export const openEditionIbcNbtcMinter: MinterInfo = {
+  id: 'open-edition-ibc-nbtc-minter',
+  factoryAddress: OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
+  supportedToken: ibcNbtc,
+  updatable: false,
+}
+
 export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'open-edition-updatable-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
+  updatable: true,
+}
+
+export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
+  id: 'open-edition-updatable-ibc-nbtc-minter',
+  factoryAddress: OPEN_EDITION_UPDATABLE_IBC_NBTC_FACTORY_ADDRESS,
+  supportedToken: ibcNbtc,
   updatable: true,
 }
 
@@ -104,6 +124,8 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcFrnzMinter,
   openEditionIbcUsdcMinter,
   openEditionUpdatableIbcUsdcMinter,
+  openEditionIbcNbtcMinter,
+  openEditionUpdatableIbcNbtcMinter,
 ]
 
 export const vendingStarsMinter: MinterInfo = {
@@ -146,10 +168,26 @@ export const vendingIbcUsdcMinter: MinterInfo = {
   flexible: false,
 }
 
+export const vendingIbcNbtcMinter: MinterInfo = {
+  id: 'vending-ibc-nbtc-minter',
+  factoryAddress: VENDING_IBC_NBTC_FACTORY_ADDRESS,
+  supportedToken: ibcNbtc,
+  updatable: false,
+  flexible: false,
+}
+
 export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'vending-updatable-ibc-usdc-minter',
   factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
+  updatable: true,
+  flexible: false,
+}
+
+export const vendingUpdatableIbcNbtcMinter: MinterInfo = {
+  id: 'vending-updatable-ibc-nbtc-minter',
+  factoryAddress: VENDING_IBC_NBTC_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: ibcNbtc,
   updatable: true,
   flexible: false,
 }
@@ -193,6 +231,8 @@ export const vendingMinterList = [
   vendingUpdatableIbcAtomMinter,
   vendingIbcUsdcMinter,
   vendingUpdatableIbcUsdcMinter,
+  vendingIbcNbtcMinter,
+  vendingUpdatableIbcNbtcMinter,
   vendingIbcUskMinter,
   vendingUpdatableIbcUskMinter,
   vendingNativeStardustMinter,
@@ -239,10 +279,26 @@ export const flexibleVendingIbcUsdcMinter: MinterInfo = {
   flexible: true,
 }
 
+export const flexibleVendingIbcNbtcMinter: MinterInfo = {
+  id: 'flexible-vending-ibc-nbtc-minter',
+  factoryAddress: VENDING_IBC_NBTC_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcNbtc,
+  updatable: false,
+  flexible: true,
+}
+
 export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'flexible-vending-updatable-ibc-usdc-minter',
   factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
   supportedToken: ibcUsdc,
+  updatable: true,
+  flexible: true,
+}
+
+export const flexibleVendingUpdatableIbcNbtcMinter: MinterInfo = {
+  id: 'flexible-vending-updatable-ibc-nbtc-minter',
+  factoryAddress: VENDING_IBC_NBTC_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcNbtc,
   updatable: true,
   flexible: true,
 }
@@ -278,6 +334,8 @@ export const flexibleVendingMinterList = [
   flexibleVendingUpdatableIbcAtomMinter,
   flexibleVendingIbcUsdcMinter,
   flexibleVendingUpdatableIbcUsdcMinter,
+  flexibleVendingIbcNbtcMinter,
+  flexibleVendingUpdatableIbcNbtcMinter,
   flexibleVendingIbcUskMinter,
   flexibleVendingUpdatableIbcUskMinter,
   flexibleVendingStrdstMinter,
