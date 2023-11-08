@@ -4,11 +4,13 @@ import {
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
+  OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_IBC_USK_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
@@ -115,6 +117,20 @@ export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
   updatable: true,
 }
 
+export const openEditionIbcUskMinter: MinterInfo = {
+  id: 'open-edition-ibc-usk-minter',
+  factoryAddress: OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
+  supportedToken: ibcUsk,
+  updatable: false,
+}
+
+export const openEditionUpdatableIbcUskMinter: MinterInfo = {
+  id: 'open-edition-updatable-ibc-usk-minter',
+  factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USK_FACTORY_ADDRESS,
+  supportedToken: ibcUsk,
+  updatable: true,
+}
+
 export const openEditionMinterList = [
   openEditionStarsMinter,
   openEditionUpdatableStarsMinter,
@@ -126,6 +142,8 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcUsdcMinter,
   openEditionIbcNbtcMinter,
   openEditionUpdatableIbcNbtcMinter,
+  openEditionIbcUskMinter,
+  openEditionUpdatableIbcUskMinter,
 ]
 
 export const vendingStarsMinter: MinterInfo = {

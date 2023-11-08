@@ -13,7 +13,7 @@ import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
 import { openEditionMinterList } from 'config/minter'
-import type { TokenInfo } from 'config/token'
+import { type TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import type { DispatchExecuteArgs as OpenEditionFactoryDispatchExecuteArgs } from 'contracts/openEditionFactory/messages/execute'
@@ -26,6 +26,7 @@ import {
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   SG721_OPEN_EDITION_CODE_ID,
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
+  STRDST_SG721_CODE_ID,
 } from 'utils/constants'
 import type { AssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
@@ -608,7 +609,12 @@ export const OpenEditionMinterCreator = ({
           payment_address: mintingDetails?.paymentAddress || null,
         },
         collection_params: {
-          code_id: collectionDetails?.updatable ? SG721_OPEN_EDITION_UPDATABLE_CODE_ID : SG721_OPEN_EDITION_CODE_ID,
+          code_id: collectionDetails?.updatable
+            ? SG721_OPEN_EDITION_UPDATABLE_CODE_ID
+            : mintingDetails?.selectedMintToken?.displayName === 'USK' ||
+              mintingDetails?.selectedMintToken?.displayName === 'USDC'
+            ? STRDST_SG721_CODE_ID
+            : SG721_OPEN_EDITION_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {

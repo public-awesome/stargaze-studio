@@ -35,7 +35,9 @@ export const ibcUsdc: TokenInfo = {
 export const ibcUsk: TokenInfo = {
   id: 'ibc-usk',
   denom:
-    NETWORK === 'mainnet' ? 'ibc/938CEB62ABCBA6366AA369A8362E310B2A0B1A54835E4F3FF01D69D860959128' : 'Not available',
+    NETWORK === 'mainnet'
+      ? 'ibc/938CEB62ABCBA6366AA369A8362E310B2A0B1A54835E4F3FF01D69D860959128'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uusk',
   displayName: 'USK',
   decimalPlaces: 6,
 }
