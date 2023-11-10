@@ -377,7 +377,7 @@ export const CollectionDetails = ({
               </div>
             </div>
           </div>
-          <Conditional test={SG721_UPDATABLE_CODE_ID > 0}>
+          <Conditional test={false && SG721_UPDATABLE_CODE_ID > 0}>
             <Tooltip
               backgroundColor="bg-blue-500"
               label={
