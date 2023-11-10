@@ -356,7 +356,9 @@ export const CollectionDetails = ({
           </div>
         </div>
         <Conditional
-          test={SG721_OPEN_EDITION_UPDATABLE_CODE_ID > 0 && OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS !== undefined}
+          test={
+            false && SG721_OPEN_EDITION_UPDATABLE_CODE_ID > 0 && OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS !== undefined
+          }
         >
           <Tooltip
             backgroundColor="bg-blue-500"
