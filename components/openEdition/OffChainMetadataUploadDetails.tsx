@@ -126,7 +126,9 @@ export const OffChainMetadataUploadDetails = ({
       reader.onload = (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
-        const assetFile = new File([e.target.result], event.target.files[i].name, { type: 'image/jpg' })
+        const assetFile = new File([e.target.result], event.target.files[i].name.replaceAll('#', ''), {
+          type: 'image/jpg',
+        })
         files.push(assetFile)
       }
       reader.readAsArrayBuffer(event.target.files[i])
@@ -152,7 +154,9 @@ export const OffChainMetadataUploadDetails = ({
       reader.onload = async (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
-        const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
+        const metadataFile = new File([e.target.result], event.target.files[i].name.replaceAll('#', ''), {
+          type: 'application/json',
+        })
         files.push(metadataFile)
         try {
           const parsedMetadata = JSON.parse(await metadataFile.text())
@@ -188,7 +192,7 @@ export const OffChainMetadataUploadDetails = ({
     reader.onload = (e) => {
       if (!event.target.files) return toast.error('No file selected.')
       if (!e.target?.result) return toast.error('Error parsing file.')
-      selectedFile = new File([e.target.result], event.target.files[0].name, { type: 'image/*' })
+      selectedFile = new File([e.target.result], event.target.files[0].name.replaceAll('#', ''), { type: 'image/*' })
     }
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (event.target.files[0]) reader.readAsArrayBuffer(event.target.files[0])

@@ -194,7 +194,9 @@ export const UploadDetails = ({
       reader.onload = (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
-        const assetFile = new File([e.target.result], event.target.files[i].name, { type: 'image/jpg' })
+        const assetFile = new File([e.target.result], event.target.files[i].name.replaceAll('#', ''), {
+          type: 'image/jpg',
+        })
         files.push(assetFile)
       }
       reader.readAsArrayBuffer(event.target.files[i])
@@ -283,7 +285,9 @@ export const UploadDetails = ({
       reader.onload = async (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
-        const metadataFile = new File([e.target.result], event.target.files[i].name, { type: 'application/json' })
+        const metadataFile = new File([e.target.result], event.target.files[i].name.replaceAll('#', ''), {
+          type: 'application/json',
+        })
         files.push(metadataFile)
         try {
           const parsedMetadata = JSON.parse(await metadataFile.text())
@@ -359,7 +363,9 @@ export const UploadDetails = ({
       reader.onload = (e) => {
         if (!e.target?.result) return toast.error('Error parsing file.')
         if (!event.target.files) return toast.error('No files selected.')
-        const thumbnailFile = new File([e.target.result], event.target.files[i].name, { type: 'image/jpg' })
+        const thumbnailFile = new File([e.target.result], event.target.files[i].name.replaceAll('#', ''), {
+          type: 'image/jpg',
+        })
         files.push(thumbnailFile)
       }
       reader.readAsArrayBuffer(event.target.files[i])

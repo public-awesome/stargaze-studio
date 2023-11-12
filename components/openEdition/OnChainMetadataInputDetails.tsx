@@ -143,7 +143,9 @@ export const OnChainMetadataInputDetails = ({
     reader.onload = (e) => {
       if (!event.target.files) return toast.error('No file selected.')
       if (!e.target?.result) return toast.error('Error parsing file.')
-      selectedFile = new File([e.target.result], event.target.files[0].name, { type: 'application/json' })
+      selectedFile = new File([e.target.result], event.target.files[0].name.replaceAll('#', ''), {
+        type: 'application/json',
+      })
     }
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (event.target.files[0]) reader.readAsArrayBuffer(event.target.files[0])
