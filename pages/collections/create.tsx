@@ -809,10 +809,9 @@ const CollectionCreationPage: NextPage = () => {
 
                 const updatedMetadataFile = new File(
                   [metadataFileBlob],
-                  uploadDetails.metadataFiles[i].name.substring(
-                    0,
-                    uploadDetails.metadataFiles[i].name.lastIndexOf('.'),
-                  ),
+                  uploadDetails.metadataFiles[i].name
+                    .substring(0, uploadDetails.metadataFiles[i].name.lastIndexOf('.'))
+                    .replaceAll('#', ''),
                   {
                     type: 'application/json',
                   },
@@ -869,10 +868,9 @@ const CollectionCreationPage: NextPage = () => {
               console.log('Name: ', (uploadDetails.baseMinterMetadataFile as File).name)
               const updatedMetadataFile = new File(
                 [metadataFileBlob],
-                (uploadDetails.baseMinterMetadataFile as File).name.substring(
-                  0,
-                  (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'),
-                ),
+                (uploadDetails.baseMinterMetadataFile as File).name
+                  .substring(0, (uploadDetails.baseMinterMetadataFile as File).name.lastIndexOf('.'))
+                  .replaceAll('#', ''),
                 {
                   type: 'application/json',
                 },

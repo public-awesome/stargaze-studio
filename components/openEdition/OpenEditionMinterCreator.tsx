@@ -529,10 +529,12 @@ export const OpenEditionMinterCreator = ({
             console.log('Name: ', (offChainMetadataUploadDetails.openEditionMinterMetadataFile as File).name)
             const updatedMetadataFile = new File(
               [metadataFileBlob],
-              (offChainMetadataUploadDetails.openEditionMinterMetadataFile as File).name.substring(
-                0,
-                (offChainMetadataUploadDetails.openEditionMinterMetadataFile as File).name.lastIndexOf('.'),
-              ),
+              (offChainMetadataUploadDetails.openEditionMinterMetadataFile as File).name
+                .substring(
+                  0,
+                  (offChainMetadataUploadDetails.openEditionMinterMetadataFile as File).name.lastIndexOf('.'),
+                )
+                .replaceAll('#', ''),
               {
                 type: 'application/json',
               },

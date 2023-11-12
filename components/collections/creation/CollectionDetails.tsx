@@ -142,7 +142,9 @@ export const CollectionDetails = ({
     reader.onload = (e) => {
       if (!e.target?.result) return toast.error('Error parsing file.')
       if (!event.target.files) return toast.error('No files selected.')
-      const imageFile = new File([e.target.result], event.target.files[0].name, { type: 'image/jpg' })
+      const imageFile = new File([e.target.result], event.target.files[0].name.replaceAll('#', ''), {
+        type: 'image/jpg',
+      })
       setCoverImage(imageFile)
     }
     reader.readAsArrayBuffer(event.target.files[0])

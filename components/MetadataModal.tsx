@@ -127,7 +127,9 @@ export const MetadataModal = (props: MetadataModalProps) => {
       type: 'application/json',
     })
 
-    const editedMetadataFile = new File([metadataFileBlob], metadataFile.name, { type: 'application/json' })
+    const editedMetadataFile = new File([metadataFileBlob], metadataFile.name.replaceAll('#', ''), {
+      type: 'application/json',
+    })
     props.updateMetadata(editedMetadataFile)
     toast.success('Metadata updated successfully.')
   }

@@ -20,7 +20,9 @@ export interface MetadataInputProps {
 export const MetadataInput = (props: MetadataInputProps) => {
   const emptyMetadataFile = new File(
     [JSON.stringify({})],
-    `${props.selectedAssetFile?.name.substring(0, props.selectedAssetFile?.name.lastIndexOf('.'))}.json`,
+    `${props.selectedAssetFile?.name
+      .substring(0, props.selectedAssetFile?.name.lastIndexOf('.'))
+      .replaceAll('#', '')}.json`,
     { type: 'application/json' },
   )
 
@@ -142,8 +144,10 @@ export const MetadataInput = (props: MetadataInputProps) => {
     const editedMetadataFile = new File(
       [metadataFileBlob],
       props.selectedMetadataFile?.name
-        ? props.selectedMetadataFile?.name
-        : `${props.selectedAssetFile?.name.substring(0, props.selectedAssetFile?.name.lastIndexOf('.'))}.json`,
+        ? props.selectedMetadataFile?.name.replaceAll('#', '')
+        : `${props.selectedAssetFile?.name
+            .substring(0, props.selectedAssetFile?.name.lastIndexOf('.'))
+            .replaceAll('#', '')}.json`,
       { type: 'application/json' },
     )
     props.updateMetadataToUpload(editedMetadataFile)
