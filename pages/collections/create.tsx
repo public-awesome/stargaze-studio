@@ -1121,8 +1121,8 @@ const CollectionCreationPage: NextPage = () => {
       if (contractInfoResponse !== undefined) {
         const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        if (contractInfo && !contractInfo.contract.includes('splits'))
-          throw new Error('The provided royalty payment address does not belong to a splits contract.')
+        if (contractInfo && (contractInfo.contract.includes('minter') || contractInfo.contract.includes('sg721')))
+          throw new Error('The provided royalty payment address does not belong to a compatible contract.')
         else console.log(contractInfo)
       }
     }
