@@ -32,10 +32,12 @@ export interface DispatchQueryProps {
   messages: WhiteListInstance | undefined
   type: QueryType
   address: string
+  startAfter?: string
+  limit?: number
 }
 
 export const dispatchQuery = (props: DispatchQueryProps) => {
-  const { messages, type, address } = props
+  const { messages, type, address, startAfter, limit } = props
   switch (type) {
     case 'has_started':
       return messages?.hasStarted()
@@ -44,7 +46,7 @@ export const dispatchQuery = (props: DispatchQueryProps) => {
     case 'is_active':
       return messages?.isActive()
     case 'members':
-      return messages?.members()
+      return messages?.members(startAfter, limit)
     case 'admin_list':
       return messages?.adminList()
     case 'has_member':
