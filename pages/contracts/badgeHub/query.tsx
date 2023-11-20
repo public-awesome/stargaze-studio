@@ -116,6 +116,9 @@ const BadgeHubQueryPage: NextPage = () => {
     if (contractAddress.length > 0) {
       void router.replace({ query: { contractAddress } })
     }
+    if (contractAddress.length === 0) {
+      void router.replace({ query: {} })
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractAddress])
   useEffect(() => {

@@ -14,7 +14,7 @@ import { Tooltip } from 'components/Tooltip'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { useCallback, useEffect, useState } from 'react'
-import { FaCopy, FaRocket, FaSlidersH, FaStore } from 'react-icons/fa'
+import { FaCopy, FaList, FaRocket, FaSlidersH, FaStore } from 'react-icons/fa'
 import { copy } from 'utils/clipboard'
 import { API_URL, STARGAZE_URL } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
@@ -48,10 +48,16 @@ const CollectionList: NextPage = () => {
     if (myCollections.length > 0) {
       myCollections.map(async (collection: any) => {
         await getMinterContractType(collection.minter)
-          .then((contractType) => {
+          .then(async (contractType) => {
             if (contractType?.includes('sg-base-minter')) {
               setMyOneOfOneCollections((prevState) => [...prevState, collection])
             } else if (contractType?.includes('sg-minter') || contractType?.includes('flex')) {
+              const minterConfig = await (await wallet.getCosmWasmClient())
+                .queryContractSmart(collection.minter, { config: {} })
+                .catch(() => {
+                  console.log('Unable to retrieve minter config')
+                })
+              if (minterConfig?.whitelist) collection.whitelist = minterConfig.whitelist
               setMyStandardCollections((prevState) => [...prevState, collection])
             } else if (contractType?.includes('open-edition')) {
               setMyOpenEditionCollections((prevState) => [...prevState, collection])
@@ -171,6 +177,31 @@ const CollectionList: NextPage = () => {
                                 </Tooltip>
                               </span>
                             </div>
+                            <Conditional test={collection.whitelist}>
+                              <div className="flex flex-row items-center space-x-3">
+                                Whitelist:
+                                <span className="ml-2">
+                                  <Tooltip
+                                    backgroundColor="bg-blue-500"
+                                    label="Click to copy the whitelist contract address"
+                                  >
+                                    <button
+                                      className="group flex space-x-2 font-mono text-base text-white/80 hover:underline"
+                                      onClick={() => void copy(collection.whitelist as string)}
+                                      type="button"
+                                    >
+                                      <span>
+                                        {truncateMiddle(
+                                          collection.whitelist ? (collection.whitelist as string) : '',
+                                          36,
+                                        )}
+                                      </span>
+                                      <FaCopy className="opacity-0 group-hover:opacity-100" />
+                                    </button>
+                                  </Tooltip>
+                                </span>
+                              </div>
+                            </Conditional>
                           </td>
                           <th className="bg-black">
                             <div className="flex items-center space-x-8">
@@ -187,6 +218,14 @@ const CollectionList: NextPage = () => {
                               >
                                 <FaRocket />
                               </Anchor>
+                              <Conditional test={collection.whitelist}>
+                                <Anchor
+                                  className="text-xl text-white"
+                                  href={`/contracts/whitelist/execute/?contractAddress=${collection.whitelist}`}
+                                >
+                                  <FaList />
+                                </Anchor>
+                              </Conditional>
                             </div>
                           </th>
                         </tr>
