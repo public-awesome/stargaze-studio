@@ -1,6 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-export type AssetType = 'image' | 'audio' | 'video' | 'html' | 'unknown'
+export type AssetType = 'image' | 'audio' | 'video' | 'html' | 'document' | 'unknown'
 
 export const getAssetType = (assetFileName: string): AssetType => {
   const assetType = assetFileName?.toLowerCase().split('.').pop() || 'unknown'
@@ -9,5 +9,6 @@ export const getAssetType = (assetFileName: string): AssetType => {
   if (assetType === 'mp3' || assetType === 'wav') return 'audio'
   if (assetType === 'mp4') return 'video'
   if (assetType === 'html') return 'html'
+  if (assetType === 'pdf') return 'document'
   return 'unknown'
 }

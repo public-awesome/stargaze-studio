@@ -65,7 +65,7 @@ export const OffChainMetadataUploadDetails = ({
   const [exportedMetadata, setExportedMetadata] = useState(undefined)
   const [openEditionMinterMetadataFile, setOpenEditionMinterMetadataFile] = useState<File | undefined>()
 
-  const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
+  const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html', 'document']
 
   const assetFilesRef = useRef<HTMLInputElement | null>(null)
   const metadataFilesRef = useRef<HTMLInputElement | null>(null)
@@ -454,7 +454,7 @@ export const OffChainMetadataUploadDetails = ({
                       )}
                     >
                       <input
-                        accept="image/*, audio/*, video/*, .html"
+                        accept="image/*, audio/*, video/*, .html, .pdf"
                         className={clsx(
                           'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
                           'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
