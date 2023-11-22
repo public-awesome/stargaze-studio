@@ -1389,8 +1389,8 @@ const CollectionCreationPage: NextPage = () => {
           details.openEditionMinterDetails.coverImageUrl
       }
       if (NETWORK === 'mainnet') {
-        details.collectionDetails.updatable = false
-        details.openEditionMinterDetails.collectionDetails.updatable = false
+        if (details.collectionDetails.updatable) details.collectionDetails.updatable = false
+        if (details.collectionDetails.updatable) details.openEditionMinterDetails.collectionDetails.updatable = false
       }
 
       setImportedDetails(details)
