@@ -1,5 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable jsx-a11y/media-has-caption */
+import clsx from 'clsx'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { getAssetType } from 'utils/getAssetType'
@@ -41,6 +42,16 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
     [relatedAsset],
   )
 
+  const documentPreview = useMemo(
+    () => (
+      <div className="flex flex-col items-center mt-4 ml-2">
+        <img key="document-key" alt="document_icon" className={clsx('mb-2 ml-2 w-24 h-24 thumbnail')} src="/pdf.png" />
+        <span className="flex self-center ">{relatedAsset?.name}</span>
+      </div>
+    ),
+    [relatedAsset],
+  )
+
   useEffect(() => {
     if (getAssetType(relatedAsset?.name as string) !== 'html') return
     const reader = new FileReader()
@@ -60,9 +71,14 @@ export const MetadataFormGroup = (props: MetadataFormGroupProps) => {
           {subtitle && <span className="text-sm text-white/50">{subtitle}</span>}
           <div>
             {relatedAsset && (
-              <div className="flex flex-row items-center mt-2 mr-4 border-2 border-dashed">
+              <div
+                className={`flex flex-row items-center mt-2 mr-4 ${
+                  getAssetType(relatedAsset.name) === 'document' ? '' : `border-2 border-dashed`
+                }`}
+              >
                 {getAssetType(relatedAsset.name) === 'audio' && audioPreview}
                 {getAssetType(relatedAsset.name) === 'video' && videoPreview}
+                {getAssetType(relatedAsset.name) === 'document' && documentPreview}
                 {getAssetType(relatedAsset.name) === 'image' && (
                   <img alt="preview" src={URL.createObjectURL(relatedAsset)} />
                 )}

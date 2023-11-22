@@ -777,7 +777,8 @@ const CollectionCreationPage: NextPage = () => {
                 if (
                   getAssetType(uploadDetails.assetFiles[i].name) === 'audio' ||
                   getAssetType(uploadDetails.assetFiles[i].name) === 'video' ||
-                  getAssetType(uploadDetails.assetFiles[i].name) === 'html'
+                  getAssetType(uploadDetails.assetFiles[i].name) === 'html' ||
+                  getAssetType(uploadDetails.assetFiles[i].name) === 'document'
                 ) {
                   data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[i].name}`
                 }
@@ -845,7 +846,8 @@ const CollectionCreationPage: NextPage = () => {
               if (
                 getAssetType(uploadDetails.assetFiles[0].name) === 'audio' ||
                 getAssetType(uploadDetails.assetFiles[0].name) === 'video' ||
-                getAssetType(uploadDetails.assetFiles[0].name) === 'html'
+                getAssetType(uploadDetails.assetFiles[0].name) === 'html' ||
+                getAssetType(uploadDetails.assetFiles[0].name) === 'document'
               ) {
                 data.animation_url = `ipfs://${assetUri}/${uploadDetails.assetFiles[0].name}`
               }

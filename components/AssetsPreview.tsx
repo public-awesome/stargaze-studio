@@ -83,6 +83,17 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
               <span className="flex self-center ">{assetSource.name}</span>
             </div>
           )}
+          {getAssetType(assetSource.name) === 'document' && (
+            <div className="flex absolute flex-col items-center mt-4 ml-2">
+              <img
+                key={`document-${index}`}
+                alt="document_icon"
+                className={clsx('mb-2 ml-1 w-6 h-6 thumbnail')}
+                src="/pdf.png"
+              />
+              <span className="flex self-center ">{assetSource.name}</span>
+            </div>
+          )}
           {getAssetType(assetSource.name) === 'video' &&
             videoPreviewElements.filter((videoPreviewElement) => videoPreviewElement.key === assetSource.name)}
 
