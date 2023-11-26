@@ -5,6 +5,7 @@ import {
   OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
+  OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
@@ -131,6 +132,13 @@ export const openEditionUpdatableIbcUskMinter: MinterInfo = {
   updatable: true,
 }
 
+export const openEditionNativeStrdstMinter: MinterInfo = {
+  id: 'open-edition-native-strdst-minter',
+  factoryAddress: OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
+  supportedToken: nativeStardust,
+  updatable: false,
+}
+
 export const openEditionMinterList = [
   openEditionStarsMinter,
   openEditionUpdatableStarsMinter,
@@ -144,6 +152,7 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcNbtcMinter,
   openEditionIbcUskMinter,
   openEditionUpdatableIbcUskMinter,
+  openEditionNativeStrdstMinter,
 ]
 
 export const vendingStarsMinter: MinterInfo = {
