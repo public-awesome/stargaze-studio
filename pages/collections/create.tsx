@@ -579,7 +579,8 @@ const CollectionCreationPage: NextPage = () => {
             : mintingDetails?.selectedMintToken?.displayName === 'STRDST' ||
               mintingDetails?.selectedMintToken?.displayName === 'USK' ||
               mintingDetails?.selectedMintToken?.displayName === 'USDC' ||
-              mintingDetails?.selectedMintToken?.displayName === 'nBTC'
+              mintingDetails?.selectedMintToken?.displayName === 'nBTC' ||
+              mintingDetails?.selectedMintToken?.displayName === 'KUJI'
             ? STRDST_SG721_CODE_ID
             : SG721_CODE_ID,
           name: collectionDetails?.name,

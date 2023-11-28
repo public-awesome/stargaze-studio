@@ -42,6 +42,16 @@ export const ibcUsk: TokenInfo = {
   decimalPlaces: 6,
 }
 
+export const ibcKuji: TokenInfo = {
+  id: 'ibc-kuji',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/0E57658B71E9CC4BB0F6FE3E01712966713B49E6FD292E6B66E3F111B103D361'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/ukuji',
+  displayName: 'KUJI',
+  decimalPlaces: 6,
+}
+
 export const ibcFrnz: TokenInfo = {
   id: 'ibc-frnz',
   denom:
@@ -69,4 +79,4 @@ export const nativeStardust: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, ibcNbtc, nativeStardust]
+export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, ibcNbtc, ibcKuji, nativeStardust]

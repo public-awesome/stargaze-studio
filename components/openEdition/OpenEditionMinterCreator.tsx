@@ -615,7 +615,8 @@ export const OpenEditionMinterCreator = ({
             ? SG721_OPEN_EDITION_UPDATABLE_CODE_ID
             : mintingDetails?.selectedMintToken?.displayName === 'USK' ||
               mintingDetails?.selectedMintToken?.displayName === 'USDC' ||
-              mintingDetails?.selectedMintToken?.displayName === 'STRDST'
+              mintingDetails?.selectedMintToken?.displayName === 'STRDST' ||
+              mintingDetails?.selectedMintToken?.displayName === 'KUJI'
             ? STRDST_SG721_CODE_ID
             : SG721_OPEN_EDITION_CODE_ID,
           name: collectionDetails?.name,
