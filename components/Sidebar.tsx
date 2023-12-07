@@ -242,6 +242,17 @@ export const Sidebar = () => {
               >
                 <Link href="/contracts/royaltyRegistry/">Royalty Registry</Link>
               </li>
+              <Conditional test={NETWORK === 'testnet'}>
+                <li
+                  className={clsx(
+                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/contracts/upload/') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/contracts/upload/">Upload Contract</Link>
+                </li>
+              </Conditional>
             </ul>
           </li>
         </ul>
