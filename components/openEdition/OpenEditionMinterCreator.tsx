@@ -139,6 +139,7 @@ export const OpenEditionMinterCreator = ({
       collectionDetails?.updatable,
       factoryAddressForSelectedDenom,
       updatableFactoryAddressForSelectedDenom,
+      wallet.isWalletConnected,
     ],
   )
 

@@ -249,7 +249,10 @@ const BadgeHubExecutePage: NextPage = () => {
   const showPubkeyField = isEitherType(type, ['mint_by_keys'])
   const showPrivateKeyField = isEitherType(type, ['mint_by_key', 'mint_by_keys'])
 
-  const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
+  const messages = useMemo(
+    () => contract?.use(contractState.value),
+    [contract, wallet.address, contractState.value, wallet.isWalletConnected],
+  )
   const payload: DispatchExecuteArgs = {
     badge: {
       manager: badge?.manager || managerState.value,

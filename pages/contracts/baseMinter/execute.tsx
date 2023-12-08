@@ -56,7 +56,10 @@ const BaseMinterExecutePage: NextPage = () => {
   const showDateField = type === 'update_start_trading_time'
   const showTokenUriField = type === 'mint'
 
-  const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
+  const messages = useMemo(
+    () => contract?.use(contractState.value),
+    [contract, wallet.address, contractState.value, wallet.isWalletConnected],
+  )
   const payload: DispatchExecuteArgs = {
     startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
     tokenUri: tokenUriState.value,

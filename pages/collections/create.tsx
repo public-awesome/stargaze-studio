@@ -138,12 +138,12 @@ const CollectionCreationPage: NextPage = () => {
 
   const vendingFactoryMessages = useMemo(
     () => vendingFactoryContract?.use(vendingFactoryAddress as string),
-    [vendingFactoryContract, wallet.address, vendingFactoryAddress],
+    [vendingFactoryContract, wallet.address, vendingFactoryAddress, wallet.isWalletConnected],
   )
 
   const baseFactoryMessages = useMemo(
     () => baseFactoryContract?.use(BASE_FACTORY_ADDRESS),
-    [baseFactoryContract, wallet.address],
+    [baseFactoryContract, wallet.address, wallet.isWalletConnected],
   )
 
   const [uploading, setUploading] = useState(false)
