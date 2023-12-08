@@ -19,10 +19,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       endpointOptions={{
         endpoints: {
           stargaze: {
-            rpc: ['https://rpc.stargaze-apis.com'],
+            rpc: ['https://rpc.stargaze-apis.com/'],
+            rest: ['https://rest.stargaze-apis.com/'],
           },
           stargazetestnet: {
-            rpc: ['https://rpc.elgafar-1.stargaze-apis.com'],
+            rpc: ['https://rpc.elgafar-1.stargaze-apis.com/'],
+            rest: ['https://rest.elgafar-1.stargaze-apis.com/'],
           },
         },
       }}

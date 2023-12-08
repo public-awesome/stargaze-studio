@@ -5,6 +5,7 @@ export const mainnetConfig: AppConfig = {
   chainName: 'Stargaze',
   addressPrefix: 'stars',
   rpcUrl: 'https://rpc.stargaze-apis.com/',
+  httpUrl: 'https://rest.stargaze-apis.com/',
   feeToken: 'ustars',
   stakingToken: 'ustars',
   coinMap: {
