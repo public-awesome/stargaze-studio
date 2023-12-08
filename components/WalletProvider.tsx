@@ -16,6 +16,19 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     <ChainProvider
       assetLists={assets}
       chains={chains}
+      endpointOptions={{
+        endpoints: {
+          stargaze: {
+            rpc: ['https://rpc.stargaze-apis.com'],
+          },
+          stargazetestnet: {
+            rpc: ['https://rpc.elgafar-1.stargaze-apis.com'],
+          },
+        },
+      }}
+      sessionOptions={{
+        duration: 1000 * 60 * 60 * 12, // 12 hours
+      }}
       signerOptions={{
         signingCosmwasm: () => ({
           gasPrice: GasPrice.fromString(`${gasPrice}${feeToken}`),
