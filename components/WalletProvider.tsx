@@ -27,6 +27,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             rest: ['https://rest.elgafar-1.stargaze-apis.com/'],
           },
         },
+        isLazy: true,
       }}
       sessionOptions={{
         duration: 1000 * 60 * 60 * 12, // 12 hours
