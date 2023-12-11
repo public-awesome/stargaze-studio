@@ -69,6 +69,16 @@ export const ibcNbtc: TokenInfo = {
   decimalPlaces: 6,
 }
 
+export const ibcHuahua: TokenInfo = {
+  id: 'ibc-huahua',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/CAD8A9F306CAAC55731C66930D6BEE539856DD12E59061C965E44D82AA26A0E7'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uhuahua',
+  displayName: 'HUAHUA',
+  decimalPlaces: 6,
+}
+
 export const nativeStardust: TokenInfo = {
   id: 'native-strdst',
   denom:
@@ -79,4 +89,4 @@ export const nativeStardust: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, ibcNbtc, ibcKuji, nativeStardust]
+export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, ibcNbtc, ibcKuji, ibcHuahua, nativeStardust]
