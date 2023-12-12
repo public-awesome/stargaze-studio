@@ -7,6 +7,7 @@ import {
   OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
+  OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
@@ -38,13 +39,27 @@ import {
   VENDING_IBC_USK_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USK_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_USK_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  VENDING_NATIVE_BRNCH_FACTORY_ADDRESS,
+  VENDING_NATIVE_BRNCH_FLEX_FACTORY_ADDRESS,
+  VENDING_NATIVE_BRNCH_UPDATABLE_FACTORY_ADDRESS,
   VENDING_NATIVE_STARDUST_FACTORY_ADDRESS,
   VENDING_NATIVE_STARDUST_UPDATABLE_FACTORY_ADDRESS,
   VENDING_NATIVE_STRDST_FLEX_FACTORY_ADDRESS,
 } from 'utils/constants'
 
 import type { TokenInfo } from './token'
-import { ibcAtom, ibcFrnz, ibcHuahua, ibcKuji, ibcNbtc, ibcUsdc, ibcUsk, nativeStardust, stars } from './token'
+import {
+  ibcAtom,
+  ibcFrnz,
+  ibcHuahua,
+  ibcKuji,
+  ibcNbtc,
+  ibcUsdc,
+  ibcUsk,
+  nativeBrnch,
+  nativeStardust,
+  stars,
+} from './token'
 
 export interface MinterInfo {
   id: string
@@ -159,6 +174,13 @@ export const openEditionNativeStrdstMinter: MinterInfo = {
   updatable: false,
 }
 
+export const openEditionNativeBrnchMinter: MinterInfo = {
+  id: 'open-edition-native-brnch-minter',
+  factoryAddress: OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
+  supportedToken: nativeBrnch,
+  updatable: false,
+}
+
 export const openEditionMinterList = [
   openEditionStarsMinter,
   openEditionUpdatableStarsMinter,
@@ -175,6 +197,7 @@ export const openEditionMinterList = [
   openEditionIbcKujiMinter,
   openEditionIbcHuahuaMinter,
   openEditionNativeStrdstMinter,
+  openEditionNativeBrnchMinter,
 ]
 
 export const vendingStarsMinter: MinterInfo = {
@@ -289,6 +312,22 @@ export const vendingUpdatableNativeStardustMinter: MinterInfo = {
   flexible: false,
 }
 
+export const vendingNativeBrnchMinter: MinterInfo = {
+  id: 'vending-native-brnch-minter',
+  factoryAddress: VENDING_NATIVE_BRNCH_FACTORY_ADDRESS,
+  supportedToken: nativeBrnch,
+  updatable: false,
+  flexible: false,
+}
+
+export const vendingUpdatableNativeBrnchMinter: MinterInfo = {
+  id: 'vending-native-brnch-minter',
+  factoryAddress: VENDING_NATIVE_BRNCH_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: nativeBrnch,
+  updatable: true,
+  flexible: false,
+}
+
 export const vendingMinterList = [
   vendingStarsMinter,
   vendingUpdatableStarsMinter,
@@ -304,6 +343,8 @@ export const vendingMinterList = [
   vendingIbcHuahuaMinter,
   vendingNativeStardustMinter,
   vendingUpdatableNativeStardustMinter,
+  vendingNativeBrnchMinter,
+  vendingUpdatableNativeBrnchMinter,
 ]
 
 export const flexibleVendingStarsMinter: MinterInfo = {
@@ -410,6 +451,14 @@ export const flexibleVendingStrdstMinter: MinterInfo = {
   flexible: true,
 }
 
+export const flexibleVendingBrnchMinter: MinterInfo = {
+  id: 'flexible-vending-native-brnch-minter',
+  factoryAddress: VENDING_NATIVE_BRNCH_FLEX_FACTORY_ADDRESS,
+  supportedToken: nativeBrnch,
+  updatable: false,
+  flexible: true,
+}
+
 export const flexibleVendingMinterList = [
   flexibleVendingStarsMinter,
   flexibleVendingUpdatableStarsMinter,
@@ -424,4 +473,5 @@ export const flexibleVendingMinterList = [
   flexibleVendingIbcKujiMinter,
   flexibleVendingIbcHuahuaMinter,
   flexibleVendingStrdstMinter,
+  flexibleVendingBrnchMinter,
 ]
