@@ -89,4 +89,25 @@ export const nativeStardust: TokenInfo = {
   decimalPlaces: 6,
 }
 
-export const tokensList = [stars, ibcAtom, ibcUsdc, ibcUsk, ibcFrnz, ibcNbtc, ibcKuji, ibcHuahua, nativeStardust]
+export const nativeBrnch: TokenInfo = {
+  id: 'native-brnch',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'factory/stars16da2uus9zrsy83h23ur42v3lglg5rmyrpqnju4/uBRNCH'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uBRNCH',
+  displayName: 'BRNCH',
+  decimalPlaces: 6,
+}
+
+export const tokensList = [
+  stars,
+  ibcAtom,
+  ibcUsdc,
+  ibcUsk,
+  ibcFrnz,
+  ibcNbtc,
+  ibcKuji,
+  ibcHuahua,
+  nativeStardust,
+  nativeBrnch,
+]
