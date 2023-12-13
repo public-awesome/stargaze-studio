@@ -1,11 +1,13 @@
 import type { Coin } from '@cosmjs/proto-signing'
 import { Popover, Transition } from '@headlessui/react'
 import clsx from 'clsx'
+import { tokensList } from 'config/token'
 import { Fragment, useEffect, useState } from 'react'
 import { FaCopy, FaPowerOff, FaRedo } from 'react-icons/fa'
 import { copy } from 'utils/clipboard'
 import { convertDenomToReadable } from 'utils/convertDenomToReadable'
 import { getShortAddress } from 'utils/getShortAddress'
+import { truncateMiddle } from 'utils/text'
 import { useWallet } from 'utils/wallet'
 
 import { WalletButton } from './WalletButton'
@@ -81,7 +83,10 @@ export const WalletLoader = () => {
                 <div className="font-bold">Your Balances</div>
                 {balances?.map((val) => (
                   <span key={`balance-${val.denom}`}>
-                    {convertDenomToReadable(val.amount)} {val.denom.slice(1, val.denom.length)}
+                    {convertDenomToReadable(val.amount)}{' '}
+                    {tokensList.find((t) => t.denom === val.denom)?.displayName
+                      ? tokensList.find((t) => t.denom === val.denom)?.displayName
+                      : truncateMiddle(val.denom ? val.denom : '', 28)}
                   </span>
                 ))}
               </div>
