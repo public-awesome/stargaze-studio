@@ -132,6 +132,8 @@ export const MintingDetails = ({
       console.log('Selected Token ID: ', importedMintingDetails.selectedMintToken?.id)
       unitPriceState.onChange(Number(importedMintingDetails.unitPrice) / 1000000)
       perAddressLimitState.onChange(importedMintingDetails.perAddressLimit)
+      setLimitType(importedMintingDetails.limitType)
+      tokenCountLimitState.onChange(importedMintingDetails.tokenCountLimit ? importedMintingDetails.tokenCountLimit : 0)
       setTimestamp(new Date(Number(importedMintingDetails.startTime) / 1_000_000))
       setEndTimestamp(new Date(Number(importedMintingDetails.endTime) / 1_000_000))
       paymentAddressState.onChange(importedMintingDetails.paymentAddress ? importedMintingDetails.paymentAddress : '')
