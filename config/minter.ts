@@ -1,6 +1,7 @@
 import {
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
+  OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_HUAHUA_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
@@ -23,6 +24,8 @@ import {
   VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_CRBRUS_FACTORY_ADDRESS,
+  VENDING_IBC_CRBRUS_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_HUAHUA_FACTORY_ADDRESS,
   VENDING_IBC_HUAHUA_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_KUJI_FACTORY_ADDRESS,
@@ -50,6 +53,7 @@ import {
 import type { TokenInfo } from './token'
 import {
   ibcAtom,
+  ibcCrbrus,
   ibcFrnz,
   ibcHuahua,
   ibcKuji,
@@ -167,6 +171,13 @@ export const openEditionIbcHuahuaMinter: MinterInfo = {
   updatable: false,
 }
 
+export const openEditionIbcCrbrusMinter: MinterInfo = {
+  id: 'open-edition-ibc-crbrus-minter',
+  factoryAddress: OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
+  supportedToken: ibcCrbrus,
+  updatable: false,
+}
+
 export const openEditionNativeStrdstMinter: MinterInfo = {
   id: 'open-edition-native-strdst-minter',
   factoryAddress: OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
@@ -196,6 +207,7 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcUskMinter,
   openEditionIbcKujiMinter,
   openEditionIbcHuahuaMinter,
+  openEditionIbcCrbrusMinter,
   openEditionNativeStrdstMinter,
   openEditionNativeBrnchMinter,
 ]
@@ -296,6 +308,14 @@ export const vendingIbcHuahuaMinter: MinterInfo = {
   flexible: false,
 }
 
+export const vendingIbcCrbrusMinter: MinterInfo = {
+  id: 'vending-ibc-crbrus-minter',
+  factoryAddress: VENDING_IBC_CRBRUS_FACTORY_ADDRESS,
+  supportedToken: ibcCrbrus,
+  updatable: false,
+  flexible: false,
+}
+
 export const vendingNativeStardustMinter: MinterInfo = {
   id: 'vending-native-stardust-minter',
   factoryAddress: VENDING_NATIVE_STARDUST_FACTORY_ADDRESS,
@@ -341,6 +361,7 @@ export const vendingMinterList = [
   vendingUpdatableIbcUskMinter,
   vendingIbcKujiMinter,
   vendingIbcHuahuaMinter,
+  vendingIbcCrbrusMinter,
   vendingNativeStardustMinter,
   vendingUpdatableNativeStardustMinter,
   vendingNativeBrnchMinter,
@@ -443,6 +464,14 @@ export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
   flexible: true,
 }
 
+export const flexibleVendingIbcCrbrusMinter: MinterInfo = {
+  id: 'flexible-vending-ibc-crbrus-minter',
+  factoryAddress: VENDING_IBC_CRBRUS_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcCrbrus,
+  updatable: false,
+  flexible: true,
+}
+
 export const flexibleVendingStrdstMinter: MinterInfo = {
   id: 'flexible-vending-native-strdst-minter',
   factoryAddress: VENDING_NATIVE_STRDST_FLEX_FACTORY_ADDRESS,
@@ -472,6 +501,7 @@ export const flexibleVendingMinterList = [
   flexibleVendingUpdatableIbcUskMinter,
   flexibleVendingIbcKujiMinter,
   flexibleVendingIbcHuahuaMinter,
+  flexibleVendingIbcCrbrusMinter,
   flexibleVendingStrdstMinter,
   flexibleVendingBrnchMinter,
 ]

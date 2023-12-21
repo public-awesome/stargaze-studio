@@ -79,6 +79,16 @@ export const ibcHuahua: TokenInfo = {
   decimalPlaces: 6,
 }
 
+export const ibcCrbrus: TokenInfo = {
+  id: 'ibc-crbrus',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/71CEEB5CC09F75A3ACDC417108C14514351B6B2A540ACE9B37A80BF930845134'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uCRBRUS',
+  displayName: 'CRBRUS',
+  decimalPlaces: 6,
+}
+
 export const nativeStardust: TokenInfo = {
   id: 'native-strdst',
   denom:
@@ -108,6 +118,7 @@ export const tokensList = [
   ibcNbtc,
   ibcKuji,
   ibcHuahua,
+  ibcCrbrus,
   nativeStardust,
   nativeBrnch,
 ]
