@@ -142,7 +142,7 @@ export const CollectionActions = ({
     id: 'update-mint-price',
     name: 'updateMintPrice',
     title: type === 'update_discount_price' ? 'Discount Price' : 'Update Mint Price',
-    subtitle: type === 'update_discount_price' ? 'New discount price in STARS' : 'New minting price in STARS',
+    subtitle: type === 'update_discount_price' ? 'New discount price' : 'New minting price',
   })
 
   const descriptionState = useInputState({
