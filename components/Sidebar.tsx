@@ -8,7 +8,7 @@ import { setTimezone } from 'contexts/globalSettings'
 import { setLogItemList, useLogStore } from 'contexts/log'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { FaCog } from 'react-icons/fa'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
@@ -26,6 +26,7 @@ export const Sidebar = () => {
   const router = useRouter()
   const wallet = useWallet()
   const logs = useLogStore()
+  const [isTallWindow, setIsTallWindow] = useState(false)
 
   useEffect(() => {
     if (logs.itemList.length === 0) return
@@ -43,6 +44,18 @@ export const Sidebar = () => {
     )
   }, [])
 
+  const handleResize = () => {
+    setIsTallWindow(window.innerHeight > 640)
+  }
+
+  useEffect(() => {
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    // return () => {
+    //   window.removeEventListener('resize', handleResize)
+    // }
+  }, [])
+
   return (
     <SidebarLayout>
       {/* Stargaze brand as home button */}
@@ -53,7 +66,7 @@ export const Sidebar = () => {
       <WalletLoader />
       {/* main navigation routes */}
 
-      <div className="absolute top-[20%] left-[5%] mt-2">
+      <div className={clsx('absolute left-[5%] mt-2', isTallWindow ? 'top-[20%]' : 'top-[30%]')}>
         <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <div
@@ -263,33 +276,36 @@ export const Sidebar = () => {
       <SettingsModal />
 
       <div className="flex-grow" />
-      <div className="flex-row w-full h-full">
-        <label
-          className="absolute mb-8 w-[25%] text-lg font-bold text-white normal-case bg-zinc-500 hover:bg-zinc-600 border-none animate-none btn modal-button"
-          htmlFor="my-modal-9"
-        >
-          <FaCog className="justify-center align-bottom" size={20} />
-        </label>
+      {isTallWindow && (
+        <div className="flex-row w-full h-full">
+          <label
+            className="absolute mb-8 w-[25%] text-lg font-bold text-white normal-case bg-zinc-500 hover:bg-zinc-600 border-none animate-none btn modal-button"
+            htmlFor="my-modal-9"
+          >
+            <FaCog className="justify-center align-bottom" size={20} />
+          </label>
 
-        <label
-          className="ml-16 w-[65%] text-lg font-bold text-white normal-case bg-blue-500 hover:bg-blue-600 border-none animate-none btn modal-button"
-          htmlFor="my-modal-8"
-        >
-          View Logs
-        </label>
-      </div>
+          <label
+            className="ml-16 w-[65%] text-lg font-bold text-white normal-case bg-blue-500 hover:bg-blue-600 border-none animate-none btn modal-button"
+            htmlFor="my-modal-8"
+          >
+            View Logs
+          </label>
+        </div>
+      )}
       {/* Stargaze network status */}
-      <div className="text-sm capitalize">Network: {wallet.chain.pretty_name}</div>
+      {isTallWindow && <div className="text-sm capitalize">Network: {wallet.chain.pretty_name}</div>}
 
       {/* footer reference links */}
       <ul className="text-sm list-disc list-inside">
-        {footerLinks.map(({ href, text }) => (
-          <li key={href}>
-            <Anchor className="hover:text-plumbus hover:underline" href={href}>
-              {text}
-            </Anchor>
-          </li>
-        ))}
+        {isTallWindow &&
+          footerLinks.map(({ href, text }) => (
+            <li key={href}>
+              <Anchor className="hover:text-plumbus hover:underline" href={href}>
+                {text}
+              </Anchor>
+            </li>
+          ))}
       </ul>
 
       {/* footer attribution */}
@@ -302,6 +318,7 @@ export const Sidebar = () => {
       </div>
 
       {/* footer social links */}
+
       <div className="flex gap-x-6 items-center text-white/75">
         {socialsLinks.map(({ Icon, href, text }) => (
           <Anchor key={href} className="hover:text-plumbus" href={href}>
