@@ -101,9 +101,6 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_STARGAZE_WEBSITE_URL: string
     readonly NEXT_PUBLIC_WEBSITE_URL: string
     readonly NEXT_PUBLIC_SYNC_COLLECTIONS_API_URL: string
-
-    readonly NEXT_PUBLIC_MEILISEARCH_HOST: string
-    readonly NEXT_PUBLIC_MEILISEARCH_API_KEY: string
   }
 }
 
