@@ -46,7 +46,7 @@ const Snapshots: NextPage = () => {
       <ContractPageHeader
         description="Here you can export the snapshot of the holders for a collection."
         link={links.Documentation}
-        title="Sanpshots"
+        title="Snapshots"
       />
 
       <SelectCollection selectCollection={setCollectionAddress} />
