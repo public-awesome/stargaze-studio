@@ -5,9 +5,11 @@
 /* eslint-disable tailwindcss/classnames-order */
 /* eslint-disable react/button-has-type */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
 import type { NextPage } from 'next'
+import { NextSeo } from 'next-seo'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 // import Brand from 'public/brand/brand.svg'
@@ -40,8 +42,12 @@ const Snapshots: NextPage = () => {
 
   return (
     <section className="px-4 pt-4 pb-16 mx-auto space-y-8 ml-8 w-full">
-      <h1 className="font-heading text-4xl font-bold">Snapshots</h1>
-      <p className="text-xl">Here you can export the snapshot of a collection&apos;s holders.</p>
+      <NextSeo title="Snapshots" />
+      <ContractPageHeader
+        description="Here you can export the snapshot of a collection's holders."
+        link=""
+        title="Snapshots"
+      />
       <SelectCollectionModal selectCollection={setCollectionAddress} />
       <AddressInput className="w-3/4" {...collectionAddressState} />
       <button
