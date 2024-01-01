@@ -108,6 +108,15 @@ export const Sidebar = () => {
               >
                 <Link href="/collections/actions/">Collection Actions</Link>
               </li>
+              <li
+                className={clsx(
+                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/snapshots') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/snapshots">Snapshots</Link>
+              </li>
               <Conditional test={NETWORK === 'mainnet'}>
                 <li className={clsx('text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded')} tabIndex={-1}>
                   <label
