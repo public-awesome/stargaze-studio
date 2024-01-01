@@ -67,7 +67,10 @@ const Snapshots: NextPage = () => {
               download(csv, 'snapshot.csv', 'text/csv')
             })
             .catch((err) => {
-              console.error("Couldn't fetch snapshot data: ", err)
+              toast.error(`Could not fetch snapshot data: ${err}`, {
+                style: { maxWidth: 'none' },
+              })
+              console.error('Could not fetch snapshot data: ', err)
             })
         }}
       >
