@@ -45,7 +45,7 @@ export const Sidebar = () => {
   }, [])
 
   const handleResize = () => {
-    setIsTallWindow(window.innerHeight > 640)
+    setIsTallWindow(window.innerHeight > 700)
   }
 
   useEffect(() => {
@@ -174,6 +174,40 @@ export const Sidebar = () => {
             </li>
           </ul>
         </Conditional>
+        <ul className="group p-2 w-full bg-transparent menu rounded-box">
+          <li tabIndex={0}>
+            <span
+              className={clsx(
+                'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
+                'hover:bg-white/5 transition-colors',
+                router.asPath.includes('/tokenfactory') ? 'text-white' : 'text-gray',
+              )}
+            >
+              <Link href="/badges/">Tokens</Link>
+            </span>
+            <ul className="z-50 p-2 rounded-box bg-base-200">
+              <li
+                className={clsx(
+                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                  router.asPath.includes('/tokenfactory/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/tokenfactory/">Token Factory</Link>
+              </li>
+              <li
+                className={clsx(
+                  'disabled',
+                  'text-lg font-bold hover:text-white',
+                  router.asPath.includes('/airdrop-tokens/') ? 'text-white' : 'text-gray',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/">Airdrop Tokens</Link>
+              </li>
+            </ul>
+          </li>
+        </ul>
         <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
