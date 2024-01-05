@@ -18,7 +18,6 @@ import { Field, Type } from 'protobufjs'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { withMetadata } from 'utils/layout'
-import { links } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
 export type MessageType = 'MsgCreateDenom' | 'MsgMint' | 'MsgSetDenomMetadata' | 'MsgSend' | 'MsgChangeAdmin'
@@ -316,7 +315,7 @@ const Tokenfactory: NextPage = () => {
       <NextSeo title="TokenFactory" />
       <ContractPageHeader
         description="Here you can create, mint and manage tokens."
-        link={links.Documentation}
+        link="https://docs.stargaze.zone/developers/token-factory"
         title="Token Factory"
       />
 
