@@ -1,44 +1,27 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
 /* eslint-disable tailwindcss/classnames-order */
 /* eslint-disable react/button-has-type */
 
-import type { Coin } from '@cosmjs/proto-signing'
+import type { EncodeObject } from '@cosmjs/proto-signing'
 import { Registry } from '@cosmjs/proto-signing'
 import { GasPrice, SigningStargateClient } from '@cosmjs/stargate'
+import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
-import { TextInput } from 'components/forms/FormInput'
-import { useInputState } from 'components/forms/FormInput.hooks'
-import type { Metadata } from 'cosmjs-types/cosmos/bank/v1beta1/bank'
+import { DenomUnits } from 'components/forms/DenomUnits'
+import { useDenomUnitsState } from 'components/forms/DenomUnits.hooks'
+import { AddressInput, NumberInput, TextInput } from 'components/forms/FormInput'
+import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
 import { Field, Type } from 'protobufjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
-export type MessageType = 'MsgCreateDenom' | 'MsgMint' | 'MsgSetDenomMetadata'
-
-interface MsgCreateDenom {
-  sender: string
-  /** subdenom can be up to 44 "alphanumeric" characters long. */
-  subdenom: string
-}
-
-interface MsgSetDenomMetadata {
-  sender: string
-  metadata: Metadata
-}
-
-interface MsgMint {
-  sender: string
-  amount: Coin
-  mintToAddress: string
-}
+export type MessageType = 'MsgCreateDenom' | 'MsgMint' | 'MsgSetDenomMetadata' | 'MsgSend' | 'MsgChangeAdmin'
 
 const MsgSetDenomMetadata = new Type('MsgSetDenomMetadata')
   .add(new Field('sender', 1, 'string', 'required'))
@@ -72,17 +55,32 @@ const MsgMint = new Type('MsgMint')
   .add(new Field('mintToAddress', 3, 'string', 'required'))
 
 const CoinType = new Type('Coin').add(new Field('denom', 1, 'string')).add(new Field('amount', 2, 'string'))
-
 MsgMint.add(CoinType)
+
+const MsgSend = new Type('MsgSend')
+  .add(new Field('fromAddress', 1, 'string'))
+  .add(new Field('toAddress', 2, 'string'))
+  .add(new Field('amount', 3, 'Coin', 'repeated'))
+
+MsgSend.add(CoinType)
+
+const MsgChangeAdmin = new Type('MsgChangeAdmin')
+  .add(new Field('sender', 1, 'string', 'required'))
+  .add(new Field('denom', 2, 'string', 'required'))
+  .add(new Field('newAdmin', 3, 'string', 'required'))
 
 const typeUrlMsgSetDenomMetadata = '/osmosis.tokenfactory.v1beta1.MsgSetDenomMetadata'
 const typeUrlMsgCreateDenom = '/osmosis.tokenfactory.v1beta1.MsgCreateDenom'
 const typeUrlMsgMint = '/osmosis.tokenfactory.v1beta1.MsgMint'
+const typeUrlMsgSend = '/cosmos.bank.v1beta1.MsgSend'
+const typeUrlMsgChangeAdmin = '/osmosis.tokenfactory.v1beta1.MsgChangeAdmin'
 
 const typeEntries: [string, Type][] = [
   [typeUrlMsgSetDenomMetadata, MsgSetDenomMetadata],
   [typeUrlMsgCreateDenom, MsgCreateDenom],
   [typeUrlMsgMint, MsgMint],
+  [typeUrlMsgSend, MsgSend],
+  [typeUrlMsgChangeAdmin, MsgChangeAdmin],
 ]
 
 export const registry = new Registry(typeEntries)
@@ -92,12 +90,122 @@ const Tokenfactory: NextPage = () => {
 
   const [messageType, setMessageType] = useState<MessageType>('MsgCreateDenom')
 
+  const denomState = useInputState({
+    id: 'denom',
+    name: 'denom',
+    title: 'Denom',
+    placeholder: `factory/${wallet.isWalletConnected && wallet.address ? wallet.address : 'stars1...'}/utoken`,
+    defaultValue: `factory/${wallet.isWalletConnected && wallet.address ? wallet.address : 'stars1...'}/utoken`,
+    subtitle: 'The full denom for the token',
+  })
+
   const subdenomState = useInputState({
     id: 'subdenom',
     name: 'subdenom',
     title: 'Subdenom',
-    defaultValue: 'utoken',
+    placeholder: 'utoken',
+    subtitle: 'The subdenom can be up to 44 alphanumeric characters long',
   })
+
+  const amountState = useNumberInputState({
+    id: 'amount',
+    name: 'amount',
+    title: 'Amount',
+    placeholder: '1000000',
+    subtitle: `The amount of tokens to ${messageType === 'MsgMint' ? 'mint' : 'send'}`,
+  })
+
+  const mintToAddressState = useInputState({
+    id: 'mintToAddress',
+    name: 'mintToAddress',
+    title: 'Mint To Address',
+    //placeholder: `${wallet.isWalletConnected && wallet.address ? wallet.address : 'stars1...'}`,
+    placeholder: 'The tokens can only be minted to the creator address currently.',
+    subtitle: 'The address to mint tokens to',
+  })
+
+  const recipientAddressState = useInputState({
+    id: 'recipientAddress',
+    name: 'recipientAddress',
+    title: 'Recipient Address',
+    placeholder: 'stars1...',
+    subtitle: 'The address to send tokens to',
+  })
+
+  const newAdminAddressState = useInputState({
+    id: 'newAdminAddress',
+    name: 'newAdminAddress',
+    title: 'New Admin Address',
+    placeholder: 'stars1...',
+    subtitle: 'The address to pass admin rights to',
+  })
+
+  // Metadata fields
+  const descriptionState = useInputState({
+    id: 'description',
+    name: 'description',
+    title: 'Description',
+    placeholder: 'Token description',
+    subtitle: 'The description of the token',
+  })
+
+  const baseState = useInputState({
+    id: 'base',
+    name: 'base',
+    title: 'Base',
+    placeholder: `factory/${wallet.isWalletConnected && wallet.address ? wallet.address : 'stars1...'}/utoken`,
+    defaultValue: `factory/${wallet.isWalletConnected && wallet.address ? wallet.address : 'stars1...'}/utoken`,
+    subtitle: 'The base denom for the token',
+  })
+
+  const displayState = useInputState({
+    id: 'display',
+    name: 'display',
+    title: 'Display',
+    placeholder: 'token',
+    subtitle: 'The display name for the token',
+  })
+
+  const nameState = useInputState({
+    id: 'name',
+    name: 'name',
+    title: 'Name',
+    placeholder: 'Token',
+    subtitle: 'The name of the token',
+  })
+
+  const symbolState = useInputState({
+    id: 'symbol',
+    name: 'symbol',
+    title: 'Symbol',
+    placeholder: 'TOKEN',
+    subtitle: 'The symbol of the token',
+  })
+
+  const denomUnitsState = useDenomUnitsState()
+
+  useEffect(() => {
+    denomUnitsState.reset()
+    denomUnitsState.add({
+      denom: '',
+      exponent: 0,
+      aliases: '',
+    })
+  }, [])
+
+  const getButtonName = () => {
+    if (messageType === 'MsgCreateDenom') {
+      return 'Create Denom'
+    } else if (messageType === 'MsgMint') {
+      return 'Mint Tokens'
+    } else if (messageType === 'MsgSetDenomMetadata') {
+      return 'Set Denom Metadata'
+    } else if (messageType === 'MsgSend') {
+      return 'Send Tokens'
+    } else if (messageType === 'MsgChangeAdmin') {
+      return 'Change Admin'
+    }
+  }
 
   const handleSendMessage = async () => {
     try {
@@ -121,10 +229,82 @@ const Tokenfactory: NextPage = () => {
         },
       }
 
-      const response = await stargateClient.signAndBroadcast(wallet.address as string, [msgCreateDenom], 'auto')
+      const msgMint = {
+        typeUrl: typeUrlMsgMint,
+        value: {
+          sender: wallet.address,
+          amount: {
+            denom: denomState.value,
+            amount: amountState.value.toString(),
+          },
+          mintToAddress: mintToAddressState.value,
+        },
+      }
+
+      const msgChangeAdmin = {
+        typeUrl: typeUrlMsgChangeAdmin,
+        value: {
+          sender: wallet.address,
+          denom: denomState.value,
+          newAdmin: newAdminAddressState.value,
+        },
+      }
+
+      const msgSetDenomMetadata = {
+        typeUrl: typeUrlMsgSetDenomMetadata,
+        value: {
+          sender: wallet.address,
+          metadata: {
+            description: descriptionState.value,
+            denomUnits: denomUnitsState.entries.map((entry) => ({
+              denom: entry[1].denom,
+              exponent: entry[1].exponent,
+              aliases: entry[1].aliases.length > 0 ? entry[1].aliases.split(',') : [],
+            })),
+            base: baseState.value,
+            display: displayState.value,
+            name: nameState.value,
+            symbol: symbolState.value,
+          },
+        },
+      }
+
+      const msgSend = {
+        typeUrl: typeUrlMsgSend,
+        value: {
+          fromAddress: wallet.address,
+          toAddress: recipientAddressState.value,
+          amount: [
+            {
+              denom: denomState.value,
+              amount: amountState.value.toString(),
+            },
+          ],
+        },
+      }
+
+      const messageToSign = () => {
+        if (messageType === 'MsgCreateDenom') {
+          return msgCreateDenom
+        } else if (messageType === 'MsgMint') {
+          return msgMint
+        } else if (messageType === 'MsgSetDenomMetadata') {
+          return msgSetDenomMetadata
+        } else if (messageType === 'MsgSend') {
+          return msgSend
+        } else if (messageType === 'MsgChangeAdmin') {
+          return msgChangeAdmin
+        }
+      }
+
+      const response = await stargateClient.signAndBroadcast(
+        wallet.address as string,
+        [messageToSign() as EncodeObject],
+        'auto',
+      )
       console.log('response: ', response)
 
-      toast.success(`${messageType}success.`, { style: { maxWidth: 'none' } })
+      toast.success(`${messageType} success.`, { style: { maxWidth: 'none' } })
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
       console.error('Error: ', error)
@@ -140,12 +320,62 @@ const Tokenfactory: NextPage = () => {
         title="Token Factory"
       />
 
-      <select onChange={(e) => setMessageType(e.target.value as MessageType)}>
-        <option value="MsgCreateDenom">Create Denom</option>
-        <option value="MsgMint">Mint</option>
-        <option value="MsgSetDenomMetadata">Set Denom Metadata</option>
-      </select>
-      <TextInput className="w-3/4" {...subdenomState} />
+      <div className="flex flex-col w-1/4">
+        <span className="text-xl font-bold text-white">Message Type</span>
+        <select
+          className="mt-2 pt-2 pb-2 px-4 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+          onChange={(e) => setMessageType(e.target.value as MessageType)}
+          value={messageType}
+        >
+          <option className="bg-black" value="MsgCreateDenom">
+            Create Denom
+          </option>
+          <option className="bg-black" value="MsgMint">
+            Mint
+          </option>
+          <option className="bg-black" value="MsgSend">
+            Send Tokens
+          </option>
+          <option className="bg-black" value="MsgSetDenomMetadata">
+            Set Denom Metadata
+          </option>
+          <option className="bg-black" value="MsgChangeAdmin">
+            Change Admin
+          </option>
+        </select>
+      </div>
+      <Conditional test={messageType === 'MsgCreateDenom'}>
+        <TextInput className="w-1/2" {...subdenomState} />
+      </Conditional>
+      <Conditional test={messageType === 'MsgMint'}>
+        <TextInput className="w-3/5" {...denomState} />
+        <NumberInput className="w-1/4" {...amountState} />
+        <AddressInput className="w-3/5" disabled {...mintToAddressState} />
+      </Conditional>
+      <Conditional test={messageType === 'MsgSend'}>
+        <TextInput className="w-3/5" {...denomState} />
+        <NumberInput className="w-1/4" {...amountState} />
+        <AddressInput className="w-1/2" {...recipientAddressState} />
+      </Conditional>
+      <Conditional test={messageType === 'MsgSetDenomMetadata'}>
+        <TextInput className="w-1/2" {...descriptionState} />
+        <TextInput className="w-1/2" {...baseState} />
+        <TextInput className="w-1/2" {...displayState} />
+        <TextInput className="w-1/2" {...nameState} />
+        <TextInput className="w-1/2" {...symbolState} />
+        <DenomUnits
+          attributes={denomUnitsState.entries}
+          onAdd={denomUnitsState.add}
+          onChange={denomUnitsState.update}
+          onRemove={denomUnitsState.remove}
+          subtitle="Enter the denom units for the token"
+          title="Denom Units"
+        />
+      </Conditional>
+      <Conditional test={messageType === 'MsgChangeAdmin'}>
+        <TextInput className="w-1/2" {...denomState} />
+        <AddressInput className="w-1/2" {...newAdminAddressState} />
+      </Conditional>
       <button
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
         onClick={() => {
@@ -153,7 +383,7 @@ const Tokenfactory: NextPage = () => {
         }}
       >
         {' '}
-        Export Snapshot
+        {getButtonName()}
       </button>
     </section>
   )
