@@ -49,6 +49,7 @@ export function AuthzSendGrantMsg(
   denom: string,
   spendLimit: number,
   expiration: number,
+  allowList?: string[],
 ): Msg {
   const sendAuthValue = SendAuthorization.encode(
     SendAuthorization.fromPartial({
@@ -58,15 +59,18 @@ export function AuthzSendGrantMsg(
           denom,
         }),
       ],
+      //allowList,
     }),
   ).finish()
+
   const grantValue = MsgGrant.fromPartial({
     grant: {
       authorization: {
         typeUrl: '/cosmos.bank.v1beta1.SendAuthorization',
         value: sendAuthValue,
       },
-      //expiration: { seconds: BigInt(expiration).valueOf() },
+      // TODO: fix expiration issue
+      expiration: expiration ? { seconds: BigInt(expiration) } : undefined,
     },
     grantee,
     granter,

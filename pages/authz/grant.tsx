@@ -11,14 +11,14 @@ import { Alert } from 'components/Alert'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
-import { TextInput } from 'components/forms/FormInput'
-import { useInputState } from 'components/forms/FormInput.hooks'
+import { NumberInput, TextInput } from 'components/forms/FormInput'
+import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { LinkTabs } from 'components/LinkTabs'
 import { authzLinkTabs } from 'components/LinkTabs.data'
 import { getConfig } from 'config'
 import type { Msg } from 'config/authz'
-import { AuthzGenericGrantMsg } from 'config/authz'
+import { AuthzGenericGrantMsg, AuthzSendGrantMsg } from 'config/authz'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -66,6 +66,22 @@ const Grant: NextPage = () => {
     subtitle: 'The spend limit denom',
   })
 
+  const spendLimitState = useNumberInputState({
+    id: 'spend-limit',
+    name: 'spendLimit',
+    title: 'Spend Limit',
+    placeholder: `1000000`,
+    subtitle: 'The spend limit',
+  })
+
+  const allowListState = useInputState({
+    id: 'allow-list',
+    name: 'allowList',
+    title: 'Allow List',
+    placeholder: `stars1..., stars1...`,
+    subtitle: 'Comma separated list of addresses to allow transactions to',
+  })
+
   const messageToSign = () => {
     if (authType === 'Generic') {
       if (genericAuthType === 'MsgSend') {
@@ -92,6 +108,15 @@ const Grant: NextPage = () => {
           (expiration?.getTime() as number) / 1000 || 0,
         )
       }
+    } else if (authType === 'Send') {
+      return AuthzSendGrantMsg(
+        wallet.address || '',
+        granteeAddressState.value,
+        spendLimitDenomState.value,
+        spendLimitState.value,
+        (expiration?.getTime() as number) / 1000 || 0,
+        allowListState.value ? allowListState.value.split(',').map((address) => address.trim()) : [],
+      )
     }
   }
   const handleSendMessage = async () => {
@@ -130,9 +155,7 @@ const Grant: NextPage = () => {
           value={authType}
         >
           <option value="Generic">Generic</option>
-          <option disabled value="Send">
-            Send
-          </option>
+          <option value="Send">Send</option>
           <option disabled value="Execute Smart Contract">
             Execute Smart Contract
           </option>
@@ -170,36 +193,42 @@ const Grant: NextPage = () => {
           </select>
         </div>
       </Conditional>
-      <TextInput className="w-1/3" {...granteeAddressState} />
+      <TextInput className="w-2/5" {...granteeAddressState} />
       <Conditional test={authType === 'Send'}>
+        <NumberInput className="w-1/4" {...spendLimitState} />
         <TextInput className="w-1/4" {...spendLimitDenomState} />
+        {/* <TextInput className="w-2/5" {...allowListState} /> */}
       </Conditional>
-      <FormControl
-        className="w-1/4"
-        htmlId="expiration"
-        subtitle={`Expiration time for the authorization ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
-        title="Expiration Time (Optional)"
-      >
-        <InputDateTime
-          minDate={
-            timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
-          }
-          onChange={(date) =>
-            date
-              ? setExpiration(
-                  timezone === 'Local' ? date : new Date(date?.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                )
-              : setExpiration(undefined)
-          }
-          value={
-            timezone === 'Local'
-              ? expiration
-              : expiration
-              ? new Date(expiration.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
-              : undefined
-          }
-        />
-      </FormControl>
+      <Conditional test={authType === 'Generic'}>
+        <FormControl
+          className="w-1/4"
+          htmlId="expiration"
+          subtitle={`Expiration time for the authorization ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          title="Expiration Time (Optional)"
+        >
+          <InputDateTime
+            minDate={
+              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+            }
+            onChange={(date) =>
+              date
+                ? setExpiration(
+                    timezone === 'Local'
+                      ? date
+                      : new Date(date?.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                : setExpiration(undefined)
+            }
+            value={
+              timezone === 'Local'
+                ? expiration
+                : expiration
+                ? new Date(expiration.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                : undefined
+            }
+          />
+        </FormControl>
+      </Conditional>
       <button
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
         onClick={() => {
