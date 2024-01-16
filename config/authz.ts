@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable camelcase */
 
@@ -8,6 +9,14 @@ import { SendAuthorization } from 'cosmjs-types/cosmos/bank/v1beta1/authz'
 import { Coin } from 'cosmjs-types/cosmos/base/v1beta1/coin'
 import type { AuthorizationType } from 'cosmjs-types/cosmos/staking/v1beta1/authz'
 import { StakeAuthorization, StakeAuthorization_Validators } from 'cosmjs-types/cosmos/staking/v1beta1/authz'
+import {
+  AcceptedMessageKeysFilter,
+  AllowAllMessagesFilter,
+  CombinedLimit,
+  ContractExecutionAuthorization,
+  MaxCallsLimit,
+  MaxFundsLimit,
+} from 'cosmjs-types/cosmwasm/wasm/v1/authz'
 import type { AuthorizationMode, GenericAuthorizationType, GrantAuthorizationType } from 'pages/authz/grant'
 
 export interface Msg {
@@ -67,6 +76,82 @@ export function AuthzSendGrantMsg(
     grant: {
       authorization: {
         typeUrl: '/cosmos.bank.v1beta1.SendAuthorization',
+        value: sendAuthValue,
+      },
+      // TODO: fix expiration issue
+      expiration: expiration ? { seconds: BigInt(expiration) } : undefined,
+    },
+    grantee,
+    granter,
+  })
+
+  return {
+    typeUrl: msgAuthzGrantTypeUrl,
+    value: grantValue,
+  }
+}
+
+export function AuthzExecuteContractGrantMsg(
+  granter: string,
+  grantee: string,
+  contract: string,
+  expiration: number,
+  callsRemaining?: number,
+  amounts?: Coin[],
+  allowedMessages?: string[],
+): Msg {
+  const sendAuthValue = ContractExecutionAuthorization.encode(
+    ContractExecutionAuthorization.fromPartial({
+      grants: [
+        {
+          contract,
+          filter: {
+            typeUrl: allowedMessages
+              ? '/cosmwasm.wasm.v1.AcceptedMessageKeysFilter'
+              : '/cosmwasm.wasm.v1.AllowAllMessagesFilter',
+            value: allowedMessages
+              ? AcceptedMessageKeysFilter.encode({ keys: allowedMessages }).finish()
+              : AllowAllMessagesFilter.encode({}).finish(),
+          },
+          limit:
+            callsRemaining || amounts
+              ? {
+                  typeUrl:
+                    callsRemaining && amounts
+                      ? '/cosmwasm.wasm.v1.CombinedLimit'
+                      : callsRemaining
+                      ? '/cosmwasm.wasm.v1.MaxCallsLimit'
+                      : '/cosmwasm.wasm.v1.MaxFundsLimit',
+                  value:
+                    callsRemaining && amounts
+                      ? CombinedLimit.encode({
+                          callsRemaining: BigInt(callsRemaining),
+                          amounts,
+                        }).finish()
+                      : callsRemaining
+                      ? MaxCallsLimit.encode({
+                          remaining: BigInt(callsRemaining),
+                        }).finish()
+                      : MaxFundsLimit.encode({
+                          amounts: amounts || [],
+                        }).finish(),
+                }
+              : {
+                  // limit: undefined is not accepted
+                  typeUrl: '/cosmwasm.wasm.v1.MaxCallsLimit',
+                  value: MaxCallsLimit.encode({
+                    remaining: BigInt(100000),
+                  }).finish(),
+                },
+        },
+      ],
+    }),
+  ).finish()
+
+  const grantValue = MsgGrant.fromPartial({
+    grant: {
+      authorization: {
+        typeUrl: '/cosmwasm.wasm.v1.ContractExecutionAuthorization',
         value: sendAuthValue,
       },
       // TODO: fix expiration issue

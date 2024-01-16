@@ -6,19 +6,19 @@
 /* eslint-disable tailwindcss/classnames-order */
 /* eslint-disable react/button-has-type */
 
-import { GasPrice, SigningStargateClient } from '@cosmjs/stargate'
+import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate'
 import { Alert } from 'components/Alert'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
-import { NumberInput, TextInput } from 'components/forms/FormInput'
+import { AddressInput, NumberInput, TextInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { LinkTabs } from 'components/LinkTabs'
 import { authzLinkTabs } from 'components/LinkTabs.data'
 import { getConfig } from 'config'
 import type { Msg } from 'config/authz'
-import { AuthzGenericGrantMsg, AuthzSendGrantMsg } from 'config/authz'
+import { AuthzExecuteContractGrantMsg, AuthzGenericGrantMsg, AuthzSendGrantMsg } from 'config/authz'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -74,12 +74,52 @@ const Grant: NextPage = () => {
     subtitle: 'The spend limit',
   })
 
+  const maxFundsLimitDenomState = useInputState({
+    id: 'max-funds-limit-denom',
+    name: 'maxFundsLimitDenom',
+    title: 'Max Funds Limit Denom',
+    placeholder: `ustars`,
+    subtitle: 'The denom for max funds limit',
+  })
+
+  const maxFundsLimitState = useNumberInputState({
+    id: 'max-funds-limit',
+    name: 'maxFundsLimit',
+    title: 'Max Funds Limit',
+    placeholder: `1000000`,
+    subtitle: 'The max funds limit for contract execution (leave blank for no limit)',
+  })
+
   const allowListState = useInputState({
     id: 'allow-list',
     name: 'allowList',
     title: 'Allow List',
     placeholder: `stars1..., stars1...`,
     subtitle: 'Comma separated list of addresses to allow transactions to',
+  })
+
+  const contractAddressState = useInputState({
+    id: 'contract-address',
+    name: 'contractAddress',
+    title: 'Contract Address',
+    placeholder: `stars1...`,
+    subtitle: 'The contract address to authorize execution on',
+  })
+
+  const allowedMessageKeysState = useInputState({
+    id: 'allowed-message-keys',
+    name: 'allowedMessageKeys',
+    title: 'Allowed Message Keys',
+    placeholder: `mint_to, burn, transfer`,
+    subtitle: 'Comma separated list of allowed message keys (leave blank to allow all)',
+  })
+
+  const callsRemainingState = useNumberInputState({
+    id: 'calls-remaining',
+    name: 'callsRemaining',
+    title: 'Calls Remaining',
+    placeholder: `10`,
+    subtitle: 'The allowed number of contract execution calls (leave blank for no limit)',
   })
 
   const messageToSign = () => {
@@ -116,6 +156,16 @@ const Grant: NextPage = () => {
         spendLimitState.value,
         (expiration?.getTime() as number) / 1000 || 0,
         allowListState.value ? allowListState.value.split(',').map((address) => address.trim()) : [],
+      )
+    } else if (authType === 'Execute Smart Contract') {
+      return AuthzExecuteContractGrantMsg(
+        wallet.address || '',
+        granteeAddressState.value,
+        contractAddressState.value,
+        (expiration?.getTime() as number) / 1000 || 0,
+        callsRemainingState.value ? callsRemainingState.value : undefined,
+        maxFundsLimitState.value > 0 ? coins(maxFundsLimitState.value, maxFundsLimitDenomState.value) : undefined,
+        allowedMessageKeysState.value ? allowedMessageKeysState.value.split(',').map((key) => key.trim()) : undefined,
       )
     }
   }
@@ -156,9 +206,7 @@ const Grant: NextPage = () => {
         >
           <option value="Generic">Generic</option>
           <option value="Send">Send</option>
-          <option disabled value="Execute Smart Contract">
-            Execute Smart Contract
-          </option>
+          <option value="Execute Smart Contract">Execute Smart Contract</option>
           <option disabled value="Migrate Smart Contract">
             Migrate Smart Contract
           </option>
@@ -198,6 +246,15 @@ const Grant: NextPage = () => {
         <NumberInput className="w-1/4" {...spendLimitState} />
         <TextInput className="w-1/4" {...spendLimitDenomState} />
         {/* <TextInput className="w-2/5" {...allowListState} /> */}
+      </Conditional>
+      <Conditional test={authType === 'Execute Smart Contract'}>
+        <AddressInput className="w-2/5" {...contractAddressState} />
+        <TextInput className="w-2/5" {...allowedMessageKeysState} />
+        <NumberInput className="w-2/5" {...callsRemainingState} />
+        <div className="flex flex-row">
+          <NumberInput className="w-2/5" {...maxFundsLimitState} />
+          <TextInput className="w-1/4 ml-2" {...maxFundsLimitDenomState} />
+        </div>
       </Conditional>
       <Conditional test={authType === 'Generic'}>
         <FormControl
