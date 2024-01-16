@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { GasPrice, SigningStargateClient } from '@cosmjs/stargate'
 import { Alert } from 'components/Alert'
+import { Button } from 'components/Button'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { TextInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
@@ -20,6 +21,7 @@ const RevokeAuthorization: NextPage = () => {
   const wallet = useWallet()
 
   const [transactionHash, setTransactionHash] = useState<string | undefined>(undefined)
+  const [isLoading, setIsLoading] = useState(false)
 
   const granteeAddressState = useInputState({
     id: 'grantee-address',
@@ -43,6 +45,7 @@ const RevokeAuthorization: NextPage = () => {
     try {
       if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
       setTransactionHash(undefined)
+      setIsLoading(true)
       const offlineSigner = wallet.getOfflineSignerDirect()
       const stargateClient = await SigningStargateClient.connectWithSigner(getConfig(NETWORK).rpcUrl, offlineSigner, {
         gasPrice: GasPrice.fromString('0.25ustars'),
@@ -67,8 +70,10 @@ const RevokeAuthorization: NextPage = () => {
       )
       setTransactionHash(result.transactionHash)
       toast.success(`Revoke authorization success.`, { style: { maxWidth: 'none' } })
+      setIsLoading(false)
     } catch (e: any) {
       console.log(e)
+      setIsLoading(false)
       setTransactionHash(undefined)
       toast.error(e.message, { style: { maxWidth: 'none' } })
     }
@@ -98,17 +103,24 @@ const RevokeAuthorization: NextPage = () => {
           <option className="bg-black" value="/cosmos.staking.v1beta1.MsgUndelegate">
             /cosmos.staking.v1beta1.MsgUndelegate
           </option>
+          <option className="bg-black" value="/cosmos.bank.v1beta1.SendAuthorization">
+            /cosmos.bank.v1beta1.SendAuthorization
+          </option>
+          <option className="bg-black" value="/cosmwasm.wasm.v1.ContractExecutionAuthorization">
+            /cosmwasm.wasm.v1.ContractExecutionAuthorization
+          </option>
         </select>
       </div>
       <TextInput className="w-1/3" {...granteeAddressState} />
       {/* <TextInput className="w-1/3" {...messageState} /> */}
-      <button
+      <Button
         className="text-white bg-stargaze btn"
+        isLoading={isLoading}
         onClick={() => void revokeAuthorization(granteeAddressState.value, messageState.value)}
         type="button"
       >
         Revoke Authorization
-      </button>
+      </Button>
       {transactionHash && (
         <Alert className="justify-center items-center space-y-2 w-3/4" type="info">
           {`Transaction Hash: ${transactionHash}`}

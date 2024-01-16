@@ -4,10 +4,10 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable tailwindcss/classnames-order */
-/* eslint-disable react/button-has-type */
 
 import { coins, GasPrice, SigningStargateClient } from '@cosmjs/stargate'
 import { Alert } from 'components/Alert'
+import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
@@ -49,6 +49,7 @@ const Grant: NextPage = () => {
   const [genericAuthType, setGenericAuthType] = useState<GenericAuthorizationType>('MsgSend')
   const [expiration, setExpiration] = useState<Date | undefined>()
   const [transactionHash, setTransactionHash] = useState<string | undefined>(undefined)
+  const [isLoading, setIsLoading] = useState(false)
 
   const granteeAddressState = useInputState({
     id: 'grantee-address',
@@ -173,6 +174,7 @@ const Grant: NextPage = () => {
     try {
       if (!wallet.isWalletConnected) return toast.error('Please connect your wallet.')
       setTransactionHash(undefined)
+      setIsLoading(true)
       const offlineSigner = wallet.getOfflineSignerDirect()
       const stargateClient = await SigningStargateClient.connectWithSigner(getConfig(NETWORK).rpcUrl, offlineSigner, {
         gasPrice: GasPrice.fromString('0.025ustars'),
@@ -181,8 +183,10 @@ const Grant: NextPage = () => {
       const response = await stargateClient.signAndBroadcast(wallet.address || '', [messageToSign() as Msg], 'auto')
       setTransactionHash(response.transactionHash)
       toast.success(`${authType} authorization success.`, { style: { maxWidth: 'none' } })
+      setIsLoading(false)
     } catch (error: any) {
       toast.error(error.message, { style: { maxWidth: 'none' } })
+      setIsLoading(false)
       setTransactionHash(undefined)
       console.error('Error: ', error)
     }
@@ -286,15 +290,16 @@ const Grant: NextPage = () => {
           />
         </FormControl>
       </Conditional>
-      <button
+      <Button
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
+        isLoading={isLoading}
         onClick={() => {
           void handleSendMessage()
         }}
       >
         {' '}
         {authMode === 'Grant' ? 'Grant Authorization' : 'Revoke Authorization'}
-      </button>
+      </Button>
       {transactionHash && (
         <Alert className="justify-center items-center space-y-2 w-3/4" type="info">
           {`Transaction Hash: ${transactionHash}`}
