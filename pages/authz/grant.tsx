@@ -39,6 +39,7 @@ export type GenericAuthorizationType =
   | 'MsgSend'
   | 'MsgExecuteContract'
   | 'MsgMigrateContract'
+  | 'MsgStoreCode'
 
 const Grant: NextPage = () => {
   const wallet = useWallet()
@@ -189,6 +190,14 @@ const Grant: NextPage = () => {
           (expiration?.getTime() as number) / 1000 || 0,
         )
       }
+      if (genericAuthType === 'MsgStoreCode') {
+        return AuthzGenericGrantMsg(
+          wallet.address || '',
+          granteeAddressState.value,
+          '/cosmwasm.wasm.v1.MsgStoreCode',
+          (expiration?.getTime() as number) / 1000 || 0,
+        )
+      }
     } else if (authType === 'Send') {
       return AuthzSendGrantMsg(
         wallet.address || '',
@@ -272,6 +281,7 @@ const Grant: NextPage = () => {
             <option value="MsgVote">Vote</option>
             <option value="MsgExecuteContract">Execute Contract</option>
             <option value="MsgMigrateContract">Migrate Contract</option>
+            <option value="MsgStoreCode">Store Code</option>
           </select>
         </div>
       </Conditional>

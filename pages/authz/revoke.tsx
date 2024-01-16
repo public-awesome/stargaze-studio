@@ -119,6 +119,9 @@ const RevokeAuthorization: NextPage = () => {
           <option className="bg-black" value="/cosmwasm.wasm.v1.MsgMigrateContract">
             /cosmwasm.wasm.v1.MsgMigrateContract
           </option>
+          <option className="bg-black" value="/cosmwasm.wasm.v1.MsgStoreCode">
+            /cosmwasm.wasm.v1.MsgStoreCode
+          </option>
           <option className="bg-black" disabled value="/cosmos.bank.v1beta1.SendAuthorization">
             /cosmos.bank.v1beta1.SendAuthorization
           </option>
