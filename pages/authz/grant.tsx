@@ -149,6 +149,46 @@ const Grant: NextPage = () => {
           (expiration?.getTime() as number) / 1000 || 0,
         )
       }
+      if (genericAuthType === 'MsgBeginRedelegate') {
+        return AuthzGenericGrantMsg(
+          wallet.address || '',
+          granteeAddressState.value,
+          '/cosmos.staking.v1beta1.MsgBeginRedelegate',
+          (expiration?.getTime() as number) / 1000 || 0,
+        )
+      }
+      if (genericAuthType === 'MsgWithdrawDelegatorReward') {
+        return AuthzGenericGrantMsg(
+          wallet.address || '',
+          granteeAddressState.value,
+          '/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward',
+          (expiration?.getTime() as number) / 1000 || 0,
+        )
+      }
+      if (genericAuthType === 'MsgVote') {
+        return AuthzGenericGrantMsg(
+          wallet.address || '',
+          granteeAddressState.value,
+          '/cosmos.gov.v1beta1.MsgVote',
+          (expiration?.getTime() as number) / 1000 || 0,
+        )
+      }
+      if (genericAuthType === 'MsgExecuteContract') {
+        return AuthzGenericGrantMsg(
+          wallet.address || '',
+          granteeAddressState.value,
+          '/cosmwasm.wasm.v1.MsgExecuteContract',
+          (expiration?.getTime() as number) / 1000 || 0,
+        )
+      }
+      if (genericAuthType === 'MsgMigrateContract') {
+        return AuthzGenericGrantMsg(
+          wallet.address || '',
+          granteeAddressState.value,
+          '/cosmwasm.wasm.v1.MsgMigrateContract',
+          (expiration?.getTime() as number) / 1000 || 0,
+        )
+      }
     } else if (authType === 'Send') {
       return AuthzSendGrantMsg(
         wallet.address || '',
@@ -227,28 +267,20 @@ const Grant: NextPage = () => {
             <option value="MsgSend">Send</option>
             <option value="MsgDelegate">Delegate</option>
             <option value="MsgUndelegate">Undelegate</option>
-            <option disabled value="MsgBeginRedelegate">
-              Redelegate
-            </option>
-            <option disabled value="MsgWithdrawDelegatorReward">
-              Withdraw Delegator Reward
-            </option>
-            <option disabled value="MsgVote">
-              Vote
-            </option>
-            <option disabled value="MsgExecuteContract">
-              Execute Contract
-            </option>
-            <option disabled value="MsgMigrateContract">
-              Migrate Contract
-            </option>
+            <option value="MsgBeginRedelegate">Redelegate</option>
+            <option value="MsgWithdrawDelegatorReward">Withdraw Delegator Reward</option>
+            <option value="MsgVote">Vote</option>
+            <option value="MsgExecuteContract">Execute Contract</option>
+            <option value="MsgMigrateContract">Migrate Contract</option>
           </select>
         </div>
       </Conditional>
       <TextInput className="w-2/5" {...granteeAddressState} />
       <Conditional test={authType === 'Send'}>
-        <NumberInput className="w-1/4" {...spendLimitState} />
-        <TextInput className="w-1/4" {...spendLimitDenomState} />
+        <div className="flex flex-row">
+          <NumberInput className="w-1/4" {...spendLimitState} />
+          <TextInput className="w-1/4 ml-2" {...spendLimitDenomState} />
+        </div>
         {/* <TextInput className="w-2/5" {...allowListState} /> */}
       </Conditional>
       <Conditional test={authType === 'Execute Smart Contract'}>

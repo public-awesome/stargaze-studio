@@ -51,7 +51,7 @@ const RevokeAuthorization: NextPage = () => {
         gasPrice: GasPrice.fromString('0.25ustars'),
       })
 
-      const result = await stargateClient.signAndBroadcast(
+      const response = await stargateClient.signAndBroadcast(
         wallet.address || '',
         [
           {
@@ -68,8 +68,9 @@ const RevokeAuthorization: NextPage = () => {
           gas: '200000',
         },
       )
-      setTransactionHash(result.transactionHash)
-      toast.success(`Revoke authorization success.`, { style: { maxWidth: 'none' } })
+      setTransactionHash(response.transactionHash)
+      if (response.rawLog?.includes('failed')) toast.error(response.rawLog, { style: { maxWidth: 'none' } })
+      else toast.success(`Revoke authorization success.`, { style: { maxWidth: 'none' } })
       setIsLoading(false)
     } catch (e: any) {
       console.log(e)
@@ -103,15 +104,30 @@ const RevokeAuthorization: NextPage = () => {
           <option className="bg-black" value="/cosmos.staking.v1beta1.MsgUndelegate">
             /cosmos.staking.v1beta1.MsgUndelegate
           </option>
-          <option className="bg-black" value="/cosmos.bank.v1beta1.SendAuthorization">
+          <option className="bg-black" value="/cosmos.staking.v1beta1.MsgBeginRedelegate">
+            /cosmos.staking.v1beta1.MsgBeginRedelegate
+          </option>
+          <option className="bg-black" value="/cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward">
+            /cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward
+          </option>
+          <option className="bg-black" value="/cosmos.gov.v1beta1.MsgVote">
+            /cosmos.gov.v1beta1.MsgVote
+          </option>
+          <option className="bg-black" value="/cosmwasm.wasm.v1.MsgExecuteContract">
+            /cosmwasm.wasm.v1.MsgExecuteContract
+          </option>
+          <option className="bg-black" value="/cosmwasm.wasm.v1.MsgMigrateContract">
+            /cosmwasm.wasm.v1.MsgMigrateContract
+          </option>
+          <option className="bg-black" disabled value="/cosmos.bank.v1beta1.SendAuthorization">
             /cosmos.bank.v1beta1.SendAuthorization
           </option>
-          <option className="bg-black" value="/cosmwasm.wasm.v1.ContractExecutionAuthorization">
+          <option className="bg-black" disabled value="/cosmwasm.wasm.v1.ContractExecutionAuthorization">
             /cosmwasm.wasm.v1.ContractExecutionAuthorization
           </option>
         </select>
       </div>
-      <TextInput className="w-1/3" {...granteeAddressState} />
+      <TextInput className="w-2/5" {...granteeAddressState} />
       {/* <TextInput className="w-1/3" {...messageState} /> */}
       <Button
         className="text-white bg-stargaze btn"
