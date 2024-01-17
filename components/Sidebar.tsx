@@ -45,7 +45,7 @@ export const Sidebar = () => {
   }, [])
 
   const handleResize = () => {
-    setIsTallWindow(window.innerHeight > 700)
+    setIsTallWindow(window.innerHeight > 768)
   }
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export const Sidebar = () => {
       {/* main navigation routes */}
 
       <div className={clsx('absolute left-[5%] mt-2', isTallWindow ? 'top-[20%]' : 'top-[30%]')}>
-        <ul className="group p-2 w-full bg-transparent menu rounded-box">
+        <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <div
               className={clsx(
@@ -131,7 +131,7 @@ export const Sidebar = () => {
           </li>
         </ul>
         <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
-          <ul className="group p-2 w-full bg-transparent menu rounded-box">
+          <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
             <li tabIndex={0}>
               <span
                 className={clsx(
@@ -183,7 +183,7 @@ export const Sidebar = () => {
                 router.asPath.includes('/tokenfactory') ? 'text-white' : 'text-gray',
               )}
             >
-              <Link href="/badges/">Tokens</Link>
+              <Link href="/tokenfactory/">Tokens</Link>
             </span>
             <ul className="z-50 p-2 rounded-box bg-base-200">
               <li
@@ -208,7 +208,7 @@ export const Sidebar = () => {
             </ul>
           </li>
         </ul>
-        <ul className="group p-2 w-full bg-transparent menu rounded-box">
+        <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
               className={clsx(
@@ -310,6 +310,19 @@ export const Sidebar = () => {
                 </li>
               </Conditional>
             </ul>
+          </li>
+        </ul>
+        <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
+          <li tabIndex={0}>
+            <span
+              className={clsx(
+                'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
+                'hover:bg-white/5 transition-colors',
+                router.asPath.includes('/authz/') ? 'text-white' : 'text-gray',
+              )}
+            >
+              <Link href="/authz/"> Authz </Link>
+            </span>
           </li>
         </ul>
       </div>

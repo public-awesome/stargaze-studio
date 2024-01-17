@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import clsx from 'clsx'
 import { Alert } from 'components/Alert'
@@ -62,8 +63,7 @@ const UploadContract: NextPage = () => {
         codeId: result.codeId,
         originalSize: result.originalSize,
         compressedSize: result.compressedSize,
-        originalChecksum: result.originalChecksum,
-        compressedChecksum: result.compressedChecksum,
+        originalChecksum: result.checksum,
       })
 
       setLoading(false)

@@ -158,3 +158,16 @@ export const royaltyRegistryLinkTabs: LinkTabProps[] = [
     href: '/contracts/royaltyRegistry/execute',
   },
 ]
+
+export const authzLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Grant',
+    description: `Grant authorizations to a given address`,
+    href: '/authz/grant',
+  },
+  {
+    title: 'Revoke',
+    description: `Revoke already granted authorizations`,
+    href: '/authz/revoke',
+  },
+]
