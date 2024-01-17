@@ -88,7 +88,7 @@ const RevokeAuthorization: NextPage = () => {
         title="Authorization"
       />
       <LinkTabs activeIndex={1} data={authzLinkTabs} />
-      <div className="flex flex-col w-1/3">
+      <div className="flex flex-col w-2/5">
         <span className="font-bold text-white">Authorization Type</span>
         <select
           className="py-2 px-4 mt-2 bg-black rounded-md border-2 border-white"
