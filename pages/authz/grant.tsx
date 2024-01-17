@@ -302,36 +302,34 @@ const Grant: NextPage = () => {
           <TextInput className="w-1/4 ml-2" {...maxFundsLimitDenomState} />
         </div>
       </Conditional>
-      <Conditional test={authType === 'Generic'}>
-        <FormControl
-          className="w-1/4"
-          htmlId="expiration"
-          subtitle={`Expiration time for the authorization ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
-          title="Expiration Time (Optional)"
-        >
-          <InputDateTime
-            minDate={
-              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
-            }
-            onChange={(date) =>
-              date
-                ? setExpiration(
-                    timezone === 'Local'
-                      ? date
-                      : new Date(date?.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                  )
-                : setExpiration(undefined)
-            }
-            value={
-              timezone === 'Local'
-                ? expiration
-                : expiration
-                ? new Date(expiration.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
-                : undefined
-            }
-          />
-        </FormControl>
-      </Conditional>
+
+      <FormControl
+        className="w-1/4"
+        htmlId="expiration"
+        subtitle={`Expiration time for the authorization ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+        title="Expiration Time (Optional)"
+      >
+        <InputDateTime
+          minDate={
+            timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+          }
+          onChange={(date) =>
+            date
+              ? setExpiration(
+                  timezone === 'Local' ? date : new Date(date?.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                )
+              : setExpiration(undefined)
+          }
+          value={
+            timezone === 'Local'
+              ? expiration
+              : expiration
+              ? new Date(expiration.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+              : undefined
+          }
+        />
+      </FormControl>
+
       <Button
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
         isLoading={isLoading}

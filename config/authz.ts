@@ -78,7 +78,6 @@ export function AuthzSendGrantMsg(
         typeUrl: '/cosmos.bank.v1beta1.SendAuthorization',
         value: sendAuthValue,
       },
-      // TODO: fix expiration issue
       expiration: expiration ? { seconds: BigInt(expiration) } : undefined,
     },
     grantee,
@@ -154,8 +153,7 @@ export function AuthzExecuteContractGrantMsg(
         typeUrl: '/cosmwasm.wasm.v1.ContractExecutionAuthorization',
         value: sendAuthValue,
       },
-      // TODO: fix expiration issue
-      expiration: expiration ? { seconds: BigInt(expiration) } : undefined,
+      expiration: expiration ? { seconds: BigInt(expiration), nanos: 0 } : undefined,
     },
     grantee,
     granter,
@@ -236,7 +234,7 @@ export function AuthzStakeGrantMsg({
         typeUrl: '/cosmos.staking.v1beta1.StakeAuthorization',
         value: stakeAuthValue,
       },
-      // expiration: { seconds: BigInt(expiration) },
+      expiration: { seconds: BigInt(expiration) },
     },
     grantee,
     granter,

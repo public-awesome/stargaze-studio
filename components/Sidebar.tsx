@@ -183,7 +183,7 @@ export const Sidebar = () => {
                 router.asPath.includes('/tokenfactory') ? 'text-white' : 'text-gray',
               )}
             >
-              <Link href="/badges/">Tokens</Link>
+              <Link href="/tokenfactory/">Tokens</Link>
             </span>
             <ul className="z-50 p-2 rounded-box bg-base-200">
               <li
