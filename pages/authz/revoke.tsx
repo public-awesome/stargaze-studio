@@ -41,7 +41,6 @@ const RevokeAuthorization: NextPage = () => {
   })
 
   const revokeAuthorization = async (granteeAddress: string, msg: string) => {
-    console.log('Wallet Address: ', wallet.address)
     try {
       if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
       setTransactionHash(undefined)
@@ -121,12 +120,6 @@ const RevokeAuthorization: NextPage = () => {
           </option>
           <option className="bg-black" value="/cosmwasm.wasm.v1.MsgStoreCode">
             /cosmwasm.wasm.v1.MsgStoreCode
-          </option>
-          <option className="bg-black" value="/cosmos.bank.v1beta1.SendAuthorization">
-            /cosmos.bank.v1beta1.SendAuthorization
-          </option>
-          <option className="bg-black" value="/cosmwasm.wasm.v1.ContractExecutionAuthorization">
-            /cosmwasm.wasm.v1.ContractExecutionAuthorization
           </option>
         </select>
       </div>
