@@ -14,6 +14,7 @@ import {
   AllowAllMessagesFilter,
   CombinedLimit,
   ContractExecutionAuthorization,
+  ContractMigrationAuthorization,
   MaxCallsLimit,
   MaxFundsLimit,
 } from 'cosmjs-types/cosmwasm/wasm/v1/authz'
@@ -68,7 +69,8 @@ export function AuthzSendGrantMsg(
           denom,
         }),
       ],
-      //allowList,
+      // Needs cosmos-sdk >= 0.47
+      // allowList,
     }),
   ).finish()
 
@@ -151,6 +153,81 @@ export function AuthzExecuteContractGrantMsg(
     grant: {
       authorization: {
         typeUrl: '/cosmwasm.wasm.v1.ContractExecutionAuthorization',
+        value: sendAuthValue,
+      },
+      expiration: expiration ? { seconds: BigInt(expiration), nanos: 0 } : undefined,
+    },
+    grantee,
+    granter,
+  })
+
+  return {
+    typeUrl: msgAuthzGrantTypeUrl,
+    value: grantValue,
+  }
+}
+
+export function AuthzMigrateContractGrantMsg(
+  granter: string,
+  grantee: string,
+  contract: string,
+  expiration: number,
+  callsRemaining?: number,
+  amounts?: Coin[],
+  allowedMessages?: string[],
+): Msg {
+  const sendAuthValue = ContractMigrationAuthorization.encode(
+    ContractMigrationAuthorization.fromPartial({
+      grants: [
+        {
+          contract,
+          filter: {
+            typeUrl: allowedMessages
+              ? '/cosmwasm.wasm.v1.AcceptedMessageKeysFilter'
+              : '/cosmwasm.wasm.v1.AllowAllMessagesFilter',
+            value: allowedMessages
+              ? AcceptedMessageKeysFilter.encode({ keys: allowedMessages }).finish()
+              : AllowAllMessagesFilter.encode({}).finish(),
+          },
+          limit:
+            callsRemaining || amounts
+              ? {
+                  typeUrl:
+                    callsRemaining && amounts
+                      ? '/cosmwasm.wasm.v1.CombinedLimit'
+                      : callsRemaining
+                      ? '/cosmwasm.wasm.v1.MaxCallsLimit'
+                      : '/cosmwasm.wasm.v1.MaxFundsLimit',
+                  value:
+                    callsRemaining && amounts
+                      ? CombinedLimit.encode({
+                          callsRemaining: BigInt(callsRemaining),
+                          amounts,
+                        }).finish()
+                      : callsRemaining
+                      ? MaxCallsLimit.encode({
+                          remaining: BigInt(callsRemaining),
+                        }).finish()
+                      : MaxFundsLimit.encode({
+                          amounts: amounts || [],
+                        }).finish(),
+                }
+              : {
+                  // limit: undefined is not accepted
+                  typeUrl: '/cosmwasm.wasm.v1.MaxCallsLimit',
+                  value: MaxCallsLimit.encode({
+                    remaining: BigInt(100000),
+                  }).finish(),
+                },
+        },
+      ],
+    }),
+  ).finish()
+
+  const grantValue = MsgGrant.fromPartial({
+    grant: {
+      authorization: {
+        typeUrl: '/cosmwasm.wasm.v1.ContractMigrationAuthorization',
         value: sendAuthValue,
       },
       expiration: expiration ? { seconds: BigInt(expiration), nanos: 0 } : undefined,

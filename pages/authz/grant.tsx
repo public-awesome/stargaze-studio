@@ -18,7 +18,12 @@ import { LinkTabs } from 'components/LinkTabs'
 import { authzLinkTabs } from 'components/LinkTabs.data'
 import { getConfig } from 'config'
 import type { Msg } from 'config/authz'
-import { AuthzExecuteContractGrantMsg, AuthzGenericGrantMsg, AuthzSendGrantMsg } from 'config/authz'
+import {
+  AuthzExecuteContractGrantMsg,
+  AuthzGenericGrantMsg,
+  AuthzMigrateContractGrantMsg,
+  AuthzSendGrantMsg,
+} from 'config/authz'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -217,6 +222,16 @@ const Grant: NextPage = () => {
         maxFundsLimitState.value > 0 ? coins(maxFundsLimitState.value, maxFundsLimitDenomState.value) : undefined,
         allowedMessageKeysState.value ? allowedMessageKeysState.value.split(',').map((key) => key.trim()) : undefined,
       )
+    } else if (authType === 'Migrate Smart Contract') {
+      return AuthzMigrateContractGrantMsg(
+        wallet.address || '',
+        granteeAddressState.value,
+        contractAddressState.value,
+        (expiration?.getTime() as number) / 1000 || 0,
+        callsRemainingState.value ? callsRemainingState.value : undefined,
+        maxFundsLimitState.value > 0 ? coins(maxFundsLimitState.value, maxFundsLimitDenomState.value) : undefined,
+        allowedMessageKeysState.value ? allowedMessageKeysState.value.split(',').map((key) => key.trim()) : undefined,
+      )
     }
   }
   const handleSendMessage = async () => {
@@ -260,9 +275,7 @@ const Grant: NextPage = () => {
           <option value="Generic">Generic</option>
           <option value="Send">Send</option>
           <option value="Execute Smart Contract">Execute Smart Contract</option>
-          <option disabled value="Migrate Smart Contract">
-            Migrate Smart Contract
-          </option>
+          <option value="Migrate Smart Contract">Migrate Smart Contract</option>
         </select>
       </div>
       <Conditional test={authType === 'Generic'}>
@@ -291,9 +304,10 @@ const Grant: NextPage = () => {
           <NumberInput className="w-1/4" {...spendLimitState} />
           <TextInput className="w-1/4 ml-2" {...spendLimitDenomState} />
         </div>
+        {/* Needs cosmos-sdk v0.47 */}
         {/* <TextInput className="w-2/5" {...allowListState} /> */}
       </Conditional>
-      <Conditional test={authType === 'Execute Smart Contract'}>
+      <Conditional test={authType === 'Execute Smart Contract' || authType === 'Migrate Smart Contract'}>
         <AddressInput className="w-2/5" {...contractAddressState} />
         <TextInput className="w-2/5" {...allowedMessageKeysState} />
         <NumberInput className="w-2/5" {...callsRemainingState} />
