@@ -1551,9 +1551,7 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-white"
                   external
-                  href={`${STARGAZE_URL}/launchpad/${
-                    openEditionMinterCreatorData?.openEditionMinterContractAddress as string
-                  }`}
+                  href={`${STARGAZE_URL}/launchpad/${openEditionMinterCreatorData?.sg721ContractAddress as string}`}
                 >
                   View on Launchpad
                 </Anchor>
@@ -1704,7 +1702,7 @@ const CollectionCreationPage: NextPage = () => {
                     <Anchor
                       className="text-white"
                       external
-                      href={`${STARGAZE_URL}/launchpad/${vendingMinterContractAddress as string}`}
+                      href={`${STARGAZE_URL}/launchpad/${sg721ContractAddress as string}`}
                     >
                       View on Launchpad
                     </Anchor>
