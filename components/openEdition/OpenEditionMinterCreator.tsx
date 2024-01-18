@@ -37,7 +37,7 @@ import { useWallet } from 'utils/wallet'
 import { type CollectionDetailsDataProps, CollectionDetails } from './CollectionDetails'
 import type { ImageUploadDetailsDataProps } from './ImageUploadDetails'
 import { ImageUploadDetails } from './ImageUploadDetails'
-import type { MintingDetailsDataProps } from './MintingDetails'
+import type { LimitType, MintingDetailsDataProps } from './MintingDetails'
 import { MintingDetails } from './MintingDetails'
 import type { UploadMethod } from './OffChainMetadataUploadDetails'
 import {
@@ -314,11 +314,27 @@ export const OpenEditionMinterCreator = ({
     if (!mintingDetails.perAddressLimit || mintingDetails.perAddressLimit < 1 || mintingDetails.perAddressLimit > 50)
       throw new Error('Invalid limit for tokens per address')
     if (mintingDetails.startTime === '') throw new Error('Start time is required')
-    if (mintingDetails.endTime === '') throw new Error('End time is required')
+    if (mintingDetails.limitType === 'time_limited' && mintingDetails.endTime === '')
+      throw new Error('End time is required')
+    if (mintingDetails.limitType === 'count_limited' && mintingDetails.tokenCountLimit === undefined)
+      throw new Error('Token count limit is required')
+    if (
+      mintingDetails.limitType === 'count_limited' &&
+      mintingDetails.perAddressLimit > (mintingDetails.tokenCountLimit as number)
+    )
+      throw new Error('Per address limit cannot exceed maximum token count limit')
+    if (mintingDetails.limitType === 'count_limited' && (mintingDetails.tokenCountLimit as number) > 10000)
+      throw new Error('Maximum token count cannot exceed 10000')
     if (Number(mintingDetails.startTime) < new Date().getTime() * 1000000) throw new Error('Invalid start time')
-    if (Number(mintingDetails.endTime) < Number(mintingDetails.startTime))
+    if (
+      mintingDetails.limitType === 'time_limited' &&
+      Number(mintingDetails.endTime) < Number(mintingDetails.startTime)
+    )
       throw new Error('End time cannot be earlier than start time')
-    if (Number(mintingDetails.endTime) === Number(mintingDetails.startTime))
+    if (
+      mintingDetails.limitType === 'time_limited' &&
+      Number(mintingDetails.endTime) === Number(mintingDetails.startTime)
+    )
       throw new Error('End time cannot be equal to the start time')
 
     if (
@@ -603,12 +619,14 @@ export const OpenEditionMinterCreator = ({
                 : null,
           },
           start_time: mintingDetails?.startTime,
-          end_time: mintingDetails?.endTime,
+          end_time: mintingDetails?.limitType === ('time_limited' as LimitType) ? mintingDetails.endTime : null,
           mint_price: {
             amount: Number(mintingDetails?.unitPrice).toString(),
             denom: (mintTokenFromFactory?.denom as string) || 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
+          num_tokens:
+            mintingDetails?.limitType === ('count_limited' as LimitType) ? mintingDetails.tokenCountLimit : null,
           payment_address: mintingDetails?.paymentAddress || null,
         },
         collection_params: {
