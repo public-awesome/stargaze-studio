@@ -51,6 +51,7 @@ import { upload } from 'services/upload'
 import { compareFileArrays } from 'utils/compareFileArrays'
 import {
   BASE_FACTORY_ADDRESS,
+  BASE_FACTORY_SG721_CODE_ID,
   BASE_FACTORY_UPDATABLE_ADDRESS,
   BLOCK_EXPLORER_URL,
   NETWORK,
@@ -646,7 +647,7 @@ const CollectionCreationPage: NextPage = () => {
       create_minter: {
         init_msg: null,
         collection_params: {
-          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : SG721_CODE_ID,
+          code_id: collectionDetails?.updatable ? SG721_UPDATABLE_CODE_ID : BASE_FACTORY_SG721_CODE_ID,
           name: collectionDetails?.name,
           symbol: collectionDetails?.symbol,
           info: {
