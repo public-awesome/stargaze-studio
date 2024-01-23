@@ -8,6 +8,8 @@
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
+import { LinkTabs } from 'components/LinkTabs'
+import { snapshotLinkTabs } from 'components/LinkTabs.data'
 import { SelectCollection } from 'components/SelectCollection'
 import type { NextPage } from 'next'
 import { NextSeo } from 'next-seo'
@@ -17,7 +19,7 @@ import toast from 'react-hot-toast'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 
-const Snapshots: NextPage = () => {
+const Holders: NextPage = () => {
   const [collectionAddress, setCollectionAddress] = useState<string>('')
   const collectionAddressState = useInputState({
     id: 'collection-address',
@@ -52,14 +54,14 @@ const Snapshots: NextPage = () => {
         link={links.Documentation}
         title="Snapshots"
       />
-
+      <LinkTabs activeIndex={0} data={snapshotLinkTabs} />
       <SelectCollection selectCollection={setCollectionAddress} />
       <AddressInput className="w-3/4" {...collectionAddressState} />
       <div className="flex-col mt-2 w-full form-control">
         <h1 className="underline text-lg font-bold">Snapshot Options </h1>
         <div className="flex-row w-full">
           <label className="justify-start cursor-pointer label w-2/5">
-            <span className="mr-2 font-bold">Include listed tokens on Marketplace</span>
+            <span className="mr-2 font-bold">Include tokens listed on Marketplace</span>
             <input
               checked={includeListed}
               className={`${includeListed ? `bg-stargaze` : `bg-gray-600`} checkbox`}
@@ -70,7 +72,7 @@ const Snapshots: NextPage = () => {
             />
           </label>
           <label className="justify-start cursor-pointer label w-2/5">
-            <span className="mr-2 font-bold">Include staked tokens on DAOs</span>
+            <span className="mr-2 font-bold">Include tokens staked on DAOs</span>
             <input
               checked={includeStaked}
               className={`${includeStaked ? `bg-stargaze` : `bg-gray-600`} checkbox`}
@@ -81,7 +83,7 @@ const Snapshots: NextPage = () => {
             />
           </label>
           <label className="justify-start cursor-pointer label w-2/5">
-            <span className="mr-2 font-bold">Export holders for each token individually</span>
+            <span className="mr-2 font-bold">Export by Token ID</span>
             <input
               checked={exportIndividualTokens}
               className={`${exportIndividualTokens ? `bg-stargaze` : `bg-gray-600`} checkbox`}
@@ -148,4 +150,4 @@ const Snapshots: NextPage = () => {
   )
 }
 
-export default withMetadata(Snapshots, { center: false })
+export default withMetadata(Holders, { center: false })
