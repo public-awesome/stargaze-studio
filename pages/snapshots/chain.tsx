@@ -45,7 +45,7 @@ const Chain: NextPage = () => {
         link={links.Documentation}
         title="Snapshots"
       />
-      <LinkTabs activeIndex={0} data={snapshotLinkTabs} />
+      <LinkTabs activeIndex={1} data={snapshotLinkTabs} />
       <div className="flex flex-col w-1/4">
         <span className="text-lg font-bold text-white">Chain Snapshot Type</span>
         <select
