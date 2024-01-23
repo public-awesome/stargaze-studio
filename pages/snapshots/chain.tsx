@@ -47,7 +47,7 @@ const Chain: NextPage = () => {
       />
       <LinkTabs activeIndex={0} data={snapshotLinkTabs} />
       <div className="flex flex-col w-1/4">
-        <span className="text-lg font-bold text-white">Chain Data Type</span>
+        <span className="text-lg font-bold text-white">Chain Snapshot Type</span>
         <select
           className="mt-2 pt-2 pb-2 px-4 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
           onChange={(e) => setChainDataType(JSON.parse(e.target.value))}
