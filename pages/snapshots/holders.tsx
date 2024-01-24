@@ -101,7 +101,7 @@ const Holders: NextPage = () => {
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
         isLoading={isLoading}
         onClick={() => {
-          if (collectionAddress.length === 0) {
+          if (collectionAddressState.value.length === 0) {
             toast.error('Please select a collection or enter a valid collection address.', {
               style: { maxWidth: 'none' },
             })
