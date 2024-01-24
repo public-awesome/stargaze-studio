@@ -1903,6 +1903,13 @@ const CollectionCreationPage: NextPage = () => {
             <Alert className="mt-4" type="info">
               Setting the unit price as 0 for public minting may render the collection vulnerable for bot attacks.
               Please consider creating a whitelist of addresses that can mint for free instead.
+              <br />
+              <div className="flex flex-row justify-start">
+                <span className="mt-2 mr-2">You may export a list of active Stargaze addresses using</span>
+                <AnchorButton className="font-bold text-white hover:underline" external href="/snapshots/chain">
+                  Snapshots
+                </AnchorButton>
+              </div>
             </Alert>
           </Conditional>
         </Conditional>

@@ -1,1 +1,1 @@
-export { default } from './snapshot'
+export { default } from './holders'

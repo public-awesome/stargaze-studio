@@ -171,3 +171,16 @@ export const authzLinkTabs: LinkTabProps[] = [
     href: '/authz/revoke',
   },
 ]
+
+export const snapshotLinkTabs: LinkTabProps[] = [
+  {
+    title: 'Collection Holders',
+    description: `Take a snapshot of collection holders`,
+    href: '/snapshots/holders',
+  },
+  {
+    title: 'Chain Snapshots',
+    description: `Export a list of users fulfilling a given condition`,
+    href: '/snapshots/chain',
+  },
+]
