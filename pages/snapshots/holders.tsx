@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable tailwindcss/classnames-order */
-/* eslint-disable react/button-has-type */
 
+import { Button } from 'components/Button'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { AddressInput } from 'components/forms/FormInput'
 import { useInputState } from 'components/forms/FormInput.hooks'
@@ -31,6 +31,7 @@ const Holders: NextPage = () => {
   const [includeStaked, setIncludeStaked] = useState<boolean>(true)
   const [includeListed, setIncludeListed] = useState<boolean>(true)
   const [exportIndividualTokens, setExportIndividualTokens] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const snapshotEndpoint = `https://metabase.constellations.zone/api/public/card/4cf9550e-5eb7-4fe7-bd3b-dc33229f53dc/query/json?parameters=%5B%7B%22type%22%3A%22category%22%2C%22value%22%3A%22${collectionAddressState.value}%22%2C%22id%22%3A%22cb34b7a8-70cf-ba86-8d9c-360b5b2fedd3%22%2C%22target%22%3A%5B%22variable%22%2C%5B%22template-tag%22%2C%22collection_addr%22%5D%5D%7D%5D`
 
@@ -96,9 +97,11 @@ const Holders: NextPage = () => {
         </div>
       </div>
 
-      <button
+      <Button
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
+        isLoading={isLoading}
         onClick={() => {
+          setIsLoading(true)
           fetch(snapshotEndpoint)
             .then((response) => response.json())
             .then((data) => {
@@ -117,6 +120,7 @@ const Holders: NextPage = () => {
                   })
                   .join('')}`
                 download(csv, 'snapshot.csv', 'text/csv')
+                setIsLoading(false)
                 return
               }
               const aggregatedData: any[] = []
@@ -134,8 +138,10 @@ const Holders: NextPage = () => {
               aggregatedData.sort((a, b) => b.amount - a.amount)
               const csv = `address,amount\n${aggregatedData.map((row: any) => Object.values(row).join(',')).join('\n')}`
               download(csv, 'snapshot.csv', 'text/csv')
+              setIsLoading(false)
             })
             .catch((err) => {
+              setIsLoading(false)
               toast.error(`Could not fetch snapshot data: ${err}`, {
                 style: { maxWidth: 'none' },
               })
@@ -145,7 +151,7 @@ const Holders: NextPage = () => {
       >
         {' '}
         Export Snapshot
-      </button>
+      </Button>
     </section>
   )
 }
