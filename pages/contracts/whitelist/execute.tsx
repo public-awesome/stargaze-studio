@@ -79,7 +79,7 @@ const WhitelistExecutePage: NextPage = () => {
 
   const showLimitState = isEitherType(type, ['update_per_address_limit', 'increase_member_limit'])
   const showTimestamp = isEitherType(type, ['update_start_time', 'update_end_time'])
-  const showMemberList = isEitherType(type, ['add_members'])
+  const showMemberList = isEitherType(type, ['add_members', 'remove_members'])
   const showFlexMemberList = isEitherType(type, ['add_members'])
   const showRemoveMemberList = isEitherType(type, ['remove_members'])
   const showAdminList = isEitherType(type, ['update_admins'])
@@ -278,7 +278,11 @@ const WhitelistExecutePage: NextPage = () => {
               subtitle={type === 'update_admins' ? 'Enter the admin addresses' : 'Enter the member addresses'}
               title="Addresses"
             />
-            <Conditional test={whitelistType === 'standard' && showMemberList}>
+            <Conditional
+              test={
+                (whitelistType === 'standard' && showMemberList) || (whitelistType === 'flex' && showRemoveMemberList)
+              }
+            >
               <Alert className="mt-8" type="info">
                 You may optionally choose a text file of additional member addresses.
               </Alert>
