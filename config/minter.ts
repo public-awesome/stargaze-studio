@@ -1,4 +1,6 @@
 import {
+  FEATURED_VENDING_FACTORY_ADDRESS,
+  FEATURED_VENDING_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
@@ -71,6 +73,7 @@ export interface MinterInfo {
   supportedToken: TokenInfo
   updatable?: boolean
   flexible?: boolean
+  featured?: boolean
 }
 
 export const openEditionStarsMinter: MinterInfo = {
@@ -78,6 +81,7 @@ export const openEditionStarsMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_FACTORY_ADDRESS,
   supportedToken: stars,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionUpdatableStarsMinter: MinterInfo = {
@@ -85,6 +89,7 @@ export const openEditionUpdatableStarsMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: stars,
   updatable: true,
+  featured: false,
 }
 
 export const openEditionIbcAtomMinter: MinterInfo = {
@@ -92,6 +97,7 @@ export const openEditionIbcAtomMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
   supportedToken: ibcAtom,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
@@ -99,6 +105,7 @@ export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   supportedToken: ibcAtom,
   updatable: true,
+  featured: false,
 }
 
 export const openEditionIbcUsdcMinter: MinterInfo = {
@@ -106,6 +113,7 @@ export const openEditionIbcUsdcMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionIbcNbtcMinter: MinterInfo = {
@@ -113,6 +121,7 @@ export const openEditionIbcNbtcMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   supportedToken: ibcNbtc,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
@@ -120,6 +129,7 @@ export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
   updatable: true,
+  featured: false,
 }
 
 export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
@@ -127,6 +137,7 @@ export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_NBTC_FACTORY_ADDRESS,
   supportedToken: ibcNbtc,
   updatable: true,
+  featured: false,
 }
 
 export const openEditionIbcFrnzMinter: MinterInfo = {
@@ -134,6 +145,7 @@ export const openEditionIbcFrnzMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
   supportedToken: ibcFrnz,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
@@ -141,6 +153,7 @@ export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
   supportedToken: ibcFrnz,
   updatable: true,
+  featured: false,
 }
 
 export const openEditionIbcUskMinter: MinterInfo = {
@@ -148,6 +161,7 @@ export const openEditionIbcUskMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
   supportedToken: ibcUsk,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionUpdatableIbcUskMinter: MinterInfo = {
@@ -155,6 +169,7 @@ export const openEditionUpdatableIbcUskMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USK_FACTORY_ADDRESS,
   supportedToken: ibcUsk,
   updatable: true,
+  featured: false,
 }
 
 export const openEditionIbcKujiMinter: MinterInfo = {
@@ -162,6 +177,7 @@ export const openEditionIbcKujiMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
   supportedToken: ibcKuji,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionIbcHuahuaMinter: MinterInfo = {
@@ -169,6 +185,7 @@ export const openEditionIbcHuahuaMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_HUAHUA_FACTORY_ADDRESS,
   supportedToken: ibcHuahua,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionIbcCrbrusMinter: MinterInfo = {
@@ -176,6 +193,7 @@ export const openEditionIbcCrbrusMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
   supportedToken: ibcCrbrus,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionNativeStrdstMinter: MinterInfo = {
@@ -183,6 +201,7 @@ export const openEditionNativeStrdstMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
   supportedToken: nativeStardust,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionNativeBrnchMinter: MinterInfo = {
@@ -190,6 +209,7 @@ export const openEditionNativeBrnchMinter: MinterInfo = {
   factoryAddress: OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
   supportedToken: nativeBrnch,
   updatable: false,
+  featured: false,
 }
 
 export const openEditionMinterList = [
@@ -218,6 +238,16 @@ export const vendingStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: false,
   flexible: false,
+  featured: false,
+}
+
+export const vendingFeaturedStarsMinter: MinterInfo = {
+  id: 'vending-stars-minter',
+  factoryAddress: FEATURED_VENDING_FACTORY_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: false,
+  featured: true,
 }
 
 export const vendingUpdatableStarsMinter: MinterInfo = {
@@ -226,6 +256,7 @@ export const vendingUpdatableStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcAtomMinter: MinterInfo = {
@@ -234,6 +265,7 @@ export const vendingIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingUpdatableIbcAtomMinter: MinterInfo = {
@@ -242,6 +274,7 @@ export const vendingUpdatableIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcUsdcMinter: MinterInfo = {
@@ -250,6 +283,7 @@ export const vendingIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcNbtcMinter: MinterInfo = {
@@ -258,6 +292,7 @@ export const vendingIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
@@ -266,6 +301,7 @@ export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingUpdatableIbcNbtcMinter: MinterInfo = {
@@ -274,6 +310,7 @@ export const vendingUpdatableIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcUskMinter: MinterInfo = {
@@ -282,6 +319,7 @@ export const vendingIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingUpdatableIbcUskMinter: MinterInfo = {
@@ -290,6 +328,7 @@ export const vendingUpdatableIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcKujiMinter: MinterInfo = {
@@ -298,6 +337,7 @@ export const vendingIbcKujiMinter: MinterInfo = {
   supportedToken: ibcKuji,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcHuahuaMinter: MinterInfo = {
@@ -306,6 +346,7 @@ export const vendingIbcHuahuaMinter: MinterInfo = {
   supportedToken: ibcHuahua,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingIbcCrbrusMinter: MinterInfo = {
@@ -314,6 +355,7 @@ export const vendingIbcCrbrusMinter: MinterInfo = {
   supportedToken: ibcCrbrus,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingNativeStardustMinter: MinterInfo = {
@@ -322,6 +364,7 @@ export const vendingNativeStardustMinter: MinterInfo = {
   supportedToken: nativeStardust,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingUpdatableNativeStardustMinter: MinterInfo = {
@@ -330,6 +373,7 @@ export const vendingUpdatableNativeStardustMinter: MinterInfo = {
   supportedToken: nativeStardust,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingNativeBrnchMinter: MinterInfo = {
@@ -338,6 +382,7 @@ export const vendingNativeBrnchMinter: MinterInfo = {
   supportedToken: nativeBrnch,
   updatable: false,
   flexible: false,
+  featured: false,
 }
 
 export const vendingUpdatableNativeBrnchMinter: MinterInfo = {
@@ -346,10 +391,12 @@ export const vendingUpdatableNativeBrnchMinter: MinterInfo = {
   supportedToken: nativeBrnch,
   updatable: true,
   flexible: false,
+  featured: false,
 }
 
 export const vendingMinterList = [
   vendingStarsMinter,
+  vendingFeaturedStarsMinter,
   vendingUpdatableStarsMinter,
   vendingIbcAtomMinter,
   vendingUpdatableIbcAtomMinter,
@@ -374,6 +421,16 @@ export const flexibleVendingStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: false,
   flexible: true,
+  featured: false,
+}
+
+export const flexibleFeaturedVendingStarsMinter: MinterInfo = {
+  id: 'flexible-vending-stars-minter',
+  factoryAddress: FEATURED_VENDING_FACTORY_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: true,
+  featured: true,
 }
 
 export const flexibleVendingUpdatableStarsMinter: MinterInfo = {
@@ -382,6 +439,7 @@ export const flexibleVendingUpdatableStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: true,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcAtomMinter: MinterInfo = {
@@ -390,6 +448,7 @@ export const flexibleVendingIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingUpdatableIbcAtomMinter: MinterInfo = {
@@ -398,6 +457,7 @@ export const flexibleVendingUpdatableIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: true,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcUsdcMinter: MinterInfo = {
@@ -406,6 +466,7 @@ export const flexibleVendingIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcNbtcMinter: MinterInfo = {
@@ -414,6 +475,7 @@ export const flexibleVendingIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
@@ -422,6 +484,7 @@ export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: true,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingUpdatableIbcNbtcMinter: MinterInfo = {
@@ -430,6 +493,7 @@ export const flexibleVendingUpdatableIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: true,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcUskMinter: MinterInfo = {
@@ -438,6 +502,7 @@ export const flexibleVendingIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingUpdatableIbcUskMinter: MinterInfo = {
@@ -446,6 +511,7 @@ export const flexibleVendingUpdatableIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: true,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcKujiMinter: MinterInfo = {
@@ -454,6 +520,7 @@ export const flexibleVendingIbcKujiMinter: MinterInfo = {
   supportedToken: ibcKuji,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
@@ -462,6 +529,7 @@ export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
   supportedToken: ibcHuahua,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingIbcCrbrusMinter: MinterInfo = {
@@ -470,6 +538,7 @@ export const flexibleVendingIbcCrbrusMinter: MinterInfo = {
   supportedToken: ibcCrbrus,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingStrdstMinter: MinterInfo = {
@@ -478,6 +547,7 @@ export const flexibleVendingStrdstMinter: MinterInfo = {
   supportedToken: nativeStardust,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingBrnchMinter: MinterInfo = {
@@ -486,10 +556,12 @@ export const flexibleVendingBrnchMinter: MinterInfo = {
   supportedToken: nativeBrnch,
   updatable: false,
   flexible: true,
+  featured: false,
 }
 
 export const flexibleVendingMinterList = [
   flexibleVendingStarsMinter,
+  flexibleFeaturedVendingStarsMinter,
   flexibleVendingUpdatableStarsMinter,
   flexibleVendingIbcAtomMinter,
   flexibleVendingUpdatableIbcAtomMinter,

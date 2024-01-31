@@ -146,7 +146,10 @@ export const MintingDetails = ({
             value={selectedMintToken?.displayName}
           >
             {vendingMinterList
-              .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+              .filter(
+                (minter) =>
+                  minter.factoryAddress !== undefined && minter.updatable === false && minter.featured === false,
+              )
               .map((minter) => (
                 <option key={minter.id} className="bg-black" value={minter.supportedToken.displayName}>
                   {minter.supportedToken.displayName}
