@@ -147,6 +147,7 @@ const CollectionCreationPage: NextPage = () => {
     [baseFactoryContract, wallet.address, wallet.isWalletConnected],
   )
 
+  const [isFeaturedCollection, setIsFeaturedCollection] = useState<boolean>(false)
   const [uploading, setUploading] = useState(false)
   const [isMintingComplete, setIsMintingComplete] = useState(false)
   const [initialParametersFetched, setInitialParametersFetched] = useState(false)
@@ -584,7 +585,8 @@ const CollectionCreationPage: NextPage = () => {
               mintingDetails?.selectedMintToken?.displayName === 'KUJI' ||
               mintingDetails?.selectedMintToken?.displayName === 'HUAHUA' ||
               mintingDetails?.selectedMintToken?.displayName === 'BRNCH' ||
-              mintingDetails?.selectedMintToken?.displayName === 'CRBRUS'
+              mintingDetails?.selectedMintToken?.displayName === 'CRBRUS' ||
+              isFeaturedCollection
             ? STRDST_SG721_CODE_ID
             : SG721_CODE_ID,
           name: collectionDetails?.name,
@@ -1273,7 +1275,8 @@ const CollectionCreationPage: NextPage = () => {
         (minter) =>
           minter.supportedToken === mintingDetails?.selectedMintToken &&
           minter.updatable === collectionDetails?.updatable &&
-          minter.flexible === (whitelistDetails?.whitelistType === 'flex'),
+          minter.flexible === (whitelistDetails?.whitelistType === 'flex') &&
+          minter.featured === isFeaturedCollection,
       )?.factoryAddress
     if (vendingFactoryForSelectedDenom) {
       setVendingFactoryAddress(vendingFactoryForSelectedDenom)
@@ -1304,6 +1307,7 @@ const CollectionCreationPage: NextPage = () => {
     wallet.isWalletConnected,
     whitelistDetails?.whitelistState,
     whitelistDetails?.whitelistType,
+    isFeaturedCollection,
   ])
 
   const checkwalletBalance = async () => {
@@ -1853,6 +1857,22 @@ const CollectionCreationPage: NextPage = () => {
             minterType={minterType}
             onChange={setUploadDetails}
           />
+        </Conditional>
+
+        <Conditional test={minterType === 'vending'}>
+          <div className="flex-row p-2 mb-3 w-full rounded border-2 border-white/20 form-control">
+            <label className="justify-start ml-8 w-2/5 cursor-pointer label">
+              <span className="mr-2 font-bold">Is this a featured collection?</span>
+              <input
+                checked={isFeaturedCollection}
+                className={`${isFeaturedCollection ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+                onClick={() => {
+                  setIsFeaturedCollection(!isFeaturedCollection)
+                }}
+                type="checkbox"
+              />
+            </label>
+          </div>
         </Conditional>
 
         <Conditional
