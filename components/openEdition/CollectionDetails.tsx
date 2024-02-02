@@ -236,9 +236,13 @@ export const CollectionDetails = ({
                   timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
                 }
                 onChange={(date) =>
-                  setTimestamp(
-                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                  )
+                  date
+                    ? setTimestamp(
+                        timezone === 'Local'
+                          ? date
+                          : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                      )
+                    : setTimestamp(undefined)
                 }
                 value={
                   timezone === 'Local'
