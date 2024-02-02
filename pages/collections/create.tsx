@@ -161,6 +161,7 @@ const CollectionCreationPage: NextPage = () => {
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
+  const [isMatchingVendingFactoryPresent, setIsMatchingVendingFactoryPresent] = useState<boolean>(false)
 
   const performVendingMinterChecks = () => {
     try {
@@ -1030,6 +1031,10 @@ const CollectionCreationPage: NextPage = () => {
       (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
     )
       throw new Error('Invalid payment address')
+    if (!isMatchingVendingFactoryPresent)
+      throw new Error(
+        `No matching vending factory contract found for the selected parameters (Mint Price Denom: ${mintingDetails.selectedMintToken?.displayName}, Whitelist Type: ${whitelistDetails?.whitelistType}, Featured Collection: ${isFeaturedCollection})`,
+      )
   }
 
   const checkWhitelistDetails = async () => {
@@ -1278,7 +1283,9 @@ const CollectionCreationPage: NextPage = () => {
           minter.flexible === (whitelistDetails?.whitelistType === 'flex') &&
           minter.featured === isFeaturedCollection,
       )?.factoryAddress
+
     if (vendingFactoryForSelectedDenom) {
+      setIsMatchingVendingFactoryPresent(true)
       setVendingFactoryAddress(vendingFactoryForSelectedDenom)
       const vendingFactoryParameters = await client
         .queryContractSmart(vendingFactoryForSelectedDenom, { params: {} })
@@ -1300,6 +1307,8 @@ const CollectionCreationPage: NextPage = () => {
       setMintTokenFromVendingFactory(
         tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
       )
+    } else {
+      setIsMatchingVendingFactoryPresent(false)
     }
   }, [
     collectionDetails?.updatable,
