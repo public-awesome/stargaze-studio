@@ -1,6 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
+import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
@@ -16,6 +17,8 @@ import { useWallet } from 'utils/wallet'
 import { NumberInput, TextInput } from '../forms/FormInput'
 import type { UploadMethod } from './OffChainMetadataUploadDetails'
 
+export type LimitType = 'count_limited' | 'time_limited'
+
 interface MintingDetailsProps {
   onChange: (data: MintingDetailsDataProps) => void
   uploadMethod: UploadMethod
@@ -28,9 +31,11 @@ export interface MintingDetailsDataProps {
   unitPrice: string
   perAddressLimit: number
   startTime: string
-  endTime: string
+  endTime?: string
+  tokenCountLimit?: number
   paymentAddress?: string
   selectedMintToken?: TokenInfo
+  limitType: LimitType
 }
 
 export const MintingDetails = ({
@@ -46,6 +51,7 @@ export const MintingDetails = ({
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>()
   const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
   const [mintingDetailsImported, setMintingDetailsImported] = useState(false)
+  const [limitType, setLimitType] = useState<LimitType>('time_limited')
   const { timezone } = useGlobalSettings()
 
   const unitPriceState = useNumberInputState({
@@ -64,6 +70,14 @@ export const MintingDetails = ({
     title: 'Per Address Limit',
     subtitle: '',
     placeholder: '1',
+  })
+
+  const tokenCountLimitState = useNumberInputState({
+    id: 'tokencountlimit',
+    name: 'tokencountlimit',
+    title: 'Maximum Token Count',
+    subtitle: 'Total number of mintable tokens',
+    placeholder: '100',
   })
 
   const paymentAddressState = useInputState({
@@ -98,6 +112,8 @@ export const MintingDetails = ({
       endTime: endTimestamp ? (endTimestamp.getTime() * 1_000_000).toString() : '',
       paymentAddress: paymentAddressState.value.trim(),
       selectedMintToken,
+      limitType,
+      tokenCountLimit: limitType === 'count_limited' ? tokenCountLimitState.value : undefined,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -108,6 +124,8 @@ export const MintingDetails = ({
     endTimestamp,
     paymentAddressState.value,
     selectedMintToken,
+    tokenCountLimitState.value,
+    limitType,
   ])
 
   useEffect(() => {
@@ -115,6 +133,8 @@ export const MintingDetails = ({
       console.log('Selected Token ID: ', importedMintingDetails.selectedMintToken?.id)
       unitPriceState.onChange(Number(importedMintingDetails.unitPrice) / 1000000)
       perAddressLimitState.onChange(importedMintingDetails.perAddressLimit)
+      setLimitType(importedMintingDetails.limitType)
+      tokenCountLimitState.onChange(importedMintingDetails.tokenCountLimit ? importedMintingDetails.tokenCountLimit : 0)
       setTimestamp(new Date(Number(importedMintingDetails.startTime) / 1_000_000))
       setEndTimestamp(new Date(Number(importedMintingDetails.endTime) / 1_000_000))
       paymentAddressState.onChange(importedMintingDetails.paymentAddress ? importedMintingDetails.paymentAddress : '')
@@ -171,32 +191,63 @@ export const MintingDetails = ({
             }
           />
         </FormControl>
-        <FormControl
-          htmlId="endTimestamp"
-          isRequired
-          subtitle={`Minting end time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
-          title="End Time"
-        >
-          <InputDateTime
-            minDate={
-              timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
-            }
-            onChange={(date) =>
+
+        <div className="flex-row mt-2 w-full form-control">
+          <h1 className="mt-2 font-bold text-md">Limit Type: </h1>
+          <label className="justify-start ml-6 cursor-pointer label">
+            <span className="mr-2">Time</span>
+            <input
+              checked={limitType === 'time_limited'}
+              className={`${limitType === 'time_limited' ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+              onClick={() => {
+                setLimitType('time_limited' as LimitType)
+              }}
+              type="checkbox"
+            />
+          </label>
+          <label className="justify-start ml-4 cursor-pointer label">
+            <span className="mr-2">Token Count</span>
+            <input
+              checked={limitType === 'count_limited'}
+              className={`${limitType === 'count_limited' ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+              onClick={() => {
+                setLimitType('count_limited' as LimitType)
+              }}
+              type="checkbox"
+            />
+          </label>
+        </div>
+        <Conditional test={limitType === 'time_limited'}>
+          <FormControl
+            htmlId="endTimestamp"
+            isRequired
+            subtitle={`Minting end time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+            title="End Time"
+          >
+            <InputDateTime
+              minDate={
+                timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+              }
+              onChange={(date) =>
               date
                 ? setEndTimestamp(
                     timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
                   )
                 : setEndTimestamp(undefined)
-            }
-            value={
-              timezone === 'Local'
-                ? endTimestamp
-                : endTimestamp
-                ? new Date(endTimestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
-                : undefined
-            }
-          />
-        </FormControl>
+              }
+              value={
+                timezone === 'Local'
+                  ? endTimestamp
+                  : endTimestamp
+                  ? new Date(endTimestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                  : undefined
+              }
+            />
+          </FormControl>
+        </Conditional>
+        <Conditional test={limitType === 'count_limited'}>
+          <NumberInput {...tokenCountLimitState} isRequired />
+        </Conditional>
       </FormGroup>
       <TextInput className="pr-4 pl-4 mt-3" {...paymentAddressState} />
     </div>

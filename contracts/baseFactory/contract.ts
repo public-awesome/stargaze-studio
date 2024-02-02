@@ -70,8 +70,8 @@ export const baseFactory = (client: SigningCosmWasmClient, txSigner: string): Ba
       )
 
       return {
-        baseMinterAddress: result.logs[0].events[5].attributes[0].value,
-        sg721Address: result.logs[0].events[5].attributes[2].value,
+        baseMinterAddress: result.logs[0].events[16].attributes[0].value,
+        sg721Address: result.logs[0].events[18].attributes[0].value,
         transactionHash: result.transactionHash,
         logs: result.logs,
       }
