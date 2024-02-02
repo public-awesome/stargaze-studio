@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
@@ -331,16 +332,20 @@ export const WhitelistDetails = ({
               htmlId="start-date"
               isRequired
               subtitle="Start time for minting tokens to whitelisted addresses"
-              title={`Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              title={`Whitelist Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
             >
               <InputDateTime
                 minDate={
                   timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
                 }
                 onChange={(date) =>
-                  setStartDate(
-                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                  )
+                  date
+                    ? setStartDate(
+                        timezone === 'Local'
+                          ? date
+                          : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                      )
+                    : setStartDate(undefined)
                 }
                 value={
                   timezone === 'Local'
@@ -354,17 +359,21 @@ export const WhitelistDetails = ({
             <FormControl
               htmlId="end-date"
               isRequired
-              subtitle="End time for minting tokens to whitelisted addresses"
-              title={`End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              subtitle="Whitelist End Time dictates when public sales will start"
+              title={`Whitelist End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
             >
               <InputDateTime
                 minDate={
                   timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
                 }
                 onChange={(date) =>
-                  setEndDate(
-                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                  )
+                  date
+                    ? setEndDate(
+                        timezone === 'Local'
+                          ? date
+                          : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                      )
+                    : setEndDate(undefined)
                 }
                 value={
                   timezone === 'Local'

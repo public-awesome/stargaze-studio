@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
 import { Conditional } from 'components/Conditional'
 import { FormControl } from 'components/FormControl'
@@ -175,9 +176,11 @@ export const MintingDetails = ({
               timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
             }
             onChange={(date) =>
-              setTimestamp(
-                timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-              )
+              date
+                ? setTimestamp(
+                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  )
+                : setTimestamp(undefined)
             }
             value={
               timezone === 'Local'
@@ -188,6 +191,7 @@ export const MintingDetails = ({
             }
           />
         </FormControl>
+
         <div className="flex-row mt-2 w-full form-control">
           <h1 className="mt-2 font-bold text-md">Limit Type: </h1>
           <label className="justify-start ml-6 cursor-pointer label">
@@ -225,9 +229,13 @@ export const MintingDetails = ({
                 timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
               }
               onChange={(date) =>
-                setEndTimestamp(
-                  timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                )
+                date
+                  ? setEndTimestamp(
+                      timezone === 'Local'
+                        ? date
+                        : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                    )
+                  : setEndTimestamp(undefined)
               }
               value={
                 timezone === 'Local'
