@@ -1908,6 +1908,7 @@ const CollectionCreationPage: NextPage = () => {
             <Conditional test={minterType === 'vending'}>
               <MintingDetails
                 importedMintingDetails={importedDetails?.mintingDetails}
+                isPresale={whitelistDetails?.whitelistState === 'new'}
                 minimumMintPrice={
                   whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
                     ? Number(minimumFlexMintPrice) / 1000000
@@ -1919,6 +1920,7 @@ const CollectionCreationPage: NextPage = () => {
                 numberOfTokens={uploadDetails?.assetFiles.length}
                 onChange={setMintingDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
+                whitelistStartDate={whitelistDetails?.startTime}
               />
             </Conditional>
           </div>
