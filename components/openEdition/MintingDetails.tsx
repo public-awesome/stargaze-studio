@@ -229,11 +229,13 @@ export const MintingDetails = ({
                 timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
               }
               onChange={(date) =>
-              date
-                ? setEndTimestamp(
-                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                  )
-                : setEndTimestamp(undefined)
+                date
+                  ? setEndTimestamp(
+                      timezone === 'Local'
+                        ? date
+                        : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                    )
+                  : setEndTimestamp(undefined)
               }
               value={
                 timezone === 'Local'
