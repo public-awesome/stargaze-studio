@@ -332,7 +332,7 @@ export const WhitelistDetails = ({
               htmlId="start-date"
               isRequired
               subtitle="Start time for minting tokens to whitelisted addresses"
-              title={`Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              title={`Whitelist Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
             >
               <InputDateTime
                 minDate={
@@ -359,8 +359,8 @@ export const WhitelistDetails = ({
             <FormControl
               htmlId="end-date"
               isRequired
-              subtitle="End time for minting tokens to whitelisted addresses"
-              title={`End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              subtitle="Whitelist End Time dictates when public sales will start"
+              title={`Whitelist End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
             >
               <InputDateTime
                 minDate={

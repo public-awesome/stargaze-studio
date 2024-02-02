@@ -23,6 +23,8 @@ interface MintingDetailsProps {
   minimumMintPrice: number
   mintingTokenFromFactory?: TokenInfo
   importedMintingDetails?: MintingDetailsDataProps
+  isPresale: boolean
+  whitelistStartDate?: string
 }
 
 export interface MintingDetailsDataProps {
@@ -41,6 +43,8 @@ export const MintingDetails = ({
   minimumMintPrice,
   mintingTokenFromFactory,
   importedMintingDetails,
+  isPresale,
+  whitelistStartDate,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
   const { timezone } = useGlobalSettings()
@@ -130,6 +134,12 @@ export const MintingDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedMintingDetails])
 
+  useEffect(() => {
+    if (isPresale) {
+      setTimestamp(whitelistStartDate ? new Date(Number(whitelistStartDate) / 1_000_000) : undefined)
+    }
+  }, [whitelistStartDate, isPresale])
+
   return (
     <div>
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
@@ -163,10 +173,13 @@ export const MintingDetails = ({
         <FormControl
           htmlId="timestamp"
           isRequired
-          subtitle={`Minting start time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+          subtitle={`Minting start time ${isPresale ? '(is dictated by whitelist start time)' : ''} ${
+            timezone === 'Local' ? '(local)' : '(UTC)'
+          }`}
           title="Start Time"
         >
           <InputDateTime
+            disabled={isPresale}
             minDate={
               timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
             }
