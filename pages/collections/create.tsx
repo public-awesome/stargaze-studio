@@ -161,7 +161,7 @@ const CollectionCreationPage: NextPage = () => {
   const [baseTokenUri, setBaseTokenUri] = useState<string | null>(null)
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
-  const [isMatchingVendingFactoryPresent, setIsMatchingVendingFactoryPresent] = useState<boolean>(false)
+  const [isMatchingVendingFactoryPresent, setIsMatchingVendingFactoryPresent] = useState<boolean>(true)
 
   const performVendingMinterChecks = () => {
     try {

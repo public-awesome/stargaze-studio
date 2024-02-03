@@ -2,7 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 export const checkTokenUri = async (tokenUri: string, isBaseTokenUri?: boolean) => {
   if (isBaseTokenUri) {
-    await fetch(tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/').concat(tokenUri.endsWith('/') ? '1' : '/1'))
+    await fetch(
+      tokenUri
+        .replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/')
+        .concat(tokenUri.endsWith('/') ? '1' : '/1'),
+    )
       .then((res) =>
         res
           .json()
@@ -22,7 +26,9 @@ export const checkTokenUri = async (tokenUri: string, isBaseTokenUri?: boolean) 
       )
       .catch(async () => {
         await fetch(
-          tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/').concat(tokenUri.endsWith('/') ? '1.json' : '/1.json'),
+          tokenUri
+            .replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/')
+            .concat(tokenUri.endsWith('/') ? '1.json' : '/1.json'),
         )
           .then((response) =>
             response
@@ -48,7 +54,7 @@ export const checkTokenUri = async (tokenUri: string, isBaseTokenUri?: boolean) 
           })
       })
   } else {
-    await fetch(tokenUri.replace('ipfs://', 'https://ipfs.io/ipfs/'))
+    await fetch(tokenUri.replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/'))
       .then((res) =>
         res
           .json()
