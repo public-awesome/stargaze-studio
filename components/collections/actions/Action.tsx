@@ -458,6 +458,28 @@ export const CollectionActions = ({
     setAirdropAllocationArray(data)
   }
 
+  const downloadSampleAirdropTokensFile = () => {
+    const csvData =
+      'address,amount\nstars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,3\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,1\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,2'
+    const blob = new Blob([csvData], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'airdrop_tokens.csv')
+    a.click()
+  }
+
+  const downloadSampleAirdropSpecificTokensFile = () => {
+    const csvData =
+      'address,tokenId\nstars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,214\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,683\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,102'
+    const blob = new Blob([csvData], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'airdrop_specific_tokens.csv')
+    a.click()
+  }
+
   return (
     <form>
       <div className="grid grid-cols-2 mt-4">
@@ -547,18 +569,30 @@ export const CollectionActions = ({
             </div>
           )}
           {showAirdropFileField && (
-            <FormGroup
-              subtitle={`CSV file that contains the ${
-                type === 'batch_transfer_multi_address' ? '' : 'airdrop'
-              } addresses and the ${
-                type === 'airdrop' || type === 'airdrop_open_edition' ? 'amount of tokens' : 'token ID'
-              } allocated for each address. Should start with the following header row: ${
-                type === 'airdrop' || type === 'airdrop_open_edition' ? 'address,amount' : 'address,tokenId'
-              }`}
-              title={`${type === 'batch_transfer_multi_address' ? 'Multi-Recipient Transfer File' : 'Airdrop File'}`}
-            >
-              <AirdropUpload onChange={airdropFileOnChange} />
-            </FormGroup>
+            <div>
+              <FormGroup
+                subtitle={`CSV file that contains the ${
+                  type === 'batch_transfer_multi_address' ? '' : 'airdrop'
+                } addresses and the ${
+                  type === 'airdrop' || type === 'airdrop_open_edition' ? 'amount of tokens' : 'token ID'
+                } allocated for each address. Should start with the following header row: ${
+                  type === 'airdrop' || type === 'airdrop_open_edition' ? 'address,amount' : 'address,tokenId'
+                }`}
+                title={`${type === 'batch_transfer_multi_address' ? 'Multi-Recipient Transfer File' : 'Airdrop File'}`}
+              >
+                <AirdropUpload onChange={airdropFileOnChange} />
+              </FormGroup>
+              <Button
+                className="ml-4 text-sm"
+                onClick={
+                  type === 'airdrop' || type === 'airdrop_open_edition'
+                    ? downloadSampleAirdropTokensFile
+                    : downloadSampleAirdropSpecificTokensFile
+                }
+              >
+                Download Sample File
+              </Button>
+            </div>
           )}
           <Conditional test={showDateField}>
             <FormControl
