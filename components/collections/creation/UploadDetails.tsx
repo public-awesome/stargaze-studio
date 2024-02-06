@@ -30,6 +30,8 @@ import type { BaseMinterAcquisitionMethod } from './BaseMinterDetails'
 
 export type UploadMethod = 'new' | 'existing'
 
+export type ApiKeyInputMethod = 'manual' | 'default'
+
 interface UploadDetailsProps {
   onChange: (value: UploadDetailsDataProps) => void
   minterType: MinterType
@@ -66,6 +68,7 @@ export const UploadDetails = ({
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
+  const [apiKeyInputMethod, setApiKeyInputMethod] = useState<ApiKeyInputMethod>('default')
 
   const [baseMinterMetadataFile, setBaseMinterMetadataFile] = useState<File | undefined>()
 
