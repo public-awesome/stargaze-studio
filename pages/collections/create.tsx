@@ -1307,7 +1307,7 @@ const CollectionCreationPage: NextPage = () => {
       setMintTokenFromVendingFactory(
         tokensList.find((token) => token.denom === vendingFactoryParameters?.params?.min_mint_price?.denom),
       )
-    } else {
+    } else if (mintingDetails?.selectedMintToken && whitelistDetails?.whitelistState) {
       setIsMatchingVendingFactoryPresent(false)
     }
   }, [
