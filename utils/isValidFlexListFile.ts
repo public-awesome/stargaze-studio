@@ -4,14 +4,14 @@ import { toast } from 'react-hot-toast'
 import { isValidAddress } from './isValidAddress'
 
 export const isValidFlexListFile = (file: WhitelistFlexMember[]) => {
-  let sumOfAmounts = 0
-  file.forEach((allocation) => {
-    sumOfAmounts += Number(allocation.mint_count)
-  })
-  if (sumOfAmounts > 10000) {
-    toast.error(`Total mint count should be less than 10000 tokens (current count: ${sumOfAmounts}))`)
-    return false
-  }
+  // let sumOfAmounts = 0
+  // file.forEach((allocation) => {
+  //   sumOfAmounts += Number(allocation.mint_count)
+  // })
+  // if (sumOfAmounts > 10000) {
+  //   toast.error(`Total mint count should be less than 10000 tokens (current count: ${sumOfAmounts}))`)
+  //   return false
+  // }
 
   const checks = file.map((account) => {
     // Check if address is valid bech32 address
