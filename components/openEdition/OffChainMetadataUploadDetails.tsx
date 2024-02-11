@@ -18,6 +18,7 @@ import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
+import { NFT_STORAGE_DEFAULT_API_KEY } from 'utils/constants'
 import type { AssetType } from 'utils/getAssetType'
 import { getAssetType } from 'utils/getAssetType'
 import { uid } from 'utils/random'
@@ -64,6 +65,7 @@ export const OffChainMetadataUploadDetails = ({
   const [refreshMetadata, setRefreshMetadata] = useState(false)
   const [exportedMetadata, setExportedMetadata] = useState(undefined)
   const [openEditionMinterMetadataFile, setOpenEditionMinterMetadataFile] = useState<File | undefined>()
+  const [useDefaultApiKey, setUseDefaultApiKey] = useState(false)
 
   const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html', 'document']
 
@@ -297,6 +299,14 @@ export const OffChainMetadataUploadDetails = ({
     }
   }, [importedOffChainMetadataUploadDetails])
 
+  useEffect(() => {
+    if (useDefaultApiKey) {
+      nftStorageApiKeyState.onChange(NFT_STORAGE_DEFAULT_API_KEY || '')
+    } else {
+      nftStorageApiKeyState.onChange('')
+    }
+  }, [useDefaultApiKey])
+
   return (
     <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">
       <div className="flex justify-center">
@@ -415,7 +425,22 @@ export const OffChainMetadataUploadDetails = ({
 
               <div className="flex w-full">
                 <Conditional test={uploadService === 'nft-storage'}>
-                  <TextInput {...nftStorageApiKeyState} className="w-full" />
+                  <div className="flex-col w-full">
+                    <TextInput {...nftStorageApiKeyState} className="w-full" disabled={useDefaultApiKey} />
+                    <div className="flex-row mt-2 w-full form-control">
+                      <label className="cursor-pointer label">
+                        <span className="mr-2 font-bold">Use Default API Key</span>
+                        <input
+                          checked={useDefaultApiKey}
+                          className={`${useDefaultApiKey ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+                          onClick={() => {
+                            setUseDefaultApiKey(!useDefaultApiKey)
+                          }}
+                          type="checkbox"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </Conditional>
                 <Conditional test={uploadService === 'pinata'}>
                   <TextInput {...pinataApiKeyState} className="w-full" />

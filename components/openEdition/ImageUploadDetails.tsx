@@ -14,6 +14,7 @@ import type { ChangeEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
+import { NFT_STORAGE_DEFAULT_API_KEY } from 'utils/constants'
 import type { AssetType } from 'utils/getAssetType'
 import { getAssetType } from 'utils/getAssetType'
 
@@ -43,6 +44,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
   const [isThumbnailCompatible, setIsThumbnailCompatible] = useState<boolean>(false)
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
   const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
+  const [useDefaultApiKey, setUseDefaultApiKey] = useState(false)
 
   const assetFileRef = useRef<HTMLInputElement | null>(null)
   const thumbnailFileRef = useRef<HTMLInputElement | null>(null)
@@ -191,6 +193,14 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
       coverImageUrlState.onChange(importedImageUploadDetails.coverImageUrl || '')
     }
   }, [importedImageUploadDetails])
+
+  useEffect(() => {
+    if (useDefaultApiKey) {
+      nftStorageApiKeyState.onChange(NFT_STORAGE_DEFAULT_API_KEY || '')
+    } else {
+      nftStorageApiKeyState.onChange('')
+    }
+  }, [useDefaultApiKey])
 
   const previewUrl = imageUrlState.value.toLowerCase().trim().startsWith('ipfs://')
     ? `https://ipfs-gw.stargaze-apis.com/ipfs/${imageUrlState.value.substring(7)}`
@@ -343,7 +353,22 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
 
               <div className="flex w-full">
                 <Conditional test={uploadService === 'nft-storage'}>
-                  <TextInput {...nftStorageApiKeyState} className="w-full" />
+                  <div className="flex-col w-full">
+                    <TextInput {...nftStorageApiKeyState} className="w-full" disabled={useDefaultApiKey} />
+                    <div className="flex-row mt-2 w-full form-control">
+                      <label className="cursor-pointer label">
+                        <span className="mr-2 font-bold">Use Default API Key</span>
+                        <input
+                          checked={useDefaultApiKey}
+                          className={`${useDefaultApiKey ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+                          onClick={() => {
+                            setUseDefaultApiKey(!useDefaultApiKey)
+                          }}
+                          type="checkbox"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </Conditional>
                 <Conditional test={uploadService === 'pinata'}>
                   <TextInput {...pinataApiKeyState} className="w-full" />
