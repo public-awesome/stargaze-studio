@@ -1,5 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable no-nested-ternary */
+import { Button } from 'components/Button'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { AddressList } from 'components/forms/AddressList'
@@ -100,6 +101,28 @@ export const WhitelistDetails = ({
 
   const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
     setWhitelistFlexArray(whitelistData)
+  }
+
+  const downloadSampleWhitelistFlexFile = () => {
+    const csvData =
+      'address,mint_count\nstars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,3\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,1\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,2'
+    const blob = new Blob([csvData], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'sample_whitelist_flex.csv')
+    a.click()
+  }
+
+  const downloadSampleWhitelistFile = () => {
+    const txtData =
+      'stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3'
+    const blob = new Blob([txtData], { type: 'text/txt' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'sample_whitelist.txt')
+    a.click()
   }
 
   useEffect(() => {
@@ -399,7 +422,17 @@ export const WhitelistDetails = ({
               />
             </div>
             <Conditional test={whitelistType === 'standard'}>
-              <FormGroup subtitle="TXT file that contains the whitelisted addresses" title="Whitelist File">
+              <FormGroup
+                subtitle={
+                  <div>
+                    <span>TXT file that contains the whitelisted addresses</span>
+                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFile}>
+                      Download Sample File
+                    </Button>
+                  </div>
+                }
+                title="Whitelist File"
+              >
                 <WhitelistUpload onChange={whitelistFileOnChange} />
               </FormGroup>
               <Conditional test={whitelistStandardArray.length > 0}>
@@ -408,7 +441,14 @@ export const WhitelistDetails = ({
             </Conditional>
             <Conditional test={whitelistType === 'flex'}>
               <FormGroup
-                subtitle="CSV file that contains the whitelisted addresses and their corresponding mint counts"
+                subtitle={
+                  <div>
+                    <span>CSV file that contains the whitelisted addresses and corresponding mint counts</span>
+                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
+                      Download Sample File
+                    </Button>
+                  </div>
+                }
                 title="Whitelist File"
               >
                 <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
