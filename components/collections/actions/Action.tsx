@@ -212,8 +212,8 @@ export const CollectionActions = ({
         if (contractInfoResponse !== undefined) {
           const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          if (contractInfo && !contractInfo.contract.includes('splits'))
-            throw new Error('The provided royalty payment address does not belong to a splits contract.')
+          if (contractInfo && (contractInfo.contract.includes('minter') || contractInfo.contract.includes('sg721')))
+            throw new Error('The provided royalty payment address does not belong to a compatible contract.')
           else console.log(contractInfo)
         }
       }
@@ -221,6 +221,7 @@ export const CollectionActions = ({
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',
+
         success: (tx) => `Transaction ${tx} success!`,
       })
       if (txHash) {
