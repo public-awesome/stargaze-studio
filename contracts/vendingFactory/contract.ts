@@ -63,8 +63,8 @@ export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string):
       const result = await client.execute(senderAddress, contractAddress, msg, 'auto', '', funds)
 
       return {
-        vendingMinterAddress: result.logs[0].events[16].attributes[0].value,
-        sg721Address: result.logs[0].events[18].attributes[0].value,
+        vendingMinterAddress: result.logs[0].events[5].attributes[0].value,
+        sg721Address: result.logs[0].events[5].attributes[2].value,
         transactionHash: result.transactionHash,
         logs: result.logs,
       }
