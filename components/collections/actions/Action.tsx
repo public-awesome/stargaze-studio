@@ -3,6 +3,7 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import clsx from 'clsx'
 import { AirdropUpload } from 'components/AirdropUpload'
+import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import type { DispatchExecuteArgs } from 'components/collections/actions/actions'
 import { dispatchExecute, isEitherType, previewExecutePayload } from 'components/collections/actions/actions'
@@ -663,6 +664,11 @@ export const CollectionActions = ({
                 </label>
               </div>
             </Tooltip>
+          </Conditional>
+          <Conditional test={type === 'update_collection_info'}>
+            <Alert className="mt-2 text-sm" type="info">
+              Please note that you are only required to fill in the fields you want to update.
+            </Alert>
           </Conditional>
         </div>
         <div className="-mt-6">
