@@ -73,7 +73,7 @@ const RemoveOfferPage: NextPage = () => {
         wallet.address as string,
         NETWORK === 'mainnet'
           ? 'stars1fvhcnyddukcqfnt7nlwv3thm5we22lyxyxylr9h77cvgkcn43xfsvgv0pl'
-          : 'stars1dnadsd7tx0dmnpp26ms7d66zsp7tduygwjgfjzueh0lg9t5lq5vq9kn47c',
+          : 'stars18cszlvm6pze0x9sz32qnjq4vtd45xehqs8dq7cwy8yhq35wfnn3qgzs5gu',
         {
           remove_collection_bid: {
             collection: collectionAddressState.value,
