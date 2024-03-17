@@ -30,6 +30,7 @@ const Holders: NextPage = () => {
 
   const [includeStaked, setIncludeStaked] = useState<boolean>(true)
   const [includeListed, setIncludeListed] = useState<boolean>(true)
+  const [includeInPool, setIncludeInPool] = useState<boolean>(true)
   const [exportIndividualTokens, setExportIndividualTokens] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -84,6 +85,17 @@ const Holders: NextPage = () => {
             />
           </label>
           <label className="justify-start cursor-pointer label w-2/5">
+            <span className="mr-2 font-bold">Include tokens in Infinity Pools</span>
+            <input
+              checked={includeInPool}
+              className={`${includeInPool ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+              onClick={() => {
+                setIncludeInPool(!includeInPool)
+              }}
+              type="checkbox"
+            />
+          </label>
+          <label className="justify-start cursor-pointer label w-2/5">
             <span className="mr-2 font-bold">Export by Token ID</span>
             <input
               checked={exportIndividualTokens}
@@ -122,6 +134,8 @@ const Holders: NextPage = () => {
                   ?.map((row: any) => {
                     if (!includeListed && row.is_listed) return ''
                     if (!includeStaked && row.is_staked) return ''
+                    if (!includeInPool && row.is_in_pool) return ''
+                    if (row.owner_addr === null) return ''
                     return `${row.owner_addr},${row.token_id}\n`
                   })
                   .join('')}`
@@ -133,6 +147,8 @@ const Holders: NextPage = () => {
               data.forEach((row: any) => {
                 if (!includeListed && row.is_listed) return
                 if (!includeStaked && row.is_staked) return
+                if (!includeInPool && row.is_in_pool) return
+                if (row.owner_addr === null) return
                 const existingRow = aggregatedData.find((r) => r.address === row.owner_addr)
                 if (existingRow) {
                   existingRow.amount += 1
