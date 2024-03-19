@@ -1,6 +1,10 @@
 import {
+  FEATURED_IBC_TIA_FACTORY_ADDRESS,
+  FEATURED_IBC_USDC_FACTORY_ADDRESS,
   FEATURED_VENDING_FACTORY_ADDRESS,
   FEATURED_VENDING_FACTORY_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
@@ -8,6 +12,7 @@ import {
   OPEN_EDITION_IBC_HUAHUA_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
+  OPEN_EDITION_IBC_TIA_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
@@ -16,6 +21,7 @@ import {
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_NBTC_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_IBC_TIA_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_USK_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
@@ -36,6 +42,10 @@ import {
   VENDING_IBC_NBTC_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_NBTC_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_NBTC_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_TIA_FACTORY_ADDRESS,
+  VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_TIA_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_IBC_TIA_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
   VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
@@ -60,6 +70,7 @@ import {
   ibcHuahua,
   ibcKuji,
   ibcNbtc,
+  ibcTia,
   ibcUsdc,
   ibcUsk,
   nativeBrnch,
@@ -116,6 +127,14 @@ export const openEditionIbcUsdcMinter: MinterInfo = {
   featured: false,
 }
 
+export const openEditionIbcTiaMinter: MinterInfo = {
+  id: 'open-edition-ibc-tia-minter',
+  factoryAddress: OPEN_EDITION_IBC_TIA_FACTORY_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  featured: false,
+}
+
 export const openEditionIbcNbtcMinter: MinterInfo = {
   id: 'open-edition-ibc-nbtc-minter',
   factoryAddress: OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
@@ -128,6 +147,14 @@ export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'open-edition-updatable-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_UPDATABLE_IBC_USDC_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
+  updatable: true,
+  featured: false,
+}
+
+export const openEditionUpdatableIbcTiaMinter: MinterInfo = {
+  id: 'open-edition-updatable-ibc-tia-minter',
+  factoryAddress: OPEN_EDITION_UPDATABLE_IBC_TIA_FACTORY_ADDRESS,
+  supportedToken: ibcTia,
   updatable: true,
   featured: false,
 }
@@ -221,6 +248,8 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcFrnzMinter,
   openEditionIbcUsdcMinter,
   openEditionUpdatableIbcUsdcMinter,
+  openEditionIbcTiaMinter,
+  openEditionUpdatableIbcTiaMinter,
   openEditionIbcNbtcMinter,
   openEditionUpdatableIbcNbtcMinter,
   openEditionIbcUskMinter,
@@ -286,6 +315,33 @@ export const vendingIbcUsdcMinter: MinterInfo = {
   featured: false,
 }
 
+export const vendingFeaturedIbcUsdcMinter: MinterInfo = {
+  id: 'vending-featured-ibc-usdc-minter',
+  factoryAddress: FEATURED_IBC_USDC_FACTORY_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: false,
+  flexible: false,
+  featured: true,
+}
+
+export const vendingIbcTiaMinter: MinterInfo = {
+  id: 'vending-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_FACTORY_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: false,
+  featured: false,
+}
+
+export const vendingFeaturedIbcTiaMinter: MinterInfo = {
+  id: 'vending-featured-ibc-tia-minter',
+  factoryAddress: FEATURED_IBC_TIA_FACTORY_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: false,
+  featured: true,
+}
+
 export const vendingIbcNbtcMinter: MinterInfo = {
   id: 'vending-ibc-nbtc-minter',
   factoryAddress: VENDING_IBC_NBTC_FACTORY_ADDRESS,
@@ -299,6 +355,15 @@ export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'vending-updatable-ibc-usdc-minter',
   factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: ibcUsdc,
+  updatable: true,
+  flexible: false,
+  featured: false,
+}
+
+export const vendingUpdatableIbcTiaMinter: MinterInfo = {
+  id: 'vending-updatable-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: ibcTia,
   updatable: true,
   flexible: false,
   featured: false,
@@ -401,7 +466,11 @@ export const vendingMinterList = [
   vendingIbcAtomMinter,
   vendingUpdatableIbcAtomMinter,
   vendingIbcUsdcMinter,
+  vendingFeaturedIbcUsdcMinter,
   vendingUpdatableIbcUsdcMinter,
+  vendingIbcTiaMinter,
+  vendingFeaturedIbcTiaMinter,
+  vendingUpdatableIbcTiaMinter,
   vendingIbcNbtcMinter,
   vendingUpdatableIbcNbtcMinter,
   vendingIbcUskMinter,
@@ -469,6 +538,33 @@ export const flexibleVendingIbcUsdcMinter: MinterInfo = {
   featured: false,
 }
 
+export const flexibleFeaturedVendingIbcUsdcMinter: MinterInfo = {
+  id: 'flexible-featured-vending-ibc-usdc-minter',
+  factoryAddress: FEATURED_VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: false,
+  flexible: true,
+  featured: true,
+}
+
+export const flexibleVendingIbcTiaMinter: MinterInfo = {
+  id: 'flexible-vending-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: true,
+  featured: false,
+}
+
+export const flexibleFeaturedVendingIbcTiaMinter: MinterInfo = {
+  id: 'flexible-featured-vending-ibc-tia-minter',
+  factoryAddress: FEATURED_VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: true,
+  featured: true,
+}
+
 export const flexibleVendingIbcNbtcMinter: MinterInfo = {
   id: 'flexible-vending-ibc-nbtc-minter',
   factoryAddress: VENDING_IBC_NBTC_FACTORY_FLEX_ADDRESS,
@@ -482,6 +578,15 @@ export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
   id: 'flexible-vending-updatable-ibc-usdc-minter',
   factoryAddress: VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
   supportedToken: ibcUsdc,
+  updatable: true,
+  flexible: true,
+  featured: false,
+}
+
+export const flexibleVendingUpdatableIbcTiaMinter: MinterInfo = {
+  id: 'flexible-vending-updatable-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcTia,
   updatable: true,
   flexible: true,
   featured: false,
@@ -566,7 +671,11 @@ export const flexibleVendingMinterList = [
   flexibleVendingIbcAtomMinter,
   flexibleVendingUpdatableIbcAtomMinter,
   flexibleVendingIbcUsdcMinter,
+  flexibleFeaturedVendingIbcUsdcMinter,
   flexibleVendingUpdatableIbcUsdcMinter,
+  flexibleVendingIbcTiaMinter,
+  flexibleFeaturedVendingIbcTiaMinter,
+  flexibleVendingUpdatableIbcTiaMinter,
   flexibleVendingIbcNbtcMinter,
   flexibleVendingUpdatableIbcNbtcMinter,
   flexibleVendingIbcUskMinter,
