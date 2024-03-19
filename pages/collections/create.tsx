@@ -582,6 +582,7 @@ const CollectionCreationPage: NextPage = () => {
             : mintingDetails?.selectedMintToken?.displayName === 'STRDST' ||
               mintingDetails?.selectedMintToken?.displayName === 'USK' ||
               mintingDetails?.selectedMintToken?.displayName === 'USDC' ||
+              mintingDetails?.selectedMintToken?.displayName === 'TIA' ||
               mintingDetails?.selectedMintToken?.displayName === 'nBTC' ||
               mintingDetails?.selectedMintToken?.displayName === 'KUJI' ||
               mintingDetails?.selectedMintToken?.displayName === 'HUAHUA' ||
