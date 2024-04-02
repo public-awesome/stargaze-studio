@@ -628,7 +628,7 @@ export const OpenEditionMinterCreator = ({
           num_tokens:
             mintingDetails?.limitType === ('count_limited' as LimitType) ? mintingDetails.tokenCountLimit : null,
           payment_address: mintingDetails?.paymentAddress || null,
-          whitelist: null,
+          // whitelist: null,
         },
         collection_params: {
           code_id: collectionDetails?.updatable
