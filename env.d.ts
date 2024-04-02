@@ -22,6 +22,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_OPEN_EDITION_SG721_UPDATABLE_CODE_ID: string
     readonly NEXT_PUBLIC_WHITELIST_CODE_ID: string
     readonly NEXT_PUBLIC_WHITELIST_FLEX_CODE_ID: string
+    readonly NEXT_PUBLIC_WHITELIST_MERKLE_TREE_CODE_ID: string
     readonly NEXT_PUBLIC_VENDING_MINTER_CODE_ID: string
     readonly NEXT_PUBLIC_VENDING_MINTER_FLEX_CODE_ID: string
     readonly NEXT_PUBLIC_VENDING_FACTORY_ADDRESS: string
@@ -114,6 +115,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_STARGAZE_WEBSITE_URL: string
     readonly NEXT_PUBLIC_WEBSITE_URL: string
     readonly NEXT_PUBLIC_SYNC_COLLECTIONS_API_URL: string
+    readonly NEXT_PUBLIC_WHITELIST_MERKLE_TREE_API_URL: string
     readonly NEXT_PUBLIC_NFT_STORAGE_DEFAULT_API_KEY: string
 
     readonly NEXT_PUBLIC_MEILISEARCH_HOST: string
