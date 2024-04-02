@@ -34,7 +34,12 @@ import { FormControl } from 'components/FormControl'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
-import { flexibleVendingMinterList, openEditionMinterList, vendingMinterList } from 'config/minter'
+import {
+  flexibleVendingMinterList,
+  merkleTreeVendingMinterList,
+  openEditionMinterList,
+  vendingMinterList,
+} from 'config/minter'
 import type { TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
@@ -67,6 +72,8 @@ import {
   VENDING_FACTORY_UPDATABLE_ADDRESS,
   WHITELIST_CODE_ID,
   WHITELIST_FLEX_CODE_ID,
+  WHITELIST_MERKLE_TREE_API_URL,
+  WHITELIST_MERKLE_TREE_CODE_ID,
 } from 'utils/constants'
 import { checkTokenUri } from 'utils/isValidTokenUri'
 import { withMetadata } from 'utils/layout'
@@ -88,6 +95,7 @@ const CollectionCreationPage: NextPage = () => {
     baseMinter: baseMinterContract,
     vendingMinter: vendingMinterContract,
     whitelist: whitelistContract,
+    whitelistMerkleTree: whitelistMerkleTreeContract,
     vendingFactory: vendingFactoryContract,
     baseFactory: baseFactoryContract,
   } = useContracts()
@@ -513,41 +521,84 @@ const CollectionCreationPage: NextPage = () => {
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!whitelistContract) throw new Error('Contract not found')
 
-    const standardMsg = {
-      members: whitelistDetails?.members,
-      start_time: whitelistDetails?.startTime,
-      end_time: whitelistDetails?.endTime,
-      mint_price: coin(
-        String(Number(whitelistDetails?.unitPrice)),
-        mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
-      ),
-      per_address_limit: whitelistDetails?.perAddressLimit,
-      member_limit: whitelistDetails?.memberLimit,
-      admins: whitelistDetails?.admins || [wallet.address],
-      admins_mutable: whitelistDetails?.adminsMutable,
+    if (whitelistDetails?.whitelistType === 'standard' || whitelistDetails?.whitelistType === 'flex') {
+      const standardMsg = {
+        members: whitelistDetails.members,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+        ),
+        per_address_limit: whitelistDetails.perAddressLimit,
+        member_limit: whitelistDetails.memberLimit,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const flexMsg = {
+        members: whitelistDetails.members,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+        ),
+        member_limit: whitelistDetails.memberLimit,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const data = await whitelistContract.instantiate(
+        whitelistDetails.whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
+        whitelistDetails.whitelistType === 'standard' ? standardMsg : flexMsg,
+        'Stargaze Whitelist Contract',
+        wallet.address,
+      )
+
+      return data.contractAddress
+    } else if (whitelistDetails?.whitelistType === 'merkletree') {
+      const members = whitelistDetails.members as string[]
+      const membersCsv = members.join('\n')
+      const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
+      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
+      const formData = new FormData()
+      formData.append('whitelist', membersFile)
+      const response = await axios
+        .post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .catch((error) => {
+          console.log('error', error)
+          throw new Error('Error fetching root hash from Whitelist Merkle Tree API.')
+        })
+      const rootHash = response.data.root_hash
+      console.log('rootHash', rootHash)
+
+      const merkleTreeMsg = {
+        merkle_root: rootHash,
+        merkle_tree_uri: null,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+        ),
+        per_address_limit: whitelistDetails.perAddressLimit,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const data = await whitelistMerkleTreeContract?.instantiate(
+        WHITELIST_MERKLE_TREE_CODE_ID,
+        merkleTreeMsg,
+        'Stargaze Whitelist Merkle Tree Contract',
+        wallet.address,
+      )
+      return data?.contractAddress
     }
-
-    const flexMsg = {
-      members: whitelistDetails?.members,
-      start_time: whitelistDetails?.startTime,
-      end_time: whitelistDetails?.endTime,
-      mint_price: coin(
-        String(Number(whitelistDetails?.unitPrice)),
-        mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
-      ),
-      member_limit: whitelistDetails?.memberLimit,
-      admins: whitelistDetails?.admins || [wallet.address],
-      admins_mutable: whitelistDetails?.adminsMutable,
-    }
-
-    const data = await whitelistContract.instantiate(
-      whitelistDetails?.whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
-      whitelistDetails?.whitelistType === 'standard' ? standardMsg : flexMsg,
-      'Stargaze Whitelist Contract',
-      wallet.address,
-    )
-
-    return data.contractAddress
   }
 
   const instantiateVendingMinter = async (baseUri: string, coverImageUri: string, whitelist?: string) => {
@@ -1047,6 +1098,8 @@ const CollectionCreationPage: NextPage = () => {
         //check if the address belongs to a whitelist contract (see performChecks())
         const config = await contract?.config()
         if (JSON.stringify(config).includes('whale_cap')) whitelistDetails.whitelistType = 'flex'
+        else if (!JSON.stringify(config).includes('member_limit') || config?.member_limit === 0)
+          whitelistDetails.whitelistType = 'merkletree'
         else whitelistDetails.whitelistType = 'standard'
         if (Number(config?.start_time) !== Number(mintingDetails?.startTime)) {
           const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
@@ -1084,7 +1137,10 @@ const CollectionCreationPage: NextPage = () => {
         (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
       )
         throw new Error('Per address limit is required')
-      if (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
+      if (
+        whitelistDetails.whitelistType !== 'merkletree' &&
+        (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
+      )
         throw new Error('Member limit is required')
       if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
         throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
@@ -1277,13 +1333,16 @@ const CollectionCreationPage: NextPage = () => {
     const client = await wallet.getCosmWasmClient()
     const vendingFactoryForSelectedDenom = vendingMinterList
       .concat(flexibleVendingMinterList)
+      .concat(merkleTreeVendingMinterList)
       .find(
         (minter) =>
           minter.supportedToken === mintingDetails?.selectedMintToken &&
           minter.updatable === collectionDetails?.updatable &&
           minter.flexible === (whitelistDetails?.whitelistType === 'flex') &&
+          minter.merkleTree === (whitelistDetails?.whitelistType === 'merkletree') &&
           minter.featured === isFeaturedCollection,
       )?.factoryAddress
+    console.log('Vending Factory: ', vendingFactoryForSelectedDenom)
 
     if (vendingFactoryForSelectedDenom) {
       setIsMatchingVendingFactoryPresent(true)

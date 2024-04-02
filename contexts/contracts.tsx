@@ -16,6 +16,7 @@ import type { UseVendingMinterContractProps } from 'contracts/vendingMinter'
 import { useVendingMinterContract } from 'contracts/vendingMinter'
 import type { UseWhiteListContractProps } from 'contracts/whitelist'
 import { useWhiteListContract } from 'contracts/whitelist'
+import { type UseWhiteListMerkleTreeContractProps, useWhiteListMerkleTreeContract } from 'contracts/whitelistMerkleTree'
 import type { ReactNode, VFC } from 'react'
 import { Fragment, useEffect } from 'react'
 import { create } from 'zustand'
@@ -32,6 +33,7 @@ export interface ContractsStore {
   baseMinter: UseBaseMinterContractProps | null
   openEditionMinter: UseOpenEditionMinterContractProps | null
   whitelist: UseWhiteListContractProps | null
+  whitelistMerkleTree: UseWhiteListMerkleTreeContractProps | null
   vendingFactory: UseVendingFactoryContractProps | null
   baseFactory: UseBaseFactoryContractProps | null
   openEditionFactory: UseOpenEditionFactoryContractProps | null
@@ -49,6 +51,7 @@ export const defaultValues: ContractsStore = {
   baseMinter: null,
   openEditionMinter: null,
   whitelist: null,
+  whitelistMerkleTree: null,
   vendingFactory: null,
   baseFactory: null,
   openEditionFactory: null,
@@ -83,6 +86,7 @@ const ContractsSubscription: VFC = () => {
   const baseMinter = useBaseMinterContract()
   const openEditionMinter = useOpenEditionMinterContract()
   const whitelist = useWhiteListContract()
+  const whitelistMerkleTree = useWhiteListMerkleTreeContract()
   const vendingFactory = useVendingFactoryContract()
   const baseFactory = useBaseFactoryContract()
   const openEditionFactory = useOpenEditionFactoryContract()
@@ -97,6 +101,7 @@ const ContractsSubscription: VFC = () => {
       baseMinter,
       openEditionMinter,
       whitelist,
+      whitelistMerkleTree,
       vendingFactory,
       baseFactory,
       openEditionFactory,
@@ -104,7 +109,20 @@ const ContractsSubscription: VFC = () => {
       splits,
       royaltyRegistry,
     })
-  }, [sg721, vendingMinter, baseMinter, whitelist, vendingFactory, baseFactory, badgeHub, splits, royaltyRegistry])
+  }, [
+    sg721,
+    vendingMinter,
+    baseMinter,
+    whitelist,
+    whitelistMerkleTree,
+    vendingFactory,
+    baseFactory,
+    badgeHub,
+    splits,
+    royaltyRegistry,
+    openEditionMinter,
+    openEditionFactory,
+  ])
 
   return null
 }
