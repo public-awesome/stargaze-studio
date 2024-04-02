@@ -26,6 +26,7 @@ import {
   OPEN_EDITION_UPDATABLE_IBC_USK_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
+  VENDING_FACTORY_MERKLE_TREE_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
   VENDING_FACTORY_UPDATABLE_FLEX_ADDRESS,
   VENDING_IBC_ATOM_FACTORY_ADDRESS,
@@ -44,6 +45,7 @@ import {
   VENDING_IBC_NBTC_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_TIA_FACTORY_ADDRESS,
   VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
   VENDING_IBC_TIA_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_TIA_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
@@ -84,6 +86,7 @@ export interface MinterInfo {
   supportedToken: TokenInfo
   updatable?: boolean
   flexible?: boolean
+  merkleTree?: boolean
   featured?: boolean
 }
 
@@ -267,6 +270,7 @@ export const vendingStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -276,6 +280,7 @@ export const vendingFeaturedStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: true,
 }
 
@@ -285,6 +290,7 @@ export const vendingUpdatableStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -294,6 +300,7 @@ export const vendingIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -303,6 +310,7 @@ export const vendingUpdatableIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -312,6 +320,7 @@ export const vendingIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -321,6 +330,7 @@ export const vendingFeaturedIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: true,
 }
 
@@ -330,6 +340,7 @@ export const vendingIbcTiaMinter: MinterInfo = {
   supportedToken: ibcTia,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -339,6 +350,7 @@ export const vendingFeaturedIbcTiaMinter: MinterInfo = {
   supportedToken: ibcTia,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: true,
 }
 
@@ -348,6 +360,7 @@ export const vendingIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -357,6 +370,7 @@ export const vendingUpdatableIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -366,6 +380,7 @@ export const vendingUpdatableIbcTiaMinter: MinterInfo = {
   supportedToken: ibcTia,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -375,6 +390,7 @@ export const vendingUpdatableIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -384,6 +400,7 @@ export const vendingIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -393,6 +410,7 @@ export const vendingUpdatableIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -402,6 +420,7 @@ export const vendingIbcKujiMinter: MinterInfo = {
   supportedToken: ibcKuji,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -411,6 +430,7 @@ export const vendingIbcHuahuaMinter: MinterInfo = {
   supportedToken: ibcHuahua,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -420,6 +440,7 @@ export const vendingIbcCrbrusMinter: MinterInfo = {
   supportedToken: ibcCrbrus,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -429,6 +450,7 @@ export const vendingNativeStardustMinter: MinterInfo = {
   supportedToken: nativeStardust,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -438,6 +460,7 @@ export const vendingUpdatableNativeStardustMinter: MinterInfo = {
   supportedToken: nativeStardust,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -447,6 +470,7 @@ export const vendingNativeBrnchMinter: MinterInfo = {
   supportedToken: nativeBrnch,
   updatable: false,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -456,6 +480,7 @@ export const vendingUpdatableNativeBrnchMinter: MinterInfo = {
   supportedToken: nativeBrnch,
   updatable: true,
   flexible: false,
+  merkleTree: false,
   featured: false,
 }
 
@@ -490,6 +515,7 @@ export const flexibleVendingStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -499,6 +525,7 @@ export const flexibleFeaturedVendingStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: true,
 }
 
@@ -508,6 +535,7 @@ export const flexibleVendingUpdatableStarsMinter: MinterInfo = {
   supportedToken: stars,
   updatable: true,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -517,6 +545,7 @@ export const flexibleVendingIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -526,6 +555,7 @@ export const flexibleVendingUpdatableIbcAtomMinter: MinterInfo = {
   supportedToken: ibcAtom,
   updatable: true,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -535,6 +565,7 @@ export const flexibleVendingIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -544,6 +575,7 @@ export const flexibleFeaturedVendingIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: true,
 }
 
@@ -553,6 +585,7 @@ export const flexibleVendingIbcTiaMinter: MinterInfo = {
   supportedToken: ibcTia,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -562,6 +595,7 @@ export const flexibleFeaturedVendingIbcTiaMinter: MinterInfo = {
   supportedToken: ibcTia,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: true,
 }
 
@@ -571,6 +605,7 @@ export const flexibleVendingIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -580,6 +615,7 @@ export const flexibleVendingUpdatableIbcUsdcMinter: MinterInfo = {
   supportedToken: ibcUsdc,
   updatable: true,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -589,6 +625,7 @@ export const flexibleVendingUpdatableIbcTiaMinter: MinterInfo = {
   supportedToken: ibcTia,
   updatable: true,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -598,6 +635,7 @@ export const flexibleVendingUpdatableIbcNbtcMinter: MinterInfo = {
   supportedToken: ibcNbtc,
   updatable: true,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -607,6 +645,7 @@ export const flexibleVendingIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -616,6 +655,7 @@ export const flexibleVendingUpdatableIbcUskMinter: MinterInfo = {
   supportedToken: ibcUsk,
   updatable: true,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -625,6 +665,7 @@ export const flexibleVendingIbcKujiMinter: MinterInfo = {
   supportedToken: ibcKuji,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -634,6 +675,7 @@ export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
   supportedToken: ibcHuahua,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -643,6 +685,7 @@ export const flexibleVendingIbcCrbrusMinter: MinterInfo = {
   supportedToken: ibcCrbrus,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -652,6 +695,7 @@ export const flexibleVendingStrdstMinter: MinterInfo = {
   supportedToken: nativeStardust,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -661,6 +705,7 @@ export const flexibleVendingBrnchMinter: MinterInfo = {
   supportedToken: nativeBrnch,
   updatable: false,
   flexible: true,
+  merkleTree: false,
   featured: false,
 }
 
@@ -686,3 +731,25 @@ export const flexibleVendingMinterList = [
   flexibleVendingStrdstMinter,
   flexibleVendingBrnchMinter,
 ]
+
+export const merkleTreeVendingStarsMinter: MinterInfo = {
+  id: 'merkletree-vending-stars-minter',
+  factoryAddress: VENDING_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeVendingIbcTiaMinter: MinterInfo = {
+  id: 'merkletree-vending-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeVendingMinterList = [merkleTreeVendingStarsMinter, merkleTreeVendingIbcTiaMinter]

@@ -78,7 +78,7 @@ export const WhitelistUpload = ({ onChange }: WhitelistUploadProps) => {
       const printableData = data?.map((item) => item.replace(regex, ''))
       const names = printableData?.filter((address) => address !== '' && address.endsWith('.stars'))
       const strippedNames = names?.map((name) => name.split('.')[0])
-      console.log(names)
+      console.log('names: ', names)
       if (strippedNames?.length) {
         await toast
           .promise(resolveAddresses(strippedNames), {

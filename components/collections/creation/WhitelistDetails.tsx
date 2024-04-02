@@ -181,7 +181,9 @@ export const WhitelistDetails = ({
     endDate,
     whitelistStandardArray,
     whitelistFlexArray,
+    whitelistMerkleTreeArray,
     whitelistState,
+    whitelistType,
     addressListState.values,
     adminsMutable,
   ])
