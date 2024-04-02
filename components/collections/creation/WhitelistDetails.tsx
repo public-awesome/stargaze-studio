@@ -43,7 +43,7 @@ export interface WhitelistDetailsDataProps {
 
 type WhitelistState = 'none' | 'existing' | 'new'
 
-type WhitelistType = 'standard' | 'flex'
+type WhitelistType = 'standard' | 'flex' | 'merkletree'
 
 export const WhitelistDetails = ({
   onChange,
@@ -59,6 +59,7 @@ export const WhitelistDetails = ({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
   const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
+  const [whitelistMerkleTreeArray, setWhitelistMerkleTreeArray] = useState<string[]>([])
   const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const whitelistAddressState = useInputState({
@@ -97,7 +98,8 @@ export const WhitelistDetails = ({
   const addressListState = useAddressListState()
 
   const whitelistFileOnChange = (data: string[]) => {
-    setWhitelistStandardArray(data)
+    if (whitelistType === 'standard') setWhitelistStandardArray(data)
+    if (whitelistType === 'merkletree') setWhitelistMerkleTreeArray(data)
   }
 
   const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
@@ -130,6 +132,7 @@ export const WhitelistDetails = ({
     if (!importedWhitelistDetails) {
       setWhitelistStandardArray([])
       setWhitelistFlexArray([])
+      setWhitelistMerkleTreeArray([])
     }
   }, [whitelistType])
 
@@ -143,7 +146,12 @@ export const WhitelistDetails = ({
         .replace(/"/g, '')
         .replace(/'/g, '')
         .replace(/ /g, ''),
-      members: whitelistType === 'standard' ? whitelistStandardArray : whitelistFlexArray,
+      members:
+        whitelistType === 'standard'
+          ? whitelistStandardArray
+          : whitelistType === 'merkletree'
+          ? whitelistMerkleTreeArray
+          : whitelistFlexArray,
       unitPrice: unitPriceState.value
         ? (Number(unitPriceState.value) * 1_000_000).toString()
         : unitPriceState.value === 0
@@ -211,7 +219,12 @@ export const WhitelistDetails = ({
         importedWhitelistDetails.members?.forEach((member) => {
           setWhitelistStandardArray((standardArray) => [...standardArray, member as string])
         })
-      } else {
+      } else if (importedWhitelistDetails.whitelistType === 'merkletree') {
+        setWhitelistMerkleTreeArray([])
+        importedWhitelistDetails.members?.forEach((member) => {
+          setWhitelistMerkleTreeArray((merkleTreeArray) => [...merkleTreeArray, member as string])
+        })
+      } else if (importedWhitelistDetails.whitelistType === 'flex') {
         setWhitelistFlexArray([])
         importedWhitelistDetails.members?.forEach((member) => {
           setWhitelistFlexArray((flexArray) => [
@@ -303,7 +316,7 @@ export const WhitelistDetails = ({
       </Conditional>
 
       <Conditional test={whitelistState === 'new'}>
-        <div className="flex justify-between mb-5 ml-6 max-w-[300px] text-lg font-bold">
+        <div className="flex justify-between mb-5 ml-6 max-w-[500px] text-lg font-bold">
           <div className="form-check form-check-inline">
             <input
               checked={whitelistType === 'standard'}
@@ -314,7 +327,7 @@ export const WhitelistDetails = ({
                 setWhitelistType('standard')
               }}
               type="radio"
-              value="nft-storage"
+              value="standard"
             />
             <label
               className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
@@ -343,12 +356,33 @@ export const WhitelistDetails = ({
               Whitelist Flex
             </label>
           </div>
+          <div className="form-check form-check-inline">
+            <input
+              checked={whitelistType === 'merkletree'}
+              className="peer sr-only"
+              id="inlineRadio9"
+              name="inlineRadioOptions9"
+              onClick={() => {
+                setWhitelistType('merkletree')
+              }}
+              type="radio"
+              value="merkletree"
+            />
+            <label
+              className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+              htmlFor="inlineRadio9"
+            >
+              Whitelist Merkle Tree
+            </label>
+          </div>
         </div>
         <div className="grid grid-cols-2">
           <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
             <NumberInput isRequired {...unitPriceState} />
-            <NumberInput isRequired {...memberLimitState} />
-            <Conditional test={whitelistType === 'standard'}>
+            <Conditional test={whitelistType !== 'merkletree'}>
+              <NumberInput isRequired {...memberLimitState} />
+            </Conditional>
+            <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
               <NumberInput isRequired {...perAddressLimitState} />
             </Conditional>
             <FormControl
@@ -464,6 +498,24 @@ export const WhitelistDetails = ({
               </FormGroup>
               <Conditional test={whitelistFlexArray.length > 0}>
                 <JsonPreview content={whitelistFlexArray} initialState={false} title="File Contents" />
+              </Conditional>
+            </Conditional>
+            <Conditional test={whitelistType === 'merkletree'}>
+              <FormGroup
+                subtitle={
+                  <div>
+                    <span>TXT file that contains the whitelisted addresses</span>
+                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFile}>
+                      Download Sample File
+                    </Button>
+                  </div>
+                }
+                title="Whitelist File"
+              >
+                <WhitelistUpload onChange={whitelistFileOnChange} />
+              </FormGroup>
+              <Conditional test={whitelistStandardArray.length > 0}>
+                <JsonPreview content={whitelistStandardArray} initialState title="File Contents" />
               </Conditional>
             </Conditional>
           </div>
