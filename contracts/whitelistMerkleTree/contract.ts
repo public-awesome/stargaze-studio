@@ -1,5 +1,5 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
-import type { Coin } from '@cosmjs/proto-signing'
+import { type Coin, coin } from '@cosmjs/proto-signing'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 
 export interface InstantiateResponse {
@@ -273,6 +273,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(txSigner, codeId, initMsg, label, 'auto', {
       admin,
+      funds: [coin(1000000000, 'ustars')],
     })
 
     return {
