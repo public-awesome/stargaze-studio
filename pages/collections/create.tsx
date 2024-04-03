@@ -1381,20 +1381,34 @@ const CollectionCreationPage: NextPage = () => {
 
   const checkwalletBalance = async () => {
     await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
-      if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
-        const amountNeeded =
-          Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
-          (whitelistDetails.whitelistType === 'flex'
-            ? Number(vendingMinterFlexCreationFee)
-            : collectionDetails?.updatable
-            ? Number(vendingMinterUpdatableCreationFee)
-            : Number(vendingMinterCreationFee))
-        if (amountNeeded >= Number(balance.amount))
-          throw new Error(
-            `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-              amountNeeded / 1000000
-            ).toString()} STARS`,
-          )
+      if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new') {
+        if (whitelistDetails.whitelistType !== 'merkletree' && whitelistDetails.memberLimit) {
+          const amountNeeded =
+            Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
+            (whitelistDetails.whitelistType === 'flex'
+              ? Number(vendingMinterFlexCreationFee)
+              : collectionDetails?.updatable
+              ? Number(vendingMinterUpdatableCreationFee)
+              : Number(vendingMinterCreationFee))
+          if (amountNeeded >= Number(balance.amount))
+            throw new Error(
+              `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                amountNeeded / 1000000
+              ).toString()} STARS`,
+            )
+        } else if (whitelistDetails.whitelistType === 'merkletree') {
+          const amountNeeded =
+            1000000000 +
+            (collectionDetails?.updatable
+              ? Number(vendingMinterUpdatableCreationFee)
+              : Number(vendingMinterCreationFee))
+          if (amountNeeded >= Number(balance.amount))
+            throw new Error(
+              `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                amountNeeded / 1000000
+              ).toString()} STARS`,
+            )
+        }
       } else {
         const amountNeeded =
           minterType === 'vending'
