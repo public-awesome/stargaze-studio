@@ -564,16 +564,24 @@ const CollectionCreationPage: NextPage = () => {
       const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
       const formData = new FormData()
       formData.append('whitelist', membersFile)
-      const response = await axios
-        .post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
+      const response = await toast
+        .promise(
+          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }),
+          {
+            loading: 'Fetching merkle root hash...',
+            success: 'Merkle root fetched successfully.',
+            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
           },
-        })
+        )
         .catch((error) => {
           console.log('error', error)
-          throw new Error('Error fetching root hash from Whitelist Merkle Tree API.')
+          throw new Error('Whitelist instantiation failed.')
         })
+
       const rootHash = response.data.root_hash
       console.log('rootHash', rootHash)
 
