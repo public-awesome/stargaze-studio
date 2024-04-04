@@ -223,9 +223,9 @@ export const WhitelistDetails = ({
         })
       } else if (importedWhitelistDetails.whitelistType === 'merkletree') {
         setWhitelistMerkleTreeArray([])
-        importedWhitelistDetails.members?.forEach((member) => {
-          setWhitelistMerkleTreeArray((merkleTreeArray) => [...merkleTreeArray, member as string])
-        })
+        // importedWhitelistDetails.members?.forEach((member) => {
+        //   setWhitelistMerkleTreeArray((merkleTreeArray) => [...merkleTreeArray, member as string])
+        // })
       } else if (importedWhitelistDetails.whitelistType === 'flex') {
         setWhitelistFlexArray([])
         importedWhitelistDetails.members?.forEach((member) => {
