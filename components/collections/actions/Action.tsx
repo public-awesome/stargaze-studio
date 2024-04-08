@@ -116,6 +116,13 @@ export const CollectionActions = ({
     subtitle: 'Address of the recipient',
   })
 
+  const creatorState = useInputState({
+    id: 'creator-address',
+    name: 'creator',
+    title: 'Creator Address',
+    subtitle: 'Address of the creator',
+  })
+
   const tokenURIState = useInputState({
     id: 'token-uri',
     name: 'tokenURI',
@@ -218,6 +225,7 @@ export const CollectionActions = ({
   ])
   const showPriceField = isEitherType(type, ['update_mint_price', 'update_discount_price'])
   const showDescriptionField = type === 'update_collection_info'
+  const showCreatorField = type === 'update_collection_info'
   const showImageField = type === 'update_collection_info'
   const showExternalLinkField = type === 'update_collection_info'
   const showRoyaltyRelatedFields =
@@ -290,6 +298,16 @@ export const CollectionActions = ({
     void resolveRoyaltyPaymentAddress()
   }, [royaltyPaymentAddressState.value])
 
+  const resolveCreatorAddress = async () => {
+    await resolveAddress(creatorState.value.trim(), wallet).then((resolvedAddress) => {
+      creatorState.onChange(resolvedAddress)
+    })
+  }
+
+  useEffect(() => {
+    void resolveCreatorAddress()
+  }, [creatorState.value])
+
   useEffect(() => {
     setCollectionInfo({
       description: descriptionState.value.replaceAll('\\n', '\n') || undefined,
@@ -303,6 +321,7 @@ export const CollectionActions = ({
               share: (Number(royaltyShareState.value) / 100).toString(),
             }
           : undefined,
+      creator: creatorState.value || undefined,
     })
   }, [
     descriptionState.value,
@@ -311,6 +330,7 @@ export const CollectionActions = ({
     externalLinkState.value,
     royaltyPaymentAddressState.value,
     royaltyShareState.value,
+    creatorState.value,
   ])
 
   useEffect(() => {
@@ -439,6 +459,27 @@ export const CollectionActions = ({
         }
       }
 
+      if (type === 'update_collection_info' && creatorState.value) {
+        const resolvedCreatorAddress = await resolveAddress(creatorState.value.trim(), wallet)
+        const contractInfoResponse = await (await wallet.getCosmWasmClient())
+          .queryContractRaw(
+            resolvedCreatorAddress,
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          )
+          .catch((e) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            if (e.message.includes('bech32')) throw new Error('Invalid creator address.')
+            console.log(e.message)
+          })
+        if (contractInfoResponse !== undefined) {
+          const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          if (contractInfo && !contractInfo.contract.includes('dao'))
+            throw new Error('The provided creator address does not belong to a compatible contract.')
+          else console.log(contractInfo)
+        }
+      }
+
       const txHash = await toast.promise(dispatchExecute(payload), {
         error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
         loading: 'Executing message...',
@@ -495,6 +536,7 @@ export const CollectionActions = ({
           {showBaseUriField && <TextInput className="mt-2" {...baseURIState} />}
           {showNumberOfTokensField && <NumberInput className="mt-2" {...batchNumberState} />}
           {showPriceField && <NumberInput className="mt-2" {...priceState} />}
+          {showCreatorField && <AddressInput className="mt-2" {...creatorState} />}
           {showDescriptionField && <TextInput className="my-2" {...descriptionState} />}
           {showImageField && <TextInput className="mb-2" {...imageState} />}
           {showExternalLinkField && <TextInput className="mb-2" {...externalLinkState} />}
