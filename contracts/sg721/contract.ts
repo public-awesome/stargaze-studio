@@ -25,6 +25,7 @@ export interface CollectionInfo {
   external_link?: string
   explicit_content?: boolean
   royalty_info?: RoyaltyInfo | undefined
+  creator?: string
 }
 
 export interface SG721Instance {
