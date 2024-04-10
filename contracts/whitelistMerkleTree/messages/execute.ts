@@ -36,16 +36,16 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     name: 'Update Admins',
     description: `Update the list of administrators for the whitelist`,
   },
-  {
-    id: 'add_members',
-    name: 'Add Members',
-    description: `Add members to the whitelist`,
-  },
-  {
-    id: 'remove_members',
-    name: 'Remove Members',
-    description: `Remove members from the whitelist`,
-  },
+  // {
+  //   id: 'add_members',
+  //   name: 'Add Members',
+  //   description: `Add members to the whitelist`,
+  // },
+  // {
+  //   id: 'remove_members',
+  //   name: 'Remove Members',
+  //   description: `Remove members from the whitelist`,
+  // },
   // {
   //   id: 'update_per_address_limit',
   //   name: 'Update Per Address Limit',

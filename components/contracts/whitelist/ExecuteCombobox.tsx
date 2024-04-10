@@ -1,8 +1,11 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 import { Combobox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { FormControl } from 'components/FormControl'
 import type { ExecuteListItem } from 'contracts/whitelist/messages/execute'
 import { EXECUTE_LIST } from 'contracts/whitelist/messages/execute'
+import { EXECUTE_LIST as WL_MERKLE_TREE_EXECUTE_LIST } from 'contracts/whitelistMerkleTree/messages/execute'
 import { matchSorter } from 'match-sorter'
 import { Fragment, useState } from 'react'
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
@@ -10,13 +13,20 @@ import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 export interface ExecuteComboboxProps {
   value: ExecuteListItem | null
   onChange: (item: ExecuteListItem) => void
+  whitelistType?: 'standard' | 'flex' | 'merkletree'
 }
 
-export const ExecuteCombobox = ({ value, onChange }: ExecuteComboboxProps) => {
+export const ExecuteCombobox = ({ value, onChange, whitelistType }: ExecuteComboboxProps) => {
   const [search, setSearch] = useState('')
 
   const filtered =
-    search === '' ? EXECUTE_LIST : matchSorter(EXECUTE_LIST, search, { keys: ['id', 'name', 'description'] })
+    whitelistType !== 'merkletree'
+      ? search === ''
+        ? EXECUTE_LIST
+        : matchSorter(EXECUTE_LIST, search, { keys: ['id', 'name', 'description'] })
+      : search === ''
+      ? WL_MERKLE_TREE_EXECUTE_LIST
+      : matchSorter(WL_MERKLE_TREE_EXECUTE_LIST, search, { keys: ['id', 'name', 'description'] })
 
   return (
     <Combobox
