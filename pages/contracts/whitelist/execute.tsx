@@ -48,7 +48,7 @@ const WhitelistExecutePage: NextPage = () => {
   const [lastTx, setLastTx] = useState('')
   const [memberList, setMemberList] = useState<string[]>([])
   const [flexMemberList, setFlexMemberList] = useState<WhitelistFlexMember[]>([])
-  const [whitelistType, setWhitelistType] = useState<'standard' | 'flex'>('standard')
+  const [whitelistType, setWhitelistType] = useState<'standard' | 'flex' | 'merkletree'>('standard')
 
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
@@ -211,6 +211,8 @@ const WhitelistExecutePage: NextPage = () => {
       .then((contractType) => {
         if (contractType?.includes('flex')) {
           setWhitelistType('flex')
+        } else if (contractType?.includes('merkle')) {
+          setWhitelistType('merkletree')
         } else {
           setWhitelistType('standard')
         }
@@ -236,7 +238,7 @@ const WhitelistExecutePage: NextPage = () => {
       <form className="grid grid-cols-2 p-4 space-x-8" onSubmit={mutate}>
         <div className="space-y-8">
           <AddressInput {...contractState} />
-          <ExecuteCombobox {...comboboxState} />
+          <ExecuteCombobox whitelistType={whitelistType} {...comboboxState} />
           <Conditional test={showLimitState}>
             <NumberInput {...limitState} />
           </Conditional>

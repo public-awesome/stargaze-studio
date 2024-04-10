@@ -1,4 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable no-nested-ternary */
 
 /* eslint-disable no-await-in-loop */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -8,6 +10,7 @@
 import { toUtf8 } from '@cosmjs/encoding'
 import clsx from 'clsx'
 import { Button } from 'components/Button'
+import type { WhitelistType } from 'components/collections/creation/WhitelistDetails'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { FormControl } from 'components/FormControl'
@@ -19,12 +22,18 @@ import { whitelistLinkTabs } from 'components/LinkTabs.data'
 import { useContracts } from 'contexts/contracts'
 import type { QueryType } from 'contracts/whitelist/messages/query'
 import { dispatchQuery, QUERY_LIST } from 'contracts/whitelist/messages/query'
+import type { WhitelistMerkleTreeQueryType } from 'contracts/whitelistMerkleTree/messages/query'
+import {
+  dispatchQuery as disptachWhitelistMerkleTreeQuery,
+  WHITELIST_MERKLE_TREE_QUERY_LIST,
+} from 'contracts/whitelistMerkleTree/messages/query'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { NextSeo } from 'next-seo'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
+import { WHITELIST_MERKLE_TREE_API_URL } from 'utils/constants'
 import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -33,8 +42,11 @@ import { useWallet } from 'utils/wallet'
 
 const WhitelistQueryPage: NextPage = () => {
   const { whitelist: contract } = useContracts()
+  const { whitelistMerkleTree: contractWhitelistMerkleTree } = useContracts()
   const wallet = useWallet()
   const [exporting, setExporting] = useState(false)
+  const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
+  const [proofHashes, setProofHashes] = useState<string[]>([])
 
   const contractState = useInputState({
     id: 'contract-address',
@@ -44,6 +56,46 @@ const WhitelistQueryPage: NextPage = () => {
   })
   const contractAddress = contractState.value
 
+  const debouncedWhitelistContractState = useDebounce(contractAddress, 300)
+
+  useEffect(() => {
+    async function getWhitelistContractType() {
+      if (debouncedWhitelistContractState.length > 0) {
+        const client = await wallet.getCosmWasmClient()
+        const data = await toast.promise(
+          client.queryContractRaw(
+            debouncedWhitelistContractState,
+            toUtf8(Buffer.from(Buffer.from('contract_info').toString('hex'), 'hex').toString()),
+          ),
+          {
+            loading: 'Retrieving whitelist type...',
+            error: 'Whitelist type retrieval failed.',
+            success: 'Whitelist type retrieved.',
+          },
+        )
+        const whitelistContract: string = JSON.parse(new TextDecoder().decode(data as Uint8Array)).contract
+        console.log(contract)
+        return whitelistContract
+      }
+    }
+    void getWhitelistContractType()
+      .then((whitelistContract) => {
+        if (whitelistContract?.includes('merkletree')) {
+          setWhitelistType('merkletree')
+        } else if (whitelistContract?.includes('flex')) {
+          setWhitelistType('flex')
+        } else {
+          setWhitelistType('standard')
+        }
+      })
+      .catch((err) => {
+        console.log(err)
+        setWhitelistType('standard')
+        console.log('Unable to retrieve contract type. Defaulting to "standard".')
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedWhitelistContractState, wallet.isWalletConnected])
+
   const addressState = useInputState({
     id: 'address',
     name: 'address',
@@ -51,6 +103,47 @@ const WhitelistQueryPage: NextPage = () => {
     subtitle: 'Address of the user - defaults to current address',
   })
   const address = addressState.value
+
+  const debouncedAddress = useDebounce(address, 300)
+
+  const fetchProofHashes = async (whitelistContractAddress: string, memberAddress: string): Promise<string[]> => {
+    if (whitelistContractAddress.length === 0 || memberAddress.length === 0)
+      throw new Error('Contract or member address is empty.')
+    const resolvedAddress = await resolveAddress(memberAddress, wallet)
+    const merkleRootResponse = await (
+      await wallet.getCosmWasmClient()
+    ).queryContractSmart(contractAddress, { merkle_root: {} })
+    const proofs = await toast.promise(
+      fetch(`${WHITELIST_MERKLE_TREE_API_URL}/whitelist/${merkleRootResponse.merkle_root}/${resolvedAddress}`)
+        .then((res) => res.json())
+        .then((data) => data.proofs)
+        .catch((e) => {
+          console.log(e)
+          setProofHashes([])
+        }),
+      {
+        loading: 'Fetching proof hashes...',
+        error: 'Error fetching proof hashes from Whitelist Merkle Tree API.',
+        success: 'Proof hashes fetched.',
+      },
+    )
+    return proofs as string[] | []
+  }
+
+  useEffect(() => {
+    if (
+      whitelistType === 'merkletree' &&
+      whitelistMerkleTreeQueryType === 'has_member' &&
+      debouncedAddress.length > 0
+    ) {
+      void fetchProofHashes(contractAddress, debouncedAddress)
+        .then((proofs) => setProofHashes(proofs))
+        .catch((e) => {
+          console.log(e)
+          setProofHashes([])
+        })
+    }
+  }, [debouncedAddress])
 
   const limit = useNumberInputState({
     id: 'limit',
@@ -80,22 +173,59 @@ const WhitelistQueryPage: NextPage = () => {
   }, [debouncedLimit])
 
   const [type, setType] = useState<QueryType>('config')
+  const [whitelistMerkleTreeQueryType, setWhitelistMerkleTreeQueryType] =
+    useState<WhitelistMerkleTreeQueryType>('config')
 
-  const addressVisible = type === 'has_member'
+  const addressVisible = type === 'has_member' || whitelistMerkleTreeQueryType === 'has_member'
 
   const { data: response } = useQuery(
-    [contractAddress, type, contract, wallet.address, address, startAfter.value, limit.value] as const,
+    [
+      contractAddress,
+      type,
+      whitelistMerkleTreeQueryType,
+      contract,
+      contractWhitelistMerkleTree,
+      wallet.address,
+      address,
+      startAfter.value,
+      limit.value,
+      proofHashes,
+      whitelistType,
+    ] as const,
     async ({ queryKey }) => {
-      const [_contractAddress, _type, _contract, _wallet, _address, _startAfter, _limit] = queryKey
+      const [
+        _contractAddress,
+        _type,
+        _whitelistMerkleTreeQueryType,
+        _contract,
+        _contractWhitelistMerkleTree,
+        _wallet,
+        _address,
+        _startAfter,
+        _limit,
+        _proofHashes,
+        _whitelistType,
+      ] = queryKey
       const messages = contract?.use(contractAddress)
+      const whitelistMerkleTreeMessages = contractWhitelistMerkleTree?.use(contractAddress)
+
       const res = await resolveAddress(_address, wallet).then(async (resolvedAddress) => {
-        const result = await dispatchQuery({
-          messages,
-          type,
-          address: resolvedAddress,
-          startAfter: _startAfter || undefined,
-          limit: _limit,
-        })
+        const result =
+          whitelistType === 'merkletree'
+            ? await disptachWhitelistMerkleTreeQuery({
+                messages: whitelistMerkleTreeMessages,
+                address: resolvedAddress,
+                type: whitelistMerkleTreeQueryType,
+                limit: _limit,
+                proofHashes: _proofHashes,
+              })
+            : await dispatchQuery({
+                messages,
+                type,
+                address: resolvedAddress,
+                startAfter: _startAfter || undefined,
+                limit: _limit,
+              })
         return result
       })
       return res
@@ -105,7 +235,7 @@ const WhitelistQueryPage: NextPage = () => {
       onError: (error: any) => {
         toast.error(error.message, { style: { maxWidth: 'none' } })
       },
-      enabled: Boolean(contractAddress && contract),
+      enabled: Boolean(contractAddress && (contract || contractWhitelistMerkleTree)),
     },
   )
 
@@ -230,9 +360,13 @@ const WhitelistQueryPage: NextPage = () => {
               defaultValue="config"
               id="contract-query-type"
               name="query-type"
-              onChange={(e) => setType(e.target.value as QueryType)}
+              onChange={(e) =>
+                whitelistType === 'merkletree'
+                  ? setWhitelistMerkleTreeQueryType(e.target.value as WhitelistMerkleTreeQueryType)
+                  : setType(e.target.value as QueryType)
+              }
             >
-              {QUERY_LIST.map(({ id, name }) => (
+              {(whitelistType === 'merkletree' ? WHITELIST_MERKLE_TREE_QUERY_LIST : QUERY_LIST).map(({ id, name }) => (
                 <option key={`query-${id}`} className="mt-2 text-lg bg-[#1A1A1A]" value={id}>
                   {name}
                 </option>
@@ -255,7 +389,16 @@ const WhitelistQueryPage: NextPage = () => {
             </Button>
           </Conditional>
         </div>
-        <JsonPreview content={contractAddress ? { type, response } : null} title="Query Response" />
+        <JsonPreview
+          content={
+            contractAddress
+              ? whitelistType === 'merkletree'
+                ? { type: whitelistMerkleTreeQueryType, response }
+                : { type, response }
+              : null
+          }
+          title="Query Response"
+        />
       </div>
     </section>
   )
