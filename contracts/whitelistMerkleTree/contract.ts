@@ -162,7 +162,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
 
     const merkleTreeUri = async (): Promise<string> => {
       return client.queryContractSmart(contractAddress, {
-        merkle_tree_uri: {},
+        merkle_tree_u_r_i: {},
       })
     }
 
