@@ -1,6 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable no-nested-ternary */
 import { coin } from '@cosmjs/proto-signing'
+import axios from 'axios'
 import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
@@ -34,17 +35,22 @@ import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
-import { WHITELIST_CODE_ID, WHITELIST_FLEX_CODE_ID } from '../../../utils/constants'
+import {
+  WHITELIST_CODE_ID,
+  WHITELIST_FLEX_CODE_ID,
+  WHITELIST_MERKLE_TREE_API_URL,
+  WHITELIST_MERKLE_TREE_CODE_ID,
+} from '../../../utils/constants'
 
 const WhitelistInstantiatePage: NextPage = () => {
   const wallet = useWallet()
-  const { whitelist: contract } = useContracts()
+  const { whitelist: contract, whitelistMerkleTree: whitelistMerkleTreeContract } = useContracts()
   const { timezone } = useGlobalSettings()
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
   const [endDate, setEndDate] = useState<Date | undefined>(undefined)
   const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
-  const [whitelistType, setWhitelistType] = useState<'standard' | 'flex'>('standard')
+  const [whitelistType, setWhitelistType] = useState<'standard' | 'flex' | 'merkletree'>('standard')
 
   const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
   const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
@@ -85,9 +91,13 @@ const WhitelistInstantiatePage: NextPage = () => {
   const addressListState = useAddressListState()
 
   const { data, isLoading, mutate } = useMutation(
-    async (event: FormEvent): Promise<InstantiateResponse | null> => {
+    async (event: FormEvent): Promise<InstantiateResponse | undefined | null> => {
       event.preventDefault()
       if (!contract) {
+        throw new Error('Smart contract connection failed')
+      }
+
+      if (!whitelistMerkleTreeContract && whitelistType === 'merkletree') {
         throw new Error('Smart contract connection failed')
       }
 
@@ -132,19 +142,79 @@ const WhitelistInstantiatePage: NextPage = () => {
         admins_mutable: adminsMutable,
       }
 
-      return toast.promise(
-        contract.instantiate(
-          whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
-          whitelistType === 'standard' ? standardMsg : flexMsg,
-          whitelistType === 'standard' ? 'Stargaze Whitelist Contract' : 'Stargaze Whitelist Flex Contract',
-          wallet.address,
-        ),
-        {
-          loading: 'Instantiating contract...',
-          error: 'Instantiation failed!',
-          success: 'Instantiation success!',
-        },
-      )
+      if (whitelistType !== 'merkletree') {
+        return toast.promise(
+          contract.instantiate(
+            whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
+            whitelistType === 'standard' ? standardMsg : flexMsg,
+            whitelistType === 'standard' ? 'Stargaze Whitelist Contract' : 'Stargaze Whitelist Flex Contract',
+            wallet.address,
+          ),
+          {
+            loading: 'Instantiating contract...',
+            error: 'Instantiation failed!',
+            success: 'Instantiation success!',
+          },
+        )
+      } else if (whitelistType === 'merkletree') {
+        const members = whitelistStandardArray
+        const membersCsv = members.join('\n')
+        const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
+        const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
+        const formData = new FormData()
+        formData.append('whitelist', membersFile)
+        const response = await toast
+          .promise(
+            axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }),
+            {
+              loading: 'Fetching merkle root hash...',
+              success: 'Merkle root fetched successfully.',
+              error: 'Error fetching root hash from Whitelist Merkle Tree API.',
+            },
+          )
+          .catch((error) => {
+            console.log('error', error)
+            throw new Error('Whitelist instantiation failed.')
+          })
+
+        const rootHash = response.data.root_hash
+        console.log('rootHash', rootHash)
+
+        const merkleTreeMsg = {
+          merkle_root: rootHash,
+          merkle_tree_uri: null,
+          start_time: (startDate.getTime() * 1_000_000).toString(),
+          end_time: (endDate.getTime() * 1_000_000).toString(),
+          mint_price: coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars'),
+          per_address_limit: perAddressLimitState.value,
+          admins: [
+            ...new Set(
+              addressListState.values
+                .map((a) => a.address.trim())
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
+            ),
+          ] || [wallet.address],
+          admins_mutable: adminsMutable,
+        }
+
+        return toast.promise(
+          whitelistMerkleTreeContract?.instantiate(
+            WHITELIST_MERKLE_TREE_CODE_ID,
+            merkleTreeMsg,
+            'Stargaze Whitelist Merkle Tree Contract',
+            wallet.address,
+          ) as Promise<InstantiateResponse>,
+          {
+            loading: 'Instantiating contract...',
+            error: 'Instantiation failed!',
+            success: 'Instantiation success!',
+          },
+        )
+      }
     },
     {
       onError: (error) => {
@@ -176,7 +246,7 @@ const WhitelistInstantiatePage: NextPage = () => {
       />
       <LinkTabs activeIndex={0} data={whitelistLinkTabs} />
 
-      <div className="flex justify-between mb-5 ml-6 max-w-[300px] text-lg font-bold">
+      <div className="flex justify-between mb-5 ml-6 max-w-[520px] text-lg font-bold">
         <div className="form-check form-check-inline">
           <input
             checked={whitelistType === 'standard'}
@@ -216,6 +286,26 @@ const WhitelistInstantiatePage: NextPage = () => {
             Whitelist Flex
           </label>
         </div>
+
+        <div className="form-check form-check-inline">
+          <input
+            checked={whitelistType === 'merkletree'}
+            className="peer sr-only"
+            id="inlineRadio3"
+            name="inlineRadioOptions3"
+            onClick={() => {
+              setWhitelistType('merkletree')
+            }}
+            type="radio"
+            value="merkletree"
+          />
+          <label
+            className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+            htmlFor="inlineRadio3"
+          >
+            Whitelist Merkle Tree
+          </label>
+        </div>
       </div>
 
       <Conditional test={Boolean(data)}>
@@ -251,7 +341,7 @@ const WhitelistInstantiatePage: NextPage = () => {
       </div>
 
       <FormGroup subtitle="Your whitelisted addresses" title="Whitelist File">
-        <Conditional test={whitelistType === 'standard'}>
+        <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
           <WhitelistUpload onChange={whitelistFileOnChange} />
           <Conditional test={whitelistStandardArray.length > 0}>
             <JsonPreview content={whitelistStandardArray} initialState={false} title="File Contents" />
@@ -283,8 +373,10 @@ const WhitelistInstantiatePage: NextPage = () => {
           </select>
         </div>
 
-        <NumberInput isRequired {...memberLimitState} />
-        <Conditional test={whitelistType === 'standard'}>
+        <Conditional test={whitelistType !== 'merkletree'}>
+          <NumberInput isRequired {...memberLimitState} />
+        </Conditional>
+        <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
           <NumberInput isRequired {...perAddressLimitState} />
         </Conditional>
         <Conditional test={whitelistType === 'flex'}>

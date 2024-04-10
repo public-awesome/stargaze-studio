@@ -1,8 +1,8 @@
 import type { WhiteListMerkleTreeInstance } from '../contract'
 
-export type QueryType = typeof QUERY_TYPES[number]
+export type WhitelistMerkleTreeQueryType = typeof WHITELIST_MERKLE_TREE_QUERY_TYPES[number]
 
-export const QUERY_TYPES = [
+export const WHITELIST_MERKLE_TREE_QUERY_TYPES = [
   'has_started',
   'has_ended',
   'is_active',
@@ -14,12 +14,12 @@ export const QUERY_TYPES = [
 ] as const
 
 export interface QueryListItem {
-  id: QueryType
+  id: WhitelistMerkleTreeQueryType
   name: string
   description?: string
 }
 
-export const QUERY_LIST: QueryListItem[] = [
+export const WHITELIST_MERKLE_TREE_QUERY_LIST: QueryListItem[] = [
   { id: 'has_started', name: 'Has Started', description: 'Check if the whitelist minting has started' },
   { id: 'has_ended', name: 'Has Ended', description: 'Check if the whitelist minting has ended' },
   { id: 'is_active', name: 'Is Active', description: 'Check if the whitelist minting is active' },
@@ -32,7 +32,7 @@ export const QUERY_LIST: QueryListItem[] = [
 
 export interface DispatchQueryProps {
   messages: WhiteListMerkleTreeInstance | undefined
-  type: QueryType
+  type: WhitelistMerkleTreeQueryType
   address: string
   startAfter?: string
   limit?: number

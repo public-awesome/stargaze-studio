@@ -43,7 +43,7 @@ export interface WhitelistDetailsDataProps {
 
 type WhitelistState = 'none' | 'existing' | 'new'
 
-type WhitelistType = 'standard' | 'flex' | 'merkletree'
+export type WhitelistType = 'standard' | 'flex' | 'merkletree'
 
 export const WhitelistDetails = ({
   onChange,
