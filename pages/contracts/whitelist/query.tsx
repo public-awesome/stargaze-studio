@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable no-nested-ternary */
 
 /* eslint-disable no-await-in-loop */
@@ -32,6 +33,7 @@ import { NextSeo } from 'next-seo'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { useQuery } from 'react-query'
+import { WHITELIST_MERKLE_TREE_API_URL } from 'utils/constants'
 import { useDebounce } from 'utils/debounce'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
@@ -44,6 +46,7 @@ const WhitelistQueryPage: NextPage = () => {
   const wallet = useWallet()
   const [exporting, setExporting] = useState(false)
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
+  const [proofHashes, setProofHashes] = useState<string[]>([])
 
   const contractState = useInputState({
     id: 'contract-address',
@@ -101,6 +104,47 @@ const WhitelistQueryPage: NextPage = () => {
   })
   const address = addressState.value
 
+  const debouncedAddress = useDebounce(address, 300)
+
+  const fetchProofHashes = async (whitelistContractAddress: string, memberAddress: string): Promise<string[]> => {
+    if (whitelistContractAddress.length === 0 || memberAddress.length === 0)
+      throw new Error('Contract or member address is empty.')
+    const resolvedAddress = await resolveAddress(memberAddress, wallet)
+    const merkleRootResponse = await (
+      await wallet.getCosmWasmClient()
+    ).queryContractSmart(contractAddress, { merkle_root: {} })
+    const proofs = await toast.promise(
+      fetch(`${WHITELIST_MERKLE_TREE_API_URL}/whitelist/${merkleRootResponse.merkle_root}/${resolvedAddress}`)
+        .then((res) => res.json())
+        .then((data) => data.proofs)
+        .catch((e) => {
+          console.log(e)
+          setProofHashes([])
+        }),
+      {
+        loading: 'Fetching proof hashes...',
+        error: 'Error fetching proof hashes from Whitelist Merkle Tree API.',
+        success: 'Proof hashes fetched.',
+      },
+    )
+    return proofs as string[] | []
+  }
+
+  useEffect(() => {
+    if (
+      whitelistType === 'merkletree' &&
+      whitelistMerkleTreeQueryType === 'has_member' &&
+      debouncedAddress.length > 0
+    ) {
+      void fetchProofHashes(contractAddress, debouncedAddress)
+        .then((proofs) => setProofHashes(proofs))
+        .catch((e) => {
+          console.log(e)
+          setProofHashes([])
+        })
+    }
+  }, [debouncedAddress])
+
   const limit = useNumberInputState({
     id: 'limit',
     name: 'limit',
@@ -132,7 +176,7 @@ const WhitelistQueryPage: NextPage = () => {
   const [whitelistMerkleTreeQueryType, setWhitelistMerkleTreeQueryType] =
     useState<WhitelistMerkleTreeQueryType>('config')
 
-  const addressVisible = type === 'has_member'
+  const addressVisible = type === 'has_member' || whitelistMerkleTreeQueryType === 'has_member'
 
   const { data: response } = useQuery(
     [
@@ -145,6 +189,8 @@ const WhitelistQueryPage: NextPage = () => {
       address,
       startAfter.value,
       limit.value,
+      proofHashes,
+      whitelistType,
     ] as const,
     async ({ queryKey }) => {
       const [
@@ -157,6 +203,8 @@ const WhitelistQueryPage: NextPage = () => {
         _address,
         _startAfter,
         _limit,
+        _proofHashes,
+        _whitelistType,
       ] = queryKey
       const messages = contract?.use(contractAddress)
       const whitelistMerkleTreeMessages = contractWhitelistMerkleTree?.use(contractAddress)
@@ -169,6 +217,7 @@ const WhitelistQueryPage: NextPage = () => {
                 address: resolvedAddress,
                 type: whitelistMerkleTreeQueryType,
                 limit: _limit,
+                proofHashes: _proofHashes,
               })
             : await dispatchQuery({
                 messages,
