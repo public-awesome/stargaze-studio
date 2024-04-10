@@ -712,6 +712,12 @@ export const CollectionActions = ({
               Please note that you are only required to fill in the fields you want to update.
             </Alert>
           </Conditional>
+          <Conditional test={type === 'update_discount_price'}>
+            <Alert className="mt-2 text-sm" type="warning">
+              Please note that discount price can only be updated every 24 hours and be removed 12 hours after its last
+              update.
+            </Alert>
+          </Conditional>
         </div>
         <div className="-mt-6">
           <div className="relative mb-2">
