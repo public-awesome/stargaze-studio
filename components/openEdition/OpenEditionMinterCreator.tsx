@@ -13,7 +13,6 @@ import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
-import { openEditionMinterList } from 'config/minter'
 import { type TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
@@ -23,8 +22,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import {
-  OPEN_EDITION_FACTORY_ADDRESS,
-  OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   SG721_OPEN_EDITION_CODE_ID,
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
   STRDST_SG721_CODE_ID,
@@ -74,13 +71,13 @@ export interface OpenEditionMinterDetailsDataProps {
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
   onDetailsChange: (data: OpenEditionMinterDetailsDataProps) => void
-  openEditionMinterUpdatableCreationFee?: string
   openEditionMinterCreationFee?: string
   minimumMintPrice?: string
-  minimumUpdatableMintPrice?: string
   minterType?: MinterType
   mintTokenFromFactory?: TokenInfo | undefined
   importedOpenEditionMinterDetails?: OpenEditionMinterDetailsDataProps
+  isMatchingFactoryPresent?: boolean
+  openEditionFactoryAddress?: string
 }
 
 export interface OpenEditionMinterCreatorDataProps {
@@ -94,12 +91,12 @@ export const OpenEditionMinterCreator = ({
   onChange,
   onDetailsChange,
   openEditionMinterCreationFee,
-  openEditionMinterUpdatableCreationFee,
   minimumMintPrice,
-  minimumUpdatableMintPrice,
   minterType,
   mintTokenFromFactory,
   importedOpenEditionMinterDetails,
+  isMatchingFactoryPresent,
+  openEditionFactoryAddress,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
   const {
@@ -134,24 +131,13 @@ export const OpenEditionMinterCreator = ({
 
   const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
 
-  const factoryAddressForSelectedDenom =
-    openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === false)
-      ?.factoryAddress || OPEN_EDITION_FACTORY_ADDRESS
-  const updatableFactoryAddressForSelectedDenom =
-    openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === true)
-      ?.factoryAddress || OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS
-
   const openEditionFactoryMessages = useMemo(
-    () =>
-      openEditionFactoryContract?.use(
-        collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
-      ),
+    () => openEditionFactoryContract?.use(openEditionFactoryAddress as string),
     [
       openEditionFactoryContract,
       wallet.address,
       collectionDetails?.updatable,
-      factoryAddressForSelectedDenom,
-      updatableFactoryAddressForSelectedDenom,
+      openEditionFactoryAddress,
       wallet.isWalletConnected,
     ],
   )
@@ -325,9 +311,9 @@ export const OpenEditionMinterCreator = ({
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.unitPrice === '') throw new Error('Mint price is required')
     if (collectionDetails?.updatable) {
-      if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
+      if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
         throw new Error(
-          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} ${
+          `Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} ${
             mintTokenFromFactory?.displayName
           }`,
         )
@@ -368,6 +354,11 @@ export const OpenEditionMinterCreator = ({
       (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
     )
       throw new Error('Invalid payment address')
+
+    if (!isMatchingFactoryPresent)
+      throw new Error(
+        `No matching open edition factory contract found for the selected parameters (Mint Price Denom: ${mintingDetails.selectedMintToken?.displayName}, Whitelist Type: ${whitelistDetails?.whitelistType})`,
+      )
   }
 
   const checkWhitelistDetails = async () => {
@@ -485,9 +476,13 @@ export const OpenEditionMinterCreator = ({
 
   const checkwalletBalance = async () => {
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
-    const amountNeeded = collectionDetails?.updatable
-      ? Number(openEditionMinterUpdatableCreationFee)
-      : Number(openEditionMinterCreationFee)
+    let amountNeeded = 0
+    if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
+      amountNeeded =
+        Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + Number(openEditionMinterCreationFee)
+    } else {
+      amountNeeded = openEditionMinterCreationFee ? Number(openEditionMinterCreationFee) : 0
+    }
     await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
       if (amountNeeded >= Number(balance.amount))
         throw new Error(
@@ -889,18 +884,11 @@ export const OpenEditionMinterCreator = ({
     }
 
     const payload: OpenEditionFactoryDispatchExecuteArgs = {
-      contract: collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
+      contract: openEditionFactoryAddress as string,
       messages: openEditionFactoryMessages,
       txSigner: wallet.address || '',
       msg,
-      funds: [
-        coin(
-          collectionDetails?.updatable
-            ? (openEditionMinterUpdatableCreationFee as string)
-            : (openEditionMinterCreationFee as string),
-          'ustars',
-        ),
-      ],
+      funds: [coin(openEditionMinterCreationFee as string, 'ustars')],
       updatable: collectionDetails?.updatable,
     }
     await openEditionFactoryDispatchExecute(payload)
@@ -1064,11 +1052,7 @@ export const OpenEditionMinterCreator = ({
         <MintingDetails
           importedMintingDetails={importedOpenEditionMinterDetails?.mintingDetails}
           isPresale={whitelistDetails?.whitelistState === 'new'}
-          minimumMintPrice={
-            collectionDetails?.updatable
-              ? Number(minimumUpdatableMintPrice) / 1000000
-              : Number(minimumMintPrice) / 1000000
-          }
+          minimumMintPrice={Number(minimumMintPrice) / 1000000}
           mintTokenFromFactory={mintTokenFromFactory}
           onChange={setMintingDetails}
           uploadMethod={offChainMetadataUploadDetails?.uploadMethod as UploadMethod}
