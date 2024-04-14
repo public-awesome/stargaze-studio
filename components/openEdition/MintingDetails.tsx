@@ -25,6 +25,8 @@ interface MintingDetailsProps {
   minimumMintPrice: number
   mintTokenFromFactory?: TokenInfo | undefined
   importedMintingDetails?: MintingDetailsDataProps
+  isPresale: boolean
+  whitelistStartDate?: string
 }
 
 export interface MintingDetailsDataProps {
@@ -44,6 +46,8 @@ export const MintingDetails = ({
   minimumMintPrice,
   mintTokenFromFactory,
   importedMintingDetails,
+  isPresale,
+  whitelistStartDate,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
 
@@ -144,6 +148,12 @@ export const MintingDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedMintingDetails])
 
+  useEffect(() => {
+    if (isPresale) {
+      setTimestamp(whitelistStartDate ? new Date(Number(whitelistStartDate) / 1_000_000) : undefined)
+    }
+  }, [whitelistStartDate, isPresale])
+
   return (
     <div className="border-l-[1px] border-gray-500 border-opacity-20">
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
@@ -172,6 +182,7 @@ export const MintingDetails = ({
           title="Start Time"
         >
           <InputDateTime
+            disabled={isPresale}
             minDate={
               timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
             }
