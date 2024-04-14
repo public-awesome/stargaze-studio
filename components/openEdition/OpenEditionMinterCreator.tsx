@@ -84,6 +84,7 @@ export interface OpenEditionMinterCreatorDataProps {
   metadataStorageMethod: MetadataStorageMethod
   openEditionMinterContractAddress: string | null
   sg721ContractAddress: string | null
+  whitelistContractAddress: string | null
   transactionHash: string | null
 }
 
@@ -125,7 +126,7 @@ export const OpenEditionMinterCreator = ({
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [openEditionMinterContractAddress, setOpenEditionMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
-  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null | undefined>(null)
+  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [thumbnailImageUri, setThumbnailImageUri] = useState<string | undefined>(undefined)
 
@@ -919,11 +920,18 @@ export const OpenEditionMinterCreator = ({
       metadataStorageMethod,
       openEditionMinterContractAddress,
       sg721ContractAddress,
+      whitelistContractAddress,
       transactionHash,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metadataStorageMethod, openEditionMinterContractAddress, sg721ContractAddress, transactionHash])
+  }, [
+    metadataStorageMethod,
+    openEditionMinterContractAddress,
+    sg721ContractAddress,
+    whitelistContractAddress,
+    transactionHash,
+  ])
 
   useEffect(() => {
     const data: OpenEditionMinterDetailsDataProps = {
