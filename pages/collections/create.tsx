@@ -35,6 +35,7 @@ import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
 import {
+  flexibleOpenEditionMinterList,
   flexibleVendingMinterList,
   merkleTreeVendingMinterList,
   openEditionMinterList,
@@ -61,7 +62,6 @@ import {
   BLOCK_EXPLORER_URL,
   NETWORK,
   OPEN_EDITION_FACTORY_ADDRESS,
-  OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   SG721_CODE_ID,
   SG721_UPDATABLE_CODE_ID,
   STARGAZE_URL,
@@ -130,20 +130,19 @@ const CollectionCreationPage: NextPage = () => {
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
   const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<string | null>(null)
-  const [openEditionMinterUpdatableCreationFee, setOpenEditionMinterUpdatableCreationFee] = useState<string | null>(
-    null,
-  )
   const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<string | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
   const [minimumUpdatableMintPrice, setMinimumUpdatableMintPrice] = useState<string | null>('0')
   const [minimumOpenEditionMintPrice, setMinimumOpenEditionMintPrice] = useState<string | null>('0')
-  const [minimumOpenEditionUpdatableMintPrice, setMinimumOpenEditionUpdatableMintPrice] = useState<string | null>('0')
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
   const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(stars)
   const [mintTokenFromVendingFactory, setMintTokenFromVendingFactory] = useState<TokenInfo | undefined>(stars)
   const [vendingFactoryAddress, setVendingFactoryAddress] = useState<string | null>(VENDING_FACTORY_ADDRESS)
+  const [openEditionFactoryAddress, setOpenEditionFactoryAddress] = useState<string | undefined>(
+    OPEN_EDITION_FACTORY_ADDRESS,
+  )
 
   const vendingFactoryMessages = useMemo(
     () => vendingFactoryContract?.use(vendingFactoryAddress as string),
@@ -170,6 +169,7 @@ const CollectionCreationPage: NextPage = () => {
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [isMatchingVendingFactoryPresent, setIsMatchingVendingFactoryPresent] = useState<boolean>(true)
+  const [isMatchingOpenEditionFactoryPresent, setIsMatchingOpenEditionFactoryPresent] = useState<boolean>(true)
 
   const performVendingMinterChecks = () => {
     try {
@@ -1273,32 +1273,27 @@ const CollectionCreationPage: NextPage = () => {
       setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
       setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
     }
-    if (OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS) {
-      const openEditionUpdatableFactoryParameters = await client
-        .queryContractSmart(OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS, { params: {} })
-        .catch((error) => {
-          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
-          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-        })
-      setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
-      setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
-    }
     setInitialParametersFetched(true)
   }
 
   const fetchOpenEditionFactoryParameters = useCallback(async () => {
     const client = await wallet.getCosmWasmClient()
-    const factoryForSelectedDenom = openEditionMinterList.find(
-      (minter) =>
-        minter.supportedToken === openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
-        minter.updatable === false,
-    )
-    const updatableFactoryForSelectedDenom = openEditionMinterList.find(
-      (minter) =>
-        minter.supportedToken === openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
-        minter.updatable === true,
-    )
+    const factoryForSelectedDenom = openEditionMinterList
+      .concat(flexibleOpenEditionMinterList)
+      .find(
+        (minter) =>
+          minter.supportedToken === openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
+          minter.updatable === openEditionMinterDetails.collectionDetails?.updatable &&
+          minter.flexible ===
+            (openEditionMinterDetails.whitelistDetails?.whitelistState !== 'none' &&
+              openEditionMinterDetails.whitelistDetails?.whitelistType === 'flex'),
+      )
+
+    console.log('OE Factory: ', factoryForSelectedDenom?.factoryAddress)
     if (factoryForSelectedDenom?.factoryAddress) {
+      setIsMatchingOpenEditionFactoryPresent(true)
+      setOpenEditionFactoryAddress(factoryForSelectedDenom.factoryAddress)
+
       const openEditionFactoryParameters = await client
         .queryContractSmart(factoryForSelectedDenom.factoryAddress, { params: {} })
         .catch((error) => {
@@ -1306,35 +1301,24 @@ const CollectionCreationPage: NextPage = () => {
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
       setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
-      if (!openEditionMinterDetails?.collectionDetails?.updatable) {
-        setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
-        setMintTokenFromOpenEditionFactory(
-          tokensList.find((token) => token.denom === openEditionFactoryParameters?.params?.min_mint_price?.denom),
-        )
-      }
-    }
-    if (updatableFactoryForSelectedDenom?.factoryAddress) {
-      const openEditionUpdatableFactoryParameters = await client
-        .queryContractSmart(updatableFactoryForSelectedDenom.factoryAddress, { params: {} })
-        .catch((error) => {
-          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
-          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-        })
-      setOpenEditionMinterUpdatableCreationFee(openEditionUpdatableFactoryParameters?.params?.creation_fee?.amount)
-      if (openEditionMinterDetails?.collectionDetails?.updatable) {
-        setMinimumOpenEditionUpdatableMintPrice(openEditionUpdatableFactoryParameters?.params?.min_mint_price?.amount)
-        setMintTokenFromOpenEditionFactory(
-          tokensList.find(
-            (token) => token.denom === openEditionUpdatableFactoryParameters?.params?.min_mint_price?.denom,
-          ),
-        )
-      }
+      setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
+      setMintTokenFromOpenEditionFactory(
+        tokensList.find((token) => token.denom === openEditionFactoryParameters?.params?.min_mint_price?.denom),
+      )
+    } else if (
+      openEditionMinterDetails?.mintingDetails?.selectedMintToken &&
+      openEditionMinterDetails.whitelistDetails?.whitelistState
+    ) {
+      setIsMatchingOpenEditionFactoryPresent(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     openEditionMinterDetails?.mintingDetails?.selectedMintToken,
     openEditionMinterDetails?.collectionDetails?.updatable,
+    openEditionMinterDetails?.whitelistDetails?.whitelistType,
+    openEditionMinterDetails?.whitelistDetails?.whitelistState,
     wallet.isWalletConnected,
+    openEditionMinterDetails?.isRefreshed,
   ])
 
   const fetchVendingFactoryParameters = useCallback(async () => {
@@ -1622,6 +1606,19 @@ const CollectionCreationPage: NextPage = () => {
               >
                 {openEditionMinterCreatorData?.sg721ContractAddress as string}
               </Anchor>
+              <Conditional test={openEditionMinterCreatorData?.whitelistContractAddress !== null}>
+                <br />
+                Whitelist Contract Address:{'  '}
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`/contracts/whitelist/query/?contractAddress=${
+                    openEditionMinterCreatorData?.whitelistContractAddress as string
+                  }`}
+                >
+                  {openEditionMinterCreatorData?.whitelistContractAddress as string}
+                </Anchor>
+              </Conditional>
               <br />
               Transaction Hash: {'  '}
               <Conditional test={NETWORK === 'testnet'}>
@@ -1930,14 +1927,14 @@ const CollectionCreationPage: NextPage = () => {
       <Conditional test={minterType === 'openEdition'}>
         <OpenEditionMinterCreator
           importedOpenEditionMinterDetails={importedDetails?.openEditionMinterDetails}
+          isMatchingFactoryPresent={isMatchingOpenEditionFactoryPresent}
           minimumMintPrice={minimumOpenEditionMintPrice as string}
-          minimumUpdatableMintPrice={minimumOpenEditionUpdatableMintPrice as string}
           mintTokenFromFactory={mintTokenFromOpenEditionFactory}
           minterType={minterType}
           onChange={setOpenEditionMinterCreatorData}
           onDetailsChange={setOpenEditionMinterDetails}
+          openEditionFactoryAddress={openEditionFactoryAddress}
           openEditionMinterCreationFee={openEditionMinterCreationFee as string}
-          openEditionMinterUpdatableCreationFee={openEditionMinterUpdatableCreationFee as string}
         />
       </Conditional>
       <div className="mx-10">
