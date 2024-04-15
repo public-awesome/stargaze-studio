@@ -849,14 +849,21 @@ export const OpenEditionMinterCreator = ({
                 : null,
           },
           start_time: mintingDetails?.startTime,
-          end_time: mintingDetails?.limitType === ('time_limited' as LimitType) ? mintingDetails.endTime : null,
+          end_time:
+            mintingDetails?.limitType === ('time_limited' as LimitType) ||
+            mintingDetails?.limitType === ('time_and_count_limited' as LimitType)
+              ? mintingDetails.endTime
+              : null,
           mint_price: {
             amount: Number(mintingDetails?.unitPrice).toString(),
             denom: (mintTokenFromFactory?.denom as string) || 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           num_tokens:
-            mintingDetails?.limitType === ('count_limited' as LimitType) ? mintingDetails.tokenCountLimit : null,
+            mintingDetails?.limitType === ('count_limited' as LimitType) ||
+            mintingDetails?.limitType === ('time_and_count_limited' as LimitType)
+              ? mintingDetails.tokenCountLimit
+              : null,
           payment_address: mintingDetails?.paymentAddress || null,
           whitelist,
         },
