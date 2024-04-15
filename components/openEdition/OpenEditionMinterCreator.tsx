@@ -30,6 +30,7 @@ import {
   WHITELIST_MERKLE_TREE_API_URL,
   WHITELIST_MERKLE_TREE_CODE_ID,
 } from 'utils/constants'
+import { useDebounce } from 'utils/debounce'
 import type { AssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
 import { checkTokenUri } from 'utils/isValidTokenUri'
@@ -66,6 +67,7 @@ export interface OpenEditionMinterDetailsDataProps {
   coverImageUrl?: string | null
   tokenUri?: string | null
   tokenImageUri?: string | null
+  isRefreshed?: boolean
 }
 
 interface OpenEditionMinterCreatorProps {
@@ -112,6 +114,7 @@ export const OpenEditionMinterCreator = ({
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
+  const [isRefreshed, setIsRefreshed] = useState(false)
   const [onChainMetadataInputDetails, setOnChainMetadataInputDetails] =
     useState<OnChainMetadataInputDetailsDataProps | null>(null)
   const [offChainMetadataUploadDetails, setOffChainMetadataUploadDetails] =
@@ -947,6 +950,7 @@ export const OpenEditionMinterCreator = ({
       coverImageUrl,
       tokenUri,
       tokenImageUri,
+      isRefreshed,
     }
     onDetailsChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -963,6 +967,7 @@ export const OpenEditionMinterCreator = ({
     coverImageUrl,
     tokenUri,
     tokenImageUri,
+    isRefreshed,
   ])
 
   useEffect(() => {
@@ -970,6 +975,40 @@ export const OpenEditionMinterCreator = ({
       setMetadataStorageMethod(importedOpenEditionMinterDetails.metadataStorageMethod as MetadataStorageMethod)
     }
   }, [importedOpenEditionMinterDetails])
+
+  const fetchWhitelistConfig = async (contractAddress: string | undefined) => {
+    if (contractAddress === '' || !whitelistDetails) return
+    const contract = whitelistContract?.use(contractAddress)
+
+    await contract
+      ?.config()
+      .then((config) => {
+        if (!config) {
+          whitelistDetails.whitelistType = 'standard'
+          return
+        }
+
+        if (JSON.stringify(config).includes('whale_cap')) whitelistDetails.whitelistType = 'flex'
+        else if (!JSON.stringify(config).includes('member_limit') || config.member_limit === 0) {
+          // whitelistDetails.whitelistType = 'merkletree'
+          toast.error(
+            'Whitelist Merkle Tree is not supported yet for open edition collections. Please use a standard or flexible whitelist contract.',
+          )
+        } else whitelistDetails.whitelistType = 'standard'
+        setIsRefreshed(!isRefreshed)
+      })
+      .catch((error) => {
+        console.log('error', error)
+      })
+  }
+
+  const debouncedWhitelistContractAddress = useDebounce(whitelistDetails?.contractAddress, 300)
+
+  useEffect(() => {
+    if (whitelistDetails?.whitelistState === 'existing' && debouncedWhitelistContractAddress !== '') {
+      void fetchWhitelistConfig(debouncedWhitelistContractAddress)
+    }
+  }, [whitelistDetails?.whitelistState, debouncedWhitelistContractAddress])
 
   return (
     <div>

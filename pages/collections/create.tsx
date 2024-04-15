@@ -1318,6 +1318,7 @@ const CollectionCreationPage: NextPage = () => {
     openEditionMinterDetails?.whitelistDetails?.whitelistType,
     openEditionMinterDetails?.whitelistDetails?.whitelistState,
     wallet.isWalletConnected,
+    openEditionMinterDetails?.isRefreshed,
   ])
 
   const fetchVendingFactoryParameters = useCallback(async () => {
