@@ -13,7 +13,6 @@ import {
   OPEN_EDITION_IBC_ATOM_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
-  OPEN_EDITION_IBC_HUAHUA_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_TIA_FACTORY_ADDRESS,
@@ -41,8 +40,6 @@ import {
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_FLEX_ADDRESS,
-  VENDING_IBC_HUAHUA_FACTORY_ADDRESS,
-  VENDING_IBC_HUAHUA_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_KUJI_FACTORY_ADDRESS,
   VENDING_IBC_KUJI_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_NBTC_FACTORY_ADDRESS,
@@ -75,7 +72,7 @@ import {
   ibcAtom,
   ibcCrbrus,
   ibcFrnz,
-  ibcHuahua,
+  // ibcHuahua,
   ibcKuji,
   ibcNbtc,
   ibcTia,
@@ -231,14 +228,13 @@ export const openEditionIbcKujiMinter: MinterInfo = {
   flexible: false,
 }
 
-export const openEditionIbcHuahuaMinter: MinterInfo = {
-  id: 'open-edition-ibc-huahua-minter',
-  factoryAddress: OPEN_EDITION_IBC_HUAHUA_FACTORY_ADDRESS,
-  supportedToken: ibcHuahua,
-  updatable: false,
-  featured: false,
-  flexible: false,
-}
+// export const openEditionIbcHuahuaMinter: MinterInfo = {
+//   id: 'open-edition-ibc-huahua-minter',
+//   factoryAddress: OPEN_EDITION_IBC_HUAHUA_FACTORY_ADDRESS,
+//   supportedToken: ibcHuahua,
+//   updatable: false,
+//   featured: false,
+// }
 
 export const openEditionIbcCrbrusMinter: MinterInfo = {
   id: 'open-edition-ibc-crbrus-minter',
@@ -283,7 +279,7 @@ export const openEditionMinterList = [
   openEditionIbcUskMinter,
   openEditionUpdatableIbcUskMinter,
   openEditionIbcKujiMinter,
-  openEditionIbcHuahuaMinter,
+  // openEditionIbcHuahuaMinter,
   openEditionIbcCrbrusMinter,
   openEditionNativeStrdstMinter,
   openEditionNativeBrnchMinter,
@@ -492,15 +488,15 @@ export const vendingIbcKujiMinter: MinterInfo = {
   featured: false,
 }
 
-export const vendingIbcHuahuaMinter: MinterInfo = {
-  id: 'vending-ibc-huahua-minter',
-  factoryAddress: VENDING_IBC_HUAHUA_FACTORY_ADDRESS,
-  supportedToken: ibcHuahua,
-  updatable: false,
-  flexible: false,
-  merkleTree: false,
-  featured: false,
-}
+// export const vendingIbcHuahuaMinter: MinterInfo = {
+//   id: 'vending-ibc-huahua-minter',
+//   factoryAddress: VENDING_IBC_HUAHUA_FACTORY_ADDRESS,
+//   supportedToken: ibcHuahua,
+//   updatable: false,
+//   flexible: false,
+//   merkleTree: false,
+//   featured: false,
+// }
 
 export const vendingIbcCrbrusMinter: MinterInfo = {
   id: 'vending-ibc-crbrus-minter',
@@ -569,7 +565,7 @@ export const vendingMinterList = [
   vendingIbcUskMinter,
   vendingUpdatableIbcUskMinter,
   vendingIbcKujiMinter,
-  vendingIbcHuahuaMinter,
+  // vendingIbcHuahuaMinter,
   vendingIbcCrbrusMinter,
   vendingNativeStardustMinter,
   vendingUpdatableNativeStardustMinter,
@@ -737,15 +733,15 @@ export const flexibleVendingIbcKujiMinter: MinterInfo = {
   featured: false,
 }
 
-export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
-  id: 'flexible-vending-ibc-huahua-minter',
-  factoryAddress: VENDING_IBC_HUAHUA_FACTORY_FLEX_ADDRESS,
-  supportedToken: ibcHuahua,
-  updatable: false,
-  flexible: true,
-  merkleTree: false,
-  featured: false,
-}
+// export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
+//   id: 'flexible-vending-ibc-huahua-minter',
+//   factoryAddress: VENDING_IBC_HUAHUA_FACTORY_FLEX_ADDRESS,
+//   supportedToken: ibcHuahua,
+//   updatable: false,
+//   flexible: true,
+//   merkleTree: false,
+//   featured: false,
+// }
 
 export const flexibleVendingIbcCrbrusMinter: MinterInfo = {
   id: 'flexible-vending-ibc-crbrus-minter',
@@ -794,7 +790,7 @@ export const flexibleVendingMinterList = [
   flexibleVendingIbcUskMinter,
   flexibleVendingUpdatableIbcUskMinter,
   flexibleVendingIbcKujiMinter,
-  flexibleVendingIbcHuahuaMinter,
+  // flexibleVendingIbcHuahuaMinter,
   flexibleVendingIbcCrbrusMinter,
   flexibleVendingStrdstMinter,
   flexibleVendingBrnchMinter,
