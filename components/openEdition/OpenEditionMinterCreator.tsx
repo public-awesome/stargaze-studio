@@ -367,6 +367,7 @@ export const OpenEditionMinterCreator = ({
   }
 
   const checkWhitelistDetails = async () => {
+    if (NETWORK === 'mainnet') return // Skip whitelist checks on mainnet
     if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
     if (whitelistDetails.whitelistState === 'existing') {
       if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
@@ -866,7 +867,7 @@ export const OpenEditionMinterCreator = ({
               ? mintingDetails.tokenCountLimit
               : null,
           payment_address: mintingDetails?.paymentAddress || null,
-          whitelist: NETWORK === 'testnet' ? whitelist : null,
+          // whitelist: NETWORK === 'testnet' ? whitelist : null,
         },
         collection_params: {
           code_id: collectionDetails?.updatable
