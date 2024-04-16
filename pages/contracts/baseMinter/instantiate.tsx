@@ -23,13 +23,12 @@ import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaAsterisk } from 'react-icons/fa'
 import { useMutation } from 'react-query'
-import { BASE_FACTORY_ADDRESS } from 'utils/constants'
+import { BASE_FACTORY_ADDRESS, BASE_FACTORY_SG721_CODE_ID } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
 import type { CreateBaseMinterResponse } from '../../../contracts/baseFactory/contract'
-import { SG721_CODE_ID } from '../../../utils/constants'
 import { resolveAddress } from '../../../utils/resolveAddress'
 
 const BaseMinterInstantiatePage: NextPage = () => {
@@ -62,7 +61,7 @@ const BaseMinterInstantiatePage: NextPage = () => {
     title: 'Code ID',
     subtitle: 'Code ID for the sg721 contract',
     placeholder: '1',
-    defaultValue: SG721_CODE_ID,
+    defaultValue: BASE_FACTORY_SG721_CODE_ID,
   })
 
   const creatorState = useInputState({
