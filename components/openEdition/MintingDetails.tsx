@@ -17,7 +17,7 @@ import { useWallet } from 'utils/wallet'
 import { NumberInput, TextInput } from '../forms/FormInput'
 import type { UploadMethod } from './OffChainMetadataUploadDetails'
 
-export type LimitType = 'count_limited' | 'time_limited'
+export type LimitType = 'count_limited' | 'time_limited' | 'time_and_count_limited'
 
 interface MintingDetailsProps {
   onChange: (data: MintingDetailsDataProps) => void
@@ -25,6 +25,8 @@ interface MintingDetailsProps {
   minimumMintPrice: number
   mintTokenFromFactory?: TokenInfo | undefined
   importedMintingDetails?: MintingDetailsDataProps
+  isPresale: boolean
+  whitelistStartDate?: string
 }
 
 export interface MintingDetailsDataProps {
@@ -44,6 +46,8 @@ export const MintingDetails = ({
   minimumMintPrice,
   mintTokenFromFactory,
   importedMintingDetails,
+  isPresale,
+  whitelistStartDate,
 }: MintingDetailsProps) => {
   const wallet = useWallet()
 
@@ -109,11 +113,19 @@ export const MintingDetails = ({
         : '',
       perAddressLimit: perAddressLimitState.value,
       startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
-      endTime: endTimestamp ? (endTimestamp.getTime() * 1_000_000).toString() : '',
+      endTime:
+        limitType === 'time_limited' || limitType === 'time_and_count_limited'
+          ? endTimestamp
+            ? (endTimestamp.getTime() * 1_000_000).toString()
+            : ''
+          : undefined,
       paymentAddress: paymentAddressState.value.trim(),
       selectedMintToken,
       limitType,
-      tokenCountLimit: limitType === 'count_limited' ? tokenCountLimitState.value : undefined,
+      tokenCountLimit:
+        limitType === 'count_limited' || limitType === 'time_and_count_limited'
+          ? tokenCountLimitState.value
+          : undefined,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,6 +156,12 @@ export const MintingDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedMintingDetails])
 
+  useEffect(() => {
+    if (isPresale) {
+      setTimestamp(whitelistStartDate ? new Date(Number(whitelistStartDate) / 1_000_000) : undefined)
+    }
+  }, [whitelistStartDate, isPresale])
+
   return (
     <div className="border-l-[1px] border-gray-500 border-opacity-20">
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
@@ -172,6 +190,7 @@ export const MintingDetails = ({
           title="Start Time"
         >
           <InputDateTime
+            disabled={isPresale}
             minDate={
               timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
             }
@@ -197,10 +216,12 @@ export const MintingDetails = ({
           <label className="justify-start ml-6 cursor-pointer label">
             <span className="mr-2">Time</span>
             <input
-              checked={limitType === 'time_limited'}
+              checked={limitType === 'time_limited' || limitType === 'time_and_count_limited'}
               className={`${limitType === 'time_limited' ? `bg-stargaze` : `bg-gray-600`} checkbox`}
               onClick={() => {
-                setLimitType('time_limited' as LimitType)
+                if (limitType === 'time_and_count_limited') setLimitType('count_limited' as LimitType)
+                else if (limitType === 'count_limited') setLimitType('time_and_count_limited' as LimitType)
+                else setLimitType('count_limited' as LimitType)
               }}
               type="checkbox"
             />
@@ -208,16 +229,18 @@ export const MintingDetails = ({
           <label className="justify-start ml-4 cursor-pointer label">
             <span className="mr-2">Token Count</span>
             <input
-              checked={limitType === 'count_limited'}
+              checked={limitType === 'count_limited' || limitType === 'time_and_count_limited'}
               className={`${limitType === 'count_limited' ? `bg-stargaze` : `bg-gray-600`} checkbox`}
               onClick={() => {
-                setLimitType('count_limited' as LimitType)
+                if (limitType === 'time_and_count_limited') setLimitType('time_limited' as LimitType)
+                else if (limitType === 'time_limited') setLimitType('time_and_count_limited' as LimitType)
+                else setLimitType('time_limited' as LimitType)
               }}
               type="checkbox"
             />
           </label>
         </div>
-        <Conditional test={limitType === 'time_limited'}>
+        <Conditional test={limitType === 'time_limited' || limitType === 'time_and_count_limited'}>
           <FormControl
             htmlId="endTimestamp"
             isRequired
@@ -247,7 +270,7 @@ export const MintingDetails = ({
             />
           </FormControl>
         </Conditional>
-        <Conditional test={limitType === 'count_limited'}>
+        <Conditional test={limitType === 'count_limited' || limitType === 'time_and_count_limited'}>
           <NumberInput {...tokenCountLimitState} isRequired />
         </Conditional>
       </FormGroup>

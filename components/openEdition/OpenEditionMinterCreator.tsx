@@ -6,13 +6,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { toUtf8 } from '@cosmjs/encoding'
 import { coin } from '@cosmjs/proto-signing'
+import axios from 'axios'
 import clsx from 'clsx'
 import { Button } from 'components/Button'
 import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
-import { openEditionMinterList } from 'config/minter'
 import { type TokenInfo } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
@@ -22,12 +22,15 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import {
-  OPEN_EDITION_FACTORY_ADDRESS,
-  OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   SG721_OPEN_EDITION_CODE_ID,
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
   STRDST_SG721_CODE_ID,
+  WHITELIST_CODE_ID,
+  WHITELIST_FLEX_CODE_ID,
+  WHITELIST_MERKLE_TREE_API_URL,
+  WHITELIST_MERKLE_TREE_CODE_ID,
 } from 'utils/constants'
+import { useDebounce } from 'utils/debounce'
 import type { AssetType } from 'utils/getAssetType'
 import { isValidAddress } from 'utils/isValidAddress'
 import { checkTokenUri } from 'utils/isValidTokenUri'
@@ -47,12 +50,14 @@ import {
 import type { OnChainMetadataInputDetailsDataProps } from './OnChainMetadataInputDetails'
 import { OnChainMetadataInputDetails } from './OnChainMetadataInputDetails'
 import { type RoyaltyDetailsDataProps, RoyaltyDetails } from './RoyaltyDetails'
+import { type WhitelistDetailsDataProps, WhitelistDetails } from './WhitelistDetails'
 
 export type MetadataStorageMethod = 'off-chain' | 'on-chain'
 
 export interface OpenEditionMinterDetailsDataProps {
   imageUploadDetails?: ImageUploadDetailsDataProps
   collectionDetails?: CollectionDetailsDataProps
+  whitelistDetails?: WhitelistDetailsDataProps
   royaltyDetails?: RoyaltyDetailsDataProps
   onChainMetadataInputDetails?: OnChainMetadataInputDetailsDataProps
   offChainMetadataUploadDetails?: OffChainMetadataUploadDetailsDataProps
@@ -62,24 +67,26 @@ export interface OpenEditionMinterDetailsDataProps {
   coverImageUrl?: string | null
   tokenUri?: string | null
   tokenImageUri?: string | null
+  isRefreshed?: boolean
 }
 
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
   onDetailsChange: (data: OpenEditionMinterDetailsDataProps) => void
-  openEditionMinterUpdatableCreationFee?: string
   openEditionMinterCreationFee?: string
   minimumMintPrice?: string
-  minimumUpdatableMintPrice?: string
   minterType?: MinterType
   mintTokenFromFactory?: TokenInfo | undefined
   importedOpenEditionMinterDetails?: OpenEditionMinterDetailsDataProps
+  isMatchingFactoryPresent?: boolean
+  openEditionFactoryAddress?: string
 }
 
 export interface OpenEditionMinterCreatorDataProps {
   metadataStorageMethod: MetadataStorageMethod
   openEditionMinterContractAddress: string | null
   sg721ContractAddress: string | null
+  whitelistContractAddress: string | null
   transactionHash: string | null
 }
 
@@ -87,21 +94,27 @@ export const OpenEditionMinterCreator = ({
   onChange,
   onDetailsChange,
   openEditionMinterCreationFee,
-  openEditionMinterUpdatableCreationFee,
   minimumMintPrice,
-  minimumUpdatableMintPrice,
   minterType,
   mintTokenFromFactory,
   importedOpenEditionMinterDetails,
+  isMatchingFactoryPresent,
+  openEditionFactoryAddress,
 }: OpenEditionMinterCreatorProps) => {
   const wallet = useWallet()
-  const { openEditionMinter: openEditionMinterContract, openEditionFactory: openEditionFactoryContract } =
-    useContracts()
+  const {
+    openEditionMinter: openEditionMinterContract,
+    openEditionFactory: openEditionFactoryContract,
+    whitelist: whitelistContract,
+    whitelistMerkleTree: whitelistMerkleTreeContract,
+  } = useContracts()
 
   const [metadataStorageMethod, setMetadataStorageMethod] = useState<MetadataStorageMethod>('off-chain')
   const [imageUploadDetails, setImageUploadDetails] = useState<ImageUploadDetailsDataProps | null>(null)
   const [collectionDetails, setCollectionDetails] = useState<CollectionDetailsDataProps | null>(null)
+  const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
+  const [isRefreshed, setIsRefreshed] = useState(false)
   const [onChainMetadataInputDetails, setOnChainMetadataInputDetails] =
     useState<OnChainMetadataInputDetailsDataProps | null>(null)
   const [offChainMetadataUploadDetails, setOffChainMetadataUploadDetails] =
@@ -116,29 +129,19 @@ export const OpenEditionMinterCreator = ({
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null)
   const [openEditionMinterContractAddress, setOpenEditionMinterContractAddress] = useState<string | null>(null)
   const [sg721ContractAddress, setSg721ContractAddress] = useState<string | null>(null)
+  const [whitelistContractAddress, setWhitelistContractAddress] = useState<string | null>(null)
   const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [thumbnailImageUri, setThumbnailImageUri] = useState<string | undefined>(undefined)
 
   const thumbnailCompatibleAssetTypes: AssetType[] = ['video', 'audio', 'html']
 
-  const factoryAddressForSelectedDenom =
-    openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === false)
-      ?.factoryAddress || OPEN_EDITION_FACTORY_ADDRESS
-  const updatableFactoryAddressForSelectedDenom =
-    openEditionMinterList.find((minter) => minter.supportedToken === mintTokenFromFactory && minter.updatable === true)
-      ?.factoryAddress || OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS
-
   const openEditionFactoryMessages = useMemo(
-    () =>
-      openEditionFactoryContract?.use(
-        collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
-      ),
+    () => openEditionFactoryContract?.use(openEditionFactoryAddress as string),
     [
       openEditionFactoryContract,
       wallet.address,
       collectionDetails?.updatable,
-      factoryAddressForSelectedDenom,
-      updatableFactoryAddressForSelectedDenom,
+      openEditionFactoryAddress,
       wallet.isWalletConnected,
     ],
   )
@@ -152,13 +155,26 @@ export const OpenEditionMinterCreator = ({
         .then(() => {
           void checkRoyaltyDetails()
             .then(() => {
-              void checkwalletBalance()
+              checkWhitelistDetails()
                 .then(() => {
-                  setReadyToCreate(true)
+                  void checkwalletBalance()
+                    .then(() => {
+                      setReadyToCreate(true)
+                    })
+                    .catch((error: any) => {
+                      toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
+                      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                      setReadyToCreate(false)
+                    })
                 })
-                .catch((error: any) => {
-                  toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
-                  addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                .catch((error) => {
+                  if (String(error.message).includes('Insufficient wallet balance')) {
+                    toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+                    addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                  } else {
+                    toast.error(`Error in Whitelist Configuration: ${error.message}`, { style: { maxWidth: 'none' } })
+                    addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                  }
                   setReadyToCreate(false)
                 })
             })
@@ -299,9 +315,9 @@ export const OpenEditionMinterCreator = ({
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.unitPrice === '') throw new Error('Mint price is required')
     if (collectionDetails?.updatable) {
-      if (Number(mintingDetails.unitPrice) < Number(minimumUpdatableMintPrice))
+      if (Number(mintingDetails.unitPrice) < Number(minimumMintPrice))
         throw new Error(
-          `Invalid mint price: The minimum mint price is ${Number(minimumUpdatableMintPrice) / 1000000} ${
+          `Invalid mint price: The minimum mint price is ${Number(minimumMintPrice) / 1000000} ${
             mintTokenFromFactory?.displayName
           }`,
         )
@@ -342,6 +358,92 @@ export const OpenEditionMinterCreator = ({
       (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
     )
       throw new Error('Invalid payment address')
+
+    if (!isMatchingFactoryPresent)
+      throw new Error(
+        `No matching open edition factory contract found for the selected parameters (Mint Price Denom: ${mintingDetails.selectedMintToken?.displayName}, Whitelist Type: ${whitelistDetails?.whitelistType})`,
+      )
+  }
+
+  const checkWhitelistDetails = async () => {
+    if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
+    if (whitelistDetails.whitelistState === 'existing') {
+      if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
+      else {
+        const contract = whitelistContract?.use(whitelistDetails.contractAddress)
+        //check if the address belongs to a whitelist contract (see performChecks())
+        const config = await contract?.config()
+        if (JSON.stringify(config).includes('whale_cap')) whitelistDetails.whitelistType = 'flex'
+        else if (!JSON.stringify(config).includes('member_limit') || config?.member_limit === 0) {
+          // whitelistDetails.whitelistType = 'merkletree'
+          throw new Error(
+            'Whitelist Merkle Tree is not supported yet. Please use a standard or flexible whitelist contract.',
+          )
+        } else whitelistDetails.whitelistType = 'standard'
+        if (Number(config?.start_time) !== Number(mintingDetails?.startTime)) {
+          const whitelistStartDate = new Date(Number(config?.start_time) / 1000000)
+          throw Error(`Whitelist start time (${whitelistStartDate.toLocaleString()}) does not match minting start time`)
+        }
+
+        if (mintingDetails?.tokenCountLimit && config?.per_address_limit) {
+          if (mintingDetails.tokenCountLimit >= 100 && Number(config.per_address_limit) > 50) {
+            throw Error(
+              `Invalid limit for tokens per address (${config.per_address_limit} tokens). Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
+            )
+          } else if (
+            mintingDetails.tokenCountLimit >= 100 &&
+            Number(config.per_address_limit) > Math.ceil((mintingDetails.tokenCountLimit / 100) * 3)
+          ) {
+            throw Error(
+              `Invalid limit for tokens per address (${config.per_address_limit} tokens). Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
+            )
+          } else if (mintingDetails.tokenCountLimit < 100 && Number(config.per_address_limit) > 3) {
+            throw Error(
+              `Invalid limit for tokens per address (${config.per_address_limit} tokens). Tokens per address limit cannot exceed 3 for collections with a token count limit smaller than 100 tokens.`,
+            )
+          }
+        }
+      }
+    } else if (whitelistDetails.whitelistState === 'new') {
+      if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
+      if (whitelistDetails.unitPrice === undefined) throw new Error('Whitelist unit price is required')
+      if (Number(whitelistDetails.unitPrice) < 0)
+        throw new Error('Invalid unit price: The unit price cannot be negative')
+      if (whitelistDetails.startTime === '') throw new Error('Start time is required')
+      if (whitelistDetails.endTime === '') throw new Error('End time is required')
+      if (
+        whitelistDetails.whitelistType === 'standard' &&
+        (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
+      )
+        throw new Error('Per address limit is required')
+      if (
+        whitelistDetails.whitelistType !== 'merkletree' &&
+        (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
+      )
+        throw new Error('Member limit is required')
+      if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
+        throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
+      if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
+        throw new Error('Whitelist start time must be the same as the minting start time')
+      if (whitelistDetails.perAddressLimit && mintingDetails?.tokenCountLimit) {
+        if (mintingDetails.tokenCountLimit >= 100 && whitelistDetails.perAddressLimit > 50) {
+          throw Error(
+            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
+          )
+        } else if (
+          mintingDetails.tokenCountLimit >= 100 &&
+          whitelistDetails.perAddressLimit > Math.ceil((mintingDetails.tokenCountLimit / 100) * 3)
+        ) {
+          throw Error(
+            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
+          )
+        } else if (mintingDetails.tokenCountLimit < 100 && whitelistDetails.perAddressLimit > 3) {
+          throw Error(
+            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3 for collections with a token count limit smaller than 100 tokens.`,
+          )
+        }
+      }
+    }
   }
 
   const checkRoyaltyDetails = async () => {
@@ -378,9 +480,13 @@ export const OpenEditionMinterCreator = ({
 
   const checkwalletBalance = async () => {
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
-    const amountNeeded = collectionDetails?.updatable
-      ? Number(openEditionMinterUpdatableCreationFee)
-      : Number(openEditionMinterCreationFee)
+    let amountNeeded = 0
+    if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
+      amountNeeded =
+        Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + Number(openEditionMinterCreationFee)
+    } else {
+      amountNeeded = openEditionMinterCreationFee ? Number(openEditionMinterCreationFee) : 0
+    }
     await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
       if (amountNeeded >= Number(balance.amount))
         throw new Error(
@@ -399,6 +505,7 @@ export const OpenEditionMinterCreator = ({
       setTokenImageUri(null)
       setOpenEditionMinterContractAddress(null)
       setSg721ContractAddress(null)
+      setWhitelistContractAddress(null)
       setTransactionHash(null)
       if (metadataStorageMethod === 'off-chain') {
         if (offChainMetadataUploadDetails?.uploadMethod === 'new') {
@@ -423,13 +530,27 @@ export const OpenEditionMinterCreator = ({
           setTokenUri(metadataUriWithBase)
           setCoverImageUrl(coverImageUriWithBase)
           setUploading(false)
-          await instantiateOpenEditionMinter(metadataUriWithBase, coverImageUriWithBase)
+
+          let whitelist: string | undefined
+          if (whitelistDetails?.whitelistState === 'existing') whitelist = whitelistDetails.contractAddress
+          else if (whitelistDetails?.whitelistState === 'new') whitelist = await instantiateWhitelist()
+          setWhitelistContractAddress(whitelist as string)
+
+          await instantiateOpenEditionMinter(metadataUriWithBase, coverImageUriWithBase, undefined, whitelist)
         } else {
           setTokenUri(offChainMetadataUploadDetails?.tokenURI as string)
           setCoverImageUrl(offChainMetadataUploadDetails?.imageUrl as string)
+
+          let whitelist: string | undefined
+          if (whitelistDetails?.whitelistState === 'existing') whitelist = whitelistDetails.contractAddress
+          else if (whitelistDetails?.whitelistState === 'new') whitelist = await instantiateWhitelist()
+          setWhitelistContractAddress(whitelist as string)
+
           await instantiateOpenEditionMinter(
             offChainMetadataUploadDetails?.tokenURI as string,
             offChainMetadataUploadDetails?.imageUrl as string,
+            undefined,
+            whitelist,
           )
         }
       } else if (metadataStorageMethod === 'on-chain') {
@@ -471,15 +592,27 @@ export const OpenEditionMinterCreator = ({
             ? `ipfs://${thumbnailUri}/${(imageUploadDetails.thumbnailFile as File).name}`
             : undefined
           setThumbnailImageUri(thumbnailUriWithBase)
-
           setUploading(false)
-          await instantiateOpenEditionMinter(imageUriWithBase, coverImageUriWithBase, thumbnailUriWithBase)
+
+          let whitelist: string | undefined
+          if (whitelistDetails?.whitelistState === 'existing') whitelist = whitelistDetails.contractAddress
+          else if (whitelistDetails?.whitelistState === 'new') whitelist = await instantiateWhitelist()
+          setWhitelistContractAddress(whitelist as string)
+
+          await instantiateOpenEditionMinter(imageUriWithBase, coverImageUriWithBase, thumbnailUriWithBase, whitelist)
         } else if (imageUploadDetails?.uploadMethod === 'existing') {
           setTokenImageUri(imageUploadDetails.imageUrl as string)
           setCoverImageUrl(imageUploadDetails.coverImageUrl as string)
+
+          let whitelist: string | undefined
+          if (whitelistDetails?.whitelistState === 'existing') whitelist = whitelistDetails.contractAddress
+          else if (whitelistDetails?.whitelistState === 'new') whitelist = await instantiateWhitelist()
+          setWhitelistContractAddress(whitelist as string)
+
           await instantiateOpenEditionMinter(
             imageUploadDetails.imageUrl as string,
             imageUploadDetails.coverImageUrl as string,
+            whitelist,
           )
         }
       }
@@ -578,7 +711,104 @@ export const OpenEditionMinterCreator = ({
     })
   }
 
-  const instantiateOpenEditionMinter = async (uri: string, coverImageUri: string, thumbnailUri?: string) => {
+  const instantiateWhitelist = async () => {
+    if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
+    if (!whitelistContract) throw new Error('Contract not found')
+
+    if (whitelistDetails?.whitelistType === 'standard' || whitelistDetails?.whitelistType === 'flex') {
+      const standardMsg = {
+        members: whitelistDetails.members,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
+        ),
+        per_address_limit: whitelistDetails.perAddressLimit,
+        member_limit: whitelistDetails.memberLimit,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const flexMsg = {
+        members: whitelistDetails.members,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
+        ),
+        member_limit: whitelistDetails.memberLimit,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const data = await whitelistContract.instantiate(
+        whitelistDetails.whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
+        whitelistDetails.whitelistType === 'standard' ? standardMsg : flexMsg,
+        'Stargaze Whitelist Contract',
+        wallet.address,
+      )
+
+      return data.contractAddress
+    } else if (whitelistDetails?.whitelistType === 'merkletree') {
+      const members = whitelistDetails.members as string[]
+      const membersCsv = members.join('\n')
+      const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
+      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
+      const formData = new FormData()
+      formData.append('whitelist', membersFile)
+      const response = await toast
+        .promise(
+          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }),
+          {
+            loading: 'Fetching merkle root hash...',
+            success: 'Merkle root fetched successfully.',
+            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
+          },
+        )
+        .catch((error) => {
+          console.log('error', error)
+          throw new Error('Whitelist instantiation failed.')
+        })
+
+      const rootHash = response.data.root_hash
+      console.log('rootHash', rootHash)
+
+      const merkleTreeMsg = {
+        merkle_root: rootHash,
+        merkle_tree_uri: null,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
+        ),
+        per_address_limit: whitelistDetails.perAddressLimit,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const data = await whitelistMerkleTreeContract?.instantiate(
+        WHITELIST_MERKLE_TREE_CODE_ID,
+        merkleTreeMsg,
+        'Stargaze Whitelist Merkle Tree Contract',
+        wallet.address,
+      )
+      return data?.contractAddress
+    }
+  }
+
+  const instantiateOpenEditionMinter = async (
+    uri: string,
+    coverImageUri: string,
+    thumbnailUri?: string,
+    whitelist?: string,
+  ) => {
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!openEditionFactoryContract) throw new Error('Contract not found')
     if (!openEditionMinterContract) throw new Error('Contract not found')
@@ -619,16 +849,23 @@ export const OpenEditionMinterCreator = ({
                 : null,
           },
           start_time: mintingDetails?.startTime,
-          end_time: mintingDetails?.limitType === ('time_limited' as LimitType) ? mintingDetails.endTime : null,
+          end_time:
+            mintingDetails?.limitType === ('time_limited' as LimitType) ||
+            mintingDetails?.limitType === ('time_and_count_limited' as LimitType)
+              ? mintingDetails.endTime
+              : null,
           mint_price: {
             amount: Number(mintingDetails?.unitPrice).toString(),
             denom: (mintTokenFromFactory?.denom as string) || 'ustars',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           num_tokens:
-            mintingDetails?.limitType === ('count_limited' as LimitType) ? mintingDetails.tokenCountLimit : null,
+            mintingDetails?.limitType === ('count_limited' as LimitType) ||
+            mintingDetails?.limitType === ('time_and_count_limited' as LimitType)
+              ? mintingDetails.tokenCountLimit
+              : null,
           payment_address: mintingDetails?.paymentAddress || null,
-          // whitelist: null,
+          whitelist,
         },
         collection_params: {
           code_id: collectionDetails?.updatable
@@ -658,18 +895,11 @@ export const OpenEditionMinterCreator = ({
     }
 
     const payload: OpenEditionFactoryDispatchExecuteArgs = {
-      contract: collectionDetails?.updatable ? updatableFactoryAddressForSelectedDenom : factoryAddressForSelectedDenom,
+      contract: openEditionFactoryAddress as string,
       messages: openEditionFactoryMessages,
       txSigner: wallet.address || '',
       msg,
-      funds: [
-        coin(
-          collectionDetails?.updatable
-            ? (openEditionMinterUpdatableCreationFee as string)
-            : (openEditionMinterCreationFee as string),
-          'ustars',
-        ),
-      ],
+      funds: [coin(openEditionMinterCreationFee as string, 'ustars')],
       updatable: collectionDetails?.updatable,
     }
     await openEditionFactoryDispatchExecute(payload)
@@ -700,16 +930,24 @@ export const OpenEditionMinterCreator = ({
       metadataStorageMethod,
       openEditionMinterContractAddress,
       sg721ContractAddress,
+      whitelistContractAddress,
       transactionHash,
     }
     onChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [metadataStorageMethod, openEditionMinterContractAddress, sg721ContractAddress, transactionHash])
+  }, [
+    metadataStorageMethod,
+    openEditionMinterContractAddress,
+    sg721ContractAddress,
+    whitelistContractAddress,
+    transactionHash,
+  ])
 
   useEffect(() => {
     const data: OpenEditionMinterDetailsDataProps = {
       imageUploadDetails: imageUploadDetails ? imageUploadDetails : undefined,
       collectionDetails: collectionDetails ? collectionDetails : undefined,
+      whitelistDetails: whitelistDetails ? whitelistDetails : undefined,
       royaltyDetails: royaltyDetails ? royaltyDetails : undefined,
       onChainMetadataInputDetails: onChainMetadataInputDetails ? onChainMetadataInputDetails : undefined,
       offChainMetadataUploadDetails: offChainMetadataUploadDetails ? offChainMetadataUploadDetails : undefined,
@@ -719,12 +957,14 @@ export const OpenEditionMinterCreator = ({
       coverImageUrl,
       tokenUri,
       tokenImageUri,
+      isRefreshed,
     }
     onDetailsChange(data)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     imageUploadDetails,
     collectionDetails,
+    whitelistDetails,
     royaltyDetails,
     onChainMetadataInputDetails,
     offChainMetadataUploadDetails,
@@ -734,6 +974,7 @@ export const OpenEditionMinterCreator = ({
     coverImageUrl,
     tokenUri,
     tokenImageUri,
+    isRefreshed,
   ])
 
   useEffect(() => {
@@ -741,6 +982,40 @@ export const OpenEditionMinterCreator = ({
       setMetadataStorageMethod(importedOpenEditionMinterDetails.metadataStorageMethod as MetadataStorageMethod)
     }
   }, [importedOpenEditionMinterDetails])
+
+  const fetchWhitelistConfig = async (contractAddress: string | undefined) => {
+    if (contractAddress === '' || !whitelistDetails) return
+    const contract = whitelistContract?.use(contractAddress)
+
+    await contract
+      ?.config()
+      .then((config) => {
+        if (!config) {
+          whitelistDetails.whitelistType = 'standard'
+          return
+        }
+
+        if (JSON.stringify(config).includes('whale_cap')) whitelistDetails.whitelistType = 'flex'
+        else if (!JSON.stringify(config).includes('member_limit') || config.member_limit === 0) {
+          // whitelistDetails.whitelistType = 'merkletree'
+          toast.error(
+            'Whitelist Merkle Tree is not supported yet for open edition collections. Please use a standard or flexible whitelist contract.',
+          )
+        } else whitelistDetails.whitelistType = 'standard'
+        setIsRefreshed(!isRefreshed)
+      })
+      .catch((error) => {
+        console.log('error', error)
+      })
+  }
+
+  const debouncedWhitelistContractAddress = useDebounce(whitelistDetails?.contractAddress, 300)
+
+  useEffect(() => {
+    if (whitelistDetails?.whitelistState === 'existing' && debouncedWhitelistContractAddress !== '') {
+      void fetchWhitelistConfig(debouncedWhitelistContractAddress)
+    }
+  }, [whitelistDetails?.whitelistState, debouncedWhitelistContractAddress])
 
   return (
     <div>
@@ -830,16 +1105,22 @@ export const OpenEditionMinterCreator = ({
         />
         <MintingDetails
           importedMintingDetails={importedOpenEditionMinterDetails?.mintingDetails}
-          minimumMintPrice={
-            collectionDetails?.updatable
-              ? Number(minimumUpdatableMintPrice) / 1000000
-              : Number(minimumMintPrice) / 1000000
-          }
+          isPresale={whitelistDetails?.whitelistState === 'new'}
+          minimumMintPrice={Number(minimumMintPrice) / 1000000}
           mintTokenFromFactory={mintTokenFromFactory}
           onChange={setMintingDetails}
           uploadMethod={offChainMetadataUploadDetails?.uploadMethod as UploadMethod}
+          whitelistStartDate={whitelistDetails?.startTime}
         />
       </div>
+      <div className="my-6 mx-10">
+        <WhitelistDetails
+          importedWhitelistDetails={importedOpenEditionMinterDetails?.whitelistDetails}
+          mintingTokenFromFactory={mintTokenFromFactory}
+          onChange={setWhitelistDetails}
+        />
+      </div>
+
       <div className="my-6">
         <RoyaltyDetails
           importedRoyaltyDetails={importedOpenEditionMinterDetails?.royaltyDetails}
