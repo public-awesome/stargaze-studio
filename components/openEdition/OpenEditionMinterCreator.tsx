@@ -22,6 +22,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import {
+  NETWORK,
   SG721_OPEN_EDITION_CODE_ID,
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
   STRDST_SG721_CODE_ID,
@@ -865,7 +866,7 @@ export const OpenEditionMinterCreator = ({
               ? mintingDetails.tokenCountLimit
               : null,
           payment_address: mintingDetails?.paymentAddress || null,
-          whitelist,
+          whitelist: NETWORK === 'testnet' ? whitelist : null,
         },
         collection_params: {
           code_id: collectionDetails?.updatable
@@ -1113,13 +1114,16 @@ export const OpenEditionMinterCreator = ({
           whitelistStartDate={whitelistDetails?.startTime}
         />
       </div>
-      <div className="my-6 mx-10">
-        <WhitelistDetails
-          importedWhitelistDetails={importedOpenEditionMinterDetails?.whitelistDetails}
-          mintingTokenFromFactory={mintTokenFromFactory}
-          onChange={setWhitelistDetails}
-        />
-      </div>
+
+      <Conditional test={NETWORK === 'testnet'}>
+        <div className="my-6 mx-10">
+          <WhitelistDetails
+            importedWhitelistDetails={importedOpenEditionMinterDetails?.whitelistDetails}
+            mintingTokenFromFactory={mintTokenFromFactory}
+            onChange={setWhitelistDetails}
+          />
+        </div>
+      </Conditional>
 
       <div className="my-6">
         <RoyaltyDetails
