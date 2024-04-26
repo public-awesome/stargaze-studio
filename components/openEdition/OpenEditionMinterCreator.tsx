@@ -22,7 +22,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { upload } from 'services/upload'
 import {
-  NETWORK,
   SG721_OPEN_EDITION_CODE_ID,
   SG721_OPEN_EDITION_UPDATABLE_CODE_ID,
   STRDST_SG721_CODE_ID,
@@ -367,7 +366,6 @@ export const OpenEditionMinterCreator = ({
   }
 
   const checkWhitelistDetails = async () => {
-    if (NETWORK === 'mainnet') return // Skip whitelist checks on mainnet
     if (!whitelistDetails) throw new Error('Please fill out the whitelist details')
     if (whitelistDetails.whitelistState === 'existing') {
       if (whitelistDetails.contractAddress === '') throw new Error('Whitelist contract address is required')
@@ -867,7 +865,7 @@ export const OpenEditionMinterCreator = ({
               ? mintingDetails.tokenCountLimit
               : null,
           payment_address: mintingDetails?.paymentAddress || null,
-          // whitelist: NETWORK === 'testnet' ? whitelist : null,
+          whitelist,
         },
         collection_params: {
           code_id: collectionDetails?.updatable
@@ -1116,15 +1114,13 @@ export const OpenEditionMinterCreator = ({
         />
       </div>
 
-      <Conditional test={NETWORK === 'testnet'}>
-        <div className="my-6 mx-10">
-          <WhitelistDetails
-            importedWhitelistDetails={importedOpenEditionMinterDetails?.whitelistDetails}
-            mintingTokenFromFactory={mintTokenFromFactory}
-            onChange={setWhitelistDetails}
-          />
-        </div>
-      </Conditional>
+      <div className="my-6 mx-10">
+        <WhitelistDetails
+          importedWhitelistDetails={importedOpenEditionMinterDetails?.whitelistDetails}
+          mintingTokenFromFactory={mintTokenFromFactory}
+          onChange={setWhitelistDetails}
+        />
+      </div>
 
       <div className="my-6">
         <RoyaltyDetails
