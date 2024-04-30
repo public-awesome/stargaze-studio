@@ -1113,6 +1113,7 @@ export const OpenEditionMinterCreator = ({
           whitelistStartDate={whitelistDetails?.startTime}
         />
       </div>
+
       <div className="my-6 mx-10">
         <WhitelistDetails
           importedWhitelistDetails={importedOpenEditionMinterDetails?.whitelistDetails}
