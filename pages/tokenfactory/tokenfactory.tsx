@@ -1,11 +1,11 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable tailwindcss/classnames-order */
-/* eslint-disable react/button-has-type */
 
 import type { EncodeObject } from '@cosmjs/proto-signing'
 import { Registry } from '@cosmjs/proto-signing'
 import { GasPrice, SigningStargateClient } from '@cosmjs/stargate'
+import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { DenomUnits } from 'components/forms/DenomUnits'
@@ -17,6 +17,7 @@ import { NextSeo } from 'next-seo'
 import { Field, Type } from 'protobufjs'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { NETWORK } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { useWallet } from 'utils/wallet'
 
@@ -52,16 +53,13 @@ const MsgMint = new Type('MsgMint')
   .add(new Field('sender', 1, 'string', 'required'))
   .add(new Field('amount', 2, 'Coin', 'required'))
   .add(new Field('mintToAddress', 3, 'string', 'required'))
-
-const CoinType = new Type('Coin').add(new Field('denom', 1, 'string')).add(new Field('amount', 2, 'string'))
-MsgMint.add(CoinType)
+  .add(new Type('Coin').add(new Field('denom', 1, 'string')).add(new Field('amount', 2, 'string')))
 
 const MsgSend = new Type('MsgSend')
   .add(new Field('fromAddress', 1, 'string'))
   .add(new Field('toAddress', 2, 'string'))
   .add(new Field('amount', 3, 'Coin', 'repeated'))
-
-MsgSend.add(CoinType)
+  .add(new Type('Coin').add(new Field('denom', 1, 'string')).add(new Field('amount', 2, 'string')))
 
 const MsgChangeAdmin = new Type('MsgChangeAdmin')
   .add(new Field('sender', 1, 'string', 'required'))
@@ -88,6 +86,7 @@ const Tokenfactory: NextPage = () => {
   const wallet = useWallet()
 
   const [messageType, setMessageType] = useState<MessageType>('MsgCreateDenom')
+  const [loading, setLoading] = useState(false)
 
   const denomState = useInputState({
     id: 'denom',
@@ -118,8 +117,8 @@ const Tokenfactory: NextPage = () => {
     id: 'mintToAddress',
     name: 'mintToAddress',
     title: 'Mint To Address',
-    //placeholder: `${wallet.isWalletConnected && wallet.address ? wallet.address : 'stars1...'}`,
-    placeholder: 'The tokens can only be minted to the creator address currently.',
+    placeholder: 'stars1...',
+    defaultValue: wallet.address ?? '',
     subtitle: 'The address to mint tokens to',
   })
 
@@ -209,10 +208,10 @@ const Tokenfactory: NextPage = () => {
   const handleSendMessage = async () => {
     try {
       if (!wallet.isWalletConnected) return toast.error('Please connect your wallet.')
-
+      setLoading(true)
       const offlineSigner = wallet.getOfflineSignerDirect()
       const stargateClient = await SigningStargateClient.connectWithSigner(
-        'https://rpc.elgafar-1.stargaze-apis.com/',
+        NETWORK === 'testnet' ? 'https://rpc.elgafar-1.stargaze-apis.com/' : 'https://rpc.stargaze-apis.com/',
         offlineSigner,
         {
           gasPrice: GasPrice.fromString('0.025ustars'),
@@ -302,9 +301,10 @@ const Tokenfactory: NextPage = () => {
         'auto',
       )
       console.log('response: ', response)
-
+      setLoading(false)
       toast.success(`${messageType} success.`, { style: { maxWidth: 'none' } })
     } catch (error: any) {
+      setLoading(false)
       toast.error(error.message, { style: { maxWidth: 'none' } })
       console.error('Error: ', error)
     }
@@ -349,7 +349,7 @@ const Tokenfactory: NextPage = () => {
       <Conditional test={messageType === 'MsgMint'}>
         <TextInput className="w-3/5" {...denomState} />
         <NumberInput className="w-1/4" {...amountState} />
-        <AddressInput className="w-3/5" disabled {...mintToAddressState} />
+        <AddressInput className="w-3/5" {...mintToAddressState} />
       </Conditional>
       <Conditional test={messageType === 'MsgSend'}>
         <TextInput className="w-3/5" {...denomState} />
@@ -375,15 +375,16 @@ const Tokenfactory: NextPage = () => {
         <TextInput className="w-1/2" {...denomState} />
         <AddressInput className="w-1/2" {...newAdminAddressState} />
       </Conditional>
-      <button
+      <Button
         className="px-4 py-2 font-bold text-white bg-stargaze rounded-md"
+        isLoading={loading}
         onClick={() => {
           void handleSendMessage()
         }}
       >
         {' '}
         {getButtonName()}
-      </button>
+      </Button>
     </section>
   )
 }
