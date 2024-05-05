@@ -1,7 +1,8 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 
+import type { StdFee } from '@cosmjs/amino'
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
-import type { Coin } from '@cosmjs/proto-signing'
+import { type Coin, coins } from '@cosmjs/proto-signing'
 import type { logs } from '@cosmjs/stargate'
 
 export interface CreateVendingMinterResponse {
@@ -51,6 +52,11 @@ export interface VendingFactoryContract {
 export const vendingFactory = (client: SigningCosmWasmClient, txSigner: string): VendingFactoryContract => {
   const use = (contractAddress: string): VendingFactoryInstance => {
     //Query
+
+    const defaultFee: StdFee = {
+      amount: coins('100000', 'ustars'),
+      gas: '100000',
+    }
 
     //Execute
     const createVendingMinter = async (

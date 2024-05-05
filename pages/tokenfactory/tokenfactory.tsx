@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable tailwindcss/classnames-order */
 
@@ -211,7 +212,11 @@ const Tokenfactory: NextPage = () => {
       setLoading(true)
       const offlineSigner = wallet.getOfflineSignerDirect()
       const stargateClient = await SigningStargateClient.connectWithSigner(
-        NETWORK === 'testnet' ? 'https://rpc.elgafar-1.stargaze-apis.com/' : 'https://rpc.stargaze-apis.com/',
+        NETWORK === 'fang-testnet'
+          ? 'https://rpc.fang-1.stargaze-apis.com/'
+          : NETWORK === 'testnet'
+          ? 'https://rpc.fang-1.stargaze-apis.com/'
+          : 'https://rpc.stargaze-apis.com/',
         offlineSigner,
         {
           gasPrice: GasPrice.fromString('0.025ustars'),
