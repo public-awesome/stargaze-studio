@@ -130,7 +130,7 @@ const CollectionCreationPage: NextPage = () => {
   const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<Coin | null>(null)
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<Coin | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<Coin | null>(null)
-  const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<Coin | null>(null)
+  const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<Coin | undefined>(undefined)
   const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<Coin | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<Coin | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
@@ -1958,7 +1958,7 @@ const CollectionCreationPage: NextPage = () => {
           onChange={setOpenEditionMinterCreatorData}
           onDetailsChange={setOpenEditionMinterDetails}
           openEditionFactoryAddress={openEditionFactoryAddress}
-          openEditionMinterCreationFee={openEditionMinterCreationFee?.amount as string}
+          openEditionMinterCreationFee={openEditionMinterCreationFee}
         />
       </Conditional>
       <div className="mx-10">
