@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import { toUtf8 } from '@cosmjs/encoding'
+import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import { Sidetab } from '@typeform/embed-react'
 import axios from 'axios'
@@ -126,12 +127,12 @@ const CollectionCreationPage: NextPage = () => {
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
   const [minterType, setMinterType] = useState<MinterType>('vending')
 
-  const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<string | null>(null)
-  const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<string | null>(null)
-  const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<string | null>(null)
-  const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<string | null>(null)
-  const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<string | null>(null)
-  const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<string | null>(null)
+  const [vendingMinterCreationFee, setVendingMinterCreationFee] = useState<Coin | null>(null)
+  const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<Coin | null>(null)
+  const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<Coin | null>(null)
+  const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<Coin | undefined>(undefined)
+  const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<Coin | null>(null)
+  const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<Coin | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
   const [minimumUpdatableMintPrice, setMinimumUpdatableMintPrice] = useState<string | null>('0')
   const [minimumOpenEditionMintPrice, setMinimumOpenEditionMintPrice] = useState<string | null>('0')
@@ -675,14 +676,11 @@ const CollectionCreationPage: NextPage = () => {
       txSigner: wallet.address || '',
       msg,
       funds: [
-        coin(
-          whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
-            ? (vendingMinterFlexCreationFee as string)
-            : collectionDetails?.updatable
-            ? (vendingMinterUpdatableCreationFee as string)
-            : (vendingMinterCreationFee as string),
-          'ustars',
-        ),
+        whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex'
+          ? (vendingMinterFlexCreationFee as Coin)
+          : collectionDetails?.updatable
+          ? (vendingMinterUpdatableCreationFee as Coin)
+          : (vendingMinterCreationFee as Coin),
       ],
       updatable: collectionDetails?.updatable,
       flex: whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex',
@@ -736,10 +734,7 @@ const CollectionCreationPage: NextPage = () => {
       txSigner: wallet.address || '',
       msg,
       funds: [
-        coin(
-          collectionDetails?.updatable ? (baseMinterUpdatableCreationFee as string) : (baseMinterCreationFee as string),
-          'ustars',
-        ),
+        collectionDetails?.updatable ? (baseMinterUpdatableCreationFee as Coin) : (baseMinterCreationFee as Coin),
       ],
       updatable: collectionDetails?.updatable,
     }
@@ -1216,7 +1211,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setBaseMinterCreationFee(baseFactoryParameters?.params?.creation_fee?.amount)
+      setBaseMinterCreationFee(baseFactoryParameters?.params?.creation_fee)
     }
     if (BASE_FACTORY_UPDATABLE_ADDRESS) {
       const baseFactoryUpdatableParameters = await client
@@ -1227,7 +1222,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setBaseMinterUpdatableCreationFee(baseFactoryUpdatableParameters?.params?.creation_fee?.amount)
+      setBaseMinterUpdatableCreationFee(baseFactoryUpdatableParameters?.params?.creation_fee)
     }
     if (VENDING_FACTORY_ADDRESS) {
       const vendingFactoryParameters = await client
@@ -1236,7 +1231,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+      setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee)
       setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
     }
     if (VENDING_FACTORY_UPDATABLE_ADDRESS) {
@@ -1248,7 +1243,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setVendingMinterUpdatableCreationFee(vendingFactoryUpdatableParameters?.params?.creation_fee?.amount)
+      setVendingMinterUpdatableCreationFee(vendingFactoryUpdatableParameters?.params?.creation_fee)
       setMinimumUpdatableMintPrice(vendingFactoryUpdatableParameters?.params?.min_mint_price?.amount)
     }
     if (VENDING_FACTORY_FLEX_ADDRESS) {
@@ -1260,7 +1255,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee?.amount)
+      setVendingMinterFlexCreationFee(vendingFactoryFlexParameters?.params?.creation_fee)
       setMinimumFlexMintPrice(vendingFactoryFlexParameters?.params?.min_mint_price?.amount)
     }
     if (OPEN_EDITION_FACTORY_ADDRESS) {
@@ -1270,7 +1265,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
+      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee)
       setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
     }
     setInitialParametersFetched(true)
@@ -1300,7 +1295,7 @@ const CollectionCreationPage: NextPage = () => {
           toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
         })
-      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee?.amount)
+      setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee)
       setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
       setMintTokenFromOpenEditionFactory(
         tokensList.find((token) => token.denom === openEditionFactoryParameters?.params?.min_mint_price?.denom),
@@ -1347,13 +1342,13 @@ const CollectionCreationPage: NextPage = () => {
         })
 
       if (whitelistDetails?.whitelistState !== 'none' && whitelistDetails?.whitelistType === 'flex') {
-        setVendingMinterFlexCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setVendingMinterFlexCreationFee(vendingFactoryParameters?.params?.creation_fee)
         setMinimumFlexMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
       } else if (collectionDetails?.updatable) {
-        setVendingMinterUpdatableCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setVendingMinterUpdatableCreationFee(vendingFactoryParameters?.params?.creation_fee)
         setMinimumUpdatableMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
       } else {
-        setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee?.amount)
+        setVendingMinterCreationFee(vendingFactoryParameters?.params?.creation_fee)
         setMinimumMintPrice(vendingFactoryParameters?.params?.min_mint_price?.amount)
       }
       setMintTokenFromVendingFactory(
@@ -1372,53 +1367,82 @@ const CollectionCreationPage: NextPage = () => {
   ])
 
   const checkwalletBalance = async () => {
-    await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
-      if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new') {
-        if (whitelistDetails.whitelistType !== 'merkletree' && whitelistDetails.memberLimit) {
-          const amountNeeded =
-            Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 +
-            (whitelistDetails.whitelistType === 'flex'
-              ? Number(vendingMinterFlexCreationFee)
-              : collectionDetails?.updatable
-              ? Number(vendingMinterUpdatableCreationFee)
-              : Number(vendingMinterCreationFee))
-          if (amountNeeded >= Number(balance.amount))
+    const queryClient = await wallet.getCosmWasmClient()
+
+    const creationFee: Coin | null =
+      minterType === 'vending'
+        ? whitelistDetails?.whitelistType === 'flex'
+          ? vendingMinterFlexCreationFee
+          : collectionDetails?.updatable
+          ? vendingMinterUpdatableCreationFee
+          : vendingMinterCreationFee
+        : collectionDetails?.updatable
+        ? baseMinterUpdatableCreationFee
+        : baseMinterCreationFee
+
+    const creationFeeDenom = tokensList.find((token) => token.denom === creationFee?.denom)
+
+    await queryClient.getBalance(wallet.address || '', 'ustars').then(async (starsBalance) => {
+      await queryClient
+        .getBalance(wallet.address || '', creationFee?.denom as string)
+        .then((creationFeeDenomBalance) => {
+          if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new') {
+            if (whitelistDetails.whitelistType !== 'merkletree' && whitelistDetails.memberLimit) {
+              const whitelistCreationFee = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000
+              if (creationFee?.denom === 'ustars') {
+                const amountNeeded = whitelistCreationFee + Number(creationFee.amount)
+                if (amountNeeded >= Number(starsBalance.amount))
+                  throw new Error(
+                    `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                      amountNeeded / 1000000
+                    ).toString()} STARS`,
+                  )
+              } else {
+                if (whitelistCreationFee >= Number(starsBalance.amount))
+                  throw new Error(
+                    `Insufficient wallet balance to instantiate the whitelist. Needed amount: ${(
+                      whitelistCreationFee / 1000000
+                    ).toString()} STARS`,
+                  )
+                if (Number(creationFee?.amount) > Number(creationFeeDenomBalance.amount))
+                  throw new Error(
+                    `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                      Number(creationFee?.amount) / 1000000
+                    ).toString()} ${creationFeeDenom ? creationFeeDenom.displayName : creationFee?.denom}`,
+                  )
+              }
+            } else if (whitelistDetails.whitelistType === 'merkletree') {
+              const merkleWhitelistCreationFee = 1000000000
+              if (creationFee?.denom === 'ustars') {
+                const amountNeeded = merkleWhitelistCreationFee + Number(creationFee.amount)
+                if (amountNeeded >= Number(starsBalance.amount))
+                  throw new Error(
+                    `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                      amountNeeded / 1000000
+                    ).toString()} STARS`,
+                  )
+              } else {
+                if (merkleWhitelistCreationFee >= Number(starsBalance.amount))
+                  throw new Error(
+                    `Insufficient wallet balance to instantiate the whitelist. Needed amount: ${(
+                      merkleWhitelistCreationFee / 1000000
+                    ).toString()} STARS`,
+                  )
+                if (Number(creationFee?.amount) > Number(creationFeeDenomBalance.amount))
+                  throw new Error(
+                    `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                      Number(creationFee?.amount) / 1000000
+                    ).toString()} ${creationFeeDenom ? creationFeeDenom.displayName : creationFee?.denom}`,
+                  )
+              }
+            }
+          } else if (Number(creationFee?.amount) > Number(creationFeeDenomBalance.amount))
             throw new Error(
               `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-                amountNeeded / 1000000
-              ).toString()} STARS`,
+                Number(creationFee?.amount) / 1000000
+              ).toString()} ${creationFeeDenom ? creationFeeDenom.displayName : creationFee?.denom}`,
             )
-        } else if (whitelistDetails.whitelistType === 'merkletree') {
-          const amountNeeded =
-            1000000000 +
-            (collectionDetails?.updatable
-              ? Number(vendingMinterUpdatableCreationFee)
-              : Number(vendingMinterCreationFee))
-          if (amountNeeded >= Number(balance.amount))
-            throw new Error(
-              `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-                amountNeeded / 1000000
-              ).toString()} STARS`,
-            )
-        }
-      } else {
-        const amountNeeded =
-          minterType === 'vending'
-            ? whitelistDetails?.whitelistState === 'existing' && whitelistDetails.whitelistType === 'flex'
-              ? Number(vendingMinterFlexCreationFee)
-              : collectionDetails?.updatable
-              ? Number(vendingMinterUpdatableCreationFee)
-              : Number(vendingMinterCreationFee)
-            : collectionDetails?.updatable
-            ? Number(baseMinterUpdatableCreationFee)
-            : Number(baseMinterCreationFee)
-        if (amountNeeded >= Number(balance.amount))
-          throw new Error(
-            `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-              amountNeeded / 1000000
-            ).toString()} STARS`,
-          )
-      }
+        })
     })
   }
 
@@ -1934,7 +1958,7 @@ const CollectionCreationPage: NextPage = () => {
           onChange={setOpenEditionMinterCreatorData}
           onDetailsChange={setOpenEditionMinterDetails}
           openEditionFactoryAddress={openEditionFactoryAddress}
-          openEditionMinterCreationFee={openEditionMinterCreationFee as string}
+          openEditionMinterCreationFee={openEditionMinterCreationFee}
         />
       </Conditional>
       <div className="mx-10">

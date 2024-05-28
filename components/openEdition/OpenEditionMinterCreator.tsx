@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { toUtf8 } from '@cosmjs/encoding'
+import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import axios from 'axios'
 import clsx from 'clsx'
@@ -13,7 +14,7 @@ import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
-import { type TokenInfo } from 'config/token'
+import { type TokenInfo, tokensList } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
 import type { DispatchExecuteArgs as OpenEditionFactoryDispatchExecuteArgs } from 'contracts/openEditionFactory/messages/execute'
@@ -73,7 +74,7 @@ export interface OpenEditionMinterDetailsDataProps {
 interface OpenEditionMinterCreatorProps {
   onChange: (data: OpenEditionMinterCreatorDataProps) => void
   onDetailsChange: (data: OpenEditionMinterDetailsDataProps) => void
-  openEditionMinterCreationFee?: string
+  openEditionMinterCreationFee?: Coin
   minimumMintPrice?: string
   minterType?: MinterType
   mintTokenFromFactory?: TokenInfo | undefined
@@ -480,20 +481,45 @@ export const OpenEditionMinterCreator = ({
 
   const checkwalletBalance = async () => {
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
-    let amountNeeded = 0
-    if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
-      amountNeeded =
-        Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000 + Number(openEditionMinterCreationFee)
-    } else {
-      amountNeeded = openEditionMinterCreationFee ? Number(openEditionMinterCreationFee) : 0
-    }
-    await (await wallet.getCosmWasmClient()).getBalance(wallet.address || '', 'ustars').then((balance) => {
-      if (amountNeeded >= Number(balance.amount))
-        throw new Error(
-          `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
-            amountNeeded / 1000000
-          ).toString()} STARS`,
-        )
+    const queryClient = await wallet.getCosmWasmClient()
+    const creationFeeDenom = tokensList.find((token) => token.denom === openEditionMinterCreationFee?.denom)
+    await queryClient.getBalance(wallet.address || '', 'ustars').then(async (starsBalance) => {
+      await queryClient
+        .getBalance(wallet.address || '', openEditionMinterCreationFee?.denom as string)
+        .then((creationFeeDenomBalance) => {
+          if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
+            const whitelistCreationFee = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000
+            if (openEditionMinterCreationFee?.denom === 'ustars') {
+              const amountNeeded = whitelistCreationFee + Number(openEditionMinterCreationFee.amount)
+              if (amountNeeded >= Number(starsBalance.amount))
+                throw new Error(
+                  `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                    amountNeeded / 1000000
+                  ).toString()} STARS`,
+                )
+            } else {
+              if (whitelistCreationFee >= Number(starsBalance.amount))
+                throw new Error(
+                  `Insufficient wallet balance to instantiate the whitelist. Needed amount: ${(
+                    whitelistCreationFee / 1000000
+                  ).toString()} STARS`,
+                )
+              if (Number(openEditionMinterCreationFee?.amount) > Number(creationFeeDenomBalance.amount))
+                throw new Error(
+                  `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                    Number(openEditionMinterCreationFee?.amount) / 1000000
+                  ).toString()} ${
+                    creationFeeDenom ? creationFeeDenom.displayName : openEditionMinterCreationFee?.denom
+                  }`,
+                )
+            }
+          } else if (Number(openEditionMinterCreationFee?.amount) > Number(creationFeeDenomBalance.amount))
+            throw new Error(
+              `Insufficient wallet balance to instantiate the required contracts. Needed amount: ${(
+                Number(openEditionMinterCreationFee?.amount) / 1000000
+              ).toString()} ${creationFeeDenom ? creationFeeDenom.displayName : openEditionMinterCreationFee?.denom}`,
+            )
+        })
     })
   }
 
@@ -899,7 +925,7 @@ export const OpenEditionMinterCreator = ({
       messages: openEditionFactoryMessages,
       txSigner: wallet.address || '',
       msg,
-      funds: [coin(openEditionMinterCreationFee as string, 'ustars')],
+      funds: [openEditionMinterCreationFee as Coin],
       updatable: collectionDetails?.updatable,
     }
     await openEditionFactoryDispatchExecute(payload)
