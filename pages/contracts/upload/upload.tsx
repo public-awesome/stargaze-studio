@@ -41,12 +41,13 @@ const UploadContract: NextPage = () => {
     'ACCESS_TYPE_UNSPECIFIED' | 'ACCESS_TYPE_EVERYBODY' | 'ACCESS_TYPE_ANY_OF_ADDRESSES' | 'ACCESS_TYPE_NOBODY'
   >('ACCESS_TYPE_UNSPECIFIED')
   const [accessConfig, setAccessConfig] = useState<AccessConfig | undefined>(undefined)
-  const [isAuthzUpload, setIsAuthzUpload] = useState(true)
+  const [isAuthzUpload, setIsAuthzUpload] = useState(false)
 
   const granterAddressState = useInputState({
     id: 'address',
     name: 'Granter Address',
-    title: 'The address that granted the authorization for contract upload',
+    title: 'Granter Address',
+    subtitle: 'The address that granted the authorization for contract upload',
     defaultValue: '',
     placeholder: 'stars1...',
   })
@@ -54,9 +55,9 @@ const UploadContract: NextPage = () => {
   const memoState = useInputState({
     id: 'memo',
     name: 'Memo',
-    title: 'The memo to attach to the transaction',
+    title: 'Transaction Memo',
     defaultValue: '',
-    placeholder: 'My first contract',
+    placeholder: 'My contract',
   })
 
   const permittedAddressListState = useAddressListState()
