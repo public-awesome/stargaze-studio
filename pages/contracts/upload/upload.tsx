@@ -189,105 +189,97 @@ const UploadContract: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <Conditional test={NETWORK === 'testnet'}>
-        <NextSeo title="Upload Contract" />
-        <ContractPageHeader
-          description="Here you can upload a contract on Stargaze Testnet."
-          link=""
-          title="Upload Contract"
-        />
-        <div className="inset-x-0 bottom-0 border-b-2 border-white/25" />
+      <NextSeo title="Upload Contract" />
+      <ContractPageHeader
+        description="Here you can upload a contract on Stargaze Testnet."
+        link=""
+        title="Upload Contract"
+      />
+      <div className="inset-x-0 bottom-0 border-b-2 border-white/25" />
 
-        <div className="flex flex-col w-1/2">
-          <span className="text-xl font-bold text-white">Authorization Type for Contract Instantiation</span>
-          <select
-            className="px-4 pt-2 pb-2 mt-2 w-1/2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
-            onChange={(e) => setAccessType(e.target.value as any)}
-            value={accessType}
-          >
-            <option disabled value="ACCESS_TYPE_UNSPECIFIED">
-              Select Authorization Type
-            </option>
-            <option value="ACCESS_TYPE_EVERYBODY">Everybody</option>
-            <option value="ACCESS_TYPE_ANY_OF_ADDRESSES">Any of Addresses</option>
-            <option value="ACCESS_TYPE_NOBODY">Nobody</option>
-          </select>
-        </div>
-
-        <div className="my-2 w-1/2">
-          <TextInput {...memoState} />
-        </div>
-
-        <div className="flex flex-row justify-start">
-          <h1 className="mt-2 font-bold text-md">Authz Upload?</h1>
-          <label className="justify-start ml-6 cursor-pointer label">
-            <input
-              checked={isAuthzUpload}
-              className={`${isAuthzUpload ? `bg-stargaze` : `bg-gray-600`} checkbox`}
-              onClick={() => {
-                setIsAuthzUpload(!isAuthzUpload)
-              }}
-              type="checkbox"
-            />
-          </label>
-        </div>
-        <Conditional test={isAuthzUpload}>
-          <div className="my-2 w-3/4">
-            <TextInput {...granterAddressState} />
-          </div>
-        </Conditional>
-
-        <Conditional test={accessType === 'ACCESS_TYPE_ANY_OF_ADDRESSES'}>
-          <div className="my-2 w-3/4">
-            <AddressList
-              entries={permittedAddressListState.entries}
-              onAdd={permittedAddressListState.add}
-              onChange={permittedAddressListState.update}
-              onRemove={permittedAddressListState.remove}
-              subtitle="The list of addresses permitted to instantiate the contract"
-              title="Permitted Addresses"
-            />
-          </div>
-        </Conditional>
-
-        <Conditional test={Boolean(transactionResult)}>
-          <Alert type="info">
-            <b>Upload success!</b> Here is the transaction result containing the code ID, transaction hash and other
-            data.
-          </Alert>
-          <JsonPreview content={transactionResult} title="Transaction Result" />
-          <br />
-        </Conditional>
-
-        <div
-          className={clsx(
-            'flex relative justify-center items-center space-y-4 h-32',
-            'rounded border-2 border-white/20 border-dashed',
-          )}
+      <div className="flex flex-col w-1/2">
+        <span className="text-xl font-bold text-white">Authorization Type for Contract Instantiation</span>
+        <select
+          className="px-4 pt-2 pb-2 mt-2 w-1/2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
+          onChange={(e) => setAccessType(e.target.value as any)}
+          value={accessType}
         >
+          <option disabled value="ACCESS_TYPE_UNSPECIFIED">
+            Select Authorization Type
+          </option>
+          <option value="ACCESS_TYPE_EVERYBODY">Everybody</option>
+          <option value="ACCESS_TYPE_ANY_OF_ADDRESSES">Any of Addresses</option>
+          <option value="ACCESS_TYPE_NOBODY">Nobody</option>
+        </select>
+      </div>
+
+      <div className="my-2 w-1/2">
+        <TextInput {...memoState} />
+      </div>
+
+      <div className="flex flex-row justify-start">
+        <h1 className="mt-2 font-bold text-md">Authz Upload?</h1>
+        <label className="justify-start ml-6 cursor-pointer label">
           <input
-            accept=".wasm"
-            className={clsx(
-              'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
-              'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
-            )}
-            onChange={onFileChange}
-            ref={inputFile}
-            type="file"
+            checked={isAuthzUpload}
+            className={`${isAuthzUpload ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+            onClick={() => {
+              setIsAuthzUpload(!isAuthzUpload)
+            }}
+            type="checkbox"
+          />
+        </label>
+      </div>
+      <Conditional test={isAuthzUpload}>
+        <div className="my-2 w-3/4">
+          <TextInput {...granterAddressState} />
+        </div>
+      </Conditional>
+
+      <Conditional test={accessType === 'ACCESS_TYPE_ANY_OF_ADDRESSES'}>
+        <div className="my-2 w-3/4">
+          <AddressList
+            entries={permittedAddressListState.entries}
+            onAdd={permittedAddressListState.add}
+            onChange={permittedAddressListState.update}
+            onRemove={permittedAddressListState.remove}
+            subtitle="The list of addresses permitted to instantiate the contract"
+            title="Permitted Addresses"
           />
         </div>
+      </Conditional>
 
-        <div className="flex justify-end pb-6">
-          <Button isDisabled={!wasmFile} isLoading={loading} isWide leftIcon={<FaAsterisk />} onClick={upload}>
-            Upload Contract
-          </Button>
-        </div>
+      <Conditional test={Boolean(transactionResult)}>
+        <Alert type="info">
+          <b>Upload success!</b> Here is the transaction result containing the code ID, transaction hash and other data.
+        </Alert>
+        <JsonPreview content={transactionResult} title="Transaction Result" />
+        <br />
       </Conditional>
-      <Conditional test={NETWORK === 'mainnet'}>
-        <NextSeo title="Upload Contract" />
-        <ContractPageHeader description="" link="" title="Upload Contract" />
-        <Alert type="info">Permissionless upload of contracts is only supported for testnet currently.</Alert>
-      </Conditional>
+
+      <div
+        className={clsx(
+          'flex relative justify-center items-center space-y-4 h-32',
+          'rounded border-2 border-white/20 border-dashed',
+        )}
+      >
+        <input
+          accept=".wasm"
+          className={clsx(
+            'file:py-2 file:px-4 file:mr-4 file:bg-plumbus-light file:rounded file:border-0 cursor-pointer',
+            'before:absolute before:inset-0 before:hover:bg-white/5 before:transition',
+          )}
+          onChange={onFileChange}
+          ref={inputFile}
+          type="file"
+        />
+      </div>
+
+      <div className="flex justify-end pb-6">
+        <Button isDisabled={!wasmFile} isLoading={loading} isWide leftIcon={<FaAsterisk />} onClick={upload}>
+          Upload Contract
+        </Button>
+      </div>
     </section>
   )
 }
