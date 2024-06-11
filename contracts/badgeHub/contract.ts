@@ -342,7 +342,8 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
-        editFee ? [coin(editFee, 'ustars')] : [],
+        [coin(200000000, 'ustars')],
+        // editFee ? [coin(editFee, 'ustars')] : [],
       )
 
       return res.transactionHash
