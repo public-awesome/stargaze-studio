@@ -33,6 +33,7 @@ export interface ImageUploadDetailsDataProps {
   nftStorageApiKey?: string
   pinataApiKey?: string
   pinataSecretKey?: string
+  web3StorageEmail?: string
   uploadMethod: UploadMethod
   imageUrl?: string
   coverImageUrl?: string
@@ -68,6 +69,14 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     name: 'pinataSecretKey',
     title: 'Pinata Secret Key',
     placeholder: 'Enter Pinata Secret Key',
+    defaultValue: '',
+  })
+
+  const web3StorageEmailState = useInputState({
+    id: 'web3-storage-email',
+    name: 'web3StorageEmail',
+    title: 'web3.Storage Email',
+    placeholder: 'me@stargaze.zone',
     defaultValue: '',
   })
 
@@ -147,6 +156,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
         nftStorageApiKey: nftStorageApiKeyState.value,
         pinataApiKey: pinataApiKeyState.value,
         pinataSecretKey: pinataSecretKeyState.value,
+        web3StorageEmail: web3StorageEmailState.value,
         uploadMethod,
         imageUrl: imageUrlState.value
           .replace('IPFS://', 'ipfs://')
@@ -169,6 +179,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     nftStorageApiKeyState.value,
     pinataApiKeyState.value,
     pinataSecretKeyState.value,
+    web3StorageEmailState.value,
     uploadMethod,
     imageUrlState.value,
     coverImageUrlState.value,
@@ -189,6 +200,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
       nftStorageApiKeyState.onChange(importedImageUploadDetails.nftStorageApiKey || '')
       pinataApiKeyState.onChange(importedImageUploadDetails.pinataApiKey || '')
       pinataSecretKeyState.onChange(importedImageUploadDetails.pinataSecretKey || '')
+      web3StorageEmailState.onChange(importedImageUploadDetails.web3StorageEmail || '')
       imageUrlState.onChange(importedImageUploadDetails.imageUrl || '')
       coverImageUrlState.onChange(importedImageUploadDetails.coverImageUrl || '')
     }
@@ -349,6 +361,26 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
                     Upload using Pinata
                   </label>
                 </div>
+
+                <div className="ml-2 form-check form-check-inline">
+                  <input
+                    checked={uploadService === 'web3-storage'}
+                    className="peer sr-only"
+                    id="inlineRadio-web3-storage"
+                    name="inlineRadioOptions-web3-storage"
+                    onClick={() => {
+                      setUploadService('web3-storage')
+                    }}
+                    type="radio"
+                    value="web3-storage"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio-web3-storage"
+                  >
+                    Upload using web3.storage
+                  </label>
+                </div>
               </div>
 
               <div className="flex w-full">
@@ -374,6 +406,9 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
                   <TextInput {...pinataApiKeyState} className="w-full" />
                   <div className="w-[20px]" />
                   <TextInput {...pinataSecretKeyState} className="w-full" />
+                </Conditional>
+                <Conditional test={uploadService === 'web3-storage'}>
+                  <TextInput {...web3StorageEmailState} className="w-full" />
                 </Conditional>
               </div>
             </div>

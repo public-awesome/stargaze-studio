@@ -121,6 +121,8 @@ const BadgeCreationPage: NextPage = () => {
           imageUploadDetails.nftStorageApiKey as string,
           imageUploadDetails.pinataApiKey as string,
           imageUploadDetails.pinataSecretKey as string,
+          imageUploadDetails.web3StorageEmail as string,
+          badgeDetails?.name as string,
         ).then((imageBaseUrl) => {
           setUploading(false)
           return `ipfs://${imageBaseUrl}/${imageUploadDetails.assetFile?.name as string}`
