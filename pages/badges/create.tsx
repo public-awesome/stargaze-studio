@@ -291,7 +291,10 @@ const BadgeCreationPage: NextPage = () => {
         if (imageUploadDetails.nftStorageApiKey === '') {
           throw new Error('Please enter a valid NFT.Storage API key')
         }
-      } else if (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '') {
+      } else if (
+        imageUploadDetails.uploadService === 'pinata' &&
+        (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
+      ) {
         throw new Error('Please enter Pinata API and secret keys')
       }
       if (imageUploadDetails.uploadService === 'web3-storage') {
