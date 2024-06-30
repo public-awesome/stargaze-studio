@@ -1009,6 +1009,8 @@ const CollectionCreationPage: NextPage = () => {
       } else if (uploadDetails.uploadService === 'web3-storage' && uploadDetails.web3StorageEmail?.toString() === '') {
         throw new Error('Please enter a valid web3.Storage email')
       }
+      if (uploadDetails.uploadService === 'web3-storage' && !uploadDetails.web3StorageLoginSuccessful)
+        throw new Error('Please complete the login process for web3.Storage')
     }
     if (uploadDetails.uploadMethod === 'existing' && !uploadDetails.baseTokenURI?.includes('ipfs://')) {
       throw new Error('Please specify a valid base token URI')

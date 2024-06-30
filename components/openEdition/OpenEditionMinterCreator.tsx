@@ -233,6 +233,18 @@ export const OpenEditionMinterCreator = ({
       ) {
         throw new Error('Please enter valid Pinata API and secret keys')
       }
+      if (
+        offChainMetadataUploadDetails.uploadService === 'web3-storage' &&
+        offChainMetadataUploadDetails.web3StorageEmail === ''
+      ) {
+        throw new Error('Please enter a valid Web3.Storage email')
+      }
+      if (
+        offChainMetadataUploadDetails.uploadService === 'web3-storage' &&
+        !offChainMetadataUploadDetails.web3StorageLoginSuccessful
+      ) {
+        throw new Error('Please complete the login process for Web3.Storage')
+      }
     }
     if (metadataStorageMethod === 'on-chain' && imageUploadDetails?.uploadMethod === 'new') {
       if (imageUploadDetails.uploadService === 'nft-storage' && imageUploadDetails.nftStorageApiKey === '') {
@@ -242,6 +254,12 @@ export const OpenEditionMinterCreator = ({
         (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
       ) {
         throw new Error('Please enter valid Pinata API and secret keys')
+      }
+      if (imageUploadDetails.uploadService === 'web3-storage' && imageUploadDetails.web3StorageEmail === '') {
+        throw new Error('Please enter a valid Web3.Storage email')
+      }
+      if (imageUploadDetails.uploadService === 'web3-storage' && !imageUploadDetails.web3StorageLoginSuccessful) {
+        throw new Error('Please complete the login process for Web3.Storage')
       }
     }
     if (metadataStorageMethod === 'off-chain' && offChainMetadataUploadDetails?.uploadMethod === 'existing') {

@@ -294,6 +294,11 @@ const BadgeCreationPage: NextPage = () => {
       } else if (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '') {
         throw new Error('Please enter Pinata API and secret keys')
       }
+      if (imageUploadDetails.uploadService === 'web3-storage') {
+        if (imageUploadDetails.web3StorageEmail === '' || !imageUploadDetails.web3StorageLoginSuccessful) {
+          throw new Error('Please complete the login process for Web3.Storage')
+        }
+      }
     }
     if (imageUploadDetails.uploadMethod === 'existing' && !imageUploadDetails.imageUrl?.includes('ipfs://')) {
       throw new Error('Please specify a valid image URL')
