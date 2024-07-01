@@ -255,11 +255,15 @@ export const OffChainMetadataUploadDetails = ({
         return toast.error('Please enter a valid email address.')
       }
       const client = await create()
-      const account = await toast.promise(client.login(web3StorageEmailState.value as EmailAddress), {
-        loading: 'Waiting for email verification...',
-        success: 'web3.storage login successful.',
-        error: 'Failed to log in.',
-      })
+      const account = await toast.promise(
+        client.login(web3StorageEmailState.value as EmailAddress),
+        {
+          loading: 'Waiting for email verification... Please check your inbox.',
+          success: 'web3.storage login successful.',
+          error: 'Failed to log in.',
+        },
+        { style: { maxWidth: 'none' } },
+      )
 
       console.log('Waiting for payment plan to be selected...')
       while (true) {
