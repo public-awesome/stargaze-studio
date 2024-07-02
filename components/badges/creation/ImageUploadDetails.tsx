@@ -310,8 +310,8 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
             <p className="mb-5 ml-5">
               Though the Badge Hub contract allows for off-chain image storage, it is recommended to use a decentralized
               storage solution, such as IPFS. <br /> You may head over to{' '}
-              <Anchor className="font-bold text-plumbus hover:underline" href="https://nft.storage">
-                NFT.Storage
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://web3.storage/">
+                Web3.Storage
               </Anchor>{' '}
               or{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
