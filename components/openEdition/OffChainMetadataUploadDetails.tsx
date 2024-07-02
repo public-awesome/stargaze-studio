@@ -282,7 +282,7 @@ export const OffChainMetadataUploadDetails = ({
           },
         )
         if (res.ok) {
-          toast.success('web3.storage payment plan is acquired.', { duration: 5000 })
+          toast.success('web3.storage payment plan validation successful.', { duration: 5000 })
           break
         }
         await new Promise((resolve) => setTimeout(resolve, 2000))
