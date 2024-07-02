@@ -121,6 +121,8 @@ const BadgeCreationPage: NextPage = () => {
           imageUploadDetails.nftStorageApiKey as string,
           imageUploadDetails.pinataApiKey as string,
           imageUploadDetails.pinataSecretKey as string,
+          imageUploadDetails.web3StorageEmail as string,
+          badgeDetails?.name as string,
         ).then((imageBaseUrl) => {
           setUploading(false)
           return `ipfs://${imageBaseUrl}/${imageUploadDetails.assetFile?.name as string}`
@@ -289,8 +291,16 @@ const BadgeCreationPage: NextPage = () => {
         if (imageUploadDetails.nftStorageApiKey === '') {
           throw new Error('Please enter a valid NFT.Storage API key')
         }
-      } else if (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '') {
+      } else if (
+        imageUploadDetails.uploadService === 'pinata' &&
+        (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
+      ) {
         throw new Error('Please enter Pinata API and secret keys')
+      }
+      if (imageUploadDetails.uploadService === 'web3-storage') {
+        if (imageUploadDetails.web3StorageEmail === '' || !imageUploadDetails.web3StorageLoginSuccessful) {
+          throw new Error('Please complete the login process for Web3.Storage')
+        }
       }
     }
     if (imageUploadDetails.uploadMethod === 'existing' && !imageUploadDetails.imageUrl?.includes('ipfs://')) {

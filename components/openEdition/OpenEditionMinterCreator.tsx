@@ -233,6 +233,18 @@ export const OpenEditionMinterCreator = ({
       ) {
         throw new Error('Please enter valid Pinata API and secret keys')
       }
+      if (
+        offChainMetadataUploadDetails.uploadService === 'web3-storage' &&
+        offChainMetadataUploadDetails.web3StorageEmail === ''
+      ) {
+        throw new Error('Please enter a valid Web3.Storage email')
+      }
+      if (
+        offChainMetadataUploadDetails.uploadService === 'web3-storage' &&
+        !offChainMetadataUploadDetails.web3StorageLoginSuccessful
+      ) {
+        throw new Error('Please complete the login process for Web3.Storage')
+      }
     }
     if (metadataStorageMethod === 'on-chain' && imageUploadDetails?.uploadMethod === 'new') {
       if (imageUploadDetails.uploadService === 'nft-storage' && imageUploadDetails.nftStorageApiKey === '') {
@@ -242,6 +254,12 @@ export const OpenEditionMinterCreator = ({
         (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
       ) {
         throw new Error('Please enter valid Pinata API and secret keys')
+      }
+      if (imageUploadDetails.uploadService === 'web3-storage' && imageUploadDetails.web3StorageEmail === '') {
+        throw new Error('Please enter a valid Web3.Storage email')
+      }
+      if (imageUploadDetails.uploadService === 'web3-storage' && !imageUploadDetails.web3StorageLoginSuccessful) {
+        throw new Error('Please complete the login process for Web3.Storage')
       }
     }
     if (metadataStorageMethod === 'off-chain' && offChainMetadataUploadDetails?.uploadMethod === 'existing') {
@@ -544,6 +562,8 @@ export const OpenEditionMinterCreator = ({
             offChainMetadataUploadDetails.nftStorageApiKey as string,
             offChainMetadataUploadDetails.pinataApiKey as string,
             offChainMetadataUploadDetails.pinataSecretKey as string,
+            offChainMetadataUploadDetails.web3StorageEmail as string,
+            collectionDetails?.name as string,
           )
           const metadataUriWithBase = `ipfs://${metadataUri}/${(
             offChainMetadataUploadDetails.openEditionMinterMetadataFile as File
@@ -589,6 +609,8 @@ export const OpenEditionMinterCreator = ({
             imageUploadDetails.nftStorageApiKey as string,
             imageUploadDetails.pinataApiKey as string,
             imageUploadDetails.pinataSecretKey as string,
+            imageUploadDetails.web3StorageEmail as string,
+            collectionDetails?.name as string,
           )
           const imageUriWithBase = `ipfs://${imageUri}/${(imageUploadDetails.assetFile as File).name}`
           setTokenImageUri(imageUriWithBase)
@@ -600,6 +622,8 @@ export const OpenEditionMinterCreator = ({
             imageUploadDetails.nftStorageApiKey as string,
             imageUploadDetails.pinataApiKey as string,
             imageUploadDetails.pinataSecretKey as string,
+            imageUploadDetails.web3StorageEmail as string,
+            collectionDetails?.name as string,
           )
           const coverImageUriWithBase = `ipfs://${coverImageUri}/${(collectionDetails?.imageFile as File[])[0].name}`
           setCoverImageUrl(coverImageUriWithBase)
@@ -613,6 +637,8 @@ export const OpenEditionMinterCreator = ({
               imageUploadDetails.nftStorageApiKey as string,
               imageUploadDetails.pinataApiKey as string,
               imageUploadDetails.pinataSecretKey as string,
+              imageUploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
             )
           const thumbnailUriWithBase = thumbnailUri
             ? `ipfs://${thumbnailUri}/${(imageUploadDetails.thumbnailFile as File).name}`
@@ -663,6 +689,8 @@ export const OpenEditionMinterCreator = ({
         offChainMetadataUploadDetails.nftStorageApiKey as string,
         offChainMetadataUploadDetails.pinataApiKey as string,
         offChainMetadataUploadDetails.pinataSecretKey as string,
+        offChainMetadataUploadDetails.web3StorageEmail as string,
+        collectionDetails?.name as string,
       )
         .then(async (assetUri: string) => {
           let thumbnailUri: string | undefined
@@ -674,6 +702,8 @@ export const OpenEditionMinterCreator = ({
               offChainMetadataUploadDetails.nftStorageApiKey as string,
               offChainMetadataUploadDetails.pinataApiKey as string,
               offChainMetadataUploadDetails.pinataSecretKey as string,
+              offChainMetadataUploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
             )
           const thumbnailUriWithBase = thumbnailUri
             ? `ipfs://${thumbnailUri}/${(offChainMetadataUploadDetails.thumbnailFile as File).name}`
@@ -726,6 +756,8 @@ export const OpenEditionMinterCreator = ({
               offChainMetadataUploadDetails.nftStorageApiKey as string,
               offChainMetadataUploadDetails.pinataApiKey as string,
               offChainMetadataUploadDetails.pinataSecretKey as string,
+              offChainMetadataUploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
             )
               .then(resolve)
               .catch(reject)
