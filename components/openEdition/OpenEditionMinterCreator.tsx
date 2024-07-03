@@ -223,11 +223,6 @@ export const OpenEditionMinterCreator = ({
     }
     if (metadataStorageMethod === 'off-chain' && offChainMetadataUploadDetails?.uploadMethod === 'new') {
       if (
-        offChainMetadataUploadDetails.uploadService === 'nft-storage' &&
-        offChainMetadataUploadDetails.nftStorageApiKey === ''
-      ) {
-        throw new Error('Please enter a valid NFT.Storage API key')
-      } else if (
         offChainMetadataUploadDetails.uploadService === 'pinata' &&
         (offChainMetadataUploadDetails.pinataApiKey === '' || offChainMetadataUploadDetails.pinataSecretKey === '')
       ) {
@@ -247,9 +242,7 @@ export const OpenEditionMinterCreator = ({
       }
     }
     if (metadataStorageMethod === 'on-chain' && imageUploadDetails?.uploadMethod === 'new') {
-      if (imageUploadDetails.uploadService === 'nft-storage' && imageUploadDetails.nftStorageApiKey === '') {
-        throw new Error('Please enter a valid NFT.Storage API key')
-      } else if (
+      if (
         imageUploadDetails.uploadService === 'pinata' &&
         (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
       ) {
@@ -559,7 +552,6 @@ export const OpenEditionMinterCreator = ({
             collectionDetails?.imageFile as File[],
             offChainMetadataUploadDetails.uploadService,
             'cover',
-            offChainMetadataUploadDetails.nftStorageApiKey as string,
             offChainMetadataUploadDetails.pinataApiKey as string,
             offChainMetadataUploadDetails.pinataSecretKey as string,
             offChainMetadataUploadDetails.web3StorageEmail as string,
@@ -606,7 +598,6 @@ export const OpenEditionMinterCreator = ({
             [imageUploadDetails.assetFile as File],
             imageUploadDetails.uploadService,
             'cover',
-            imageUploadDetails.nftStorageApiKey as string,
             imageUploadDetails.pinataApiKey as string,
             imageUploadDetails.pinataSecretKey as string,
             imageUploadDetails.web3StorageEmail as string,
@@ -619,7 +610,6 @@ export const OpenEditionMinterCreator = ({
             collectionDetails?.imageFile as File[],
             imageUploadDetails.uploadService,
             'cover',
-            imageUploadDetails.nftStorageApiKey as string,
             imageUploadDetails.pinataApiKey as string,
             imageUploadDetails.pinataSecretKey as string,
             imageUploadDetails.web3StorageEmail as string,
@@ -634,7 +624,6 @@ export const OpenEditionMinterCreator = ({
               [imageUploadDetails.thumbnailFile] as File[],
               imageUploadDetails.uploadService,
               'thumbnail',
-              imageUploadDetails.nftStorageApiKey as string,
               imageUploadDetails.pinataApiKey as string,
               imageUploadDetails.pinataSecretKey as string,
               imageUploadDetails.web3StorageEmail as string,
@@ -686,7 +675,6 @@ export const OpenEditionMinterCreator = ({
         offChainMetadataUploadDetails.assetFiles,
         offChainMetadataUploadDetails.uploadService,
         'assets',
-        offChainMetadataUploadDetails.nftStorageApiKey as string,
         offChainMetadataUploadDetails.pinataApiKey as string,
         offChainMetadataUploadDetails.pinataSecretKey as string,
         offChainMetadataUploadDetails.web3StorageEmail as string,
@@ -699,7 +687,6 @@ export const OpenEditionMinterCreator = ({
               [offChainMetadataUploadDetails.thumbnailFile] as File[],
               offChainMetadataUploadDetails.uploadService,
               'thumbnail',
-              offChainMetadataUploadDetails.nftStorageApiKey as string,
               offChainMetadataUploadDetails.pinataApiKey as string,
               offChainMetadataUploadDetails.pinataSecretKey as string,
               offChainMetadataUploadDetails.web3StorageEmail as string,
@@ -753,7 +740,6 @@ export const OpenEditionMinterCreator = ({
               fileArray,
               offChainMetadataUploadDetails.uploadService,
               'metadata',
-              offChainMetadataUploadDetails.nftStorageApiKey as string,
               offChainMetadataUploadDetails.pinataApiKey as string,
               offChainMetadataUploadDetails.pinataSecretKey as string,
               offChainMetadataUploadDetails.web3StorageEmail as string,

@@ -257,7 +257,7 @@ const WhitelistInstantiatePage: NextPage = () => {
               setWhitelistType('standard')
             }}
             type="radio"
-            value="nft-storage"
+            value="standard"
           />
           <label
             className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"

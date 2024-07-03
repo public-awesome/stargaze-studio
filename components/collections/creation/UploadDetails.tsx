@@ -27,7 +27,6 @@ import type { ChangeEvent } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import type { UploadServiceType } from 'services/upload'
-import { NFT_STORAGE_DEFAULT_API_KEY } from 'utils/constants'
 import type { AssetType } from 'utils/getAssetType'
 import { getAssetType } from 'utils/getAssetType'
 import { uid } from 'utils/random'
@@ -51,7 +50,6 @@ export interface UploadDetailsDataProps {
   thumbnailFiles?: File[]
   thumbnailCompatibleAssetFileNames?: string[]
   uploadService: UploadServiceType
-  nftStorageApiKey?: string
   pinataApiKey?: string
   pinataSecretKey?: string
   web3StorageEmail?: EmailAddress
@@ -73,10 +71,10 @@ export const UploadDetails = ({
   const [thumbnailCompatibleAssetFileNames, setThumbnailCompatibleAssetFileNames] = useState<string[]>([])
   const [thumbnailFilesArray, setThumbnailFilesArray] = useState<File[]>([])
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
-  const [uploadService, setUploadService] = useState<UploadServiceType>('nft-storage')
+  const [uploadService, setUploadService] = useState<UploadServiceType>('web3-storage')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
-  const [useDefaultApiKey, setUseDefaultApiKey] = useState(false)
+
   const [web3StorageLoginSuccessful, setWeb3StorageLoginSuccessful] = useState(false)
   const [web3StorageLoginInProgress, setWeb3StorageLoginInProgress] = useState(false)
   const [web3StorageLoginCancelled, setWeb3StorageLoginCancelled] = useState(false)
@@ -88,13 +86,6 @@ export const UploadDetails = ({
   const metadataFilesRef = useRef<HTMLInputElement | null>(null)
   const thumbnailFilesRef = useRef<HTMLInputElement | null>(null)
 
-  const nftStorageApiKeyState = useInputState({
-    id: 'nft-storage-api-key',
-    name: 'nftStorageApiKey',
-    title: 'NFT.Storage API Key',
-    placeholder: 'Enter NFT.Storage API Key',
-    defaultValue: '',
-  })
   const pinataApiKeyState = useInputState({
     id: 'pinata-api-key',
     name: 'pinataApiKey',
@@ -487,7 +478,6 @@ export const UploadDetails = ({
         thumbnailFiles: thumbnailFilesArray,
         thumbnailCompatibleAssetFileNames,
         uploadService,
-        nftStorageApiKey: nftStorageApiKeyState.value,
         pinataApiKey: pinataApiKeyState.value,
         pinataSecretKey: pinataSecretKeyState.value,
         web3StorageEmail: web3StorageEmailState.value as EmailAddress,
@@ -520,7 +510,6 @@ export const UploadDetails = ({
     thumbnailFilesArray,
     thumbnailCompatibleAssetFileNames,
     uploadService,
-    nftStorageApiKeyState.value,
     pinataApiKeyState.value,
     pinataSecretKeyState.value,
     web3StorageEmailState.value,
@@ -551,7 +540,6 @@ export const UploadDetails = ({
       if (importedUploadDetails.uploadMethod === 'new') {
         setUploadMethod('new')
         setUploadService(importedUploadDetails.uploadService)
-        nftStorageApiKeyState.onChange(importedUploadDetails.nftStorageApiKey || '')
         pinataApiKeyState.onChange(importedUploadDetails.pinataApiKey || '')
         pinataSecretKeyState.onChange(importedUploadDetails.pinataSecretKey || '')
         baseTokenUriState.onChange(importedUploadDetails.baseTokenURI || '')
@@ -564,14 +552,6 @@ export const UploadDetails = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [importedUploadDetails])
-
-  useEffect(() => {
-    if (useDefaultApiKey) {
-      nftStorageApiKeyState.onChange(NFT_STORAGE_DEFAULT_API_KEY || '')
-    } else {
-      nftStorageApiKeyState.onChange('')
-    }
-  }, [useDefaultApiKey])
 
   return (
     <div className="justify-items-start mb-3 rounded border-2 border-white/20 flex-column">
@@ -687,21 +667,21 @@ export const UploadDetails = ({
               <div className="flex justify-items-start mb-5 w-full font-bold">
                 <div className="form-check form-check-inline">
                   <input
-                    checked={uploadService === 'nft-storage'}
+                    checked={uploadService === 'web3-storage'}
                     className="peer sr-only"
-                    id="inlineRadio3"
-                    name="inlineRadioOptions3"
+                    id="inlineRadio-web3-storage"
+                    name="inlineRadioOptions-web3-storage"
                     onClick={() => {
-                      setUploadService('nft-storage')
+                      setUploadService('web3-storage')
                     }}
                     type="radio"
-                    value="nft-storage"
+                    value="web3-storage"
                   />
                   <label
                     className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-                    htmlFor="inlineRadio3"
+                    htmlFor="inlineRadio-web3-storage"
                   >
-                    Upload using NFT.Storage
+                    Upload using Web3.Storage
                   </label>
                 </div>
 
@@ -724,47 +704,9 @@ export const UploadDetails = ({
                     Upload using Pinata
                   </label>
                 </div>
-
-                <div className="ml-2 form-check form-check-inline">
-                  <input
-                    checked={uploadService === 'web3-storage'}
-                    className="peer sr-only"
-                    id="inlineRadio-web3-storage"
-                    name="inlineRadioOptions-web3-storage"
-                    onClick={() => {
-                      setUploadService('web3-storage')
-                    }}
-                    type="radio"
-                    value="web3-storage"
-                  />
-                  <label
-                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-                    htmlFor="inlineRadio-web3-storage"
-                  >
-                    Upload using Web3.Storage
-                  </label>
-                </div>
               </div>
 
               <div className="flex w-full">
-                <Conditional test={uploadService === 'nft-storage'}>
-                  <div className="flex-col w-full">
-                    <TextInput {...nftStorageApiKeyState} className="w-full" disabled={useDefaultApiKey} />
-                    <div className="flex-row mt-2 w-full form-control">
-                      <label className="cursor-pointer label">
-                        <span className="mr-2 font-bold">Use Default API Key</span>
-                        <input
-                          checked={useDefaultApiKey}
-                          className={`${useDefaultApiKey ? `bg-stargaze` : `bg-gray-600`} checkbox`}
-                          onClick={() => {
-                            setUseDefaultApiKey(!useDefaultApiKey)
-                          }}
-                          type="checkbox"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </Conditional>
                 <Conditional test={uploadService === 'pinata'}>
                   <TextInput {...pinataApiKeyState} className="w-full" />
                   <div className="w-[20px]" />

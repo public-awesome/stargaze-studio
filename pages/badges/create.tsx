@@ -118,7 +118,6 @@ const BadgeCreationPage: NextPage = () => {
           [imageUploadDetails.assetFile] as File[],
           imageUploadDetails.uploadService,
           'cover',
-          imageUploadDetails.nftStorageApiKey as string,
           imageUploadDetails.pinataApiKey as string,
           imageUploadDetails.pinataSecretKey as string,
           imageUploadDetails.web3StorageEmail as string,
@@ -287,11 +286,7 @@ const BadgeCreationPage: NextPage = () => {
       throw new Error('Please select the image file')
     }
     if (imageUploadDetails.uploadMethod === 'new') {
-      if (imageUploadDetails.uploadService === 'nft-storage') {
-        if (imageUploadDetails.nftStorageApiKey === '') {
-          throw new Error('Please enter a valid NFT.Storage API key')
-        }
-      } else if (
+      if (
         imageUploadDetails.uploadService === 'pinata' &&
         (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
       ) {

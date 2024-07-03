@@ -321,7 +321,6 @@ const CollectionCreationPage: NextPage = () => {
           collectionDetails?.imageFile as File[],
           uploadDetails.uploadService,
           'cover',
-          uploadDetails.nftStorageApiKey as string,
           uploadDetails.pinataApiKey as string,
           uploadDetails.pinataSecretKey as string,
           uploadDetails.web3StorageEmail as string,
@@ -379,7 +378,6 @@ const CollectionCreationPage: NextPage = () => {
           collectionDetails?.imageFile as File[],
           uploadDetails.uploadService,
           'cover',
-          uploadDetails.nftStorageApiKey as string,
           uploadDetails.pinataApiKey as string,
           uploadDetails.pinataSecretKey as string,
           uploadDetails.web3StorageEmail as string,
@@ -815,7 +813,6 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails.assetFiles,
         uploadDetails.uploadService,
         'assets',
-        uploadDetails.nftStorageApiKey as string,
         uploadDetails.pinataApiKey as string,
         uploadDetails.pinataSecretKey as string,
         uploadDetails.web3StorageEmail as string,
@@ -828,7 +825,6 @@ const CollectionCreationPage: NextPage = () => {
               uploadDetails.thumbnailFiles,
               uploadDetails.uploadService,
               'thumbnail',
-              uploadDetails.nftStorageApiKey as string,
               uploadDetails.pinataApiKey as string,
               uploadDetails.pinataSecretKey as string,
               uploadDetails.web3StorageEmail as string,
@@ -897,7 +893,6 @@ const CollectionCreationPage: NextPage = () => {
                     fileArray,
                     uploadDetails.uploadService,
                     'metadata',
-                    uploadDetails.nftStorageApiKey as string,
                     uploadDetails.pinataApiKey as string,
                     uploadDetails.pinataSecretKey as string,
                     uploadDetails.web3StorageEmail as string,
@@ -958,7 +953,6 @@ const CollectionCreationPage: NextPage = () => {
                 fileArray,
                 uploadDetails.uploadService,
                 'metadata',
-                uploadDetails.nftStorageApiKey as string,
                 uploadDetails.pinataApiKey as string,
                 uploadDetails.pinataSecretKey as string,
                 uploadDetails.web3StorageEmail as string,
@@ -997,20 +991,16 @@ const CollectionCreationPage: NextPage = () => {
     if (uploadDetails.uploadMethod === 'new' && minterType === 'vending')
       compareFileArrays(uploadDetails.assetFiles, uploadDetails.metadataFiles)
     if (uploadDetails.uploadMethod === 'new') {
-      if (uploadDetails.uploadService === 'nft-storage') {
-        if (uploadDetails.nftStorageApiKey === '') {
-          throw new Error('Please enter a valid NFT.Storage API key')
-        }
-      } else if (
+      if (
         uploadDetails.uploadService === 'pinata' &&
         (uploadDetails.pinataApiKey === '' || uploadDetails.pinataSecretKey === '')
       ) {
         throw new Error('Please enter Pinata API and secret keys')
       } else if (uploadDetails.uploadService === 'web3-storage' && uploadDetails.web3StorageEmail?.toString() === '') {
-        throw new Error('Please enter a valid web3.Storage email')
+        throw new Error('Please enter a valid Web3.Storage email')
       }
       if (uploadDetails.uploadService === 'web3-storage' && !uploadDetails.web3StorageLoginSuccessful)
-        throw new Error('Please complete the login process for web3.Storage')
+        throw new Error('Please complete the login process for Web3.Storage')
     }
     if (uploadDetails.uploadMethod === 'existing' && !uploadDetails.baseTokenURI?.includes('ipfs://')) {
       throw new Error('Please specify a valid base token URI')
