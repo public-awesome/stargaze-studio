@@ -1,5 +1,4 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -191,7 +190,7 @@ const UploadContract: NextPage = () => {
     <section className="py-6 px-12 space-y-4">
       <NextSeo title="Upload Contract" />
       <ContractPageHeader
-        description="Here you can upload a contract on Stargaze Testnet."
+        description={`Here you can upload a contract on Stargaze ${NETWORK === 'mainnet' ? 'mainnet' : 'testnet'}.`}
         link=""
         title="Upload Contract"
       />
