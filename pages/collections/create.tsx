@@ -1639,7 +1639,12 @@ const CollectionCreationPage: NextPage = () => {
               >
                 {openEditionMinterCreatorData?.sg721ContractAddress as string}
               </Anchor>
-              <Conditional test={openEditionMinterCreatorData?.whitelistContractAddress !== null}>
+              <Conditional
+                test={
+                  openEditionMinterCreatorData?.whitelistContractAddress !== null &&
+                  openEditionMinterCreatorData?.whitelistContractAddress !== undefined
+                }
+              >
                 <br />
                 Whitelist Contract Address:{'  '}
                 <Anchor

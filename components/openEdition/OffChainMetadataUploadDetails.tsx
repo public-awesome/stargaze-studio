@@ -107,7 +107,7 @@ export const OffChainMetadataUploadDetails = ({
     id: 'web3-storage-email',
     name: 'web3StorageEmail',
     title: 'web3.Storage Email',
-    placeholder: 'me@stargaze.zone',
+    placeholder: 'my@happy.email',
     defaultValue: '',
   })
 
