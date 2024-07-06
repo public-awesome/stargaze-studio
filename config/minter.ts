@@ -21,7 +21,9 @@ import {
   OPEN_EDITION_IBC_USDC_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
+  OPEN_EDITION_NATIVE_BRNCH_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
+  OPEN_EDITION_NATIVE_STRDST_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
@@ -294,6 +296,24 @@ export const flexibleOpenEditionStarsMinter: MinterInfo = {
   flexible: true,
 }
 
+export const flexibleOpenEditionStrdstMinter: MinterInfo = {
+  id: 'flexible-open-edition-native-strdst-minter',
+  factoryAddress: OPEN_EDITION_NATIVE_STRDST_FACTORY_FLEX_ADDRESS,
+  supportedToken: nativeStardust,
+  updatable: false,
+  featured: false,
+  flexible: true,
+}
+
+export const flexibleOpenEditionBrnchMinter: MinterInfo = {
+  id: 'flexible-open-edition-native-brnch-minter',
+  factoryAddress: OPEN_EDITION_NATIVE_BRNCH_FACTORY_FLEX_ADDRESS,
+  supportedToken: nativeBrnch,
+  updatable: false,
+  featured: false,
+  flexible: true,
+}
+
 export const flexibleOpenEditionIbcAtomMinter: MinterInfo = {
   id: 'flexible-open-edition-ibc-atom-minter',
   factoryAddress: OPEN_EDITION_IBC_ATOM_FACTORY_FLEX_ADDRESS,
@@ -323,6 +343,8 @@ export const flexibleOpenEditionIbcTiaMinter: MinterInfo = {
 
 export const flexibleOpenEditionMinterList = [
   flexibleOpenEditionStarsMinter,
+  flexibleOpenEditionStrdstMinter,
+  flexibleOpenEditionBrnchMinter,
   flexibleOpenEditionIbcAtomMinter,
   flexibleOpenEditionIbcUsdcMinter,
   flexibleOpenEditionIbcTiaMinter,
