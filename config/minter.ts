@@ -22,6 +22,8 @@ import {
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
+  OPEN_EDITION_MERKLE_TREE_FACTORY_ADDRESS,
+  OPEN_EDITION_MERKLE_TREE_FLEX_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_BRNCH_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
@@ -106,6 +108,17 @@ export const openEditionStarsMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
+}
+
+export const openEditionStarsMerkleTreeMinter: MinterInfo = {
+  id: 'open-edition-stars-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_MERKLE_TREE_FACTORY_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  featured: false,
+  flexible: false,
+  merkleTree: true,
 }
 
 export const openEditionUpdatableStarsMinter: MinterInfo = {
@@ -115,6 +128,7 @@ export const openEditionUpdatableStarsMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcAtomMinter: MinterInfo = {
@@ -124,6 +138,7 @@ export const openEditionIbcAtomMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
@@ -133,6 +148,7 @@ export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcUsdcMinter: MinterInfo = {
@@ -142,6 +158,7 @@ export const openEditionIbcUsdcMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcTiaMinter: MinterInfo = {
@@ -151,6 +168,7 @@ export const openEditionIbcTiaMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcNbtcMinter: MinterInfo = {
@@ -160,6 +178,7 @@ export const openEditionIbcNbtcMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
@@ -169,6 +188,7 @@ export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcTiaMinter: MinterInfo = {
@@ -178,6 +198,7 @@ export const openEditionUpdatableIbcTiaMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
@@ -187,6 +208,7 @@ export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcFrnzMinter: MinterInfo = {
@@ -196,6 +218,7 @@ export const openEditionIbcFrnzMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
@@ -205,6 +228,7 @@ export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcUskMinter: MinterInfo = {
@@ -214,6 +238,7 @@ export const openEditionIbcUskMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcUskMinter: MinterInfo = {
@@ -223,6 +248,7 @@ export const openEditionUpdatableIbcUskMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcKujiMinter: MinterInfo = {
@@ -232,6 +258,7 @@ export const openEditionIbcKujiMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 // export const openEditionIbcHuahuaMinter: MinterInfo = {
@@ -249,6 +276,7 @@ export const openEditionIbcCrbrusMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionNativeStrdstMinter: MinterInfo = {
@@ -258,6 +286,7 @@ export const openEditionNativeStrdstMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionNativeBrnchMinter: MinterInfo = {
@@ -267,10 +296,12 @@ export const openEditionNativeBrnchMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionMinterList = [
   openEditionStarsMinter,
+  openEditionStarsMerkleTreeMinter,
   openEditionUpdatableStarsMinter,
   openEditionUpdatableIbcAtomMinter,
   openEditionIbcAtomMinter,
@@ -298,6 +329,17 @@ export const flexibleOpenEditionStarsMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
+}
+
+export const flexibleOpenEditionStarsMerkleTreeMinter: MinterInfo = {
+  id: 'flexible-open-edition-stars-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_MERKLE_TREE_FLEX_FACTORY_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  featured: false,
+  flexible: true,
+  merkleTree: true,
 }
 
 export const flexibleOpenEditionStrdstMinter: MinterInfo = {
@@ -307,6 +349,7 @@ export const flexibleOpenEditionStrdstMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionBrnchMinter: MinterInfo = {
@@ -316,6 +359,7 @@ export const flexibleOpenEditionBrnchMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionIbcAtomMinter: MinterInfo = {
@@ -325,6 +369,7 @@ export const flexibleOpenEditionIbcAtomMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionIbcUsdcMinter: MinterInfo = {
@@ -334,6 +379,7 @@ export const flexibleOpenEditionIbcUsdcMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionIbcTiaMinter: MinterInfo = {
@@ -343,10 +389,12 @@ export const flexibleOpenEditionIbcTiaMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionMinterList = [
   flexibleOpenEditionStarsMinter,
+  flexibleOpenEditionStarsMerkleTreeMinter,
   flexibleOpenEditionStrdstMinter,
   flexibleOpenEditionBrnchMinter,
   flexibleOpenEditionIbcAtomMinter,
