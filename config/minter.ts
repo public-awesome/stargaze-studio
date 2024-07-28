@@ -4,8 +4,10 @@ import {
   FEATURED_VENDING_FACTORY_ADDRESS,
   FEATURED_VENDING_FACTORY_FLEX_ADDRESS,
   FEATURED_VENDING_FACTORY_MERKLE_TREE_ADDRESS,
+  FEATURED_VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
+  FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_FACTORY_FLEX_ADDRESS,
@@ -34,6 +36,7 @@ import {
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_MERKLE_TREE_ADDRESS,
+  VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
   VENDING_FACTORY_UPDATABLE_FLEX_ADDRESS,
   VENDING_IBC_ATOM_FACTORY_ADDRESS,
@@ -51,6 +54,7 @@ import {
   VENDING_IBC_TIA_FACTORY_ADDRESS,
   VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
+  VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   VENDING_IBC_TIA_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_TIA_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
@@ -858,9 +862,53 @@ export const merkleTreeVendingFeaturedIbcTiaMinter: MinterInfo = {
   featured: true,
 }
 
+export const merkleTreeFlexVendingStarsMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-stars-minter',
+  factoryAddress: VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeFlexVendingFeaturedStarsMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-featured-stars-minter',
+  factoryAddress: FEATURED_VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: true,
+}
+
+export const merkleTreeFlexVendingIbcTiaMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeFlexVendingFeaturedIbcTiaMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-featured-ibc-tia-minter',
+  factoryAddress: FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: true,
+}
+
 export const merkleTreeVendingMinterList = [
   merkleTreeVendingStarsMinter,
   merkleTreeVendingIbcTiaMinter,
   merkleTreeVendingFeaturedStarsMinter,
   merkleTreeVendingFeaturedIbcTiaMinter,
+  merkleTreeFlexVendingStarsMinter,
+  merkleTreeFlexVendingIbcTiaMinter,
+  merkleTreeFlexVendingFeaturedStarsMinter,
+  merkleTreeFlexVendingFeaturedIbcTiaMinter,
 ]
