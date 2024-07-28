@@ -35,6 +35,7 @@ import { FormControl } from 'components/FormControl'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
+import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import {
   flexibleOpenEditionMinterList,
   flexibleVendingMinterList,
@@ -609,6 +610,55 @@ const CollectionCreationPage: NextPage = () => {
         wallet.address,
       )
       return data?.contractAddress
+    } else if (whitelistDetails?.whitelistType === 'merkletree-flex') {
+      const members = whitelistDetails.members as WhitelistFlexMember[]
+      const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
+      const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
+      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
+      const formData = new FormData()
+      formData.append('whitelist', membersFile)
+      const response = await toast
+        .promise(
+          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }),
+          {
+            loading: 'Fetching merkle root hash...',
+            success: 'Merkle root fetched successfully.',
+            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
+          },
+        )
+        .catch((error) => {
+          console.log('error', error)
+          throw new Error('Whitelist instantiation failed.')
+        })
+
+      const rootHash = response.data.root_hash
+      console.log('rootHash', rootHash)
+
+      const merkleTreeFlexMsg = {
+        merkle_root: rootHash,
+        merkle_tree_uri: null,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
+        ),
+        per_address_limit: whitelistDetails.perAddressLimit || 1,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const data = await whitelistMerkleTreeContract?.instantiate(
+        WHITELIST_MERKLE_TREE_CODE_ID,
+        merkleTreeFlexMsg,
+        'Stargaze Whitelist Merkle Tree Flex Contract',
+        wallet.address,
+      )
+      return data?.contractAddress
     }
   }
 
@@ -1151,6 +1201,7 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Per address limit is required')
       if (
         whitelistDetails.whitelistType !== 'merkletree' &&
+        whitelistDetails.whitelistType !== 'merkletree-flex' &&
         (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
       )
         throw new Error('Member limit is required')
@@ -1334,8 +1385,11 @@ const CollectionCreationPage: NextPage = () => {
         (minter) =>
           minter.supportedToken === mintingDetails?.selectedMintToken &&
           minter.updatable === collectionDetails?.updatable &&
-          minter.flexible === (whitelistDetails?.whitelistType === 'flex') &&
-          minter.merkleTree === (whitelistDetails?.whitelistType === 'merkletree') &&
+          minter.flexible ===
+            (whitelistDetails?.whitelistType === 'flex' || whitelistDetails?.whitelistType === 'merkletree-flex') &&
+          minter.merkleTree ===
+            (whitelistDetails?.whitelistType === 'merkletree' ||
+              whitelistDetails?.whitelistType === 'merkletree-flex') &&
           minter.featured === isFeaturedCollection,
       )?.factoryAddress
     console.log('Vending Factory: ', vendingFactoryForSelectedDenom)
@@ -1396,7 +1450,11 @@ const CollectionCreationPage: NextPage = () => {
         .getBalance(wallet.address || '', creationFee?.denom as string)
         .then((creationFeeDenomBalance) => {
           if (minterType === 'vending' && whitelistDetails?.whitelistState === 'new') {
-            if (whitelistDetails.whitelistType !== 'merkletree' && whitelistDetails.memberLimit) {
+            if (
+              whitelistDetails.whitelistType !== 'merkletree' &&
+              whitelistDetails.whitelistType !== 'merkletree-flex' &&
+              whitelistDetails.memberLimit
+            ) {
               const whitelistCreationFee = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000
               if (creationFee?.denom === 'ustars') {
                 const amountNeeded = whitelistCreationFee + Number(creationFee.amount)
@@ -1420,7 +1478,10 @@ const CollectionCreationPage: NextPage = () => {
                     ).toString()} ${creationFeeDenom ? creationFeeDenom.displayName : creationFee?.denom}`,
                   )
               }
-            } else if (whitelistDetails.whitelistType === 'merkletree') {
+            } else if (
+              whitelistDetails.whitelistType === 'merkletree' ||
+              whitelistDetails.whitelistType === 'merkletree-flex'
+            ) {
               const merkleWhitelistCreationFee = 1000000000
               if (creationFee?.denom === 'ustars') {
                 const amountNeeded = merkleWhitelistCreationFee + Number(creationFee.amount)
