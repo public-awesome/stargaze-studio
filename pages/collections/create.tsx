@@ -1341,7 +1341,12 @@ const CollectionCreationPage: NextPage = () => {
           minter.updatable === openEditionMinterDetails.collectionDetails?.updatable &&
           minter.flexible ===
             (openEditionMinterDetails.whitelistDetails?.whitelistState !== 'none' &&
-              openEditionMinterDetails.whitelistDetails?.whitelistType === 'flex'),
+              (openEditionMinterDetails.whitelistDetails?.whitelistType === 'flex' ||
+                openEditionMinterDetails.whitelistDetails?.whitelistType === 'merkletree-flex')) &&
+          minter.merkleTree ===
+            (openEditionMinterDetails.whitelistDetails?.whitelistState !== 'none' &&
+              (openEditionMinterDetails.whitelistDetails?.whitelistType === 'merkletree' ||
+                openEditionMinterDetails.whitelistDetails?.whitelistType === 'merkletree-flex')),
       )
 
     console.log('OE Factory: ', factoryForSelectedDenom?.factoryAddress)

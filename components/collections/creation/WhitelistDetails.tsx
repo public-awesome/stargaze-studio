@@ -105,8 +105,8 @@ export const WhitelistDetails = ({
   }
 
   const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
-    setWhitelistFlexArray(whitelistData)
-    setWhitelistMerkleTreeFlexArray(whitelistData)
+    if (whitelistType === 'flex') setWhitelistFlexArray(whitelistData)
+    if (whitelistType === 'merkletree-flex') setWhitelistMerkleTreeFlexArray(whitelistData)
   }
 
   const downloadSampleWhitelistFlexFile = () => {
