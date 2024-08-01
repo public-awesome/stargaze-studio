@@ -4,8 +4,14 @@ import {
   FEATURED_VENDING_FACTORY_ADDRESS,
   FEATURED_VENDING_FACTORY_FLEX_ADDRESS,
   FEATURED_VENDING_FACTORY_MERKLE_TREE_ADDRESS,
+  FEATURED_VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_ATOM_FACTORY_ADDRESS,
+  FEATURED_VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
+  FEATURED_VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
+  FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_FACTORY_FLEX_ADDRESS,
@@ -20,6 +26,8 @@ import {
   OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_USDC_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_USK_FACTORY_ADDRESS,
+  OPEN_EDITION_MERKLE_TREE_FACTORY_ADDRESS,
+  OPEN_EDITION_MERKLE_TREE_FLEX_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_BRNCH_FACTORY_ADDRESS,
   OPEN_EDITION_NATIVE_BRNCH_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_NATIVE_STRDST_FACTORY_ADDRESS,
@@ -34,10 +42,13 @@ import {
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_MERKLE_TREE_ADDRESS,
+  VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
   VENDING_FACTORY_UPDATABLE_FLEX_ADDRESS,
   VENDING_IBC_ATOM_FACTORY_ADDRESS,
   VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
+  VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_ADDRESS,
@@ -51,6 +62,7 @@ import {
   VENDING_IBC_TIA_FACTORY_ADDRESS,
   VENDING_IBC_TIA_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
+  VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   VENDING_IBC_TIA_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_TIA_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
@@ -102,6 +114,17 @@ export const openEditionStarsMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
+}
+
+export const openEditionStarsMerkleTreeMinter: MinterInfo = {
+  id: 'open-edition-stars-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_MERKLE_TREE_FACTORY_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  featured: false,
+  flexible: false,
+  merkleTree: true,
 }
 
 export const openEditionUpdatableStarsMinter: MinterInfo = {
@@ -111,6 +134,7 @@ export const openEditionUpdatableStarsMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcAtomMinter: MinterInfo = {
@@ -120,6 +144,7 @@ export const openEditionIbcAtomMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
@@ -129,6 +154,7 @@ export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcUsdcMinter: MinterInfo = {
@@ -138,6 +164,7 @@ export const openEditionIbcUsdcMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcTiaMinter: MinterInfo = {
@@ -147,6 +174,7 @@ export const openEditionIbcTiaMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcNbtcMinter: MinterInfo = {
@@ -156,6 +184,7 @@ export const openEditionIbcNbtcMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
@@ -165,6 +194,7 @@ export const openEditionUpdatableIbcUsdcMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcTiaMinter: MinterInfo = {
@@ -174,6 +204,7 @@ export const openEditionUpdatableIbcTiaMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
@@ -183,6 +214,7 @@ export const openEditionUpdatableIbcNbtcMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcFrnzMinter: MinterInfo = {
@@ -192,6 +224,7 @@ export const openEditionIbcFrnzMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
@@ -201,6 +234,7 @@ export const openEditionUpdatableIbcFrnzMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcUskMinter: MinterInfo = {
@@ -210,6 +244,7 @@ export const openEditionIbcUskMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionUpdatableIbcUskMinter: MinterInfo = {
@@ -219,6 +254,7 @@ export const openEditionUpdatableIbcUskMinter: MinterInfo = {
   updatable: true,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionIbcKujiMinter: MinterInfo = {
@@ -228,6 +264,7 @@ export const openEditionIbcKujiMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 // export const openEditionIbcHuahuaMinter: MinterInfo = {
@@ -245,6 +282,7 @@ export const openEditionIbcCrbrusMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionNativeStrdstMinter: MinterInfo = {
@@ -254,6 +292,7 @@ export const openEditionNativeStrdstMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionNativeBrnchMinter: MinterInfo = {
@@ -263,10 +302,12 @@ export const openEditionNativeBrnchMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: false,
+  merkleTree: false,
 }
 
 export const openEditionMinterList = [
   openEditionStarsMinter,
+  openEditionStarsMerkleTreeMinter,
   openEditionUpdatableStarsMinter,
   openEditionUpdatableIbcAtomMinter,
   openEditionIbcAtomMinter,
@@ -294,6 +335,17 @@ export const flexibleOpenEditionStarsMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
+}
+
+export const flexibleOpenEditionStarsMerkleTreeMinter: MinterInfo = {
+  id: 'flexible-open-edition-stars-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_MERKLE_TREE_FLEX_FACTORY_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  featured: false,
+  flexible: true,
+  merkleTree: true,
 }
 
 export const flexibleOpenEditionStrdstMinter: MinterInfo = {
@@ -303,6 +355,7 @@ export const flexibleOpenEditionStrdstMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionBrnchMinter: MinterInfo = {
@@ -312,6 +365,7 @@ export const flexibleOpenEditionBrnchMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionIbcAtomMinter: MinterInfo = {
@@ -321,6 +375,7 @@ export const flexibleOpenEditionIbcAtomMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionIbcUsdcMinter: MinterInfo = {
@@ -330,6 +385,7 @@ export const flexibleOpenEditionIbcUsdcMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionIbcTiaMinter: MinterInfo = {
@@ -339,10 +395,12 @@ export const flexibleOpenEditionIbcTiaMinter: MinterInfo = {
   updatable: false,
   featured: false,
   flexible: true,
+  merkleTree: false,
 }
 
 export const flexibleOpenEditionMinterList = [
   flexibleOpenEditionStarsMinter,
+  flexibleOpenEditionStarsMerkleTreeMinter,
   flexibleOpenEditionStrdstMinter,
   flexibleOpenEditionBrnchMinter,
   flexibleOpenEditionIbcAtomMinter,
@@ -388,6 +446,16 @@ export const vendingIbcAtomMinter: MinterInfo = {
   flexible: false,
   merkleTree: false,
   featured: false,
+}
+
+export const vendingFeaturedIbcAtomMinter: MinterInfo = {
+  id: 'vending-featured-ibc-atom-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATOM_FACTORY_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: false,
+  merkleTree: false,
+  featured: true,
 }
 
 export const vendingUpdatableIbcAtomMinter: MinterInfo = {
@@ -575,6 +643,7 @@ export const vendingMinterList = [
   vendingFeaturedStarsMinter,
   vendingUpdatableStarsMinter,
   vendingIbcAtomMinter,
+  vendingFeaturedIbcAtomMinter,
   vendingUpdatableIbcAtomMinter,
   vendingIbcUsdcMinter,
   vendingFeaturedIbcUsdcMinter,
@@ -633,6 +702,16 @@ export const flexibleVendingIbcAtomMinter: MinterInfo = {
   flexible: true,
   merkleTree: false,
   featured: false,
+}
+
+export const flexibleFeaturedVendingIbcAtomMinter: MinterInfo = {
+  id: 'flexible-featured-vending-ibc-atom-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: true,
+  merkleTree: false,
+  featured: true,
 }
 
 export const flexibleVendingUpdatableIbcAtomMinter: MinterInfo = {
@@ -800,6 +879,7 @@ export const flexibleVendingMinterList = [
   flexibleFeaturedVendingStarsMinter,
   flexibleVendingUpdatableStarsMinter,
   flexibleVendingIbcAtomMinter,
+  flexibleFeaturedVendingIbcAtomMinter,
   flexibleVendingUpdatableIbcAtomMinter,
   flexibleVendingIbcUsdcMinter,
   flexibleFeaturedVendingIbcUsdcMinter,
@@ -838,6 +918,26 @@ export const merkleTreeVendingFeaturedStarsMinter: MinterInfo = {
   featured: true,
 }
 
+export const merkleTreeVendingIbcAtomMinter: MinterInfo = {
+  id: 'merkletree-vending-ibc-atom-minter',
+  factoryAddress: VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeVendingFeaturedIbcAtomMinter: MinterInfo = {
+  id: 'merkletree-vending-featured-ibc-atom-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: true,
+}
+
 export const merkleTreeVendingIbcTiaMinter: MinterInfo = {
   id: 'merkletree-vending-ibc-tia-minter',
   factoryAddress: VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
@@ -858,9 +958,76 @@ export const merkleTreeVendingFeaturedIbcTiaMinter: MinterInfo = {
   featured: true,
 }
 
+export const merkleTreeFlexVendingStarsMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-stars-minter',
+  factoryAddress: VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeFlexVendingFeaturedStarsMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-featured-stars-minter',
+  factoryAddress: FEATURED_VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: stars,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: true,
+}
+
+export const merkleTreeFlexVendingIbcTiaMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-ibc-tia-minter',
+  factoryAddress: VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeFlexVendingFeaturedIbcTiaMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-featured-ibc-tia-minter',
+  factoryAddress: FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcTia,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: true,
+}
+
+export const merkleTreeFlexVendingIbcAtomMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-ibc-atom-minter',
+  factoryAddress: VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeFlexVendingFeaturedIbcAtomMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-featured-ibc-atom-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: true,
+}
+
 export const merkleTreeVendingMinterList = [
   merkleTreeVendingStarsMinter,
   merkleTreeVendingIbcTiaMinter,
+  merkleTreeVendingIbcAtomMinter,
   merkleTreeVendingFeaturedStarsMinter,
   merkleTreeVendingFeaturedIbcTiaMinter,
+  merkleTreeFlexVendingStarsMinter,
+  merkleTreeFlexVendingIbcTiaMinter,
+  merkleTreeFlexVendingFeaturedStarsMinter,
+  merkleTreeFlexVendingFeaturedIbcTiaMinter,
+  merkleTreeFlexVendingIbcAtomMinter,
+  merkleTreeFlexVendingFeaturedIbcAtomMinter,
 ]
