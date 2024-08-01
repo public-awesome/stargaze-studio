@@ -1022,6 +1022,7 @@ export const merkleTreeVendingMinterList = [
   merkleTreeVendingStarsMinter,
   merkleTreeVendingIbcTiaMinter,
   merkleTreeVendingIbcAtomMinter,
+  merkleTreeVendingFeaturedIbcAtomMinter,
   merkleTreeVendingFeaturedStarsMinter,
   merkleTreeVendingFeaturedIbcTiaMinter,
   merkleTreeFlexVendingStarsMinter,
