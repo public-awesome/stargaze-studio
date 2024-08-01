@@ -18,7 +18,7 @@ export const stars: TokenInfo = {
 
 export const ibcAtom: TokenInfo = {
   id: 'ibc-atom',
-  denom: 'ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2',
+  denom: 'ibc/9DF365E2C0EF4EA02FA771F638BB9C0C830EFCD354629BDC017F79B348B4E989',
   displayName: 'ATOM',
   decimalPlaces: 6,
 }

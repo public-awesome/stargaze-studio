@@ -43,7 +43,7 @@ export interface WhitelistDetailsDataProps {
 
 type WhitelistState = 'none' | 'existing' | 'new'
 
-export type WhitelistType = 'standard' | 'flex' | 'merkletree'
+export type WhitelistType = 'standard' | 'flex' | 'merkletree' | 'merkletree-flex'
 
 export const WhitelistDetails = ({
   onChange,
@@ -60,6 +60,8 @@ export const WhitelistDetails = ({
   const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
   const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
   const [whitelistMerkleTreeArray, setWhitelistMerkleTreeArray] = useState<string[]>([])
+  const [whitelistMerkleTreeFlexArray, setWhitelistMerkleTreeFlexArray] = useState<WhitelistFlexMember[]>([])
+
   const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const whitelistAddressState = useInputState({
@@ -103,7 +105,8 @@ export const WhitelistDetails = ({
   }
 
   const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
-    setWhitelistFlexArray(whitelistData)
+    if (whitelistType === 'flex') setWhitelistFlexArray(whitelistData)
+    if (whitelistType === 'merkletree-flex') setWhitelistMerkleTreeFlexArray(whitelistData)
   }
 
   const downloadSampleWhitelistFlexFile = () => {
@@ -151,7 +154,9 @@ export const WhitelistDetails = ({
           ? whitelistStandardArray
           : whitelistType === 'merkletree'
           ? whitelistMerkleTreeArray
-          : whitelistFlexArray,
+          : whitelistType === 'flex'
+          ? whitelistFlexArray
+          : whitelistMerkleTreeFlexArray,
       unitPrice: unitPriceState.value
         ? (Number(unitPriceState.value) * 1_000_000).toString()
         : unitPriceState.value === 0
@@ -182,6 +187,7 @@ export const WhitelistDetails = ({
     whitelistStandardArray,
     whitelistFlexArray,
     whitelistMerkleTreeArray,
+    whitelistMerkleTreeFlexArray,
     whitelistState,
     whitelistType,
     addressListState.values,
@@ -231,6 +237,17 @@ export const WhitelistDetails = ({
         importedWhitelistDetails.members?.forEach((member) => {
           setWhitelistFlexArray((flexArray) => [
             ...flexArray,
+            {
+              address: (member as WhitelistFlexMember).address,
+              mint_count: (member as WhitelistFlexMember).mint_count,
+            },
+          ])
+        })
+      } else if (importedWhitelistDetails.whitelistType === 'merkletree-flex') {
+        setWhitelistMerkleTreeFlexArray([])
+        importedWhitelistDetails.members?.forEach((member) => {
+          setWhitelistMerkleTreeFlexArray((merkleTreeFlexArray) => [
+            ...merkleTreeFlexArray,
             {
               address: (member as WhitelistFlexMember).address,
               mint_count: (member as WhitelistFlexMember).mint_count,
@@ -318,7 +335,7 @@ export const WhitelistDetails = ({
       </Conditional>
 
       <Conditional test={whitelistState === 'new'}>
-        <div className="flex justify-between mb-5 ml-6 max-w-[500px] text-lg font-bold">
+        <div className="flex justify-between my-5 ml-6 max-w-[750px] text-lg font-bold">
           <div className="form-check form-check-inline">
             <input
               checked={whitelistType === 'standard'}
@@ -377,11 +394,30 @@ export const WhitelistDetails = ({
               Whitelist Merkle Tree
             </label>
           </div>
+          <div className="form-check form-check-inline">
+            <input
+              checked={whitelistType === 'merkletree-flex'}
+              className="peer sr-only"
+              id="inlineRadio10"
+              name="inlineRadioOptions10"
+              onClick={() => {
+                setWhitelistType('merkletree-flex')
+              }}
+              type="radio"
+              value="merkletree-flex"
+            />
+            <label
+              className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+              htmlFor="inlineRadio10"
+            >
+              Whitelist Merkle Tree Flex
+            </label>
+          </div>
         </div>
         <div className="grid grid-cols-2">
           <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
             <NumberInput isRequired {...unitPriceState} />
-            <Conditional test={whitelistType !== 'merkletree'}>
+            <Conditional test={whitelistType === 'standard' || whitelistType === 'flex'}>
               <NumberInput isRequired {...memberLimitState} />
             </Conditional>
             <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
@@ -518,6 +554,24 @@ export const WhitelistDetails = ({
               </FormGroup>
               <Conditional test={whitelistStandardArray.length > 0}>
                 <JsonPreview content={whitelistStandardArray} initialState title="File Contents" />
+              </Conditional>
+            </Conditional>
+            <Conditional test={whitelistType === 'merkletree-flex'}>
+              <FormGroup
+                subtitle={
+                  <div>
+                    <span>CSV file that contains the whitelisted addresses and corresponding mint counts</span>
+                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
+                      Download Sample File
+                    </Button>
+                  </div>
+                }
+                title="Whitelist File"
+              >
+                <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
+              </FormGroup>
+              <Conditional test={whitelistMerkleTreeFlexArray.length > 0}>
+                <JsonPreview content={whitelistMerkleTreeFlexArray} initialState={false} title="File Contents" />
               </Conditional>
             </Conditional>
           </div>

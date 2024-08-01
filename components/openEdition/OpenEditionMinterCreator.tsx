@@ -14,6 +14,7 @@ import type { MinterType } from 'components/collections/actions/Combobox'
 import { Conditional } from 'components/Conditional'
 import { ConfirmationModal } from 'components/ConfirmationModal'
 import { LoadingModal } from 'components/LoadingModal'
+import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { type TokenInfo, tokensList } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { addLogItem } from 'contexts/log'
@@ -498,8 +499,18 @@ export const OpenEditionMinterCreator = ({
       await queryClient
         .getBalance(wallet.address || '', openEditionMinterCreationFee?.denom as string)
         .then((creationFeeDenomBalance) => {
-          if (whitelistDetails?.whitelistState === 'new' && whitelistDetails.memberLimit) {
-            const whitelistCreationFee = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000
+          if (whitelistDetails?.whitelistState === 'new') {
+            let whitelistCreationFee = 0
+            if (
+              (whitelistDetails.whitelistType === 'standard' || whitelistDetails.whitelistType === 'flex') &&
+              whitelistDetails.memberLimit
+            )
+              whitelistCreationFee = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000
+            else if (
+              whitelistDetails.whitelistType === 'merkletree' ||
+              whitelistDetails.whitelistType === 'merkletree-flex'
+            )
+              whitelistCreationFee = 100000000
             if (openEditionMinterCreationFee?.denom === 'ustars') {
               const amountNeeded = whitelistCreationFee + Number(openEditionMinterCreationFee.amount)
               if (amountNeeded >= Number(starsBalance.amount))
@@ -844,6 +855,55 @@ export const OpenEditionMinterCreator = ({
         wallet.address,
       )
       return data?.contractAddress
+    } else if (whitelistDetails?.whitelistType === 'merkletree-flex') {
+      const members = whitelistDetails.members as WhitelistFlexMember[]
+      const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
+      const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
+      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
+      const formData = new FormData()
+      formData.append('whitelist', membersFile)
+      const response = await toast
+        .promise(
+          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }),
+          {
+            loading: 'Fetching merkle root hash...',
+            success: 'Merkle root fetched successfully.',
+            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
+          },
+        )
+        .catch((error) => {
+          console.log('error', error)
+          throw new Error('Whitelist instantiation failed.')
+        })
+
+      const rootHash = response.data.root_hash
+      console.log('rootHash', rootHash)
+
+      const merkleTreeFlexMsg = {
+        merkle_root: rootHash,
+        merkle_tree_uri: null,
+        start_time: whitelistDetails.startTime,
+        end_time: whitelistDetails.endTime,
+        mint_price: coin(
+          String(Number(whitelistDetails.unitPrice)),
+          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
+        ),
+        per_address_limit: whitelistDetails.perAddressLimit || 1,
+        admins: whitelistDetails.admins || [wallet.address],
+        admins_mutable: whitelistDetails.adminsMutable,
+      }
+
+      const data = await whitelistMerkleTreeContract?.instantiate(
+        WHITELIST_MERKLE_TREE_CODE_ID,
+        merkleTreeFlexMsg,
+        'Stargaze Whitelist Merkle Tree Flex Contract',
+        wallet.address,
+      )
+      return data?.contractAddress
     }
   }
 
@@ -921,7 +981,8 @@ export const OpenEditionMinterCreator = ({
               mintingDetails?.selectedMintToken?.displayName === 'KUJI' ||
               mintingDetails?.selectedMintToken?.displayName === 'HUAHUA' ||
               mintingDetails?.selectedMintToken?.displayName === 'BRNCH' ||
-              mintingDetails?.selectedMintToken?.displayName === 'CRBRUS'
+              mintingDetails?.selectedMintToken?.displayName === 'CRBRUS' ||
+              mintingDetails?.selectedMintToken?.displayName === 'ATOM'
             ? STRDST_SG721_CODE_ID
             : SG721_OPEN_EDITION_CODE_ID,
           name: collectionDetails?.name,
