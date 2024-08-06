@@ -431,6 +431,7 @@ export const OpenEditionMinterCreator = ({
         throw new Error('Per address limit is required')
       if (
         whitelistDetails.whitelistType !== 'merkletree' &&
+        whitelistDetails.whitelistType !== 'merkletree-flex' &&
         (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
       )
         throw new Error('Member limit is required')

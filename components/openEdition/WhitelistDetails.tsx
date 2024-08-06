@@ -417,7 +417,7 @@ export const WhitelistDetails = ({
         <div className="grid grid-cols-2">
           <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
             <NumberInput isRequired {...unitPriceState} />
-            <Conditional test={whitelistType !== 'merkletree'}>
+            <Conditional test={whitelistType !== 'merkletree' && whitelistType !== 'merkletree-flex'}>
               <NumberInput isRequired {...memberLimitState} />
             </Conditional>
             <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
@@ -554,6 +554,24 @@ export const WhitelistDetails = ({
               </FormGroup>
               <Conditional test={whitelistStandardArray.length > 0}>
                 <JsonPreview content={whitelistStandardArray} initialState title="File Contents" />
+              </Conditional>
+            </Conditional>
+            <Conditional test={whitelistType === 'merkletree-flex'}>
+              <FormGroup
+                subtitle={
+                  <div>
+                    <span>CSV file that contains the whitelisted addresses and corresponding mint counts</span>
+                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
+                      Download Sample File
+                    </Button>
+                  </div>
+                }
+                title="Whitelist File"
+              >
+                <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
+              </FormGroup>
+              <Conditional test={whitelistMerkleTreeFlexArray.length > 0}>
+                <JsonPreview content={whitelistMerkleTreeFlexArray} initialState={false} title="File Contents" />
               </Conditional>
             </Conditional>
           </div>
