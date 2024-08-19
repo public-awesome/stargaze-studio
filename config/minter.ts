@@ -17,6 +17,8 @@ import {
   OPEN_EDITION_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_FLEX_ADDRESS,
+  OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
+  OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
@@ -145,6 +147,16 @@ export const openEditionIbcAtomMinter: MinterInfo = {
   featured: false,
   flexible: false,
   merkleTree: false,
+}
+
+export const openEditionIbcAtomMerkleTreeMinter: MinterInfo = {
+  id: 'open-edition-ibc-atom-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  featured: false,
+  flexible: false,
+  merkleTree: true,
 }
 
 export const openEditionUpdatableIbcAtomMinter: MinterInfo = {
@@ -311,6 +323,7 @@ export const openEditionMinterList = [
   openEditionUpdatableStarsMinter,
   openEditionUpdatableIbcAtomMinter,
   openEditionIbcAtomMinter,
+  openEditionIbcAtomMerkleTreeMinter,
   openEditionIbcFrnzMinter,
   openEditionUpdatableIbcFrnzMinter,
   openEditionIbcUsdcMinter,
@@ -378,6 +391,16 @@ export const flexibleOpenEditionIbcAtomMinter: MinterInfo = {
   merkleTree: false,
 }
 
+export const flexibleOpenEditionIbcAtomMerkleTreeMinter: MinterInfo = {
+  id: 'flexible-open-edition-ibc-atom-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcAtom,
+  updatable: false,
+  featured: false,
+  flexible: true,
+  merkleTree: true,
+}
+
 export const flexibleOpenEditionIbcUsdcMinter: MinterInfo = {
   id: 'flexible-open-edition-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_IBC_USDC_FACTORY_FLEX_ADDRESS,
@@ -404,6 +427,7 @@ export const flexibleOpenEditionMinterList = [
   flexibleOpenEditionStrdstMinter,
   flexibleOpenEditionBrnchMinter,
   flexibleOpenEditionIbcAtomMinter,
+  flexibleOpenEditionIbcAtomMerkleTreeMinter,
   flexibleOpenEditionIbcUsdcMinter,
   flexibleOpenEditionIbcTiaMinter,
 ]
