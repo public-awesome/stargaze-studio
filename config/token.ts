@@ -14,6 +14,7 @@ export const stars: TokenInfo = {
   denom: 'ustars',
   displayName: 'STARS',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/stars.svg',
 }
 
 export const ibcAtom: TokenInfo = {
@@ -24,6 +25,7 @@ export const ibcAtom: TokenInfo = {
       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uatom',
   displayName: 'ATOM',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/cosmoshub/images/atom.svg',
 }
 
 export const ibcUsdc: TokenInfo = {
@@ -34,6 +36,7 @@ export const ibcUsdc: TokenInfo = {
       : 'factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/uusdc',
   displayName: 'USDC',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/USDCoin.svg',
 }
 export const ibcUsk: TokenInfo = {
   id: 'ibc-usk',
@@ -43,6 +46,7 @@ export const ibcUsk: TokenInfo = {
       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uusk',
   displayName: 'USK',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/usk.svg',
 }
 
 export const ibcKuji: TokenInfo = {
@@ -53,6 +57,7 @@ export const ibcKuji: TokenInfo = {
       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/ukuji',
   displayName: 'KUJI',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/kuji.svg',
 }
 
 export const ibcFrnz: TokenInfo = {
@@ -63,6 +68,7 @@ export const ibcFrnz: TokenInfo = {
       : 'factory/stars1paqkeyluuw47pflgwwqaaj8y679zj96aatg5a7/ufrienzies',
   displayName: 'FRNZ',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/frnz.png',
 }
 
 export const ibcNbtc: TokenInfo = {
@@ -70,6 +76,7 @@ export const ibcNbtc: TokenInfo = {
   denom: NETWORK === 'mainnet' ? 'Not available' : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/unbtc',
   displayName: 'nBTC',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/nomic/images/nbtc.svg',
 }
 
 // export const ibcHuahua: TokenInfo = {
@@ -90,6 +97,7 @@ export const ibcCrbrus: TokenInfo = {
       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uCRBRUS',
   displayName: 'CRBRUS',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/cerberus/images/crbrus.svg',
 }
 
 export const ibcTia: TokenInfo = {
@@ -100,6 +108,7 @@ export const ibcTia: TokenInfo = {
       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/utia',
   displayName: 'TIA',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/celestia/images/celestia.svg',
 }
 
 export const nativeStardust: TokenInfo = {
@@ -110,6 +119,7 @@ export const nativeStardust: TokenInfo = {
       : 'factory/stars18vxuarvh44wxltxqsyac36972nvaqc377sdh40/dust',
   displayName: 'STRDST',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/dust.png',
 }
 
 export const nativeBrnch: TokenInfo = {
@@ -120,6 +130,7 @@ export const nativeBrnch: TokenInfo = {
       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uBRNCH',
   displayName: 'BRNCH',
   decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/brnch.png',
 }
 
 export const tokensList = [
