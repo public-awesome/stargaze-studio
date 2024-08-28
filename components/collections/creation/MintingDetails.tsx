@@ -63,10 +63,8 @@ export const MintingDetails = ({
   const unitPriceState = useNumberInputState({
     id: 'unitPrice',
     name: 'unitPrice',
-    title: 'Unit Price',
-    subtitle: `Price of each token (min. ${minimumMintPrice} ${
-      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
-    })`,
+    title: 'Mint Price',
+    subtitle: `Minimum: ${minimumMintPrice} ${mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'}`,
     placeholder: '50',
   })
 

@@ -48,7 +48,7 @@ const CustomTokenSelect: React.FC<CustomTokenSelectProps> = ({ options, selected
         className="py-2 pr-2 pl-3 ml-2 w-full text-base leading-5 text-left bg-zinc-900 rounded-md border-2 border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="flex flex-row">
+        <div className="flex flex-row justify-between">
           {selectedOption ? (
             <div className="flex items-center">
               {selectedOption.imageURL && (
@@ -64,7 +64,7 @@ const CustomTokenSelect: React.FC<CustomTokenSelectProps> = ({ options, selected
             'Select a token'
           )}
           <svg
-            className={`w-5 h-5 ml-20 mt-1 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
+            className={`w-5 h-5 mt-1 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`}
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
