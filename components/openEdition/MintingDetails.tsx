@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
 import { Conditional } from 'components/Conditional'
+import CustomTokenSelect from 'components/CustomTokenSelect'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
@@ -62,9 +63,7 @@ export const MintingDetails = ({
     id: 'unitPrice',
     name: 'unitPrice',
     title: 'Mint Price',
-    subtitle: `Price of each token (min. ${minimumMintPrice} ${
-      mintTokenFromFactory ? mintTokenFromFactory.displayName : 'STARS'
-    })`,
+    subtitle: `Minimum: ${minimumMintPrice} ${mintTokenFromFactory ? mintTokenFromFactory.displayName : 'STARS'}`,
     placeholder: '50',
   })
 
@@ -167,7 +166,7 @@ export const MintingDetails = ({
       <FormGroup subtitle="Information about your minting settings" title="Minting Details">
         <div className="flex flex-row items-end">
           <NumberInput {...unitPriceState} isRequired />
-          <select
+          {/* <select
             className="py-[9px] px-4 ml-4 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
             onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
             value={selectedMintToken?.displayName}
@@ -179,7 +178,20 @@ export const MintingDetails = ({
                   {minter.supportedToken.displayName}
                 </option>
               ))}
-          </select>
+          </select> */}
+          <CustomTokenSelect
+            onOptionChange={setSelectedMintToken}
+            options={openEditionMinterList
+              .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+              .map((minter) => minter.supportedToken)
+              .reduce((uniqueTokens: TokenInfo[], token: TokenInfo) => {
+                if (!uniqueTokens.includes(token)) {
+                  uniqueTokens.push(token)
+                }
+                return uniqueTokens
+              }, [])}
+            selectedOption={selectedMintToken}
+          />
         </div>
 
         <NumberInput {...perAddressLimitState} isRequired />
