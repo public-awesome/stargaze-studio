@@ -1,6 +1,6 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable import/no-default-export */
-/* eslint-disable react/button-has-type */
+
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useEffect, useRef, useState } from 'react'
@@ -47,6 +47,7 @@ const CustomTokenSelect: React.FC<CustomTokenSelectProps> = ({ options, selected
       <button
         className="py-2 pr-2 pl-3 ml-2 w-full text-base leading-5 text-left bg-zinc-900 rounded-md border-2 border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
         onClick={() => setIsOpen(!isOpen)}
+        type="button"
       >
         <div className="flex flex-row justify-between">
           {selectedOption ? (
