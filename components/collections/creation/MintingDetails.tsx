@@ -1,6 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
+import CustomTokenSelect from 'components/CustomTokenSelect'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
@@ -62,10 +63,8 @@ export const MintingDetails = ({
   const unitPriceState = useNumberInputState({
     id: 'unitPrice',
     name: 'unitPrice',
-    title: 'Unit Price',
-    subtitle: `Price of each token (min. ${minimumMintPrice} ${
-      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
-    })`,
+    title: 'Mint Price',
+    subtitle: `Minimum: ${minimumMintPrice} ${mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'}`,
     placeholder: '50',
   })
 
@@ -149,9 +148,9 @@ export const MintingDetails = ({
           isRequired
           value={uploadMethod === 'new' ? numberOfTokens : numberOfTokensState.value}
         />
-        <div className="flex flex-row items-end">
+        <div className="flex flex-row items-end mr-2">
           <NumberInput {...unitPriceState} isRequired />
-          <select
+          {/* <select
             className="py-[9px] px-4 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
             onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
             value={selectedMintToken?.displayName}
@@ -166,7 +165,17 @@ export const MintingDetails = ({
                   {minter.supportedToken.displayName}
                 </option>
               ))}
-          </select>
+          </select> */}
+          <CustomTokenSelect
+            onOptionChange={setSelectedMintToken}
+            options={vendingMinterList
+              .filter(
+                (minter) =>
+                  minter.factoryAddress !== undefined && minter.updatable === false && minter.featured === false,
+              )
+              .map((minter) => minter.supportedToken)}
+            selectedOption={selectedMintToken}
+          />
         </div>
 
         <NumberInput {...perAddressLimitState} isRequired />

@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
 import { coin } from '@cosmjs/proto-signing'
 import axios from 'axios'
@@ -6,6 +7,7 @@ import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
+import CustomTokenSelect from 'components/CustomTokenSelect'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
 import { AddressList } from 'components/forms/AddressList'
@@ -20,7 +22,7 @@ import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/Whitel
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
-import { stars, tokensList } from 'config/token'
+import { stars } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { InstantiateResponse } from 'contracts/sg721'
@@ -61,7 +63,7 @@ const WhitelistInstantiatePage: NextPage = () => {
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
-    subtitle: 'Price of each tokens in collection',
+    subtitle: 'Mint price per token',
     placeholder: '500',
   })
 
@@ -355,10 +357,10 @@ const WhitelistInstantiatePage: NextPage = () => {
         </Conditional>
       </FormGroup>
 
-      <FormGroup subtitle="Information about your minting settings" title="Minting Details">
-        <div className="flex flex-row items-center">
+      <FormGroup key="minting-details" subtitle="Information about your minting settings" title="Minting Details">
+        <div className="flex flex-row items-end">
           <NumberInput {...unitPriceState} isRequired />
-          <select
+          {/* <select
             className="py-[9px] px-4 mt-14 ml-2 placeholder:text-white/50 bg-white/10 rounded border-2 border-white/20 focus:ring focus:ring-plumbus-20"
             onChange={(e) => setSelectedMintToken(tokensList.find((t) => t.displayName === e.target.value))}
             value={selectedMintToken?.displayName}
@@ -370,7 +372,20 @@ const WhitelistInstantiatePage: NextPage = () => {
                   {minter.supportedToken.displayName}
                 </option>
               ))}
-          </select>
+          </select> */}
+          <CustomTokenSelect
+            onOptionChange={setSelectedMintToken}
+            options={vendingMinterList
+              .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+              .map((minter) => minter.supportedToken)
+              .reduce((uniqueTokens: TokenInfo[], token: TokenInfo) => {
+                if (!uniqueTokens.includes(token)) {
+                  uniqueTokens.push(token)
+                }
+                return uniqueTokens
+              }, [])}
+            selectedOption={selectedMintToken}
+          />
         </div>
 
         <Conditional test={whitelistType !== 'merkletree'}>
