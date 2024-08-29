@@ -93,7 +93,7 @@ const RemoveOfferPage: NextPage = () => {
 
   return (
     <section className="py-6 px-12 space-y-4">
-      <NextSeo title="Remove Collection offer" />
+      <NextSeo title="Remove Collection Offer" />
       <ContractPageHeader link={links.Documentation} title="Remove Collection Offer" />
       <div className="space-y-8">
         <AddressInput {...collectionAddressState} />
