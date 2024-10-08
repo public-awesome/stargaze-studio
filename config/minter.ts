@@ -13,6 +13,7 @@ import {
   FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_ADDRESS,
   FEATURED_VENDING_IBC_TIA_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_USDC_FACTORY_MERKLE_TREE_ADDRESS,
   OPEN_EDITION_FACTORY_ADDRESS,
   OPEN_EDITION_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_ADDRESS,
@@ -69,6 +70,7 @@ import {
   VENDING_IBC_TIA_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USDC_FACTORY_ADDRESS,
   VENDING_IBC_USDC_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_USDC_FACTORY_MERKLE_TREE_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_USDC_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_USK_FACTORY_ADDRESS,
@@ -982,6 +984,26 @@ export const merkleTreeVendingFeaturedIbcTiaMinter: MinterInfo = {
   featured: true,
 }
 
+export const merkleTreeVendingIbcUsdcMinter: MinterInfo = {
+  id: 'merkletree-vending-ibc-usdc-minter',
+  factoryAddress: VENDING_IBC_USDC_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeVendingFeaturedIbcUsdcMinter: MinterInfo = {
+  id: 'merkletree-vending-featured-ibc-usdc-minter',
+  factoryAddress: FEATURED_VENDING_IBC_USDC_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcUsdc,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: true,
+}
+
 export const merkleTreeFlexVendingStarsMinter: MinterInfo = {
   id: 'merkletree-flex-vending-stars-minter',
   factoryAddress: VENDING_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
@@ -1046,9 +1068,11 @@ export const merkleTreeVendingMinterList = [
   merkleTreeVendingStarsMinter,
   merkleTreeVendingIbcTiaMinter,
   merkleTreeVendingIbcAtomMinter,
+  merkleTreeVendingIbcUsdcMinter,
   merkleTreeVendingFeaturedIbcAtomMinter,
   merkleTreeVendingFeaturedStarsMinter,
   merkleTreeVendingFeaturedIbcTiaMinter,
+  merkleTreeVendingFeaturedIbcUsdcMinter,
   merkleTreeFlexVendingStarsMinter,
   merkleTreeFlexVendingIbcTiaMinter,
   merkleTreeFlexVendingFeaturedStarsMinter,
