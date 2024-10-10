@@ -49,16 +49,16 @@ export const ibcUsk: TokenInfo = {
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/usk.svg',
 }
 
-export const ibcKuji: TokenInfo = {
-  id: 'ibc-kuji',
-  denom:
-    NETWORK === 'mainnet'
-      ? 'ibc/0E57658B71E9CC4BB0F6FE3E01712966713B49E6FD292E6B66E3F111B103D361'
-      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/ukuji',
-  displayName: 'KUJI',
-  decimalPlaces: 6,
-  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/kuji.svg',
-}
+// export const ibcKuji: TokenInfo = {
+//   id: 'ibc-kuji',
+//   denom:
+//     NETWORK === 'mainnet'
+//       ? 'ibc/0E57658B71E9CC4BB0F6FE3E01712966713B49E6FD292E6B66E3F111B103D361'
+//       : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/ukuji',
+//   displayName: 'KUJI',
+//   decimalPlaces: 6,
+//   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/kujira/images/kuji.svg',
+// }
 
 export const ibcFrnz: TokenInfo = {
   id: 'ibc-frnz',
@@ -140,7 +140,7 @@ export const tokensList = [
   ibcUsk,
   ibcFrnz,
   ibcNbtc,
-  ibcKuji,
+  // ibcKuji,
   // ibcHuahua,
   ibcCrbrus,
   ibcTia,

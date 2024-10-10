@@ -81,20 +81,22 @@ const CustomTokenSelect: React.FC<CustomTokenSelectProps> = ({ options, selected
 
       {isOpen && (
         <ul className="overflow-auto absolute z-10 py-1 mt-1 ml-2 w-full max-h-60 text-base bg-zinc-900 rounded-md focus:outline-none ring-1 ring-black ring-opacity-5 shadow-lg sm:text-md">
-          {options.map((option) => (
-            <li
-              key={option.id}
-              className="relative py-2 pr-9 pl-3 hover:text-white hover:bg-indigo-600 rounded-sm cursor-pointer select-none"
-              onClick={() => handleOptionClick(option)}
-            >
-              <div className="flex items-center">
-                {option.imageURL && (
-                  <img alt={option.displayName} className="mr-2 w-6 h-6 rounded-full" src={option.imageURL} />
-                )}
-                <span className="block font-normal truncate">{option.displayName}</span>
-              </div>
-            </li>
-          ))}
+          {options
+            .sort((a, b) => a.displayName.localeCompare(b.displayName))
+            .map((option) => (
+              <li
+                key={option.id}
+                className="relative py-2 pr-9 pl-3 hover:text-white hover:bg-indigo-600 rounded-sm cursor-pointer select-none"
+                onClick={() => handleOptionClick(option)}
+              >
+                <div className="flex items-center">
+                  {option.imageURL && (
+                    <img alt={option.displayName} className="mr-2 w-6 h-6 rounded-full" src={option.imageURL} />
+                  )}
+                  <span className="block font-normal truncate">{option.displayName}</span>
+                </div>
+              </li>
+            ))}
         </ul>
       )}
     </div>
