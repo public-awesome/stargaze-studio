@@ -9,7 +9,7 @@ import { useInputState, useNumberInputState } from 'components/forms/FormInput.h
 import { InputDateTime } from 'components/InputDateTime'
 import { openEditionMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
-import { stars, tokensList } from 'config/token'
+import { ibcAtom, tokensList } from 'config/token'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import React, { useEffect, useState } from 'react'
 import { resolveAddress } from 'utils/resolveAddress'
@@ -54,7 +54,7 @@ export const MintingDetails = ({
 
   const [timestamp, setTimestamp] = useState<Date | undefined>()
   const [endTimestamp, setEndTimestamp] = useState<Date | undefined>()
-  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(ibcAtom)
   const [mintingDetailsImported, setMintingDetailsImported] = useState(false)
   const [limitType, setLimitType] = useState<LimitType>('time_limited')
   const { timezone } = useGlobalSettings()

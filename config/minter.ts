@@ -22,7 +22,7 @@ import {
   OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
-  OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
+  // OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_TIA_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_TIA_FACTORY_FLEX_ADDRESS,
@@ -56,8 +56,8 @@ import {
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_FLEX_ADDRESS,
-  VENDING_IBC_KUJI_FACTORY_ADDRESS,
-  VENDING_IBC_KUJI_FACTORY_FLEX_ADDRESS,
+  // VENDING_IBC_KUJI_FACTORY_ADDRESS,
+  // VENDING_IBC_KUJI_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_NBTC_FACTORY_ADDRESS,
   VENDING_IBC_NBTC_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_NBTC_UPDATABLE_FACTORY_ADDRESS,
@@ -91,7 +91,7 @@ import {
   ibcCrbrus,
   ibcFrnz,
   // ibcHuahua,
-  ibcKuji,
+  // ibcKuji,
   ibcNbtc,
   ibcTia,
   ibcUsdc,
@@ -271,15 +271,15 @@ export const openEditionUpdatableIbcUskMinter: MinterInfo = {
   merkleTree: false,
 }
 
-export const openEditionIbcKujiMinter: MinterInfo = {
-  id: 'open-edition-ibc-kuji-minter',
-  factoryAddress: OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
-  supportedToken: ibcKuji,
-  updatable: false,
-  featured: false,
-  flexible: false,
-  merkleTree: false,
-}
+// export const openEditionIbcKujiMinter: MinterInfo = {
+//   id: 'open-edition-ibc-kuji-minter',
+//   factoryAddress: OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
+//   supportedToken: ibcKuji,
+//   updatable: false,
+//   featured: false,
+//   flexible: false,
+//   merkleTree: false,
+// }
 
 // export const openEditionIbcHuahuaMinter: MinterInfo = {
 //   id: 'open-edition-ibc-huahua-minter',
@@ -336,7 +336,7 @@ export const openEditionMinterList = [
   openEditionUpdatableIbcNbtcMinter,
   openEditionIbcUskMinter,
   openEditionUpdatableIbcUskMinter,
-  openEditionIbcKujiMinter,
+  // openEditionIbcKujiMinter,
   // openEditionIbcHuahuaMinter,
   openEditionIbcCrbrusMinter,
   openEditionNativeStrdstMinter,
@@ -594,15 +594,15 @@ export const vendingUpdatableIbcUskMinter: MinterInfo = {
   featured: false,
 }
 
-export const vendingIbcKujiMinter: MinterInfo = {
-  id: 'vending-ibc-kuji-minter',
-  factoryAddress: VENDING_IBC_KUJI_FACTORY_ADDRESS,
-  supportedToken: ibcKuji,
-  updatable: false,
-  flexible: false,
-  merkleTree: false,
-  featured: false,
-}
+// export const vendingIbcKujiMinter: MinterInfo = {
+//   id: 'vending-ibc-kuji-minter',
+//   factoryAddress: VENDING_IBC_KUJI_FACTORY_ADDRESS,
+//   supportedToken: ibcKuji,
+//   updatable: false,
+//   flexible: false,
+//   merkleTree: false,
+//   featured: false,
+// }
 
 // export const vendingIbcHuahuaMinter: MinterInfo = {
 //   id: 'vending-ibc-huahua-minter',
@@ -681,7 +681,7 @@ export const vendingMinterList = [
   vendingUpdatableIbcNbtcMinter,
   vendingIbcUskMinter,
   vendingUpdatableIbcUskMinter,
-  vendingIbcKujiMinter,
+  // vendingIbcKujiMinter,
   // vendingIbcHuahuaMinter,
   vendingIbcCrbrusMinter,
   vendingNativeStardustMinter,
@@ -850,15 +850,15 @@ export const flexibleVendingUpdatableIbcUskMinter: MinterInfo = {
   featured: false,
 }
 
-export const flexibleVendingIbcKujiMinter: MinterInfo = {
-  id: 'flexible-vending-ibc-kuji-minter',
-  factoryAddress: VENDING_IBC_KUJI_FACTORY_FLEX_ADDRESS,
-  supportedToken: ibcKuji,
-  updatable: false,
-  flexible: true,
-  merkleTree: false,
-  featured: false,
-}
+// export const flexibleVendingIbcKujiMinter: MinterInfo = {
+//   id: 'flexible-vending-ibc-kuji-minter',
+//   factoryAddress: VENDING_IBC_KUJI_FACTORY_FLEX_ADDRESS,
+//   supportedToken: ibcKuji,
+//   updatable: false,
+//   flexible: true,
+//   merkleTree: false,
+//   featured: false,
+// }
 
 // export const flexibleVendingIbcHuahuaMinter: MinterInfo = {
 //   id: 'flexible-vending-ibc-huahua-minter',
@@ -917,7 +917,7 @@ export const flexibleVendingMinterList = [
   flexibleVendingUpdatableIbcNbtcMinter,
   flexibleVendingIbcUskMinter,
   flexibleVendingUpdatableIbcUskMinter,
-  flexibleVendingIbcKujiMinter,
+  // flexibleVendingIbcKujiMinter,
   // flexibleVendingIbcHuahuaMinter,
   flexibleVendingIbcCrbrusMinter,
   flexibleVendingStrdstMinter,
