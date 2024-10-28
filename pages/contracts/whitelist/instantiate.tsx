@@ -149,7 +149,9 @@ const WhitelistInstantiatePage: NextPage = () => {
           contract.instantiate(
             whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
             whitelistType === 'standard' ? standardMsg : flexMsg,
-            whitelistType === 'standard' ? 'Stargaze Whitelist Contract' : 'Stargaze Whitelist Flex Contract',
+            whitelistType === 'standard'
+              ? 'Stargaze Tiered Whitelist Contract'
+              : 'Stargaze Tiered Whitelist Flex Contract',
             wallet.address,
           ),
           {

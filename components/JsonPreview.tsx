@@ -65,7 +65,7 @@ export const JsonPreview = ({
         )}
       </div>
       {show && (
-        <div className="overflow-auto p-2 font-mono text-sm">
+        <div className="overflow-auto p-2 mt-2 max-h-64 font-mono text-sm no-horizontal-scrollbar">
           <pre>{content ? JSON.stringify(content, null, 2).trim() : '{}'}</pre>
         </div>
       )}
