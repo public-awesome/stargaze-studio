@@ -1,6 +1,8 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
 import { toUtf8 } from '@cosmjs/encoding'
+import { coin } from '@cosmjs/proto-signing'
 import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
@@ -77,8 +79,8 @@ const WhitelistExecutePage: NextPage = () => {
     placeholder: '5',
   })
 
-  const showLimitState = isEitherType(type, ['update_per_address_limit', 'increase_member_limit'])
-  const showTimestamp = isEitherType(type, ['update_start_time', 'update_end_time'])
+  const showLimitState = isEitherType(type, ['increase_member_limit'])
+  const showTimestamp = isEitherType(type, ['update_stage_config'])
   const showMemberList = isEitherType(type, ['add_members', 'remove_members'])
   const showFlexMemberList = isEitherType(type, ['add_members'])
   const showRemoveMemberList = isEitherType(type, ['remove_members'])
@@ -89,8 +91,8 @@ const WhitelistExecutePage: NextPage = () => {
     contract: contractState.value,
     messages,
     type,
-    limit: limitState.value,
-    timestamp: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
+    memberLimit: limitState.value,
+    startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
     members:
       whitelistType === 'standard'
         ? [
@@ -136,6 +138,11 @@ const WhitelistExecutePage: NextPage = () => {
           .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
       ),
     ] || [wallet.address],
+    stageId: 0,
+    stageName: '',
+    endTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
+    perAddressLimit: limitState.value,
+    mintPrice: coin(0, 'ustars'),
   }
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
@@ -246,10 +253,8 @@ const WhitelistExecutePage: NextPage = () => {
             <FormControl
               htmlId="timestamp"
               isRequired
-              subtitle={`${type === 'update_start_time' ? 'Start' : 'End'} time for minting ${
-                timezone === 'Local' ? '(local)' : '(UTC)'
-              }`}
-              title={`${type === 'update_start_time' ? 'Start' : 'End'} Time`}
+              subtitle={`Start time for minting ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              title="Start Time"
             >
               <InputDateTime
                 minDate={
