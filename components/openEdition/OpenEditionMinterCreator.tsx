@@ -6,7 +6,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/proto-signing'
-import { coin } from '@cosmjs/proto-signing'
 import axios from 'axios'
 import clsx from 'clsx'
 import { Button } from 'components/Button'
@@ -418,45 +417,45 @@ export const OpenEditionMinterCreator = ({
         }
       }
     } else if (whitelistDetails.whitelistState === 'new') {
-      if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
-      if (whitelistDetails.unitPrice === undefined) throw new Error('Whitelist unit price is required')
-      if (Number(whitelistDetails.unitPrice) < 0)
-        throw new Error('Invalid unit price: The unit price cannot be negative')
-      if (whitelistDetails.startTime === '') throw new Error('Start time is required')
-      if (whitelistDetails.endTime === '') throw new Error('End time is required')
-      if (
-        whitelistDetails.whitelistType === 'standard' &&
-        (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
-      )
-        throw new Error('Per address limit is required')
-      if (
-        whitelistDetails.whitelistType !== 'merkletree' &&
-        whitelistDetails.whitelistType !== 'merkletree-flex' &&
-        (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
-      )
-        throw new Error('Member limit is required')
-      if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
-        throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
-      if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
-        throw new Error('Whitelist start time must be the same as the minting start time')
-      if (whitelistDetails.perAddressLimit && mintingDetails?.tokenCountLimit) {
-        if (mintingDetails.tokenCountLimit >= 100 && whitelistDetails.perAddressLimit > 50) {
-          throw Error(
-            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
-          )
-        } else if (
-          mintingDetails.tokenCountLimit >= 100 &&
-          whitelistDetails.perAddressLimit > Math.ceil((mintingDetails.tokenCountLimit / 100) * 3)
-        ) {
-          throw Error(
-            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
-          )
-        } else if (mintingDetails.tokenCountLimit < 100 && whitelistDetails.perAddressLimit > 3) {
-          throw Error(
-            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3 for collections with a token count limit smaller than 100 tokens.`,
-          )
-        }
-      }
+      // if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
+      // if (whitelistDetails.unitPrice === undefined) throw new Error('Whitelist unit price is required')
+      // if (Number(whitelistDetails.unitPrice) < 0)
+      //   throw new Error('Invalid unit price: The unit price cannot be negative')
+      // if (whitelistDetails.startTime === '') throw new Error('Start time is required')
+      // if (whitelistDetails.endTime === '') throw new Error('End time is required')
+      // if (
+      //   whitelistDetails.whitelistType === 'standard' &&
+      //   (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
+      // )
+      //   throw new Error('Per address limit is required')
+      // if (
+      //   whitelistDetails.whitelistType !== 'merkletree' &&
+      //   whitelistDetails.whitelistType !== 'merkletree-flex' &&
+      //   (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
+      // )
+      //   throw new Error('Member limit is required')
+      // if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
+      //   throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
+      // if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
+      //   throw new Error('Whitelist start time must be the same as the minting start time')
+      // if (whitelistDetails.perAddressLimit && mintingDetails?.tokenCountLimit) {
+      //   if (mintingDetails.tokenCountLimit >= 100 && whitelistDetails.perAddressLimit > 50) {
+      //     throw Error(
+      //       `Invalid limit for tokens per address. Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
+      //     )
+      //   } else if (
+      //     mintingDetails.tokenCountLimit >= 100 &&
+      //     whitelistDetails.perAddressLimit > Math.ceil((mintingDetails.tokenCountLimit / 100) * 3)
+      //   ) {
+      //     throw Error(
+      //       `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
+      //     )
+      //   } else if (mintingDetails.tokenCountLimit < 100 && whitelistDetails.perAddressLimit > 3) {
+      //     throw Error(
+      //       `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3 for collections with a token count limit smaller than 100 tokens.`,
+      //     )
+      //   }
+      // }
     }
   }
 
@@ -773,27 +772,27 @@ export const OpenEditionMinterCreator = ({
 
     if (whitelistDetails?.whitelistType === 'standard' || whitelistDetails?.whitelistType === 'flex') {
       const standardMsg = {
-        members: whitelistDetails.members,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
-        ),
-        per_address_limit: whitelistDetails.perAddressLimit,
+        members: whitelistDetails.members?.slice(0, whitelistDetails.stageCount),
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+          per_address_limit: stage.perAddressLimit,
+        })),
         member_limit: whitelistDetails.memberLimit,
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
       }
 
       const flexMsg = {
-        members: whitelistDetails.members,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
-        ),
+        members: whitelistDetails.members?.slice(0, whitelistDetails.stageCount),
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+        })),
         member_limit: whitelistDetails.memberLimit,
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
@@ -802,13 +801,13 @@ export const OpenEditionMinterCreator = ({
       const data = await whitelistContract.instantiate(
         whitelistDetails.whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
         whitelistDetails.whitelistType === 'standard' ? standardMsg : flexMsg,
-        'Stargaze Whitelist Contract',
+        'Stargaze Tiered Whitelist Contract',
         wallet.address,
       )
 
       return data.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree') {
-      const members = whitelistDetails.members as string[]
+      const members = whitelistDetails.members ? (whitelistDetails.members[0] as string[]) : []
       const membersCsv = members.join('\n')
       const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
       const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
@@ -838,13 +837,13 @@ export const OpenEditionMinterCreator = ({
       const merkleTreeMsg = {
         merkle_root: rootHash,
         merkle_tree_uri: null,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
-        ),
-        per_address_limit: whitelistDetails.perAddressLimit,
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+          per_address_limit: stage.perAddressLimit,
+        })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
       }
@@ -857,7 +856,7 @@ export const OpenEditionMinterCreator = ({
       )
       return data?.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree-flex') {
-      const members = whitelistDetails.members as WhitelistFlexMember[]
+      const members = whitelistDetails.members ? (whitelistDetails.members[0] as WhitelistFlexMember[]) : []
       const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
       const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
       const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
@@ -887,13 +886,12 @@ export const OpenEditionMinterCreator = ({
       const merkleTreeFlexMsg = {
         merkle_root: rootHash,
         merkle_tree_uri: null,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromFactory ? mintTokenFromFactory.denom : 'ustars',
-        ),
-        per_address_limit: whitelistDetails.perAddressLimit || 1,
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+        })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
       }
@@ -1216,7 +1214,7 @@ export const OpenEditionMinterCreator = ({
           mintTokenFromFactory={mintTokenFromFactory}
           onChange={setMintingDetails}
           uploadMethod={offChainMetadataUploadDetails?.uploadMethod as UploadMethod}
-          whitelistStartDate={whitelistDetails?.startTime}
+          whitelistStartDate={(whitelistDetails?.stages ? whitelistDetails.stages[0].startTime : '') as string}
         />
       </div>
 

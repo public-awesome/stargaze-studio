@@ -1,6 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-nested-ternary */
+import { coin } from '@cosmjs/proto-signing'
 import { Button } from 'components/Button'
 import { FormControl } from 'components/FormControl'
 import { FormGroup } from 'components/FormGroup'
@@ -12,6 +13,7 @@ import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import type { TokenInfo } from 'config/token'
 import { useGlobalSettings } from 'contexts/globalSettings'
+import type { Stage } from 'contracts/whitelist/messages/execute'
 import React, { useEffect, useState } from 'react'
 import { isValidAddress } from 'utils/isValidAddress'
 import { useWallet } from 'utils/wallet'
@@ -30,12 +32,10 @@ interface WhitelistDetailsProps {
 export interface WhitelistDetailsDataProps {
   whitelistState: WhitelistState
   whitelistType: WhitelistType
+  stageCount?: number
   contractAddress?: string
-  members?: string[] | WhitelistFlexMember[]
-  unitPrice?: string
-  startTime?: string
-  endTime?: string
-  perAddressLimit?: number
+  members?: string[][] | WhitelistFlexMember[][]
+  stages?: Stage[]
   memberLimit?: number
   admins?: string[]
   adminsMutable?: boolean
@@ -55,12 +55,40 @@ export const WhitelistDetails = ({
 
   const [whitelistState, setWhitelistState] = useState<WhitelistState>('none')
   const [whitelistType, setWhitelistType] = useState<WhitelistType>('standard')
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [whitelistStandardArray, setWhitelistStandardArray] = useState<string[]>([])
-  const [whitelistFlexArray, setWhitelistFlexArray] = useState<WhitelistFlexMember[]>([])
-  const [whitelistMerkleTreeArray, setWhitelistMerkleTreeArray] = useState<string[]>([])
-  const [whitelistMerkleTreeFlexArray, setWhitelistMerkleTreeFlexArray] = useState<WhitelistFlexMember[]>([])
+
+  const [stageCount, setStageCount] = useState<number>(1)
+
+  const [stageOneStartDate, setStageOneStartDate] = useState<Date | undefined>(undefined)
+  const [stageOneEndDate, setStageOneEndDate] = useState<Date | undefined>(undefined)
+
+  const [stageTwoStartDate, setStageTwoStartDate] = useState<Date | undefined>(undefined)
+  const [stageTwoEndDate, setStageTwoEndDate] = useState<Date | undefined>(undefined)
+
+  const [stageThreeStartDate, setStageThreeStartDate] = useState<Date | undefined>(undefined)
+  const [stageThreeEndDate, setStageThreeEndDate] = useState<Date | undefined>(undefined)
+
+  const [whitelistStandardStageOneArray, setWhitelistStandardStageOneArray] = useState<string[]>([])
+  const [whitelistStandardStageTwoArray, setWhitelistStandardStageTwoArray] = useState<string[]>([])
+  const [whitelistStandardStageThreeArray, setWhitelistStandardStageThreeArray] = useState<string[]>([])
+
+  const [whitelistFlexStageOneArray, setWhitelistFlexStageOneArray] = useState<WhitelistFlexMember[]>([])
+  const [whitelistFlexStageTwoArray, setWhitelistFlexStageTwoArray] = useState<WhitelistFlexMember[]>([])
+  const [whitelistFlexStageThreeArray, setWhitelistFlexStageThreeArray] = useState<WhitelistFlexMember[]>([])
+
+  const [whitelistMerkleTreeStageOneArray, setWhitelistMerkleTreeStageOneArray] = useState<string[]>([])
+  const [whitelistMerkleTreeStageTwoArray, setWhitelistMerkleTreeStageTwoArray] = useState<string[]>([])
+  const [whitelistMerkleTreeStageThreeArray, setWhitelistMerkleTreeStageThreeArray] = useState<string[]>([])
+
+  const [whitelistMerkleTreeFlexStageOneArray, setWhitelistMerkleTreeFlexStageOneArray] = useState<
+    WhitelistFlexMember[]
+  >([])
+  const [whitelistMerkleTreeFlexStageTwoArray, setWhitelistMerkleTreeFlexStageTwoArray] = useState<
+    WhitelistFlexMember[]
+  >([])
+  const [whitelistMerkleTreeFlexStageThreeArray, setWhitelistMerkleTreeFlexStageThreeArray] = useState<
+    WhitelistFlexMember[]
+  >([])
+
   const [adminsMutable, setAdminsMutable] = useState<boolean>(true)
 
   const whitelistAddressState = useInputState({
@@ -70,8 +98,28 @@ export const WhitelistDetails = ({
     defaultValue: '',
   })
 
-  const unitPriceState = useNumberInputState({
-    id: 'unit-price',
+  const stageOneUnitPriceState = useNumberInputState({
+    id: 'stage-one-unit-price',
+    name: 'unitPrice',
+    title: 'Unit Price',
+    subtitle: `Token price for whitelisted addresses \n (min. 0 ${
+      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
+    })`,
+    placeholder: '25',
+  })
+
+  const stageTwoUnitPriceState = useNumberInputState({
+    id: 'stage-two-unit-price',
+    name: 'unitPrice',
+    title: 'Unit Price',
+    subtitle: `Token price for whitelisted addresses \n (min. 0 ${
+      mintingTokenFromFactory ? mintingTokenFromFactory.displayName : 'STARS'
+    })`,
+    placeholder: '25',
+  })
+
+  const stageThreeUnitPriceState = useNumberInputState({
+    id: 'stage-three-unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
     subtitle: `Token price for whitelisted addresses \n (min. 0 ${
@@ -84,12 +132,26 @@ export const WhitelistDetails = ({
     id: 'member-limit',
     name: 'memberLimit',
     title: 'Member Limit',
-    subtitle: 'Maximum number of whitelisted addresses',
+    subtitle: 'Limited to 30k addresses in total',
     placeholder: '1000',
   })
 
-  const perAddressLimitState = useNumberInputState({
-    id: 'per-address-limit',
+  const stageOnePerAddressLimitState = useNumberInputState({
+    id: 'stage-one-per-address-limit',
+    name: 'perAddressLimit',
+    title: 'Per Address Limit',
+    subtitle: 'Maximum number of tokens per whitelisted address',
+    placeholder: '5',
+  })
+  const stageTwoPerAddressLimitState = useNumberInputState({
+    id: 'stage-one-per-address-limit',
+    name: 'perAddressLimit',
+    title: 'Per Address Limit',
+    subtitle: 'Maximum number of tokens per whitelisted address',
+    placeholder: '5',
+  })
+  const stageThreePerAddressLimitState = useNumberInputState({
+    id: 'stage-one-per-address-limit',
     name: 'perAddressLimit',
     title: 'Per Address Limit',
     subtitle: 'Maximum number of tokens per whitelisted address',
@@ -98,14 +160,34 @@ export const WhitelistDetails = ({
 
   const addressListState = useAddressListState()
 
-  const whitelistFileOnChange = (data: string[]) => {
-    if (whitelistType === 'standard') setWhitelistStandardArray(data)
-    if (whitelistType === 'merkletree') setWhitelistMerkleTreeArray(data)
+  const stageOneWhitelistFileOnChange = (data: string[]) => {
+    if (whitelistType === 'standard') setWhitelistStandardStageOneArray(data)
+    if (whitelistType === 'merkletree') setWhitelistMerkleTreeStageOneArray(data)
   }
 
-  const whitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
-    if (whitelistType === 'flex') setWhitelistFlexArray(whitelistData)
-    if (whitelistType === 'merkletree-flex') setWhitelistMerkleTreeFlexArray(whitelistData)
+  const stageOneWhitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
+    if (whitelistType === 'flex') setWhitelistFlexStageOneArray(whitelistData)
+    if (whitelistType === 'merkletree-flex') setWhitelistMerkleTreeFlexStageOneArray(whitelistData)
+  }
+
+  const stageTwoWhitelistFileOnChange = (data: string[]) => {
+    if (whitelistType === 'standard') setWhitelistStandardStageTwoArray(data)
+    if (whitelistType === 'merkletree') setWhitelistMerkleTreeStageTwoArray(data)
+  }
+
+  const stageTwoWhitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
+    if (whitelistType === 'flex') setWhitelistFlexStageTwoArray(whitelistData)
+    if (whitelistType === 'merkletree-flex') setWhitelistMerkleTreeFlexStageTwoArray(whitelistData)
+  }
+
+  const stageThreeWhitelistFileOnChange = (data: string[]) => {
+    if (whitelistType === 'standard') setWhitelistStandardStageThreeArray(data)
+    if (whitelistType === 'merkletree') setWhitelistMerkleTreeStageThreeArray(data)
+  }
+
+  const stageThreeWhitelistFlexFileOnChange = (whitelistData: WhitelistFlexMember[]) => {
+    if (whitelistType === 'flex') setWhitelistFlexStageThreeArray(whitelistData)
+    if (whitelistType === 'merkletree-flex') setWhitelistMerkleTreeFlexStageThreeArray(whitelistData)
   }
 
   const downloadSampleWhitelistFlexFile = () => {
@@ -130,19 +212,59 @@ export const WhitelistDetails = ({
     a.click()
   }
 
+  const addStage = () => {
+    setStageCount((count) => count + 1)
+  }
+
+  const removeStage = () => {
+    setStageCount((count) => count - 1)
+  }
+
   useEffect(() => {
     if (!importedWhitelistDetails) {
-      setWhitelistStandardArray([])
-      setWhitelistFlexArray([])
-      setWhitelistMerkleTreeArray([])
-      setWhitelistMerkleTreeFlexArray([])
+      setStageCount(1)
+
+      setWhitelistStandardStageOneArray([])
+      setWhitelistFlexStageOneArray([])
+      setWhitelistMerkleTreeStageOneArray([])
+      setWhitelistMerkleTreeFlexStageOneArray([])
+
+      setWhitelistStandardStageTwoArray([])
+      setWhitelistFlexStageTwoArray([])
+      setWhitelistMerkleTreeStageTwoArray([])
+      setWhitelistMerkleTreeFlexStageTwoArray([])
+
+      setWhitelistStandardStageThreeArray([])
+      setWhitelistFlexStageThreeArray([])
+      setWhitelistMerkleTreeStageThreeArray([])
+      setWhitelistMerkleTreeFlexStageThreeArray([])
     }
   }, [whitelistType])
+
+  useEffect(() => {
+    if (stageCount === 1) {
+      setWhitelistStandardStageTwoArray([])
+      setWhitelistFlexStageTwoArray([])
+      setWhitelistMerkleTreeStageTwoArray([])
+      setWhitelistMerkleTreeFlexStageTwoArray([])
+
+      setWhitelistStandardStageThreeArray([])
+      setWhitelistFlexStageThreeArray([])
+      setWhitelistMerkleTreeStageThreeArray([])
+      setWhitelistMerkleTreeFlexStageThreeArray([])
+    } else if (stageCount === 2) {
+      setWhitelistStandardStageThreeArray([])
+      setWhitelistFlexStageThreeArray([])
+      setWhitelistMerkleTreeStageThreeArray([])
+      setWhitelistMerkleTreeFlexStageThreeArray([])
+    }
+  }, [stageCount])
 
   useEffect(() => {
     const data: WhitelistDetailsDataProps = {
       whitelistState,
       whitelistType,
+      stageCount,
       contractAddress: whitelistAddressState.value
         .toLowerCase()
         .replace(/,/g, '')
@@ -151,20 +273,57 @@ export const WhitelistDetails = ({
         .replace(/ /g, ''),
       members:
         whitelistType === 'standard'
-          ? whitelistStandardArray
+          ? [whitelistStandardStageOneArray, whitelistStandardStageTwoArray, whitelistStandardStageThreeArray]
           : whitelistType === 'merkletree'
-          ? whitelistMerkleTreeArray
+          ? [whitelistMerkleTreeStageOneArray, whitelistMerkleTreeStageTwoArray, whitelistMerkleTreeStageThreeArray]
           : whitelistType === 'flex'
-          ? whitelistFlexArray
-          : whitelistMerkleTreeFlexArray,
-      unitPrice: unitPriceState.value
-        ? (Number(unitPriceState.value) * 1_000_000).toString()
-        : unitPriceState.value === 0
-        ? '0'
-        : undefined,
-      startTime: startDate ? (startDate.getTime() * 1_000_000).toString() : '',
-      endTime: endDate ? (endDate.getTime() * 1_000_000).toString() : '',
-      perAddressLimit: perAddressLimitState.value,
+          ? [whitelistFlexStageOneArray, whitelistFlexStageTwoArray, whitelistFlexStageThreeArray]
+          : [
+              whitelistMerkleTreeFlexStageOneArray,
+              whitelistMerkleTreeFlexStageTwoArray,
+              whitelistMerkleTreeFlexStageThreeArray,
+            ],
+      stages: [
+        {
+          startTime: stageOneStartDate ? (stageOneStartDate.getTime() * 1_000_000).toString() : '',
+          endTime: stageOneEndDate ? (stageOneEndDate.getTime() * 1_000_000).toString() : '',
+          perAddressLimit: stageOnePerAddressLimitState.value,
+          mintPrice: coin(
+            stageOneUnitPriceState.value
+              ? (Number(stageOneUnitPriceState.value) * 1_000_000).toString()
+              : stageOneUnitPriceState.value === 0
+              ? '0'
+              : '',
+            mintingTokenFromFactory?.denom || 'ustars',
+          ),
+        },
+        {
+          startTime: stageTwoStartDate ? (stageTwoStartDate.getTime() * 1_000_000).toString() : '',
+          endTime: stageTwoEndDate ? (stageTwoEndDate.getTime() * 1_000_000).toString() : '',
+          perAddressLimit: stageTwoPerAddressLimitState.value,
+          mintPrice: coin(
+            stageTwoUnitPriceState.value
+              ? (Number(stageTwoUnitPriceState.value) * 1_000_000).toString()
+              : stageTwoUnitPriceState.value === 0
+              ? '0'
+              : '',
+            mintingTokenFromFactory?.denom || 'ustars',
+          ),
+        },
+        {
+          startTime: stageThreeStartDate ? (stageThreeStartDate.getTime() * 1_000_000).toString() : '',
+          endTime: stageThreeEndDate ? (stageThreeEndDate.getTime() * 1_000_000).toString() : '',
+          perAddressLimit: stageThreePerAddressLimitState.value,
+          mintPrice: coin(
+            stageThreeUnitPriceState.value
+              ? (Number(stageThreeUnitPriceState.value) * 1_000_000).toString()
+              : stageThreeUnitPriceState.value === 0
+              ? '0'
+              : '',
+            mintingTokenFromFactory?.denom || 'ustars',
+          ),
+        },
+      ],
       memberLimit: memberLimitState.value,
       admins: [
         ...new Set(
@@ -179,80 +338,218 @@ export const WhitelistDetails = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     whitelistAddressState.value,
-    unitPriceState.value,
     memberLimitState.value,
-    perAddressLimitState.value,
-    startDate,
-    endDate,
-    whitelistStandardArray,
-    whitelistFlexArray,
-    whitelistMerkleTreeArray,
-    whitelistMerkleTreeFlexArray,
+    stageOneStartDate,
+    stageOneEndDate,
+    stageOneUnitPriceState.value,
+    stageOnePerAddressLimitState.value,
+    stageTwoStartDate,
+    stageTwoEndDate,
+    stageTwoUnitPriceState.value,
+    stageTwoPerAddressLimitState.value,
+    stageThreeStartDate,
+    stageThreeEndDate,
+    stageThreeUnitPriceState.value,
+    stageThreePerAddressLimitState.value,
+    whitelistStandardStageOneArray,
+    whitelistFlexStageOneArray,
+    whitelistMerkleTreeStageOneArray,
+    whitelistMerkleTreeFlexStageOneArray,
+    whitelistStandardStageTwoArray,
+    whitelistFlexStageTwoArray,
+    whitelistMerkleTreeStageTwoArray,
+    whitelistMerkleTreeFlexStageTwoArray,
+    whitelistStandardStageThreeArray,
+    whitelistFlexStageThreeArray,
+    whitelistMerkleTreeStageThreeArray,
+    whitelistMerkleTreeFlexStageThreeArray,
     whitelistState,
     whitelistType,
+    stageCount,
     addressListState.values,
     adminsMutable,
+    mintingTokenFromFactory,
   ])
+
+  useEffect(() => {
+    setStageTwoStartDate(stageOneEndDate)
+  }, [stageOneEndDate])
+
+  useEffect(() => {
+    setStageThreeStartDate(stageTwoEndDate)
+  }, [stageTwoEndDate])
 
   // make the necessary changes with respect to imported whitelist details
   useEffect(() => {
     if (importedWhitelistDetails) {
       setWhitelistState(importedWhitelistDetails.whitelistState)
       setWhitelistType(importedWhitelistDetails.whitelistType)
+      setStageCount(importedWhitelistDetails.stageCount ? importedWhitelistDetails.stageCount : 1)
+
       whitelistAddressState.onChange(
         importedWhitelistDetails.contractAddress ? importedWhitelistDetails.contractAddress : '',
       )
-      unitPriceState.onChange(
-        importedWhitelistDetails.unitPrice ? Number(importedWhitelistDetails.unitPrice) / 1000000 : 0,
+      stageOneUnitPriceState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 0
+          ? Number(importedWhitelistDetails.stages[0].mintPrice?.amount) / 1000000
+          : 0,
       )
+
+      stageTwoUnitPriceState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 1
+          ? Number(importedWhitelistDetails.stages[1].mintPrice?.amount) / 1000000
+          : 0,
+      )
+
+      stageThreeUnitPriceState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 2
+          ? Number(importedWhitelistDetails.stages[2].mintPrice?.amount) / 1000000
+          : 0,
+      )
+
       memberLimitState.onChange(importedWhitelistDetails.memberLimit ? importedWhitelistDetails.memberLimit : 0)
-      perAddressLimitState.onChange(
-        importedWhitelistDetails.perAddressLimit ? importedWhitelistDetails.perAddressLimit : 0,
+
+      stageOnePerAddressLimitState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 0
+          ? (importedWhitelistDetails.stages[0].perAddressLimit as number)
+          : 0,
       )
-      setStartDate(
-        importedWhitelistDetails.startTime
-          ? new Date(Number(importedWhitelistDetails.startTime) / 1_000_000)
+
+      stageTwoPerAddressLimitState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 1
+          ? (importedWhitelistDetails.stages[1].perAddressLimit as number)
+          : 0,
+      )
+
+      stageThreePerAddressLimitState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 2
+          ? (importedWhitelistDetails.stages[2].perAddressLimit as number)
+          : 0,
+      )
+
+      setStageOneStartDate(
+        importedWhitelistDetails.stages &&
+          importedWhitelistDetails.stages.length > 0 &&
+          importedWhitelistDetails.stages[0].startTime
+          ? new Date(Number(importedWhitelistDetails.stages[0].startTime) / 1_000_000)
           : undefined,
       )
-      setEndDate(
-        importedWhitelistDetails.endTime ? new Date(Number(importedWhitelistDetails.endTime) / 1_000_000) : undefined,
+      setStageOneEndDate(
+        importedWhitelistDetails.stages &&
+          importedWhitelistDetails.stages.length > 0 &&
+          importedWhitelistDetails.stages[0].endTime
+          ? new Date(Number(importedWhitelistDetails.stages[0].endTime) / 1_000_000)
+          : undefined,
       )
+
+      setStageTwoStartDate(
+        importedWhitelistDetails.stages &&
+          importedWhitelistDetails.stages.length > 1 &&
+          importedWhitelistDetails.stages[1].startTime
+          ? new Date(Number(importedWhitelistDetails.stages[1].startTime) / 1_000_000)
+          : undefined,
+      )
+      setStageTwoEndDate(
+        importedWhitelistDetails.stages &&
+          importedWhitelistDetails.stages.length > 1 &&
+          importedWhitelistDetails.stages[1].endTime
+          ? new Date(Number(importedWhitelistDetails.stages[1].endTime) / 1_000_000)
+          : undefined,
+      )
+
+      setStageThreeStartDate(
+        importedWhitelistDetails.stages &&
+          importedWhitelistDetails.stages.length > 2 &&
+          importedWhitelistDetails.stages[2].startTime
+          ? new Date(Number(importedWhitelistDetails.stages[2].startTime) / 1_000_000)
+          : undefined,
+      )
+      setStageThreeEndDate(
+        importedWhitelistDetails.stages &&
+          importedWhitelistDetails.stages.length > 2 &&
+          importedWhitelistDetails.stages[2].endTime
+          ? new Date(Number(importedWhitelistDetails.stages[2].endTime) / 1_000_000)
+          : undefined,
+      )
+
       setAdminsMutable(importedWhitelistDetails.adminsMutable ? importedWhitelistDetails.adminsMutable : true)
       importedWhitelistDetails.admins?.forEach((admin) => {
         addressListState.reset()
         addressListState.add({ address: admin })
       })
       if (importedWhitelistDetails.whitelistType === 'standard') {
-        setWhitelistStandardArray([])
-        importedWhitelistDetails.members?.forEach((member) => {
-          setWhitelistStandardArray((standardArray) => [...standardArray, member as string])
+        setWhitelistStandardStageOneArray([])
+        setWhitelistStandardStageTwoArray([])
+        setWhitelistStandardStageThreeArray([])
+
+        importedWhitelistDetails.members?.forEach((member, index) => {
+          if (index === 0) {
+            setWhitelistStandardStageOneArray(member as string[])
+          } else if (index === 1) {
+            setWhitelistStandardStageTwoArray(member as string[])
+          } else if (index === 2) {
+            setWhitelistStandardStageThreeArray(member as string[])
+          }
         })
       } else if (importedWhitelistDetails.whitelistType === 'merkletree') {
-        setWhitelistMerkleTreeArray([])
-        // importedWhitelistDetails.members?.forEach((member) => {
-        //   setWhitelistMerkleTreeArray((merkleTreeArray) => [...merkleTreeArray, member as string])
+        setWhitelistMerkleTreeStageOneArray([])
+        setWhitelistMerkleTreeStageTwoArray([])
+        setWhitelistMerkleTreeStageThreeArray([])
+
+        // importedWhitelistDetails.members?.forEach((member, index) => {
+        //   if (index === 0) {
+        //     setWhitelistMerkleTreeStageOneArray(member as string[])
+        //   } else if (index === 1) {
+        //     setWhitelistMerkleTreeStageTwoArray(member as string[])
+        //   } else if (index === 2) {
+        //     setWhitelistMerkleTreeStageThreeArray(member as string[])
+        //   }
         // })
       } else if (importedWhitelistDetails.whitelistType === 'flex') {
-        setWhitelistFlexArray([])
-        importedWhitelistDetails.members?.forEach((member) => {
-          setWhitelistFlexArray((flexArray) => [
-            ...flexArray,
-            {
-              address: (member as WhitelistFlexMember).address,
-              mint_count: (member as WhitelistFlexMember).mint_count,
-            },
-          ])
+        setWhitelistFlexStageOneArray([])
+        setWhitelistFlexStageTwoArray([])
+        setWhitelistFlexStageThreeArray([])
+        // importedWhitelistDetails.members?.forEach((member) => {
+        //   setWhitelistFlexArray((flexArray) => [
+        //     ...flexArray,
+        //     {
+        //       address: (member as WhitelistFlexMember).address,
+        //       mint_count: (member as WhitelistFlexMember).mint_count,
+        //     },
+        //   ])
+        // })
+
+        importedWhitelistDetails.members?.forEach((member, index) => {
+          if (index === 0) {
+            setWhitelistFlexStageOneArray(member as WhitelistFlexMember[])
+          } else if (index === 1) {
+            setWhitelistFlexStageTwoArray(member as WhitelistFlexMember[])
+          } else if (index === 2) {
+            setWhitelistFlexStageThreeArray(member as WhitelistFlexMember[])
+          }
         })
       } else if (importedWhitelistDetails.whitelistType === 'merkletree-flex') {
-        setWhitelistMerkleTreeFlexArray([])
-        importedWhitelistDetails.members?.forEach((member) => {
-          setWhitelistMerkleTreeFlexArray((flexArray) => [
-            ...flexArray,
-            {
-              address: (member as WhitelistFlexMember).address,
-              mint_count: (member as WhitelistFlexMember).mint_count,
-            },
-          ])
+        setWhitelistMerkleTreeFlexStageOneArray([])
+        setWhitelistMerkleTreeFlexStageTwoArray([])
+        setWhitelistMerkleTreeFlexStageThreeArray([])
+        // importedWhitelistDetails.members?.forEach((member) => {
+        //   setWhitelistMerkleTreeFlexArray((merkleTreeFlexArray) => [
+        //     ...merkleTreeFlexArray,
+        //     {
+        //       address: (member as WhitelistFlexMember).address,
+        //       mint_count: (member as WhitelistFlexMember).mint_count,
+        //     },
+        //   ])
+        // })
+
+        importedWhitelistDetails.members?.forEach((member, index) => {
+          if (index === 0) {
+            setWhitelistMerkleTreeFlexStageOneArray(member as WhitelistFlexMember[])
+          } else if (index === 1) {
+            setWhitelistMerkleTreeFlexStageTwoArray(member as WhitelistFlexMember[])
+          } else if (index === 2) {
+            setWhitelistMerkleTreeFlexStageThreeArray(member as WhitelistFlexMember[])
+          }
         })
       }
     }
@@ -414,167 +711,520 @@ export const WhitelistDetails = ({
             </label>
           </div>
         </div>
-        <div className="grid grid-cols-2">
-          <FormGroup subtitle="Information about your minting settings" title="Whitelist Minting Details">
-            <NumberInput isRequired {...unitPriceState} />
+        <div className="flex flex-col">
+          <div className="grid grid-cols-2">
             <Conditional test={whitelistType !== 'merkletree' && whitelistType !== 'merkletree-flex'}>
-              <NumberInput isRequired {...memberLimitState} />
-            </Conditional>
-            <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
-              <NumberInput isRequired {...perAddressLimitState} />
-            </Conditional>
-            <FormControl
-              htmlId="start-date"
-              isRequired
-              subtitle="Start time for minting tokens to whitelisted addresses"
-              title={`Whitelist Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
-            >
-              <InputDateTime
-                minDate={
-                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
-                }
-                onChange={(date) =>
-                  date
-                    ? setStartDate(
-                        timezone === 'Local'
-                          ? date
-                          : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                      )
-                    : setStartDate(undefined)
-                }
-                value={
-                  timezone === 'Local'
-                    ? startDate
-                    : startDate
-                    ? new Date(startDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
-                    : undefined
-                }
-              />
-            </FormControl>
-            <FormControl
-              htmlId="end-date"
-              isRequired
-              subtitle="Whitelist End Time dictates when public sales will start"
-              title={`Whitelist End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
-            >
-              <InputDateTime
-                minDate={
-                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
-                }
-                onChange={(date) =>
-                  date
-                    ? setEndDate(
-                        timezone === 'Local'
-                          ? date
-                          : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
-                      )
-                    : setEndDate(undefined)
-                }
-                value={
-                  timezone === 'Local'
-                    ? endDate
-                    : endDate
-                    ? new Date(endDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
-                    : undefined
-                }
-              />
-            </FormControl>
-          </FormGroup>
-          <div>
-            <div className="mt-2 ml-3 w-[65%] form-control">
-              <label className="justify-start cursor-pointer label">
-                <span className="mr-4 font-bold">Mutable Administrator Addresses</span>
-                <input
-                  checked={adminsMutable}
-                  className={`toggle ${adminsMutable ? `bg-stargaze` : `bg-gray-600`}`}
-                  onClick={() => setAdminsMutable(!adminsMutable)}
-                  type="checkbox"
-                />
-              </label>
-            </div>
-            <div className="my-4 ml-4">
-              <AddressList
-                entries={addressListState.entries}
-                onAdd={addressListState.add}
-                onChange={addressListState.update}
-                onRemove={addressListState.remove}
-                subtitle="The list of administrator addresses"
-                title="Administrator Addresses"
-              />
-            </div>
-            <Conditional test={whitelistType === 'standard'}>
-              <FormGroup
-                subtitle={
-                  <div>
-                    <span>TXT file that contains the whitelisted addresses</span>
-                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFile}>
-                      Download Sample File
-                    </Button>
-                  </div>
-                }
-                title="Whitelist File"
-              >
-                <WhitelistUpload onChange={whitelistFileOnChange} />
+              <FormGroup subtitle="Primary whitelist configuration" title="Whitelist Details">
+                <NumberInput isRequired {...memberLimitState} />
               </FormGroup>
-              <Conditional test={whitelistStandardArray.length > 0}>
-                <JsonPreview content={whitelistStandardArray} initialState title="File Contents" />
+            </Conditional>
+            <div>
+              <div className="mt-2 ml-3 w-[65%] form-control">
+                <label className="justify-start cursor-pointer label">
+                  <span className="mr-4 font-bold">Mutable Administrator Addresses</span>
+                  <input
+                    checked={adminsMutable}
+                    className={`toggle ${adminsMutable ? `bg-stargaze` : `bg-gray-600`}`}
+                    onClick={() => setAdminsMutable(!adminsMutable)}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+              <div className="my-4 ml-4">
+                <AddressList
+                  entries={addressListState.entries}
+                  onAdd={addressListState.add}
+                  onChange={addressListState.update}
+                  onRemove={addressListState.remove}
+                  subtitle="The list of administrator addresses"
+                  title="Administrator Addresses"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2">
+            <FormGroup subtitle="Information about your minting settings" title="Whitelist Stage I Minting Details">
+              <NumberInput isRequired {...stageOneUnitPriceState} />
+              <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
+                <NumberInput isRequired {...stageOnePerAddressLimitState} />
               </Conditional>
+              <FormControl
+                htmlId="start-date"
+                isRequired
+                subtitle="Start time for minting tokens for Stage I"
+                title={`Stage I Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              >
+                <InputDateTime
+                  minDate={
+                    timezone === 'Local'
+                      ? new Date()
+                      : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                  }
+                  onChange={(date) =>
+                    date
+                      ? setStageOneStartDate(
+                          timezone === 'Local'
+                            ? date
+                            : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                        )
+                      : setStageOneStartDate(undefined)
+                  }
+                  value={
+                    timezone === 'Local'
+                      ? stageOneStartDate
+                      : stageOneStartDate
+                      ? new Date(stageOneStartDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                      : undefined
+                  }
+                />
+              </FormControl>
+              <FormControl
+                htmlId="end-date"
+                isRequired
+                subtitle={`End time dictates when ${
+                  stageCount > 1 ? 'the next stage will start' : 'public sales will start'
+                }`}
+                title={`Stage I End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              >
+                <InputDateTime
+                  minDate={
+                    timezone === 'Local'
+                      ? new Date()
+                      : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                  }
+                  onChange={(date) =>
+                    date
+                      ? setStageOneEndDate(
+                          timezone === 'Local'
+                            ? date
+                            : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                        )
+                      : setStageOneEndDate(undefined)
+                  }
+                  value={
+                    timezone === 'Local'
+                      ? stageOneEndDate
+                      : stageOneEndDate
+                      ? new Date(stageOneEndDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                      : undefined
+                  }
+                />
+              </FormControl>
+            </FormGroup>
+
+            <Conditional test={whitelistType === 'standard'}>
+              <div className="flex flex-col">
+                <FormGroup
+                  subtitle={
+                    <div>
+                      <span>TXT file that contains the whitelisted addresses for Stage I</span>
+                      <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFile}>
+                        Download Sample File
+                      </Button>
+                    </div>
+                  }
+                  title="Whitelist File"
+                >
+                  <WhitelistUpload onChange={stageOneWhitelistFileOnChange} />
+                </FormGroup>
+                <Conditional test={whitelistStandardStageOneArray.length > 0}>
+                  <JsonPreview content={whitelistStandardStageOneArray} initialState title="File Contents" />
+                </Conditional>
+              </div>
             </Conditional>
             <Conditional test={whitelistType === 'flex'}>
-              <FormGroup
-                subtitle={
-                  <div>
-                    <span>CSV file that contains the whitelisted addresses and corresponding mint counts</span>
-                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
-                      Download Sample File
-                    </Button>
-                  </div>
-                }
-                title="Whitelist File"
-              >
-                <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
-              </FormGroup>
-              <Conditional test={whitelistFlexArray.length > 0}>
-                <JsonPreview content={whitelistFlexArray} initialState={false} title="File Contents" />
-              </Conditional>
+              <div className="flex flex-col">
+                <FormGroup
+                  subtitle={
+                    <div>
+                      <span>
+                        CSV file that contains the whitelisted addresses and corresponding mint counts for Stage I
+                      </span>
+                      <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
+                        Download Sample File
+                      </Button>
+                    </div>
+                  }
+                  title="Whitelist File"
+                >
+                  <WhitelistFlexUpload onChange={stageOneWhitelistFlexFileOnChange} />
+                </FormGroup>
+                <Conditional test={whitelistFlexStageOneArray.length > 0}>
+                  <JsonPreview content={whitelistFlexStageOneArray} initialState title="File Contents" />
+                </Conditional>
+              </div>
             </Conditional>
             <Conditional test={whitelistType === 'merkletree'}>
-              <FormGroup
-                subtitle={
-                  <div>
-                    <span>TXT file that contains the whitelisted addresses</span>
-                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFile}>
-                      Download Sample File
-                    </Button>
-                  </div>
-                }
-                title="Whitelist File"
-              >
-                <WhitelistUpload onChange={whitelistFileOnChange} />
-              </FormGroup>
-              <Conditional test={whitelistStandardArray.length > 0}>
-                <JsonPreview content={whitelistStandardArray} initialState title="File Contents" />
-              </Conditional>
+              <div className="flex flex-col">
+                <FormGroup
+                  subtitle={
+                    <div>
+                      <span>TXT file that contains the whitelisted addresses for Stage I</span>
+                      <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFile}>
+                        Download Sample File
+                      </Button>
+                    </div>
+                  }
+                  title="Whitelist File"
+                >
+                  <WhitelistUpload onChange={stageOneWhitelistFileOnChange} />
+                </FormGroup>
+                <Conditional test={whitelistStandardStageOneArray.length > 0}>
+                  <JsonPreview content={whitelistStandardStageOneArray} initialState title="File Contents" />
+                </Conditional>
+              </div>
             </Conditional>
             <Conditional test={whitelistType === 'merkletree-flex'}>
-              <FormGroup
-                subtitle={
-                  <div>
-                    <span>CSV file that contains the whitelisted addresses and corresponding mint counts</span>
-                    <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
-                      Download Sample File
-                    </Button>
-                  </div>
-                }
-                title="Whitelist File"
-              >
-                <WhitelistFlexUpload onChange={whitelistFlexFileOnChange} />
-              </FormGroup>
-              <Conditional test={whitelistMerkleTreeFlexArray.length > 0}>
-                <JsonPreview content={whitelistMerkleTreeFlexArray} initialState={false} title="File Contents" />
-              </Conditional>
+              <div className="flex flex-col">
+                <FormGroup
+                  subtitle={
+                    <div>
+                      <span>
+                        CSV file that contains the whitelisted addresses and corresponding mint counts for Stage I
+                      </span>
+                      <Button className="mt-2 text-sm text-white" onClick={downloadSampleWhitelistFlexFile}>
+                        Download Sample File
+                      </Button>
+                    </div>
+                  }
+                  title="Whitelist File"
+                >
+                  <WhitelistFlexUpload onChange={stageOneWhitelistFlexFileOnChange} />
+                </FormGroup>
+                <Conditional test={whitelistMerkleTreeFlexStageOneArray.length > 0}>
+                  <JsonPreview content={whitelistMerkleTreeFlexStageOneArray} initialState title="File Contents" />
+                </Conditional>
+              </div>
             </Conditional>
           </div>
+          <Conditional test={stageCount === 1}>
+            <div className="flex justify-end">
+              <Button className="my-2 mr-4 w-40 text-sm text-white" onClick={addStage}>
+                Add Whitelist Stage
+              </Button>
+            </div>
+          </Conditional>
+
+          <Conditional test={stageCount > 1}>
+            <div className="grid grid-cols-2 mt-4">
+              <FormGroup subtitle="Information about your minting settings" title="Whitelist Stage II Minting Details">
+                <NumberInput isRequired {...stageTwoUnitPriceState} />
+                <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
+                  <NumberInput isRequired {...stageTwoPerAddressLimitState} />
+                </Conditional>
+                <FormControl
+                  htmlId="start-date-2"
+                  isRequired
+                  subtitle="Start time for minting tokens for Stage II"
+                  title={`Stage II Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+                >
+                  <InputDateTime
+                    disabled
+                    minDate={
+                      timezone === 'Local'
+                        ? new Date()
+                        : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                    }
+                    onChange={(date) =>
+                      date
+                        ? setStageTwoStartDate(
+                            timezone === 'Local'
+                              ? date
+                              : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                          )
+                        : setStageTwoStartDate(undefined)
+                    }
+                    value={
+                      timezone === 'Local'
+                        ? stageOneEndDate
+                        : stageOneEndDate
+                        ? new Date(stageOneEndDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                        : undefined
+                    }
+                  />
+                </FormControl>
+                <FormControl
+                  htmlId="end-date-2"
+                  isRequired
+                  subtitle={`End time dictates when ${
+                    stageCount > 2 ? 'the next stage will start' : 'public sales will start'
+                  }`}
+                  title={`Stage II End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+                >
+                  <InputDateTime
+                    minDate={
+                      timezone === 'Local'
+                        ? new Date()
+                        : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                    }
+                    onChange={(date) =>
+                      date
+                        ? setStageTwoEndDate(
+                            timezone === 'Local'
+                              ? date
+                              : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                          )
+                        : setStageTwoEndDate(undefined)
+                    }
+                    value={
+                      timezone === 'Local'
+                        ? stageTwoEndDate
+                        : stageTwoEndDate
+                        ? new Date(stageTwoEndDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                        : undefined
+                    }
+                  />
+                </FormControl>
+              </FormGroup>
+              <div>
+                <Conditional test={whitelistType === 'standard'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>TXT file that contains the whitelisted addresses for Stage II</span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistUpload onChange={stageTwoWhitelistFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistStandardStageTwoArray.length > 0}>
+                      <JsonPreview content={whitelistStandardStageTwoArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+                <Conditional test={whitelistType === 'flex'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>
+                            CSV file that contains the whitelisted addresses and corresponding mint counts for Stage II
+                          </span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistFlexUpload onChange={stageTwoWhitelistFlexFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistFlexStageTwoArray.length > 0}>
+                      <JsonPreview content={whitelistFlexStageTwoArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+                <Conditional test={whitelistType === 'merkletree'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>TXT file that contains the whitelisted addresses for Stage II</span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistUpload onChange={stageTwoWhitelistFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistStandardStageTwoArray.length > 0}>
+                      <JsonPreview content={whitelistStandardStageTwoArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+                <Conditional test={whitelistType === 'merkletree-flex'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>
+                            CSV file that contains the whitelisted addresses and corresponding mint counts for Stage II
+                          </span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistFlexUpload onChange={stageTwoWhitelistFlexFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistMerkleTreeFlexStageTwoArray.length > 0}>
+                      <JsonPreview content={whitelistMerkleTreeFlexStageTwoArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+              </div>
+            </div>
+            <Conditional test={stageCount === 2}>
+              <div className="flex justify-end">
+                <Button
+                  className="my-2 mr-2 text-sm text-white bg-blue-500 hover:bg-blue-600 w-50"
+                  onClick={removeStage}
+                >
+                  Remove Whitelist Stage
+                </Button>
+                <Button className="my-2 mr-4 w-40 text-sm text-white" onClick={addStage}>
+                  Add Whitelist Stage
+                </Button>
+              </div>
+            </Conditional>
+          </Conditional>
+
+          <Conditional test={stageCount > 2}>
+            <div className="grid grid-cols-2 mt-4">
+              <FormGroup subtitle="Information about your minting settings" title="Whitelist Stage III Minting Details">
+                <NumberInput isRequired {...stageThreeUnitPriceState} />
+                <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
+                  <NumberInput isRequired {...stageThreePerAddressLimitState} />
+                </Conditional>
+                <FormControl
+                  htmlId="start-date-3"
+                  isRequired
+                  subtitle="Start time for minting tokens for Stage III"
+                  title={`Stage III Start Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+                >
+                  <InputDateTime
+                    disabled
+                    minDate={
+                      timezone === 'Local'
+                        ? new Date()
+                        : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                    }
+                    onChange={(date) =>
+                      date
+                        ? setStageThreeStartDate(
+                            timezone === 'Local'
+                              ? date
+                              : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                          )
+                        : setStageThreeStartDate(undefined)
+                    }
+                    value={
+                      timezone === 'Local'
+                        ? stageTwoEndDate
+                        : stageTwoEndDate
+                        ? new Date(stageTwoEndDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                        : undefined
+                    }
+                  />
+                </FormControl>
+                <FormControl
+                  htmlId="end-date"
+                  isRequired
+                  subtitle="End time dictates when public sales will start"
+                  title={`Stage III End Time ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+                >
+                  <InputDateTime
+                    minDate={
+                      timezone === 'Local'
+                        ? new Date()
+                        : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                    }
+                    onChange={(date) =>
+                      date
+                        ? setStageThreeEndDate(
+                            timezone === 'Local'
+                              ? date
+                              : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                          )
+                        : setStageThreeEndDate(undefined)
+                    }
+                    value={
+                      timezone === 'Local'
+                        ? stageThreeEndDate
+                        : stageThreeEndDate
+                        ? new Date(stageThreeEndDate.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                        : undefined
+                    }
+                  />
+                </FormControl>
+              </FormGroup>
+              <div>
+                <Conditional test={whitelistType === 'standard'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>TXT file that contains the whitelisted addresses for Stage III</span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistUpload onChange={stageThreeWhitelistFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistStandardStageThreeArray.length > 0}>
+                      <JsonPreview content={whitelistStandardStageThreeArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+                <Conditional test={whitelistType === 'flex'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>
+                            CSV file that contains the whitelisted addresses and corresponding mint counts for Stage III
+                          </span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistFlexUpload onChange={stageThreeWhitelistFlexFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistFlexStageThreeArray.length > 0}>
+                      <JsonPreview content={whitelistFlexStageThreeArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+                <Conditional test={whitelistType === 'merkletree'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>TXT file that contains the whitelisted addresses for Stage III</span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistUpload onChange={stageThreeWhitelistFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistStandardStageThreeArray.length > 0}>
+                      <JsonPreview content={whitelistStandardStageThreeArray} initialState title="File Contents" />
+                    </Conditional>
+                  </div>
+                </Conditional>
+                <Conditional test={whitelistType === 'merkletree-flex'}>
+                  <div className="flex flex-col">
+                    <FormGroup
+                      subtitle={
+                        <div>
+                          <span>
+                            CSV file that contains the whitelisted addresses and corresponding mint counts for Stage III
+                          </span>
+                        </div>
+                      }
+                      title="Whitelist File"
+                    >
+                      <WhitelistFlexUpload onChange={stageThreeWhitelistFlexFileOnChange} />
+                    </FormGroup>
+                    <Conditional test={whitelistMerkleTreeFlexStageThreeArray.length > 0}>
+                      <JsonPreview
+                        content={whitelistMerkleTreeFlexStageThreeArray}
+                        initialState
+                        title="File Contents"
+                      />
+                    </Conditional>
+                  </div>
+                </Conditional>
+              </div>
+            </div>
+            <Conditional test={stageCount === 3}>
+              <div className="flex justify-end">
+                <Button
+                  className="my-2 mr-4 text-sm text-white bg-blue-500 hover:bg-blue-600 w-50"
+                  onClick={removeStage}
+                >
+                  Remove Whitelist Stage
+                </Button>
+              </div>
+            </Conditional>
+          </Conditional>
         </div>
       </Conditional>
     </div>
