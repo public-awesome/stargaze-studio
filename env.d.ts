@@ -126,6 +126,7 @@ declare namespace NodeJS {
     readonly NEXT_PUBLIC_SG721_NAME_ADDRESS: string
     readonly NEXT_PUBLIC_ROYALTY_REGISTRY_ADDRESS: string
     readonly NEXT_PUBLIC_INFINITY_SWAP_PROTOCOL_ADDRESS: string
+    readonly NEXT_PUBLIC_MARKETPLACE_V2_CONTRACT_ADDRESS: string
     readonly NEXT_PUBLIC_BASE_MINTER_CODE_ID: string
     readonly NEXT_PUBLIC_BADGE_HUB_CODE_ID: string
     readonly NEXT_PUBLIC_BADGE_HUB_ADDRESS: string

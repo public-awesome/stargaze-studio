@@ -18,13 +18,13 @@ export const QUERY_LIST: QueryListItem[] = [
   { id: 'config', name: 'Query Config', description: 'View the contract config' },
   {
     id: 'collection_royalty_default',
-    name: 'Query Collection Royalty Details',
-    description: 'View the collection royalty details',
+    name: 'Query Default Collection Royalty Details',
+    description: 'View the default collection royalty details',
   },
   {
     id: 'collection_royalty_protocol',
-    name: 'Query Collection Royalty Protocol',
-    description: 'View the collection royalty protocol',
+    name: 'Query Collection Royalty for a Protocol',
+    description: 'View the collection royalty for a specific protocol',
   },
   {
     id: 'royalty_payment',

@@ -22,12 +22,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { FaArrowRight } from 'react-icons/fa'
 import { useMutation } from 'react-query'
-import { INFINITY_SWAP_PROTOCOL_ADDRESS, ROYALTY_REGISTRY_ADDRESS } from 'utils/constants'
+import {
+  INFINITY_SWAP_PROTOCOL_ADDRESS,
+  MARKETPLACE_V2_CONTRACT_ADDRESS,
+  ROYALTY_REGISTRY_ADDRESS,
+} from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 import { links } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
-export const protocolList = [{ name: 'Infinity Swap', address: INFINITY_SWAP_PROTOCOL_ADDRESS }]
+export const protocolList = [
+  { name: 'Infinity Swap', address: INFINITY_SWAP_PROTOCOL_ADDRESS },
+  { name: 'Marketplace v2', address: MARKETPLACE_V2_CONTRACT_ADDRESS },
+]
 
 const RoyaltyRegistryExecutePage: NextPage = () => {
   const { royaltyRegistry: contract } = useContracts()
@@ -118,11 +125,15 @@ const RoyaltyRegistryExecutePage: NextPage = () => {
       if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
-      const txHash = await toast.promise(dispatchExecute(payload), {
-        error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
-        loading: 'Executing message...',
-        success: (tx) => `Transaction ${tx} success!`,
-      })
+      const txHash = await toast.promise(
+        dispatchExecute(payload),
+        {
+          error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
+          loading: 'Executing message...',
+          success: (tx) => `Transaction ${tx} success!`,
+        },
+        { style: { maxWidth: 'none' } },
+      )
       if (txHash) {
         setLastTx(txHash)
       }
