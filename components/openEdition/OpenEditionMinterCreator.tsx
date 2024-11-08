@@ -807,36 +807,44 @@ export const OpenEditionMinterCreator = ({
 
       return data.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree') {
-      const members = whitelistDetails.members ? (whitelistDetails.members[0] as string[]) : []
-      const membersCsv = members.join('\n')
-      const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
-      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
-      const formData = new FormData()
-      formData.append('whitelist', membersFile)
-      const response = await toast
-        .promise(
-          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }),
-          {
-            loading: 'Fetching merkle root hash...',
-            success: 'Merkle root fetched successfully.',
-            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
-          },
-        )
-        .catch((error) => {
-          console.log('error', error)
-          throw new Error('Whitelist instantiation failed.')
-        })
+      const rootHashes = await Promise.all(
+        (whitelistDetails.members || []).map(async (memberList, index) => {
+          const members = memberList as string[]
+          const membersCsv = members.join('\n')
+          const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
+          const membersFile = new File([membersBlob], `members_${index}.csv`, { type: 'text/csv' })
 
-      const rootHash = response.data.root_hash
-      console.log('rootHash', rootHash)
+          const formData = new FormData()
+          formData.append('whitelist', membersFile)
+          formData.append('stage_id', index.toString())
+
+          const response = await toast
+            .promise(
+              axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              }),
+              {
+                loading: `Fetching merkle root hash for WL Stage ${index + 1}...`,
+                success: `Merkle root hash for WL Stage ${index + 1} fetched successfully.`,
+                error: `Error fetching root hash from Whitelist Merkle Tree API for Stage ${index + 1}.`,
+              },
+            )
+            .catch((error) => {
+              console.error('error', error)
+              throw new Error('Whitelist instantiation failed.')
+            })
+          console.log(`Stage ${index + 1} root hash: `, response.data.root_hash)
+          return response.data.root_hash
+        }),
+      )
+
+      console.log('rootHashes: ', rootHashes)
 
       const merkleTreeMsg = {
-        merkle_root: rootHash,
-        merkle_tree_uri: null,
+        merkle_roots: rootHashes,
+        merkle_tree_uris: null,
         stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
           name: stage.name || `Stage ${index + 1}`,
           start_time: stage.startTime,
@@ -856,36 +864,46 @@ export const OpenEditionMinterCreator = ({
       )
       return data?.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree-flex') {
-      const members = whitelistDetails.members ? (whitelistDetails.members[0] as WhitelistFlexMember[]) : []
-      const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
-      const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
-      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
-      const formData = new FormData()
-      formData.append('whitelist', membersFile)
-      const response = await toast
-        .promise(
-          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }),
-          {
-            loading: 'Fetching merkle root hash...',
-            success: 'Merkle root fetched successfully.',
-            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
-          },
-        )
-        .catch((error) => {
-          console.log('error', error)
-          throw new Error('Whitelist instantiation failed.')
-        })
+      const rootHashes = await Promise.all(
+        (whitelistDetails.members || []).map(async (memberList, index) => {
+          const members = memberList as WhitelistFlexMember[]
 
-      const rootHash = response.data.root_hash
-      console.log('rootHash', rootHash)
+          const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
+
+          const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
+          const membersFile = new File([membersBlob], `members_${index}.csv`, { type: 'text/csv' })
+
+          const formData = new FormData()
+          formData.append('whitelist', membersFile)
+          formData.append('stage_id', index.toString())
+
+          const response = await toast
+            .promise(
+              axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              }),
+              {
+                loading: `Fetching merkle root hash for WL Stage ${index + 1}...`,
+                success: `Merkle root hash for WL Stage ${index + 1} fetched successfully.`,
+                error: `Error fetching root hash from Whitelist Merkle Tree API for Stage ${index + 1}.`,
+              },
+            )
+            .catch((error) => {
+              console.error('error', error)
+              throw new Error('Whitelist instantiation failed.')
+            })
+          console.log(`Stage ${index + 1} root hash: `, response.data.root_hash)
+          return response.data.root_hash
+        }),
+      )
+
+      console.log('Root hashes:', rootHashes)
 
       const merkleTreeFlexMsg = {
-        merkle_root: rootHash,
-        merkle_tree_uri: null,
+        merkle_roots: rootHashes,
+        merkle_tree_uris: null,
         stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
           name: stage.name || `Stage ${index + 1}`,
           start_time: stage.startTime,
