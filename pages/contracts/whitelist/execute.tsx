@@ -9,12 +9,13 @@ import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { ExecuteCombobox } from 'components/contracts/whitelist/ExecuteCombobox'
 import { useExecuteComboboxState } from 'components/contracts/whitelist/ExecuteCombobox.hooks'
+import CustomTokenSelect from 'components/CustomTokenSelect'
 import { FormControl } from 'components/FormControl'
 import { AddressList } from 'components/forms/AddressList'
 import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { FlexMemberAttributes } from 'components/forms/FlexMemberAttributes'
 import { useFlexMemberAttributesState } from 'components/forms/FlexMemberAttributes.hooks'
-import { AddressInput, NumberInput } from 'components/forms/FormInput'
+import { AddressInput, NumberInput, TextInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
@@ -24,6 +25,9 @@ import { TransactionHash } from 'components/TransactionHash'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
+import { vendingMinterList } from 'config/minter'
+import type { TokenInfo } from 'config/token'
+import { stars } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { DispatchExecuteArgs } from 'contracts/whitelist/messages/execute'
@@ -55,7 +59,8 @@ const WhitelistExecutePage: NextPage = () => {
   const comboboxState = useExecuteComboboxState()
   const type = comboboxState.value?.id
 
-  const [timestamp, setTimestamp] = useState<Date | undefined>()
+  const [startTime, setStartTime] = useState<Date | undefined>()
+  const [endTime, setEndTime] = useState<Date | undefined>()
 
   const addressListState = useAddressListState()
 
@@ -71,28 +76,64 @@ const WhitelistExecutePage: NextPage = () => {
 
   const debouncedWhitelistContractState = useDebounce(contractState.value, 300)
 
-  const limitState = useNumberInputState({
-    id: 'limit',
-    name: 'limit',
-    title: 'Limit',
-    subtitle: 'Limit value',
+  const memberLimitState = useNumberInputState({
+    id: 'member-limit',
+    name: 'member-limit',
+    title: 'Member Limit',
+    subtitle: 'Member limit value',
+    placeholder: '1000',
+  })
+
+  const perAddressLimitState = useNumberInputState({
+    id: 'per-address-limit',
+    name: 'per-address-limit',
+    title: 'Per Address Limit',
     placeholder: '5',
   })
 
-  const showLimitState = isEitherType(type, ['increase_member_limit'])
-  const showTimestamp = isEitherType(type, ['update_stage_config'])
-  const showMemberList = isEitherType(type, ['add_members', 'remove_members'])
+  const stageIdState = useNumberInputState({
+    id: 'stage-id',
+    name: 'stage-id',
+    title: 'Stage Number',
+    placeholder: '1',
+    defaultValue: 1,
+  })
+
+  const stageNameState = useInputState({
+    id: 'stage-name',
+    name: 'stage-name',
+    title: 'Stage Name',
+    placeholder: 'Stage I',
+  })
+
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
+
+  const unitPriceState = useNumberInputState({
+    id: 'unit-price',
+    name: 'unitPrice',
+    title: 'Unit Price',
+    subtitle: 'Mint price per token',
+    placeholder: '500',
+  })
+
+  const showMemberLimitState = isEitherType(type, ['increase_member_limit'])
+  const showPerAddressLimitState = isEitherType(type, ['update_stage_config', 'add_stage'])
+  const showTimestamp = isEitherType(type, ['update_stage_config', 'add_stage'])
+  const showMemberList = isEitherType(type, ['add_members', 'remove_members', 'add_stage'])
   const showFlexMemberList = isEitherType(type, ['add_members'])
   const showRemoveMemberList = isEitherType(type, ['remove_members'])
   const showAdminList = isEitherType(type, ['update_admins'])
+  const showStageId = isEitherType(type, ['update_stage_config', 'remove_stage', 'add_members', 'remove_members'])
+  const showStageName = isEitherType(type, ['add_stage', 'update_stage_config'])
+  const showMintPrice = isEitherType(type, ['add_stage', 'update_stage_config'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, contractState.value])
   const payload: DispatchExecuteArgs = {
     contract: contractState.value,
     messages,
     type,
-    memberLimit: limitState.value,
-    startTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
+    memberLimit: memberLimitState.value,
+    startTime: startTime ? (startTime?.getTime() * 1_000_000).toString() : undefined,
     members:
       whitelistType === 'standard'
         ? [
@@ -131,18 +172,23 @@ const WhitelistExecutePage: NextPage = () => {
                 .concat(memberList),
             ),
           ],
-    admins: [
-      ...new Set(
-        addressListState.values
-          .map((a) => a.address.trim())
-          .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
-      ),
-    ] || [wallet.address],
-    stageId: 0,
-    stageName: '',
-    endTime: timestamp ? (timestamp.getTime() * 1_000_000).toString() : '',
-    perAddressLimit: limitState.value,
-    mintPrice: coin(0, 'ustars'),
+    admins:
+      addressListState.values.length > 0
+        ? [
+            ...new Set(
+              addressListState.values
+                .map((a) => a.address.trim())
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
+            ),
+          ]
+        : [wallet.address ?? ''],
+    stageId: stageIdState.value - 1,
+    stageName: stageNameState.value || undefined,
+    endTime: endTime ? (endTime?.getTime() * 1_000_000).toString() : undefined,
+    perAddressLimit: perAddressLimitState.value || undefined,
+    mintPrice: unitPriceState.value
+      ? coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars')
+      : undefined,
   }
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
@@ -153,11 +199,15 @@ const WhitelistExecutePage: NextPage = () => {
       if (!wallet.isWalletConnected) {
         throw new Error('Please connect your wallet.')
       }
-      const txHash = await toast.promise(dispatchExecute(payload), {
-        error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
-        loading: 'Executing message...',
-        success: (tx) => `Transaction ${tx} success!`,
-      })
+      const txHash = await toast.promise(
+        dispatchExecute(payload),
+        {
+          error: `${type.charAt(0).toUpperCase() + type.slice(1)} execute failed!`,
+          loading: 'Executing message...',
+          success: (tx) => `Transaction ${tx} success!`,
+        },
+        { style: { maxWidth: 'none' } },
+      )
       if (txHash) {
         setLastTx(txHash)
       }
@@ -246,14 +296,46 @@ const WhitelistExecutePage: NextPage = () => {
         <div className="space-y-8">
           <AddressInput {...contractState} />
           <ExecuteCombobox whitelistType={whitelistType} {...comboboxState} />
-          <Conditional test={showLimitState}>
-            <NumberInput {...limitState} />
+          <Conditional test={showStageId}>
+            <NumberInput className="w-1/4" {...stageIdState} />
           </Conditional>
+          <div className="flex flex-row items-end w-full">
+            <Conditional test={showStageName}>
+              <TextInput className="mr-2 w-3/4" {...stageNameState} />
+            </Conditional>
+            <Conditional test={showPerAddressLimitState}>
+              <NumberInput className="w-1/4" {...perAddressLimitState} />
+            </Conditional>
+          </div>
+          <Conditional test={showMintPrice}>
+            <div className="flex flex-row items-end pr-2 w-3/4">
+              <NumberInput {...unitPriceState} isRequired />
+              <CustomTokenSelect
+                onOptionChange={setSelectedMintToken}
+                options={vendingMinterList
+                  .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+                  .map((minter) => minter.supportedToken)
+                  .reduce((uniqueTokens: TokenInfo[], token: TokenInfo) => {
+                    if (!uniqueTokens.includes(token)) {
+                      uniqueTokens.push(token)
+                    }
+                    return uniqueTokens
+                  }, [])}
+                selectedOption={selectedMintToken}
+              />
+            </div>
+          </Conditional>
+
+          <Conditional test={showMemberLimitState}>
+            <NumberInput {...memberLimitState} />
+          </Conditional>
+
           <Conditional test={showTimestamp}>
             <FormControl
+              className="w-3/4"
               htmlId="timestamp"
               isRequired
-              subtitle={`Start time for minting ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              subtitle={`Start time for stage ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
               title="Start Time"
             >
               <InputDateTime
@@ -261,15 +343,50 @@ const WhitelistExecutePage: NextPage = () => {
                   timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
                 }
                 onChange={(date) =>
-                  setTimestamp(
-                    timezone === 'Local' ? date : new Date(date.getTime() - new Date().getTimezoneOffset() * 60 * 1000),
+                  setStartTime(
+                    timezone === 'Local'
+                      ? date
+                      : date
+                      ? new Date(date?.getTime() - new Date().getTimezoneOffset() * 60 * 1000)
+                      : undefined,
                   )
                 }
                 value={
                   timezone === 'Local'
-                    ? timestamp
-                    : timestamp
-                    ? new Date(timestamp.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    ? startTime
+                    : startTime
+                    ? new Date(startTime?.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
+                    : undefined
+                }
+              />
+            </FormControl>
+          </Conditional>
+          <Conditional test={showTimestamp}>
+            <FormControl
+              className="w-3/4"
+              htmlId="timestamp"
+              isRequired
+              subtitle={`End time for stage ${timezone === 'Local' ? '(local)' : '(UTC)'}`}
+              title="End Time"
+            >
+              <InputDateTime
+                minDate={
+                  timezone === 'Local' ? new Date() : new Date(Date.now() + new Date().getTimezoneOffset() * 60 * 1000)
+                }
+                onChange={(date) =>
+                  setEndTime(
+                    timezone === 'Local'
+                      ? date
+                      : date
+                      ? new Date(date?.getTime() - new Date().getTimezoneOffset() * 60 * 1000)
+                      : undefined,
+                  )
+                }
+                value={
+                  timezone === 'Local'
+                    ? endTime
+                    : endTime
+                    ? new Date(endTime.getTime() + new Date().getTimezoneOffset() * 60 * 1000)
                     : undefined
                 }
               />
@@ -324,7 +441,7 @@ const WhitelistExecutePage: NextPage = () => {
             </FormControl>
           </div>
           <FormControl subtitle="View current message to be sent" title="Payload Preview">
-            <JsonPreview content={previewExecutePayload(payload)} isCopyable />
+            <JsonPreview content={previewExecutePayload(payload)} isCopyable noHeightLimit />
           </FormControl>
         </div>
       </form>

@@ -84,15 +84,15 @@ export interface DispatchExecuteArgs {
   contract: string
   messages?: WhiteListInstance
   type: string | undefined
-  startTime: string
-  endTime: string
+  startTime?: string
+  endTime?: string
   members: string[] | WhitelistFlexMember[]
   memberLimit: number
-  perAddressLimit: number
+  perAddressLimit?: number
   admins: string[]
   stageId: number
-  stageName: string
-  mintPrice: Coin
+  stageName?: string
+  mintPrice?: Coin
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -127,7 +127,14 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       )
     }
     case 'add_stage': {
-      return messages.addStage(args.stageName, args.startTime, args.endTime, args.perAddressLimit, args.mintPrice)
+      return messages.addStage(
+        args.stageName as string,
+        args.startTime as string,
+        args.endTime as string,
+        args.perAddressLimit as number,
+        args.mintPrice as Coin,
+        args.members as string[],
+      )
     }
     case 'remove_stage': {
       return messages.removeStage(args.stageId)
@@ -170,11 +177,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
     }
     case 'add_stage': {
       return messages(contract)?.addStage(
-        args.stageName,
-        args.startTime,
-        args.endTime,
-        args.perAddressLimit,
-        args.mintPrice,
+        args.stageName as string,
+        args.startTime as string,
+        args.endTime as string,
+        args.perAddressLimit as number,
+        args.mintPrice as Coin,
+        args.members as string[],
       )
     }
     case 'remove_stage': {

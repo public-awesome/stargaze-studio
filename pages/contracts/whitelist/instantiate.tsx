@@ -117,13 +117,18 @@ const WhitelistInstantiatePage: NextPage = () => {
         mint_price: coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars'),
         per_address_limit: perAddressLimitState.value,
         member_limit: memberLimitState.value,
-        admins: [
-          ...new Set(
-            addressListState.values
-              .map((a) => a.address.trim())
-              .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
-          ),
-        ] || [wallet.address],
+        admins:
+          addressListState.values.length > 0
+            ? [
+                ...new Set(
+                  addressListState.values
+                    .map((a) => a.address.trim())
+                    .filter(
+                      (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                    ),
+                ),
+              ]
+            : [wallet.address ?? ''],
         admins_mutable: adminsMutable,
       }
 
@@ -134,13 +139,18 @@ const WhitelistInstantiatePage: NextPage = () => {
         mint_price: coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars'),
         whale_cap: whaleCapState.value || undefined,
         member_limit: memberLimitState.value,
-        admins: [
-          ...new Set(
-            addressListState.values
-              .map((a) => a.address.trim())
-              .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
-          ),
-        ] || [wallet.address],
+        admins:
+          addressListState.values.length > 0
+            ? [
+                ...new Set(
+                  addressListState.values
+                    .map((a) => a.address.trim())
+                    .filter(
+                      (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                    ),
+                ),
+              ]
+            : [wallet.address ?? ''],
         admins_mutable: adminsMutable,
       }
 
@@ -195,13 +205,18 @@ const WhitelistInstantiatePage: NextPage = () => {
           end_time: (endDate.getTime() * 1_000_000).toString(),
           mint_price: coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars'),
           per_address_limit: perAddressLimitState.value,
-          admins: [
-            ...new Set(
-              addressListState.values
-                .map((a) => a.address.trim())
-                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
-            ),
-          ] || [wallet.address],
+          admins:
+            addressListState.values.length > 0
+              ? [
+                  ...new Set(
+                    addressListState.values
+                      .map((a) => a.address.trim())
+                      .filter(
+                        (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                      ),
+                  ),
+                ]
+              : [wallet.address ?? ''],
           admins_mutable: adminsMutable,
         }
 

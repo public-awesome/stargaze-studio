@@ -1,3 +1,5 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-shadow */
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
@@ -62,6 +64,7 @@ export interface WhiteListInstance {
     endTime: string,
     perAddressLimit: number,
     mintPrice: Coin,
+    members: string[],
   ) => Promise<string>
   removeStage: (stageId: number) => Promise<string>
 }
@@ -86,6 +89,7 @@ export interface WhitelistMessages {
     endTime: string,
     perAddressLimit: number,
     mintPrice: Coin,
+    members: string[],
   ) => AddStageMessage
   removeStage: (stageId: number) => RemoveStageMessage
 }
@@ -111,11 +115,14 @@ export interface AddStageMessage {
   contract: string
   msg: {
     add_stage: {
-      name: string
-      start_time: string
-      end_time: string
-      per_address_limit: number
-      mint_price: Coin
+      stage: {
+        name: string
+        start_time: string
+        end_time: string
+        per_address_limit: number
+        mint_price: Coin
+      }
+      members: string[]
     }
   }
   funds: Coin[]
@@ -352,17 +359,21 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       endTime: string,
       perAddressLimit: number,
       mintPrice: Coin,
+      members: string[],
     ): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
           add_stage: {
-            name,
-            start_time: startTime,
-            end_time: endTime,
-            per_address_limit: perAddressLimit,
-            mint_price: mintPrice,
+            stage: {
+              name,
+              start_time: startTime,
+              end_time: endTime,
+              per_address_limit: perAddressLimit,
+              mint_price: mintPrice,
+            },
+            members,
           },
         },
         'auto',
@@ -506,17 +517,27 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
-    const addStage = (name: string, startTime: string, endTime: string, perAddressLimit: number, mintPrice: Coin) => {
+    const addStage = (
+      name: string,
+      startTime: string,
+      endTime: string,
+      perAddressLimit: number,
+      mintPrice: Coin,
+      members: string[],
+    ) => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
           add_stage: {
-            name,
-            start_time: startTime,
-            end_time: endTime,
-            per_address_limit: perAddressLimit,
-            mint_price: mintPrice,
+            stage: {
+              name,
+              start_time: startTime,
+              end_time: endTime,
+              per_address_limit: perAddressLimit,
+              mint_price: mintPrice,
+            },
+            members,
           },
         },
         funds: [],
