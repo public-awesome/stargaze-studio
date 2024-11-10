@@ -145,6 +145,13 @@ const WhitelistQueryPage: NextPage = () => {
     }
   }, [debouncedAddress])
 
+  const stageId = useNumberInputState({
+    id: 'stage-number',
+    name: 'stage-number',
+    title: 'Stage Number',
+    defaultValue: 1,
+  })
+
   const limit = useNumberInputState({
     id: 'limit',
     name: 'limit',
@@ -176,7 +183,14 @@ const WhitelistQueryPage: NextPage = () => {
   const [whitelistMerkleTreeQueryType, setWhitelistMerkleTreeQueryType] =
     useState<WhitelistMerkleTreeQueryType>('config')
 
-  const addressVisible = type === 'has_member' || whitelistMerkleTreeQueryType === 'has_member'
+  const addressVisible =
+    type === 'has_member' ||
+    type === 'stage_member_info' ||
+    type === 'all_stage_member_info' ||
+    whitelistMerkleTreeQueryType === 'has_member'
+
+  const stageIdVisible =
+    type === 'stage_member_info' || type === 'members' || type === 'stage' || whitelistMerkleTreeQueryType === 'stage'
 
   const { data: response } = useQuery(
     [
@@ -191,6 +205,7 @@ const WhitelistQueryPage: NextPage = () => {
       limit.value,
       proofHashes,
       whitelistType,
+      stageId.value,
     ] as const,
     async ({ queryKey }) => {
       const [
@@ -205,6 +220,7 @@ const WhitelistQueryPage: NextPage = () => {
         _limit,
         _proofHashes,
         _whitelistType,
+        _stageNumber,
       ] = queryKey
       const messages = contract?.use(contractAddress)
       const whitelistMerkleTreeMessages = contractWhitelistMerkleTree?.use(contractAddress)
@@ -218,6 +234,7 @@ const WhitelistQueryPage: NextPage = () => {
                 type: whitelistMerkleTreeQueryType,
                 limit: _limit,
                 proofHashes: _proofHashes,
+                stageId: _stageNumber - 1,
               })
             : await dispatchQuery({
                 messages,
@@ -225,6 +242,7 @@ const WhitelistQueryPage: NextPage = () => {
                 address: resolvedAddress,
                 startAfter: _startAfter || undefined,
                 limit: _limit,
+                stageId: _stageNumber - 1,
               })
         return result
       })
@@ -278,7 +296,13 @@ const WhitelistQueryPage: NextPage = () => {
       console.log('Contract Info: ', contractInfo.contract)
 
       if (contractInfo.contract.includes('flex')) {
-        let membersResponse = (await dispatchQuery({ messages, address, type: 'members', limit: 100 })) as any
+        let membersResponse = (await dispatchQuery({
+          messages,
+          address,
+          type: 'members',
+          limit: 100,
+          stageId: stageId.value - 1,
+        })) as any
         let membersArray = [...membersResponse.members]
         let lastMember = membersResponse.members[membersResponse.members.length - 1]
 
@@ -289,6 +313,7 @@ const WhitelistQueryPage: NextPage = () => {
             type: 'members',
             limit: 100,
             startAfter: lastMember.address,
+            stageId: stageId.value - 1,
           })) as any
           lastMember = membersResponse.members[membersResponse.members.length - 1]
           membersArray = [...membersArray, ...membersResponse.members]
@@ -303,7 +328,13 @@ const WhitelistQueryPage: NextPage = () => {
         tempLink.setAttribute('download', 'whitelist_flex_members.csv')
         tempLink.click()
       } else if (contractInfo.contract.includes('whitelist') && !contractInfo.contract.includes('flex')) {
-        let membersResponse = (await dispatchQuery({ messages, address, type: 'members', limit: 100 })) as any
+        let membersResponse = (await dispatchQuery({
+          messages,
+          address,
+          type: 'members',
+          limit: 100,
+          stageId: stageId.value - 1,
+        })) as any
         let membersArray = [...membersResponse.members]
         let lastMember = membersResponse.members[membersResponse.members.length - 1]
 
@@ -314,6 +345,7 @@ const WhitelistQueryPage: NextPage = () => {
             type: 'members',
             limit: 100,
             startAfter: lastMember,
+            stageId: stageId.value - 1,
           })) as any
           lastMember = membersResponse.members[membersResponse.members.length - 1]
           membersArray = [...membersArray, ...membersResponse.members]
@@ -373,6 +405,9 @@ const WhitelistQueryPage: NextPage = () => {
               ))}
             </select>
           </FormControl>
+          <Conditional test={stageIdVisible}>
+            <NumberInput className="w-1/4" {...stageId} />
+          </Conditional>
           <Conditional test={addressVisible}>
             <AddressInput {...addressState} />
           </Conditional>
@@ -397,6 +432,7 @@ const WhitelistQueryPage: NextPage = () => {
                 : { type, response }
               : null
           }
+          noHeightLimit
           title="Query Response"
         />
       </div>

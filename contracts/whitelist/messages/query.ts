@@ -13,6 +13,8 @@ export const QUERY_TYPES = [
   'stages',
   'stage',
   'active_stage',
+  'stage_member_info',
+  'all_stage_member_info',
 ] as const
 
 export interface QueryListItem {
@@ -22,16 +24,18 @@ export interface QueryListItem {
 }
 
 export const QUERY_LIST: QueryListItem[] = [
+  { id: 'config', name: 'Config', description: 'View the whitelist configuration' },
+  { id: 'stage', name: 'Stage', description: 'View details for a specific stage' },
+  { id: 'stages', name: 'Stages', description: 'View all stages' },
+  { id: 'stage_member_info', name: 'Stage Member Info', description: 'View the member info for a stage' },
+  { id: 'all_stage_member_info', name: 'All Stage Member Info', description: 'View the member info for all stages' },
+  { id: 'members', name: 'Members', description: 'View the whitelist members' },
+  { id: 'active_stage', name: 'Active Stage', description: 'View the active stage' },
   { id: 'has_started', name: 'Has Started', description: 'Check if the whitelist minting has started' },
   { id: 'has_ended', name: 'Has Ended', description: 'Check if the whitelist minting has ended' },
-  { id: 'is_active', name: 'Is Active', description: 'Check if the whitelist minting is active' },
-  { id: 'members', name: 'Members', description: 'View the whitelist members' },
-  { id: 'admin_list', name: 'Admin List', description: 'View the whitelist admin list' },
   { id: 'has_member', name: 'Has Member', description: 'Check if a member is in the whitelist' },
-  { id: 'config', name: 'Config', description: 'View the whitelist configuration' },
-  { id: 'stages', name: 'Stages', description: 'View all stages' },
-  { id: 'stage', name: 'Stage', description: 'View details for a specific stage' },
-  { id: 'active_stage', name: 'Active Stage', description: 'View the active stage' },
+  { id: 'is_active', name: 'Is Active', description: 'Check if the whitelist minting is active' },
+  { id: 'admin_list', name: 'Admin List', description: 'View the whitelist admin list' },
 ]
 
 export interface DispatchQueryProps {
@@ -66,6 +70,10 @@ export const dispatchQuery = (props: DispatchQueryProps) => {
       return messages?.stage(stageId as number)
     case 'active_stage':
       return messages?.activeStage()
+    case 'stage_member_info':
+      return messages?.stageMemberInfo(stageId as number, address)
+    case 'all_stage_member_info':
+      return messages?.allStageMemberInfo(address)
     default: {
       throw new Error('unknown query type')
     }

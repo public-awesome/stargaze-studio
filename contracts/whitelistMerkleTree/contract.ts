@@ -1,6 +1,6 @@
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import { type Coin, coin } from '@cosmjs/proto-signing'
-import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
+import type { Stage } from 'contracts/whitelist/messages/execute'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -14,6 +14,15 @@ export interface ConfigResponse {
   readonly mint_price: Coin
   readonly is_active: boolean
 }
+
+export interface StageResponse {
+  readonly stage: Stage
+}
+
+export interface StagesResponse {
+  readonly stages: Stage[]
+}
+
 export interface WhiteListMerkleTreeInstance {
   readonly contractAddress: string
   //Query
@@ -23,44 +32,51 @@ export interface WhiteListMerkleTreeInstance {
   hasMember: (member: string, proof_hashes: string[]) => Promise<boolean>
   adminList: () => Promise<string[]>
   config: () => Promise<ConfigResponse>
+  activeStage: () => Promise<StageResponse>
+  stages: () => Promise<StagesResponse>
+  stage: (stageId: number) => Promise<StageResponse>
   canExecute: (sender: string, msg: string) => Promise<boolean>
-  merkleRoot: () => Promise<string>
-  merkleTreeUri: () => Promise<string>
+  merkleRoots: () => Promise<string[]>
+  merkleTreeUris: () => Promise<string[]>
 
   //Execute
-  updateStartTime: (startTime: string) => Promise<string>
-  updateEndTime: (endTime: string) => Promise<string>
-  addMembers: (memberList: string[] | WhitelistFlexMember[]) => Promise<string>
-  removeMembers: (memberList: string[]) => Promise<string>
-  // updatePerAddressLimit: (limit: number) => Promise<string>
+  updateStageConfig: (
+    stageId: number,
+    name?: string,
+    startTime?: string,
+    endTime?: string,
+    perAddressLimit?: number,
+    mintPrice?: Coin,
+  ) => Promise<string>
   updateAdmins: (admins: string[]) => Promise<string>
   freeze: () => Promise<string>
 }
 
 export interface WhiteListMerkleTreeMessages {
-  updateStartTime: (startTime: string) => UpdateStartTimeMessage
-  updateEndTime: (endTime: string) => UpdateEndTimeMessage
-  addMembers: (memberList: string[] | WhitelistFlexMember[]) => AddMembersMessage
-  removeMembers: (memberList: string[]) => RemoveMembersMessage
-  // updatePerAddressLimit: (limit: number) => UpdatePerAddressLimitMessage
+  updateStageConfig: (
+    stageId: number,
+    name?: string,
+    startTime?: string,
+    endTime?: string,
+    perAddressLimit?: number,
+    mintPrice?: Coin,
+  ) => UpdateStageConfigMessage
   updateAdmins: (admins: string[]) => UpdateAdminsMessage
   freeze: () => FreezeMessage
 }
 
-export interface UpdateStartTimeMessage {
+export interface UpdateStageConfigMessage {
   sender: string
   contract: string
   msg: {
-    update_start_time: string
-  }
-  funds: Coin[]
-}
-
-export interface UpdateEndTimeMessage {
-  sender: string
-  contract: string
-  msg: {
-    update_end_time: string
+    update_stage_config: {
+      stage_id: number
+      name?: string
+      start_time?: string
+      end_time?: string
+      per_address_limit?: number
+      mint_price?: Coin
+    }
   }
   funds: Coin[]
 }
@@ -80,33 +96,6 @@ export interface FreezeMessage {
   msg: { freeze: Record<string, never> }
   funds: Coin[]
 }
-export interface AddMembersMessage {
-  sender: string
-  contract: string
-  msg: {
-    add_members: { to_add: string[] | WhitelistFlexMember[] }
-  }
-  funds: Coin[]
-}
-
-export interface RemoveMembersMessage {
-  sender: string
-  contract: string
-  msg: {
-    remove_members: { to_remove: string[] }
-  }
-  funds: Coin[]
-}
-
-// export interface UpdatePerAddressLimitMessage {
-//   sender: string
-
-//   contract: string
-//   msg: {
-//     update_per_address_limit: number
-//   }
-//   funds: Coin[]
-// }
 
 export interface WhiteListMerkleTreeContract {
   instantiate: (
@@ -154,15 +143,33 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
       })
     }
 
-    const merkleRoot = async (): Promise<string> => {
+    const merkleRoots = async (): Promise<string[]> => {
       return client.queryContractSmart(contractAddress, {
-        merkle_root: {},
+        merkle_roots: {},
       })
     }
 
-    const merkleTreeUri = async (): Promise<string> => {
+    const merkleTreeUris = async (): Promise<string[]> => {
       return client.queryContractSmart(contractAddress, {
-        merkle_tree_u_r_i: {},
+        merkle_tree_u_r_is: {},
+      })
+    }
+
+    const activeStage = async (): Promise<StageResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        active_stage: {},
+      })
+    }
+
+    const stages = async (): Promise<StagesResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        stages: {},
+      })
+    }
+
+    const stage = async (stageId: number): Promise<StageResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        stage: { stage_id: stageId },
       })
     }
 
@@ -173,23 +180,25 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
     }
     /// QUERY END
     /// EXECUTE START
-    const updateStartTime = async (startTime: string): Promise<string> => {
-      const res = await client.execute(txSigner, contractAddress, { update_start_time: startTime }, 'auto')
-      return res.transactionHash
-    }
-
-    const updateEndTime = async (endTime: string): Promise<string> => {
-      const res = await client.execute(txSigner, contractAddress, { update_end_time: endTime }, 'auto')
-      return res.transactionHash
-    }
-
-    const addMembers = async (memberList: string[] | WhitelistFlexMember[]): Promise<string> => {
+    const updateStageConfig = async (
+      stageId: number,
+      name?: string,
+      startTime?: string,
+      endTime?: string,
+      perAddressLimit?: number,
+      mintPrice?: Coin,
+    ): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
-          add_members: {
-            to_add: memberList,
+          update_stage_config: {
+            stage_id: stageId,
+            name,
+            start_time: startTime,
+            end_time: endTime,
+            per_address_limit: perAddressLimit,
+            mint_price: mintPrice,
           },
         },
         'auto',
@@ -223,44 +232,24 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
       return res.transactionHash
     }
 
-    const removeMembers = async (memberList: string[]): Promise<string> => {
-      const res = await client.execute(
-        txSigner,
-        contractAddress,
-        {
-          remove_members: {
-            to_remove: memberList,
-          },
-        },
-        'auto',
-      )
-      return res.transactionHash
-    }
-
-    // const updatePerAddressLimit = async (limit: number): Promise<string> => {
-    //   const res = await client.execute(txSigner, contractAddress, { update_per_address_limit: limit }, 'auto')
-    //   return res.transactionHash
-    // }
-
     /// EXECUTE END
 
     return {
       contractAddress,
-      updateStartTime,
-      updateEndTime,
+      updateStageConfig,
       updateAdmins,
       freeze,
-      addMembers,
-      removeMembers,
-      // updatePerAddressLimit,
       hasStarted,
       hasEnded,
       isActive,
       hasMember,
       adminList,
       config,
-      merkleRoot,
-      merkleTreeUri,
+      activeStage,
+      stages,
+      stage,
+      merkleRoots,
+      merkleTreeUris,
       canExecute,
     }
   }
@@ -283,34 +272,26 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
   }
 
   const messages = (contractAddress: string) => {
-    const updateStartTime = (startTime: string) => {
+    const updateStageConfig = (
+      stageId: number,
+      name?: string,
+      startTime?: string,
+      endTime?: string,
+      perAddressLimit?: number,
+      mintPrice?: Coin,
+    ) => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          update_start_time: startTime,
-        },
-        funds: [],
-      }
-    }
-
-    const updateEndTime = (endTime: string) => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          update_end_time: endTime,
-        },
-        funds: [],
-      }
-    }
-
-    const addMembers = (memberList: string[] | WhitelistFlexMember[]) => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          add_members: { to_add: memberList },
+          update_stage_config: {
+            stage_id: stageId,
+            name,
+            start_time: startTime,
+            end_time: endTime,
+            per_address_limit: perAddressLimit,
+            mint_price: mintPrice,
+          },
         },
         funds: [],
       }
@@ -338,35 +319,9 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
       }
     }
 
-    const removeMembers = (memberList: string[]) => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          remove_members: { to_remove: memberList },
-        },
-        funds: [],
-      }
-    }
-
-    // const updatePerAddressLimit = (limit: number) => {
-    //   return {
-    //     sender: txSigner,
-    //     contract: contractAddress,
-    //     msg: {
-    //       update_per_address_limit: limit,
-    //     },
-    //     funds: [],
-    //   }
-    // }
-
     return {
-      updateStartTime,
-      updateEndTime,
+      updateStageConfig,
       updateAdmins,
-      addMembers,
-      removeMembers,
-      // updatePerAddressLimit,
       freeze,
     }
   }

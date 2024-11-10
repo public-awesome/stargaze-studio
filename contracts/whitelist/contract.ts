@@ -1,4 +1,5 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-shadow */
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
@@ -30,6 +31,16 @@ export interface StagesResponse {
   readonly stages: Stage[]
 }
 
+export interface StageMemberInfoResponse {
+  readonly stage_id: number
+  readonly is_member: boolean
+  readonly per_address_limit: number
+}
+
+export interface AllStageMemberInfoResponse {
+  readonly all_stage_member_info: StageMemberInfoResponse[]
+}
+
 export interface WhiteListInstance {
   readonly contractAddress: string
   //Query
@@ -43,6 +54,8 @@ export interface WhiteListInstance {
   stages: () => Promise<StagesResponse>
   stage: (stageId: number) => Promise<StageResponse>
   config: () => Promise<ConfigResponse>
+  stageMemberInfo: (stageId: number, member: string) => Promise<StageMemberInfoResponse>
+  allStageMemberInfo: (member: string) => Promise<AllStageMemberInfoResponse>
 
   //Execute
   updateStageConfig: (
@@ -254,6 +267,18 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
         stage: { stage_id: stageId },
       })
     }
+
+    const stageMemberInfo = async (stageId: number, member: string): Promise<StageMemberInfoResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        stage_member_info: { stage_id: stageId, member },
+      })
+    }
+
+    const allStageMemberInfo = async (member: string): Promise<AllStageMemberInfoResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        all_stage_member_info: { member },
+      })
+    }
     /// QUERY END
     /// EXECUTE START
     const updateStageConfig = async (
@@ -416,6 +441,8 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       activeStage,
       stages,
       stage,
+      stageMemberInfo,
+      allStageMemberInfo,
     }
   }
 

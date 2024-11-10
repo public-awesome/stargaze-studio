@@ -9,8 +9,11 @@ export const WHITELIST_MERKLE_TREE_QUERY_TYPES = [
   'admin_list',
   'has_member',
   'config',
-  'merkle_root',
-  'merkle_tree_uri',
+  'merkle_roots',
+  'merkle_tree_uris',
+  'stage',
+  'stages',
+  'active_stage',
 ] as const
 
 export interface QueryListItem {
@@ -20,14 +23,17 @@ export interface QueryListItem {
 }
 
 export const WHITELIST_MERKLE_TREE_QUERY_LIST: QueryListItem[] = [
+  { id: 'config', name: 'Config', description: 'View the whitelist configuration' },
+  { id: 'stage', name: 'Stage', description: 'View details for a specific stage' },
+  { id: 'stages', name: 'Stages', description: 'View all stages' },
+  { id: 'merkle_roots', name: 'Merkle Roots', description: 'View the whitelist merkle roots' },
+  { id: 'merkle_tree_uris', name: 'Merkle Tree URIs', description: 'View the whitelist merkle tree URIs' },
   { id: 'has_started', name: 'Has Started', description: 'Check if the whitelist minting has started' },
   { id: 'has_ended', name: 'Has Ended', description: 'Check if the whitelist minting has ended' },
   { id: 'is_active', name: 'Is Active', description: 'Check if the whitelist minting is active' },
   { id: 'admin_list', name: 'Admin List', description: 'View the whitelist admin list' },
   { id: 'has_member', name: 'Has Member', description: 'Check if a member is in the whitelist' },
-  { id: 'config', name: 'Config', description: 'View the whitelist configuration' },
-  { id: 'merkle_root', name: 'Merkle Root', description: 'View the whitelist merkle root' },
-  { id: 'merkle_tree_uri', name: 'Merkle Tree URI', description: 'View the whitelist merkle tree URI' },
+  { id: 'active_stage', name: 'Active Stage', description: 'View the active stage' },
 ]
 
 export interface DispatchQueryProps {
@@ -37,6 +43,7 @@ export interface DispatchQueryProps {
   startAfter?: string
   limit?: number
   proofHashes?: string[]
+  stageId?: number
 }
 
 export const dispatchQuery = (props: DispatchQueryProps) => {
@@ -54,11 +61,16 @@ export const dispatchQuery = (props: DispatchQueryProps) => {
       return messages?.hasMember(address, proofHashes || [])
     case 'config':
       return messages?.config()
-    case 'merkle_root':
-      return messages?.merkleRoot()
-    case 'merkle_tree_uri':
-      return messages?.merkleTreeUri()
-
+    case 'merkle_roots':
+      return messages?.merkleRoots()
+    case 'merkle_tree_uris':
+      return messages?.merkleTreeUris()
+    case 'stage':
+      return messages?.stage(props.stageId as number)
+    case 'stages':
+      return messages?.stages()
+    case 'active_stage':
+      return messages?.activeStage()
     default: {
       throw new Error('unknown query type')
     }
