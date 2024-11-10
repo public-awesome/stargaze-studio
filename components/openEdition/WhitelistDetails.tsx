@@ -19,7 +19,7 @@ import { isValidAddress } from 'utils/isValidAddress'
 import { useWallet } from 'utils/wallet'
 
 import { Conditional } from '../Conditional'
-import { AddressInput, NumberInput } from '../forms/FormInput'
+import { AddressInput, NumberInput, TextInput } from '../forms/FormInput'
 import { JsonPreview } from '../JsonPreview'
 import { WhitelistUpload } from '../WhitelistUpload'
 
@@ -96,6 +96,27 @@ export const WhitelistDetails = ({
     name: 'whitelistAddress',
     title: 'Whitelist Address',
     defaultValue: '',
+  })
+
+  const stageOneNameState = useInputState({
+    id: 'stage-one-name',
+    name: 'stage-one-name',
+    title: 'Stage Name',
+    defaultValue: 'Stage I',
+  })
+
+  const stageTwoNameState = useInputState({
+    id: 'stage-two-name',
+    name: 'stage-two-name',
+    title: 'Stage Name',
+    defaultValue: 'Stage II',
+  })
+
+  const stageThreeNameState = useInputState({
+    id: 'stage-three-name',
+    name: 'stage-three-name',
+    title: 'Stage Name',
+    defaultValue: 'Stage III',
   })
 
   const stageOneUnitPriceState = useNumberInputState({
@@ -285,6 +306,7 @@ export const WhitelistDetails = ({
             ],
       stages: [
         {
+          name: stageOneNameState.value || '',
           startTime: stageOneStartDate ? (stageOneStartDate.getTime() * 1_000_000).toString() : '',
           endTime: stageOneEndDate ? (stageOneEndDate.getTime() * 1_000_000).toString() : '',
           perAddressLimit: stageOnePerAddressLimitState.value,
@@ -298,6 +320,7 @@ export const WhitelistDetails = ({
           ),
         },
         {
+          name: stageTwoNameState.value || '',
           startTime: stageTwoStartDate ? (stageTwoStartDate.getTime() * 1_000_000).toString() : '',
           endTime: stageTwoEndDate ? (stageTwoEndDate.getTime() * 1_000_000).toString() : '',
           perAddressLimit: stageTwoPerAddressLimitState.value,
@@ -311,6 +334,7 @@ export const WhitelistDetails = ({
           ),
         },
         {
+          name: stageThreeNameState.value || '',
           startTime: stageThreeStartDate ? (stageThreeStartDate.getTime() * 1_000_000).toString() : '',
           endTime: stageThreeEndDate ? (stageThreeEndDate.getTime() * 1_000_000).toString() : '',
           perAddressLimit: stageThreePerAddressLimitState.value,
@@ -339,6 +363,9 @@ export const WhitelistDetails = ({
   }, [
     whitelistAddressState.value,
     memberLimitState.value,
+    stageOneNameState.value,
+    stageTwoNameState.value,
+    stageThreeNameState.value,
     stageOneStartDate,
     stageOneEndDate,
     stageOneUnitPriceState.value,
@@ -389,6 +416,25 @@ export const WhitelistDetails = ({
       whitelistAddressState.onChange(
         importedWhitelistDetails.contractAddress ? importedWhitelistDetails.contractAddress : '',
       )
+
+      stageOneNameState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 0
+          ? importedWhitelistDetails.stages[0].name || 'Stage I'
+          : '',
+      )
+
+      stageTwoNameState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 1
+          ? importedWhitelistDetails.stages[1].name || 'Stage II'
+          : '',
+      )
+
+      stageThreeNameState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 2
+          ? importedWhitelistDetails.stages[2].name || 'Stage III'
+          : '',
+      )
+
       stageOneUnitPriceState.onChange(
         importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 0
           ? Number(importedWhitelistDetails.stages[0].mintPrice?.amount) / 1000000
@@ -744,6 +790,7 @@ export const WhitelistDetails = ({
           </div>
           <div className="grid grid-cols-2">
             <FormGroup subtitle="Information about your minting settings" title="Whitelist Stage I Minting Details">
+              <TextInput {...stageOneNameState} />
               <NumberInput isRequired {...stageOneUnitPriceState} />
               <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                 <NumberInput isRequired {...stageOnePerAddressLimitState} />
@@ -908,6 +955,7 @@ export const WhitelistDetails = ({
           <Conditional test={stageCount > 1}>
             <div className="grid grid-cols-2 mt-4">
               <FormGroup subtitle="Information about your minting settings" title="Whitelist Stage II Minting Details">
+                <TextInput {...stageTwoNameState} />
                 <NumberInput isRequired {...stageTwoUnitPriceState} />
                 <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                   <NumberInput isRequired {...stageTwoPerAddressLimitState} />
@@ -1069,6 +1117,7 @@ export const WhitelistDetails = ({
           <Conditional test={stageCount > 2}>
             <div className="grid grid-cols-2 mt-4">
               <FormGroup subtitle="Information about your minting settings" title="Whitelist Stage III Minting Details">
+                <TextInput {...stageThreeNameState} />
                 <NumberInput isRequired {...stageThreeUnitPriceState} />
                 <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                   <NumberInput isRequired {...stageThreePerAddressLimitState} />
