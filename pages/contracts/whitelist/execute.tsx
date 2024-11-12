@@ -120,7 +120,7 @@ const WhitelistExecutePage: NextPage = () => {
   const showPerAddressLimitState = isEitherType(type, ['update_stage_config', 'add_stage'])
   const showTimestamp = isEitherType(type, ['update_stage_config', 'add_stage'])
   const showMemberList = isEitherType(type, ['add_members', 'remove_members', 'add_stage'])
-  const showFlexMemberList = isEitherType(type, ['add_members'])
+  const showFlexMemberList = isEitherType(type, ['add_members', 'add_stage'])
   const showRemoveMemberList = isEitherType(type, ['remove_members'])
   const showAdminList = isEitherType(type, ['update_admins'])
   const showStageId = isEitherType(type, ['update_stage_config', 'remove_stage', 'add_members', 'remove_members'])
