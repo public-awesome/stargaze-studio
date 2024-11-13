@@ -909,6 +909,7 @@ export const OpenEditionMinterCreator = ({
           start_time: stage.startTime,
           end_time: stage.endTime,
           mint_price: stage.mintPrice,
+          per_address_limit: 1,
         })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
