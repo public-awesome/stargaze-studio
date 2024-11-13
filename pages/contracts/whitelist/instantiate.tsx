@@ -90,9 +90,9 @@ const WhitelistInstantiatePage: NextPage = () => {
     WhitelistFlexMember[]
   >([])
 
-  const [selectedStageOneMintToken, setSelectedStageOneMintToken] = useState<TokenInfo | undefined>(stars)
-  const [selectedStageTwoMintToken, setSelectedStageTwoMintToken] = useState<TokenInfo | undefined>(stars)
-  const [selectedStageThreeMintToken, setSelectedStageThreeMintToken] = useState<TokenInfo | undefined>(stars)
+  const [selectedStageOneMintToken, setSelectedStageOneMintToken] = useState<TokenInfo | undefined>(ibcAtom)
+  const [selectedStageTwoMintToken, setSelectedStageTwoMintToken] = useState<TokenInfo | undefined>(ibcAtom)
+  const [selectedStageThreeMintToken, setSelectedStageThreeMintToken] = useState<TokenInfo | undefined>(ibcAtom)
 
   const stageOneNameState = useInputState({
     id: 'stage-one-name',
