@@ -563,7 +563,7 @@ const CollectionCreationPage: NextPage = () => {
       return data.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree') {
       const rootHashes = await Promise.all(
-        (whitelistDetails.members || []).map(async (memberList, index) => {
+        (whitelistDetails.members || []).slice(0, whitelistDetails.stageCount).map(async (memberList, index) => {
           const members = memberList as string[]
           const membersCsv = members.join('\n')
           const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
@@ -620,7 +620,7 @@ const CollectionCreationPage: NextPage = () => {
       return data?.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree-flex') {
       const rootHashes = await Promise.all(
-        (whitelistDetails.members || []).map(async (memberList, index) => {
+        (whitelistDetails.members || []).slice(0, whitelistDetails.stageCount).map(async (memberList, index) => {
           const members = memberList as WhitelistFlexMember[]
 
           const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
@@ -664,6 +664,7 @@ const CollectionCreationPage: NextPage = () => {
           start_time: stage.startTime,
           end_time: stage.endTime,
           mint_price: stage.mintPrice,
+          per_address_limit: 1,
         })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
