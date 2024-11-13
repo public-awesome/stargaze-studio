@@ -8,7 +8,7 @@
 
 import { toUtf8 } from '@cosmjs/encoding'
 import type { Coin } from '@cosmjs/proto-signing'
-import { coin } from '@cosmjs/proto-signing'
+// import { coin } from '@cosmjs/proto-signing'
 import { Sidetab } from '@typeform/embed-react'
 import axios from 'axios'
 import clsx from 'clsx'
@@ -524,30 +524,30 @@ const CollectionCreationPage: NextPage = () => {
   const instantiateWhitelist = async () => {
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected')
     if (!whitelistContract) throw new Error('Contract not found')
-
+    console.log('whitelistDetails', whitelistDetails)
     if (whitelistDetails?.whitelistType === 'standard' || whitelistDetails?.whitelistType === 'flex') {
       const standardMsg = {
-        members: whitelistDetails.members,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
-        ),
-        per_address_limit: whitelistDetails.perAddressLimit,
+        members: whitelistDetails.members?.slice(0, whitelistDetails.stageCount),
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+          per_address_limit: stage.perAddressLimit,
+        })),
         member_limit: whitelistDetails.memberLimit,
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
       }
 
       const flexMsg = {
-        members: whitelistDetails.members,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
-        ),
+        members: whitelistDetails.members?.slice(0, whitelistDetails.stageCount),
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+        })),
         member_limit: whitelistDetails.memberLimit,
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
@@ -556,49 +556,57 @@ const CollectionCreationPage: NextPage = () => {
       const data = await whitelistContract.instantiate(
         whitelistDetails.whitelistType === 'standard' ? WHITELIST_CODE_ID : WHITELIST_FLEX_CODE_ID,
         whitelistDetails.whitelistType === 'standard' ? standardMsg : flexMsg,
-        'Stargaze Whitelist Contract',
+        'Stargaze Tiered Whitelist Contract',
         wallet.address,
       )
 
       return data.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree') {
-      const members = whitelistDetails.members as string[]
-      const membersCsv = members.join('\n')
-      const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
-      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
-      const formData = new FormData()
-      formData.append('whitelist', membersFile)
-      const response = await toast
-        .promise(
-          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }),
-          {
-            loading: 'Fetching merkle root hash...',
-            success: 'Merkle root fetched successfully.',
-            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
-          },
-        )
-        .catch((error) => {
-          console.log('error', error)
-          throw new Error('Whitelist instantiation failed.')
-        })
+      const rootHashes = await Promise.all(
+        (whitelistDetails.members || []).slice(0, whitelistDetails.stageCount).map(async (memberList, index) => {
+          const members = memberList as string[]
+          const membersCsv = members.join('\n')
+          const membersBlob = new Blob([membersCsv], { type: 'text/csv' })
+          const membersFile = new File([membersBlob], `members_${index}.csv`, { type: 'text/csv' })
 
-      const rootHash = response.data.root_hash
-      console.log('rootHash', rootHash)
+          const formData = new FormData()
+          formData.append('whitelist', membersFile)
+          formData.append('stage_id', index.toString())
+
+          const response = await toast
+            .promise(
+              axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              }),
+              {
+                loading: `Fetching merkle root hash for WL Stage ${index + 1}...`,
+                success: `Merkle root hash for WL Stage ${index + 1} fetched successfully.`,
+                error: `Error fetching root hash from Whitelist Merkle Tree API for Stage ${index + 1}.`,
+              },
+            )
+            .catch((error) => {
+              console.error('error', error)
+              throw new Error('Whitelist instantiation failed.')
+            })
+          console.log(`Stage ${index + 1} root hash: `, response.data.root_hash)
+          return response.data.root_hash
+        }),
+      )
+
+      console.log('rootHashes: ', rootHashes)
 
       const merkleTreeMsg = {
-        merkle_root: rootHash,
-        merkle_tree_uri: null,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
-        ),
-        per_address_limit: whitelistDetails.perAddressLimit,
+        merkle_roots: rootHashes,
+        merkle_tree_uris: null,
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+          per_address_limit: stage.perAddressLimit,
+        })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
       }
@@ -606,48 +614,58 @@ const CollectionCreationPage: NextPage = () => {
       const data = await whitelistMerkleTreeContract?.instantiate(
         WHITELIST_MERKLE_TREE_CODE_ID,
         merkleTreeMsg,
-        'Stargaze Whitelist Merkle Tree Contract',
+        'Stargaze Tiered Whitelist Merkle Tree Contract',
         wallet.address,
       )
       return data?.contractAddress
     } else if (whitelistDetails?.whitelistType === 'merkletree-flex') {
-      const members = whitelistDetails.members as WhitelistFlexMember[]
-      const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
-      const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
-      const membersFile = new File([membersBlob], 'members.csv', { type: 'text/csv' })
-      const formData = new FormData()
-      formData.append('whitelist', membersFile)
-      const response = await toast
-        .promise(
-          axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }),
-          {
-            loading: 'Fetching merkle root hash...',
-            success: 'Merkle root fetched successfully.',
-            error: 'Error fetching root hash from Whitelist Merkle Tree API.',
-          },
-        )
-        .catch((error) => {
-          console.log('error', error)
-          throw new Error('Whitelist instantiation failed.')
-        })
+      const rootHashes = await Promise.all(
+        (whitelistDetails.members || []).slice(0, whitelistDetails.stageCount).map(async (memberList, index) => {
+          const members = memberList as WhitelistFlexMember[]
 
-      const rootHash = response.data.root_hash
-      console.log('rootHash', rootHash)
+          const membersCsv = members.map((member) => `${member.address},${member.mint_count}`).join('\n')
+
+          const membersBlob = new Blob([`address,count\n${membersCsv}`], { type: 'text/csv' })
+          const membersFile = new File([membersBlob], `members_${index}.csv`, { type: 'text/csv' })
+
+          const formData = new FormData()
+          formData.append('whitelist', membersFile)
+          formData.append('stage_id', index.toString())
+
+          const response = await toast
+            .promise(
+              axios.post(`${WHITELIST_MERKLE_TREE_API_URL}/create_whitelist`, formData, {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+              }),
+              {
+                loading: `Fetching merkle root hash for WL Stage ${index + 1}...`,
+                success: `Merkle root hash for WL Stage ${index + 1} fetched successfully.`,
+                error: `Error fetching root hash from Whitelist Merkle Tree API for Stage ${index + 1}.`,
+              },
+            )
+            .catch((error) => {
+              console.error('error', error)
+              throw new Error('Whitelist instantiation failed.')
+            })
+          console.log(`Stage ${index + 1} root hash: `, response.data.root_hash)
+          return response.data.root_hash
+        }),
+      )
+
+      console.log('Root hashes:', rootHashes)
 
       const merkleTreeFlexMsg = {
-        merkle_root: rootHash,
-        merkle_tree_uri: null,
-        start_time: whitelistDetails.startTime,
-        end_time: whitelistDetails.endTime,
-        mint_price: coin(
-          String(Number(whitelistDetails.unitPrice)),
-          mintTokenFromVendingFactory ? mintTokenFromVendingFactory.denom : 'ustars',
-        ),
-        per_address_limit: whitelistDetails.perAddressLimit || 1,
+        merkle_roots: rootHashes,
+        merkle_tree_uris: null,
+        stages: whitelistDetails.stages?.slice(0, whitelistDetails.stageCount).map((stage, index) => ({
+          name: stage.name || `Stage ${index + 1}`,
+          start_time: stage.startTime,
+          end_time: stage.endTime,
+          mint_price: stage.mintPrice,
+          per_address_limit: 1,
+        })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
       }
@@ -1190,44 +1208,44 @@ const CollectionCreationPage: NextPage = () => {
       }
     } else if (whitelistDetails.whitelistState === 'new') {
       if (whitelistDetails.members?.length === 0) throw new Error('Whitelist member list cannot be empty')
-      if (whitelistDetails.unitPrice === undefined) throw new Error('Whitelist unit price is required')
-      if (Number(whitelistDetails.unitPrice) < 0)
-        throw new Error('Invalid unit price: The unit price cannot be negative')
-      if (whitelistDetails.startTime === '') throw new Error('Start time is required')
-      if (whitelistDetails.endTime === '') throw new Error('End time is required')
-      if (
-        whitelistDetails.whitelistType === 'standard' &&
-        (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
-      )
-        throw new Error('Per address limit is required')
-      if (
-        whitelistDetails.whitelistType !== 'merkletree' &&
-        whitelistDetails.whitelistType !== 'merkletree-flex' &&
-        (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
-      )
-        throw new Error('Member limit is required')
-      if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
-        throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
-      if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
-        throw new Error('Whitelist start time must be the same as the minting start time')
-      if (whitelistDetails.perAddressLimit && mintingDetails?.numTokens) {
-        if (mintingDetails.numTokens >= 100 && whitelistDetails.perAddressLimit > 50) {
-          throw Error(
-            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
-          )
-        } else if (
-          mintingDetails.numTokens >= 100 &&
-          whitelistDetails.perAddressLimit > Math.ceil((mintingDetails.numTokens / 100) * 3)
-        ) {
-          throw Error(
-            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
-          )
-        } else if (mintingDetails.numTokens < 100 && whitelistDetails.perAddressLimit > 3) {
-          throw Error(
-            `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3 for collections with less than 100 tokens in total.`,
-          )
-        }
-      }
+      // if (whitelistDetails.unitPrice === undefined) throw new Error('Whitelist unit price is required')
+      // if (Number(whitelistDetails.unitPrice) < 0)
+      //   throw new Error('Invalid unit price: The unit price cannot be negative')
+      // if (whitelistDetails.startTime === '') throw new Error('Start time is required')
+      // if (whitelistDetails.endTime === '') throw new Error('End time is required')
+      // if (
+      //   whitelistDetails.whitelistType === 'standard' &&
+      //   (!whitelistDetails.perAddressLimit || whitelistDetails.perAddressLimit === 0)
+      // )
+      //   throw new Error('Per address limit is required')
+      // if (
+      //   whitelistDetails.whitelistType !== 'merkletree' &&
+      //   whitelistDetails.whitelistType !== 'merkletree-flex' &&
+      //   (!whitelistDetails.memberLimit || whitelistDetails.memberLimit === 0)
+      // )
+      //   throw new Error('Member limit is required')
+      // if (Number(whitelistDetails.startTime) >= Number(whitelistDetails.endTime))
+      //   throw new Error('Whitelist start time cannot be equal to or later than the whitelist end time')
+      // if (Number(whitelistDetails.startTime) !== Number(mintingDetails?.startTime))
+      //   throw new Error('Whitelist start time must be the same as the minting start time')
+      // if (whitelistDetails.perAddressLimit && mintingDetails?.numTokens) {
+      //   if (mintingDetails.numTokens >= 100 && whitelistDetails.perAddressLimit > 50) {
+      //     throw Error(
+      //       `Invalid limit for tokens per address. Tokens per address limit cannot exceed 50 regardless of the total number of tokens.`,
+      //     )
+      //   } else if (
+      //     mintingDetails.numTokens >= 100 &&
+      //     whitelistDetails.perAddressLimit > Math.ceil((mintingDetails.numTokens / 100) * 3)
+      //   ) {
+      //     throw Error(
+      //       `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3% of the total number of tokens in the collection.`,
+      //     )
+      //   } else if (mintingDetails.numTokens < 100 && whitelistDetails.perAddressLimit > 3) {
+      //     throw Error(
+      //       `Invalid limit for tokens per address. Tokens per address limit cannot exceed 3 for collections with less than 100 tokens in total.`,
+      //     )
+      //   }
+      // }
     }
   }
 
@@ -2104,7 +2122,7 @@ const CollectionCreationPage: NextPage = () => {
                 numberOfTokens={uploadDetails?.assetFiles.length}
                 onChange={setMintingDetails}
                 uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
-                whitelistStartDate={whitelistDetails?.startTime}
+                whitelistStartDate={(whitelistDetails?.stages ? whitelistDetails.stages[0].startTime : '') as string}
               />
             </Conditional>
           </div>

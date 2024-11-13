@@ -1,7 +1,12 @@
+/* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-shadow */
 import type { SigningCosmWasmClient } from '@cosmjs/cosmwasm-stargate'
 import type { Coin } from '@cosmjs/proto-signing'
 import { coin } from '@cosmjs/proto-signing'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
+
+import type { Stage } from './messages/execute'
 
 export interface InstantiateResponse {
   readonly contractAddress: string
@@ -17,53 +22,130 @@ export interface ConfigResponse {
   readonly mint_price: Coin
   readonly is_active: boolean
 }
+
+export interface StageResponse {
+  readonly stage: Stage
+}
+
+export interface StagesResponse {
+  readonly stages: Stage[]
+}
+
+export interface StageMemberInfoResponse {
+  readonly stage_id: number
+  readonly is_member: boolean
+  readonly per_address_limit: number
+}
+
+export interface AllStageMemberInfoResponse {
+  readonly all_stage_member_info: StageMemberInfoResponse[]
+}
+
 export interface WhiteListInstance {
   readonly contractAddress: string
   //Query
   hasStarted: () => Promise<boolean>
   hasEnded: () => Promise<boolean>
   isActive: () => Promise<boolean>
-  members: (startAfter?: string, limit?: number) => Promise<string[]>
+  members: (stageId: number, startAfter?: string, limit?: number) => Promise<string[]>
   hasMember: (member: string) => Promise<boolean>
   adminList: () => Promise<string[]>
+  activeStage: () => Promise<StageResponse>
+  stages: () => Promise<StagesResponse>
+  stage: (stageId: number) => Promise<StageResponse>
   config: () => Promise<ConfigResponse>
+  stageMemberInfo: (stageId: number, member: string) => Promise<StageMemberInfoResponse>
+  allStageMemberInfo: (member: string) => Promise<AllStageMemberInfoResponse>
 
   //Execute
-  updateStartTime: (startTime: string) => Promise<string>
-  updateEndTime: (endTime: string) => Promise<string>
-  addMembers: (memberList: string[] | WhitelistFlexMember[]) => Promise<string>
-  removeMembers: (memberList: string[]) => Promise<string>
-  updatePerAddressLimit: (limit: number) => Promise<string>
+  updateStageConfig: (
+    stageId: number,
+    name?: string,
+    startTime?: string,
+    endTime?: string,
+    perAddressLimit?: number,
+    mintPrice?: Coin,
+  ) => Promise<string>
+  addMembers: (stageId: number, memberList: string[] | WhitelistFlexMember[]) => Promise<string>
+  removeMembers: (stageId: number, memberList: string[]) => Promise<string>
   increaseMemberLimit: (limit: number) => Promise<string>
   updateAdmins: (admins: string[]) => Promise<string>
   freeze: () => Promise<string>
+  addStage: (
+    name: string,
+    startTime: string,
+    endTime: string,
+    perAddressLimit: number,
+    mintPrice: Coin,
+    members: string[],
+  ) => Promise<string>
+  removeStage: (stageId: number) => Promise<string>
 }
 
 export interface WhitelistMessages {
-  updateStartTime: (startTime: string) => UpdateStartTimeMessage
-  updateEndTime: (endTime: string) => UpdateEndTimeMessage
-  addMembers: (memberList: string[] | WhitelistFlexMember[]) => AddMembersMessage
-  removeMembers: (memberList: string[]) => RemoveMembersMessage
-  updatePerAddressLimit: (limit: number) => UpdatePerAddressLimitMessage
+  updateStageConfig: (
+    stageId: number,
+    name?: string,
+    startTime?: string,
+    endTime?: string,
+    perAddressLimit?: number,
+    mintPrice?: Coin,
+  ) => UpdateStageConfigMessage
+  addMembers: (stageId: number, memberList: string[] | WhitelistFlexMember[]) => AddMembersMessage
+  removeMembers: (stageId: number, memberList: string[]) => RemoveMembersMessage
   increaseMemberLimit: (limit: number) => IncreaseMemberLimitMessage
   updateAdmins: (admins: string[]) => UpdateAdminsMessage
   freeze: () => FreezeMessage
+  addStage: (
+    name: string,
+    startTime: string,
+    endTime: string,
+    perAddressLimit: number,
+    mintPrice: Coin,
+    members: string[],
+  ) => AddStageMessage
+  removeStage: (stageId: number) => RemoveStageMessage
 }
 
-export interface UpdateStartTimeMessage {
+export interface UpdateStageConfigMessage {
   sender: string
   contract: string
   msg: {
-    update_start_time: string
+    update_stage_config: {
+      stage_id: number
+      name?: string
+      start_time?: string
+      end_time?: string
+      per_address_limit?: number
+      mint_price?: Coin
+    }
   }
   funds: Coin[]
 }
 
-export interface UpdateEndTimeMessage {
+export interface AddStageMessage {
   sender: string
   contract: string
   msg: {
-    update_end_time: string
+    add_stage: {
+      stage: {
+        name: string
+        start_time: string
+        end_time: string
+        per_address_limit: number
+        mint_price: Coin
+      }
+      members: string[]
+    }
+  }
+  funds: Coin[]
+}
+
+export interface RemoveStageMessage {
+  sender: string
+  contract: string
+  msg: {
+    remove_stage: { stage_id: number }
   }
   funds: Coin[]
 }
@@ -87,7 +169,10 @@ export interface AddMembersMessage {
   sender: string
   contract: string
   msg: {
-    add_members: { to_add: string[] | WhitelistFlexMember[] }
+    add_members: {
+      stage_id: number
+      to_add: string[] | WhitelistFlexMember[]
+    }
   }
   funds: Coin[]
 }
@@ -96,17 +181,10 @@ export interface RemoveMembersMessage {
   sender: string
   contract: string
   msg: {
-    remove_members: { to_remove: string[] }
-  }
-  funds: Coin[]
-}
-
-export interface UpdatePerAddressLimitMessage {
-  sender: string
-
-  contract: string
-  msg: {
-    update_per_address_limit: number
+    remove_members: {
+      stage_id: number
+      to_remove: string[]
+    }
   }
   funds: Coin[]
 }
@@ -148,9 +226,9 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       return client.queryContractSmart(contractAddress, { is_active: {} })
     }
 
-    const members = async (startAfter?: string, limit?: number): Promise<string[]> => {
+    const members = async (stageId: number, startAfter?: string, limit?: number): Promise<string[]> => {
       return client.queryContractSmart(contractAddress, {
-        members: { limit, start_after: startAfter },
+        members: { stage_id: stageId, limit, start_after: startAfter },
       })
     }
 
@@ -171,24 +249,71 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
         config: {},
       })
     }
+
+    const activeStage = async (): Promise<StageResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        active_stage: {},
+      })
+    }
+
+    const stages = async (): Promise<StagesResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        stages: {},
+      })
+    }
+
+    const stage = async (stageId: number): Promise<StageResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        stage: { stage_id: stageId },
+      })
+    }
+
+    const stageMemberInfo = async (stageId: number, member: string): Promise<StageMemberInfoResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        stage_member_info: { stage_id: stageId, member },
+      })
+    }
+
+    const allStageMemberInfo = async (member: string): Promise<AllStageMemberInfoResponse> => {
+      return client.queryContractSmart(contractAddress, {
+        all_stage_member_info: { member },
+      })
+    }
     /// QUERY END
     /// EXECUTE START
-    const updateStartTime = async (startTime: string): Promise<string> => {
-      const res = await client.execute(txSigner, contractAddress, { update_start_time: startTime }, 'auto')
+    const updateStageConfig = async (
+      stageId: number,
+      name?: string,
+      startTime?: string,
+      endTime?: string,
+      perAddressLimit?: number,
+      mintPrice?: Coin,
+    ): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          update_stage_config: {
+            stage_id: stageId,
+            name,
+            start_time: startTime,
+            end_time: endTime,
+            per_address_limit: perAddressLimit,
+            mint_price: mintPrice,
+          },
+        },
+        'auto',
+      )
       return res.transactionHash
     }
 
-    const updateEndTime = async (endTime: string): Promise<string> => {
-      const res = await client.execute(txSigner, contractAddress, { update_end_time: endTime }, 'auto')
-      return res.transactionHash
-    }
-
-    const addMembers = async (memberList: string[] | WhitelistFlexMember[]): Promise<string> => {
+    const addMembers = async (stageId: number, memberList: string[] | WhitelistFlexMember[]): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
           add_members: {
+            stage_id: stageId,
             to_add: memberList,
           },
         },
@@ -223,22 +348,18 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       return res.transactionHash
     }
 
-    const removeMembers = async (memberList: string[]): Promise<string> => {
+    const removeMembers = async (stageId: number, memberList: string[]): Promise<string> => {
       const res = await client.execute(
         txSigner,
         contractAddress,
         {
           remove_members: {
+            stage_id: stageId,
             to_remove: memberList,
           },
         },
         'auto',
       )
-      return res.transactionHash
-    }
-
-    const updatePerAddressLimit = async (limit: number): Promise<string> => {
-      const res = await client.execute(txSigner, contractAddress, { update_per_address_limit: limit }, 'auto')
       return res.transactionHash
     }
 
@@ -256,17 +377,59 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       )
       return res.transactionHash
     }
+
+    const addStage = async (
+      name: string,
+      startTime: string,
+      endTime: string,
+      perAddressLimit: number,
+      mintPrice: Coin,
+      members: string[],
+    ): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          add_stage: {
+            stage: {
+              name,
+              start_time: startTime,
+              end_time: endTime,
+              per_address_limit: perAddressLimit,
+              mint_price: mintPrice,
+            },
+            members,
+          },
+        },
+        'auto',
+      )
+      return res.transactionHash
+    }
+
+    const removeStage = async (stageId: number): Promise<string> => {
+      const res = await client.execute(
+        txSigner,
+        contractAddress,
+        {
+          remove_stage: {
+            stage_id: stageId,
+          },
+        },
+        'auto',
+      )
+      return res.transactionHash
+    }
     /// EXECUTE END
 
     return {
       contractAddress,
-      updateStartTime,
-      updateEndTime,
+      updateStageConfig,
       updateAdmins,
       freeze,
       addMembers,
       removeMembers,
-      updatePerAddressLimit,
+      addStage,
+      removeStage,
       increaseMemberLimit,
       hasStarted,
       hasEnded,
@@ -275,6 +438,11 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       hasMember,
       adminList,
       config,
+      activeStage,
+      stages,
+      stage,
+      stageMemberInfo,
+      allStageMemberInfo,
     }
   }
 
@@ -296,34 +464,37 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
   }
 
   const messages = (contractAddress: string) => {
-    const updateStartTime = (startTime: string) => {
+    const updateStageConfig = (
+      stageId: number,
+      name?: string,
+      startTime?: string,
+      endTime?: string,
+      perAddressLimit?: number,
+      mintPrice?: Coin,
+    ) => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          update_start_time: startTime,
+          update_stage_config: {
+            stage_id: stageId,
+            name,
+            start_time: startTime,
+            end_time: endTime,
+            per_address_limit: perAddressLimit,
+            mint_price: mintPrice,
+          },
         },
         funds: [],
       }
     }
 
-    const updateEndTime = (endTime: string) => {
+    const addMembers = (stageId: number, memberList: string[] | WhitelistFlexMember[]) => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          update_end_time: endTime,
-        },
-        funds: [],
-      }
-    }
-
-    const addMembers = (memberList: string[] | WhitelistFlexMember[]) => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          add_members: { to_add: memberList },
+          add_members: { stage_id: stageId, to_add: memberList },
         },
         funds: [],
       }
@@ -351,23 +522,12 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
-    const removeMembers = (memberList: string[]) => {
+    const removeMembers = (stageId: number, memberList: string[]) => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
-          remove_members: { to_remove: memberList },
-        },
-        funds: [],
-      }
-    }
-
-    const updatePerAddressLimit = (limit: number) => {
-      return {
-        sender: txSigner,
-        contract: contractAddress,
-        msg: {
-          update_per_address_limit: limit,
+          remove_members: { stage_id: stageId, to_remove: memberList },
         },
         funds: [],
       }
@@ -384,15 +544,53 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       }
     }
 
+    const addStage = (
+      name: string,
+      startTime: string,
+      endTime: string,
+      perAddressLimit: number,
+      mintPrice: Coin,
+      members: string[],
+    ) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          add_stage: {
+            stage: {
+              name,
+              start_time: startTime,
+              end_time: endTime,
+              per_address_limit: perAddressLimit,
+              mint_price: mintPrice,
+            },
+            members,
+          },
+        },
+        funds: [],
+      }
+    }
+
+    const removeStage = (stageId: number) => {
+      return {
+        sender: txSigner,
+        contract: contractAddress,
+        msg: {
+          remove_stage: { stage_id: stageId },
+        },
+        funds: [],
+      }
+    }
+
     return {
-      updateStartTime,
-      updateEndTime,
+      updateStageConfig,
       updateAdmins,
       addMembers,
       removeMembers,
-      updatePerAddressLimit,
       increaseMemberLimit,
       freeze,
+      addStage,
+      removeStage,
     }
   }
 

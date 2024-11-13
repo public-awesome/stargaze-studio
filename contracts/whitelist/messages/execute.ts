@@ -1,3 +1,5 @@
+import type { Coin } from '@cosmjs/proto-signing'
+
 import type { WhitelistFlexMember } from '../../../components/WhitelistFlexUpload'
 import type { WhiteListInstance } from '../index'
 import { useWhiteListContract } from '../index'
@@ -5,13 +7,13 @@ import { useWhiteListContract } from '../index'
 export type ExecuteType = typeof EXECUTE_TYPES[number]
 
 export const EXECUTE_TYPES = [
-  'update_start_time',
-  'update_end_time',
   'update_admins',
   'add_members',
   'remove_members',
-  'update_per_address_limit',
   'increase_member_limit',
+  'update_stage_config',
+  'add_stage',
+  'remove_stage',
   'freeze',
 ] as const
 
@@ -21,17 +23,15 @@ export interface ExecuteListItem {
   description?: string
 }
 
+export interface Stage {
+  name?: string
+  startTime?: string
+  endTime?: string
+  perAddressLimit?: number
+  mintPrice?: Coin
+}
+
 export const EXECUTE_LIST: ExecuteListItem[] = [
-  {
-    id: 'update_start_time',
-    name: 'Update Start Time',
-    description: `Update the start time of the whitelist`,
-  },
-  {
-    id: 'update_end_time',
-    name: 'Update End Time',
-    description: `Update the end time of the whitelist`,
-  },
   {
     id: 'update_admins',
     name: 'Update Admins',
@@ -48,14 +48,24 @@ export const EXECUTE_LIST: ExecuteListItem[] = [
     description: `Remove members from the whitelist`,
   },
   {
-    id: 'update_per_address_limit',
-    name: 'Update Per Address Limit',
-    description: `Update tokens per address limit`,
-  },
-  {
     id: 'increase_member_limit',
     name: 'Increase Member Limit',
     description: `Increase the member limit of the whitelist`,
+  },
+  {
+    id: 'update_stage_config',
+    name: 'Update Stage Config',
+    description: `Update the stage configuration of the whitelist`,
+  },
+  {
+    id: 'add_stage',
+    name: 'Add Stage',
+    description: `Add a new stage to the whitelist`,
+  },
+  {
+    id: 'remove_stage',
+    name: 'Remove Stage',
+    description: `Remove a stage from the whitelist`,
   },
   {
     id: 'freeze',
@@ -74,10 +84,15 @@ export interface DispatchExecuteArgs {
   contract: string
   messages?: WhiteListInstance
   type: string | undefined
-  timestamp: string
+  startTime?: string
+  endTime?: string
   members: string[] | WhitelistFlexMember[]
-  limit: number
+  memberLimit: number
+  perAddressLimit?: number
   admins: string[]
+  stageId: number
+  stageName?: string
+  mintPrice?: Coin
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -86,29 +101,43 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
     throw new Error('cannot dispatch execute, messages is not defined')
   }
   switch (args.type) {
-    case 'update_start_time': {
-      return messages.updateStartTime(args.timestamp)
-    }
-    case 'update_end_time': {
-      return messages.updateEndTime(args.timestamp)
-    }
     case 'update_admins': {
       return messages.updateAdmins(args.admins)
     }
     case 'add_members': {
-      return messages.addMembers(args.members)
+      return messages.addMembers(args.stageId, args.members)
     }
     case 'remove_members': {
-      return messages.removeMembers(args.members as string[])
-    }
-    case 'update_per_address_limit': {
-      return messages.updatePerAddressLimit(args.limit)
+      return messages.removeMembers(args.stageId, args.members as string[])
     }
     case 'increase_member_limit': {
-      return messages.increaseMemberLimit(args.limit)
+      return messages.increaseMemberLimit(args.memberLimit)
     }
     case 'freeze': {
       return messages.freeze()
+    }
+    case 'update_stage_config': {
+      return messages.updateStageConfig(
+        args.stageId,
+        args.stageName,
+        args.startTime,
+        args.endTime,
+        args.perAddressLimit,
+        args.mintPrice,
+      )
+    }
+    case 'add_stage': {
+      return messages.addStage(
+        args.stageName as string,
+        args.startTime as string,
+        args.endTime as string,
+        args.perAddressLimit as number,
+        args.mintPrice as Coin,
+        args.members as string[],
+      )
+    }
+    case 'remove_stage': {
+      return messages.removeStage(args.stageId)
     }
     default: {
       throw new Error('unknown execute type')
@@ -121,29 +150,43 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { messages } = useWhiteListContract()
   const { contract } = args
   switch (args.type) {
-    case 'update_start_time': {
-      return messages(contract)?.updateStartTime(args.timestamp)
-    }
-    case 'update_end_time': {
-      return messages(contract)?.updateEndTime(args.timestamp)
-    }
     case 'update_admins': {
       return messages(contract)?.updateAdmins(args.admins)
     }
     case 'add_members': {
-      return messages(contract)?.addMembers(args.members)
+      return messages(contract)?.addMembers(args.stageId, args.members)
     }
     case 'remove_members': {
-      return messages(contract)?.removeMembers(args.members as string[])
-    }
-    case 'update_per_address_limit': {
-      return messages(contract)?.updatePerAddressLimit(args.limit)
+      return messages(contract)?.removeMembers(args.stageId, args.members as string[])
     }
     case 'increase_member_limit': {
-      return messages(contract)?.increaseMemberLimit(args.limit)
+      return messages(contract)?.increaseMemberLimit(args.memberLimit)
     }
     case 'freeze': {
       return messages(contract)?.freeze()
+    }
+    case 'update_stage_config': {
+      return messages(contract)?.updateStageConfig(
+        args.stageId,
+        args.stageName,
+        args.startTime,
+        args.endTime,
+        args.perAddressLimit,
+        args.mintPrice,
+      )
+    }
+    case 'add_stage': {
+      return messages(contract)?.addStage(
+        args.stageName as string,
+        args.startTime as string,
+        args.endTime as string,
+        args.perAddressLimit as number,
+        args.mintPrice as Coin,
+        args.members as string[],
+      )
+    }
+    case 'remove_stage': {
+      return messages(contract)?.removeStage(args.stageId)
     }
     default: {
       return {}
