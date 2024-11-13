@@ -87,7 +87,7 @@ import type { MinterType } from '../../components/collections/actions/Combobox'
 import type { UploadMethod } from '../../components/collections/creation/UploadDetails'
 import { ConfirmationModal } from '../../components/ConfirmationModal'
 import type { OpenEditionMinterDetailsDataProps } from '../../components/openEdition/OpenEditionMinterCreator'
-import { stars, tokensList } from '../../config/token'
+import { ibcAtom, tokensList } from '../../config/token'
 import { getAssetType } from '../../utils/getAssetType'
 import { isValidAddress } from '../../utils/isValidAddress'
 
@@ -139,8 +139,8 @@ const CollectionCreationPage: NextPage = () => {
   const [minimumOpenEditionMintPrice, setMinimumOpenEditionMintPrice] = useState<string | null>('0')
   const [minimumFlexMintPrice, setMinimumFlexMintPrice] = useState<string | null>('0')
 
-  const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(stars)
-  const [mintTokenFromVendingFactory, setMintTokenFromVendingFactory] = useState<TokenInfo | undefined>(stars)
+  const [mintTokenFromOpenEditionFactory, setMintTokenFromOpenEditionFactory] = useState<TokenInfo | undefined>(ibcAtom)
+  const [mintTokenFromVendingFactory, setMintTokenFromVendingFactory] = useState<TokenInfo | undefined>(ibcAtom)
   const [vendingFactoryAddress, setVendingFactoryAddress] = useState<string | null>(VENDING_FACTORY_ADDRESS)
   const [openEditionFactoryAddress, setOpenEditionFactoryAddress] = useState<string | undefined>(
     OPEN_EDITION_FACTORY_ADDRESS,

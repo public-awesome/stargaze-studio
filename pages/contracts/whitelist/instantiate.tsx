@@ -26,7 +26,7 @@ import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/Whitel
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
-import { stars } from 'config/token'
+import { ibcAtom } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { InstantiateResponse } from 'contracts/sg721'
