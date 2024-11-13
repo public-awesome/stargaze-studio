@@ -7,6 +7,7 @@ import { Tooltip } from './Tooltip'
 export interface JsonPreviewProps {
   title?: string
   content: unknown
+  noHeightLimit?: boolean
 
   initialState?: boolean
   onClose?: () => void
@@ -25,7 +26,7 @@ export const JsonPreview = ({
 
   title = 'JSON Preview',
   content,
-
+  noHeightLimit,
   initialState = isVisible,
   onClose,
   isCopyable = copyable,
@@ -65,7 +66,11 @@ export const JsonPreview = ({
         )}
       </div>
       {show && (
-        <div className="overflow-auto p-2 font-mono text-sm">
+        <div
+          className={`overflow-auto p-2 mt-2 ${
+            noHeightLimit ? 'max-h-screen' : 'max-h-64'
+          } font-mono text-sm no-horizontal-scrollbar`}
+        >
           <pre>{content ? JSON.stringify(content, null, 2).trim() : '{}'}</pre>
         </div>
       )}

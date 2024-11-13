@@ -29,3 +29,13 @@ html {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.no-horizontal-scrollbar {
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: thin;
+}
+.no-horizontal-scrollbar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
