@@ -15,6 +15,7 @@ import type { TokenInfo } from 'config/token'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { Stage } from 'contracts/whitelist/messages/execute'
 import React, { useEffect, useState } from 'react'
+import { NETWORK } from 'utils/constants'
 import { isValidAddress } from 'utils/isValidAddress'
 import { useWallet } from 'utils/wallet'
 
@@ -153,7 +154,7 @@ export const WhitelistDetails = ({
     id: 'member-limit',
     name: 'memberLimit',
     title: 'Member Limit',
-    subtitle: 'Limited to 30k addresses in total',
+    subtitle: 'Limited to 10k addresses in total during instantiation',
     placeholder: '1000',
   })
 
@@ -722,6 +723,7 @@ export const WhitelistDetails = ({
             <input
               checked={whitelistType === 'merkletree'}
               className="peer sr-only"
+              disabled={NETWORK === 'mainnet'}
               id="inlineRadio9"
               name="inlineRadioOptions9"
               onClick={() => {
@@ -741,6 +743,7 @@ export const WhitelistDetails = ({
             <input
               checked={whitelistType === 'merkletree-flex'}
               className="peer sr-only"
+              disabled={NETWORK === 'mainnet'}
               id="inlineRadio10"
               name="inlineRadioOptions10"
               onClick={() => {

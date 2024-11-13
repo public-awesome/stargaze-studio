@@ -42,6 +42,7 @@ import { links } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
 import {
+  NETWORK,
   WHITELIST_CODE_ID,
   WHITELIST_FLEX_CODE_ID,
   WHITELIST_MERKLE_TREE_API_URL,
@@ -142,7 +143,7 @@ const WhitelistInstantiatePage: NextPage = () => {
     id: 'member-limit',
     name: 'memberLimit',
     title: 'Member Limit',
-    subtitle: 'Limited to 30k addresses in total',
+    subtitle: 'Limited to 10k addresses in total during instantiation',
     placeholder: '1000',
   })
 
@@ -747,6 +748,7 @@ const WhitelistInstantiatePage: NextPage = () => {
             <input
               checked={whitelistType === 'merkletree'}
               className="peer sr-only"
+              disabled={NETWORK === 'mainnet'}
               id="inlineRadio3"
               name="inlineRadioOptions3"
               onClick={() => {
@@ -767,6 +769,7 @@ const WhitelistInstantiatePage: NextPage = () => {
             <input
               checked={whitelistType === 'merkletree-flex'}
               className="peer sr-only"
+              disabled={NETWORK === 'mainnet'}
               id="inlineRadio4"
               name="inlineRadioOptions4"
               onClick={() => {
