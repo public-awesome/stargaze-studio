@@ -1,10 +1,12 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 /* eslint-disable no-nested-ternary */
+import { coins } from '@cosmjs/proto-signing'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
 import { ExecuteCombobox } from 'components/contracts/openEditionMinter/ExecuteCombobox'
 import { useExecuteComboboxState } from 'components/contracts/openEditionMinter/ExecuteCombobox.hooks'
+import CustomTokenSelect from 'components/CustomTokenSelect'
 import { FormControl } from 'components/FormControl'
 import { AddressInput, NumberInput } from 'components/forms/FormInput'
 import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
@@ -13,6 +15,9 @@ import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
 import { openEditionMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
+import { vendingMinterList } from 'config/minter'
+import type { TokenInfo } from 'config/token'
+import { ibcAtom } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { DispatchExecuteArgs } from 'contracts/openEditionMinter/messages/execute'
@@ -79,11 +84,21 @@ const OpenEditionMinterExecutePage: NextPage = () => {
     subtitle: 'Address of the recipient',
   })
 
+  const mintPriceState = useNumberInputState({
+    id: 'mint-price',
+    name: 'mint-price',
+    title: 'Mint Price',
+    placeholder: '25',
+  })
+
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(ibcAtom)
+
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showEndDateField = type === 'update_end_time'
   const showLimitField = type === 'update_per_address_limit'
   const showRecipientField = isEitherType(type, ['mint_to'])
   const showPriceField = isEitherType(type, ['update_mint_price'])
+  const showMintPriceField = isEitherType(type, ['mint'])
 
   const messages = useMemo(() => contract?.use(contractState.value), [contract, wallet.address, contractState.value])
   const payload: DispatchExecuteArgs = {
@@ -96,6 +111,10 @@ const OpenEditionMinterExecutePage: NextPage = () => {
     txSigner: wallet.address || '',
     price: priceState.value ? priceState.value.toString() : '0',
     type,
+    funds:
+      mintPriceState.value && mintPriceState.value > 0
+        ? coins((Number(mintPriceState.value) * 1_000_000).toString(), selectedMintToken?.denom || 'ustars')
+        : [],
   }
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {
@@ -224,6 +243,24 @@ const OpenEditionMinterExecutePage: NextPage = () => {
           {showRecipientField && <AddressInput {...recipientState} />}
           {showLimitField && <NumberInput {...limitState} />}
           {showPriceField && <NumberInput {...priceState} />}
+          <Conditional test={showMintPriceField}>
+            <div className="flex flex-row items-end pr-2 w-full">
+              <NumberInput isRequired {...mintPriceState} />
+              <CustomTokenSelect
+                onOptionChange={setSelectedMintToken}
+                options={vendingMinterList
+                  .filter((minter) => minter.factoryAddress !== undefined && minter.updatable === false)
+                  .map((minter) => minter.supportedToken)
+                  .reduce((uniqueTokens: TokenInfo[], token: TokenInfo) => {
+                    if (!uniqueTokens.includes(token)) {
+                      uniqueTokens.push(token)
+                    }
+                    return uniqueTokens
+                  }, [])}
+                selectedOption={selectedMintToken}
+              />
+            </div>
+          </Conditional>
           {/* TODO: Fix address execute message */}
           <Conditional test={showDateField}>
             <FormControl

@@ -39,7 +39,7 @@ export interface OpenEditionMinterInstance {
   getStatus: () => Promise<any>
 
   //Execute
-  mint: (senderAddress: string) => Promise<string>
+  mint: (senderAddress: string, funds: Coin[]) => Promise<string>
   purge: (senderAddress: string) => Promise<string>
   updateMintPrice: (senderAddress: string, price: string) => Promise<string>
   updateStartTime: (senderAddress: string, time: Timestamp) => Promise<string>
@@ -52,7 +52,7 @@ export interface OpenEditionMinterInstance {
 }
 
 export interface OpenEditionMinterMessages {
-  mint: () => MintMessage
+  mint: (funds: Coin[]) => MintMessage
   purge: () => PurgeMessage
   updateMintPrice: (price: string) => UpdateMintPriceMessage
   updateStartTime: (time: Timestamp) => UpdateStartTimeMessage
@@ -244,8 +244,8 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
     }
 
     //Execute
-    const mint = async (senderAddress: string): Promise<string> => {
-      const price = (await getMintPrice()).public_price.amount
+    const mint = async (senderAddress: string, funds: Coin[]): Promise<string> => {
+      // const price = (await getMintPrice()).public_price.amount
       const res = await client.execute(
         senderAddress,
         contractAddress,
@@ -254,7 +254,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         },
         'auto',
         '',
-        [coin(price, 'ustars')],
+        funds,
       )
 
       return res.transactionHash
@@ -513,14 +513,14 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
   }
 
   const messages = (contractAddress: string) => {
-    const mint = (): MintMessage => {
+    const mint = (funds: Coin[]): MintMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
           mint: {},
         },
-        funds: [],
+        funds,
       }
     }
 
