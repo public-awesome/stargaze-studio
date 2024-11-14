@@ -1,3 +1,5 @@
+import type { Coin } from '@cosmjs/proto-signing'
+
 import type { VendingMinterInstance } from '../index'
 import { useVendingMinterContract } from '../index'
 
@@ -107,7 +109,7 @@ export type DispatchExecuteArgs = {
   txSigner: string
 } & (
   | { type: undefined }
-  | { type: Select<'mint'> }
+  | { type: Select<'mint'>; funds: Coin[] }
   | { type: Select<'purge'> }
   | { type: Select<'update_mint_price'>; price: string }
   | { type: Select<'update_discount_price'>; price: string }
@@ -129,7 +131,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
   }
   switch (args.type) {
     case 'mint': {
-      return messages.mint(txSigner)
+      return messages.mint(txSigner, args.funds)
     }
     case 'purge': {
       return messages.purge(txSigner)
@@ -179,7 +181,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
   const { contract } = args
   switch (args.type) {
     case 'mint': {
-      return messages(contract)?.mint()
+      return messages(contract)?.mint(args.funds)
     }
     case 'purge': {
       return messages(contract)?.purge()

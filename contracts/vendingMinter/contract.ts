@@ -34,7 +34,7 @@ export interface VendingMinterInstance {
   getMintCount: (address: string) => Promise<any>
 
   //Execute
-  mint: (senderAddress: string) => Promise<string>
+  mint: (senderAddress: string, funds: Coin[]) => Promise<string>
   purge: (senderAddress: string) => Promise<string>
   updateMintPrice: (senderAddress: string, price: string) => Promise<string>
   setWhitelist: (senderAddress: string, whitelist: string) => Promise<string>
@@ -55,7 +55,7 @@ export interface VendingMinterInstance {
 }
 
 export interface VendingMinterMessages {
-  mint: () => MintMessage
+  mint: (funds: Coin[]) => MintMessage
   purge: () => PurgeMessage
   updateMintPrice: (price: string) => UpdateMintPriceMessage
   setWhitelist: (whitelist: string) => SetWhitelistMessage
@@ -307,8 +307,8 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
     }
 
     //Execute
-    const mint = async (senderAddress: string): Promise<string> => {
-      const price = (await getMintPrice()).public_price.amount
+    const mint = async (senderAddress: string, funds: Coin[]): Promise<string> => {
+      // const price = (await getMintPrice()).public_price.amount
       const res = await client.execute(
         senderAddress,
         contractAddress,
@@ -317,7 +317,7 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
         },
         'auto',
         '',
-        [coin(price, 'ustars')],
+        funds,
       )
 
       return res.transactionHash
@@ -681,14 +681,14 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
   }
 
   const messages = (contractAddress: string) => {
-    const mint = (): MintMessage => {
+    const mint = (funds: Coin[]): MintMessage => {
       return {
         sender: txSigner,
         contract: contractAddress,
         msg: {
           mint: {},
         },
-        funds: [],
+        funds,
       }
     }
 
