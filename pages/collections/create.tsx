@@ -69,6 +69,7 @@ import {
   STARGAZE_URL,
   STRDST_SG721_CODE_ID,
   SYNC_COLLECTIONS_API_URL,
+  TOKEN_MERGE_FACTORY_ADDRESS,
   VENDING_FACTORY_ADDRESS,
   VENDING_FACTORY_FLEX_ADDRESS,
   VENDING_FACTORY_UPDATABLE_ADDRESS,
@@ -1950,7 +1951,7 @@ const CollectionCreationPage: NextPage = () => {
         <div
           className={clsx(
             'mx-10 mt-5',
-            'grid before:absolute relative grid-cols-3 grid-flow-col items-stretch rounded',
+            'grid before:absolute relative grid-cols-4 grid-flow-col items-stretch rounded',
             'before:inset-x-0 before:bottom-0  before:border-white/25',
             minterType !== 'base' ? 'rounded-none border-b-2 border-white/25' : 'border-0',
           )}
@@ -2020,6 +2021,30 @@ const CollectionCreationPage: NextPage = () => {
               <h4 className="font-bold">Open Edition Collection</h4>
               <span className="text-sm text-white/80 line-clamp-2">
                 Allows multiple copies of a single NFT to be minted for a given time interval
+              </span>
+            </button>
+          </div>
+          <div
+            className={clsx(
+              'isolate space-y-1 border-2',
+              'first-of-type:rounded-tl-md last-of-type:rounded-tr-md',
+              minterType === 'token-merge' ? 'border-stargaze' : 'border-transparent',
+              minterType !== 'token-merge' ? 'bg-stargaze/5 hover:bg-stargaze/80' : 'hover:bg-white/5',
+              TOKEN_MERGE_FACTORY_ADDRESS === undefined ? 'hover:bg-zinc-500 opacity-50 hover:opacity-70' : '',
+            )}
+          >
+            <button
+              className="p-4 w-full h-full text-left bg-transparent"
+              disabled={TOKEN_MERGE_FACTORY_ADDRESS === undefined}
+              onClick={() => {
+                setMinterType('token-merge')
+                resetReadyFlags()
+              }}
+              type="button"
+            >
+              <h4 className="font-bold">Token Merge Collection</h4>
+              <span className="text-sm text-white/80 line-clamp-2">
+                Allows multiple tokens from different collections to be merged into a new NFT
               </span>
             </button>
           </div>
