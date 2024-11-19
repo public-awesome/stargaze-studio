@@ -35,6 +35,11 @@ import { FormControl } from 'components/FormControl'
 import { LoadingModal } from 'components/LoadingModal'
 import type { OpenEditionMinterCreatorDataProps } from 'components/openEdition/OpenEditionMinterCreator'
 import { OpenEditionMinterCreator } from 'components/openEdition/OpenEditionMinterCreator'
+import type {
+  TokenMergeMinterCreatorDataProps,
+  TokenMergeMinterDetailsDataProps,
+} from 'components/tokenMerge/TokenMergeMinterCreator'
+import { TokenMergeMinterCreator } from 'components/tokenMerge/TokenMergeMinterCreator'
 import type { WhitelistFlexMember } from 'components/WhitelistFlexUpload'
 import {
   flexibleOpenEditionMinterList,
@@ -114,6 +119,7 @@ const CollectionCreationPage: NextPage = () => {
     royaltyDetails: RoyaltyDetailsDataProps
     baseMinterDetails: BaseMinterDetailsDataProps
     openEditionMinterDetails: OpenEditionMinterDetailsDataProps
+    tokenMergeMinterDetails: TokenMergeMinterDetailsDataProps
   }>()
 
   const [uploadDetails, setUploadDetails] = useState<UploadDetailsDataProps | null>(null)
@@ -124,6 +130,9 @@ const CollectionCreationPage: NextPage = () => {
   const [openEditionMinterDetails, setOpenEditionMinterDetails] = useState<OpenEditionMinterDetailsDataProps | null>(
     null,
   )
+  const [tokenMergeMinterCreatorData, setTokenMergeMinterCreatorData] =
+    useState<TokenMergeMinterCreatorDataProps | null>(null)
+  const [tokenMergeMinterDetails, setTokenMergeMinterDetails] = useState<TokenMergeMinterDetailsDataProps | null>(null)
   const [mintingDetails, setMintingDetails] = useState<MintingDetailsDataProps | null>(null)
   const [whitelistDetails, setWhitelistDetails] = useState<WhitelistDetailsDataProps | null>(null)
   const [royaltyDetails, setRoyaltyDetails] = useState<RoyaltyDetailsDataProps | null>(null)
@@ -133,6 +142,7 @@ const CollectionCreationPage: NextPage = () => {
   const [baseMinterCreationFee, setBaseMinterCreationFee] = useState<Coin | null>(null)
   const [vendingMinterUpdatableCreationFee, setVendingMinterUpdatableCreationFee] = useState<Coin | null>(null)
   const [openEditionMinterCreationFee, setOpenEditionMinterCreationFee] = useState<Coin | undefined>(undefined)
+  const [tokenMergeMinterCreationFee, setTokenMergeMinterCreationFee] = useState<Coin | undefined>(undefined)
   const [vendingMinterFlexCreationFee, setVendingMinterFlexCreationFee] = useState<Coin | null>(null)
   const [baseMinterUpdatableCreationFee, setBaseMinterUpdatableCreationFee] = useState<Coin | null>(null)
   const [minimumMintPrice, setMinimumMintPrice] = useState<string | null>('0')
@@ -145,6 +155,9 @@ const CollectionCreationPage: NextPage = () => {
   const [vendingFactoryAddress, setVendingFactoryAddress] = useState<string | null>(VENDING_FACTORY_ADDRESS)
   const [openEditionFactoryAddress, setOpenEditionFactoryAddress] = useState<string | undefined>(
     OPEN_EDITION_FACTORY_ADDRESS,
+  )
+  const [tokenMergeFactoryAddress, settokenMergeFactoryAddress] = useState<string | undefined>(
+    TOKEN_MERGE_FACTORY_ADDRESS,
   )
 
   const vendingFactoryMessages = useMemo(
@@ -1348,6 +1361,15 @@ const CollectionCreationPage: NextPage = () => {
       setOpenEditionMinterCreationFee(openEditionFactoryParameters?.params?.creation_fee)
       setMinimumOpenEditionMintPrice(openEditionFactoryParameters?.params?.min_mint_price?.amount)
     }
+    if (TOKEN_MERGE_FACTORY_ADDRESS) {
+      const tokenMergeFactoryParameters = await client
+        .queryContractSmart(TOKEN_MERGE_FACTORY_ADDRESS, { params: {} })
+        .catch((error) => {
+          toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+          addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+        })
+      setTokenMergeMinterCreationFee(tokenMergeFactoryParameters?.params?.creation_fee)
+    }
     setInitialParametersFetched(true)
   }
 
@@ -1551,10 +1573,23 @@ const CollectionCreationPage: NextPage = () => {
       royaltyDetails,
       baseMinterDetails,
       openEditionMinterDetails,
+      tokenMergeMinterDetails,
       vendingMinterContractAddress,
-      baseTokenUri: `${baseTokenUri?.startsWith('ipfs://') ? baseTokenUri : `ipfs://${baseTokenUri}`}`,
+      baseTokenUri: `${
+        minterType === 'token-merge'
+          ? `ipfs://${tokenMergeMinterDetails?.baseTokenUri}`
+          : baseTokenUri?.startsWith('ipfs://')
+          ? baseTokenUri
+          : `ipfs://${baseTokenUri}`
+      }`,
       coverImageUrl:
-        uploadDetails?.uploadMethod === 'new'
+        minterType === 'token-merge'
+          ? tokenMergeMinterDetails?.uploadDetails?.uploadMethod === 'new'
+            ? `ipfs://${tokenMergeMinterDetails.coverImageUrl}/${
+                tokenMergeMinterDetails.collectionDetails?.imageFile[0]?.name as string
+              }`
+            : `ipfs://${tokenMergeMinterDetails?.coverImageUrl}`
+          : uploadDetails?.uploadMethod === 'new'
           ? `ipfs://${coverImageUrl}/${collectionDetails?.imageFile[0]?.name as string}`
           : `${coverImageUrl}`,
     }
@@ -1568,6 +1603,8 @@ const CollectionCreationPage: NextPage = () => {
           : ''
         : openEditionMinterDetails?.collectionDetails
         ? `${openEditionMinterDetails.collectionDetails.name}-`
+        : tokenMergeMinterDetails?.collectionDetails
+        ? `${tokenMergeMinterDetails.collectionDetails.name}-`
         : ''
     }configuration-${new Date().toLocaleString().replaceAll(',', '_')}.json`
     document.body.appendChild(element) // Required for this to work in FireFox
@@ -1593,9 +1630,15 @@ const CollectionCreationPage: NextPage = () => {
         details.openEditionMinterDetails.offChainMetadataUploadDetails.imageUrl =
           details.openEditionMinterDetails.coverImageUrl
       }
+      if (details.tokenMergeMinterDetails?.tokenMergeMinterContractAddress) {
+        details.tokenMergeMinterDetails.uploadDetails.uploadMethod = 'existing'
+        details.tokenMergeMinterDetails.uploadDetails.baseTokenURI = details.baseTokenUri
+        details.tokenMergeMinterDetails.uploadDetails.imageUrl = details.coverImageUrl
+      }
       if (NETWORK === 'mainnet') {
         if (details.collectionDetails.updatable) details.collectionDetails.updatable = false
         if (details.collectionDetails.updatable) details.openEditionMinterDetails.collectionDetails.updatable = false
+        if (details.collectionDetails.updatable) details.tokenMergeMinterDetails.collectionDetails.updatable = false
       }
 
       setImportedDetails(details)
@@ -1605,18 +1648,28 @@ const CollectionCreationPage: NextPage = () => {
 
   const syncCollections = useCallback(async () => {
     const collectionAddress =
-      minterType === 'openEdition' ? openEditionMinterCreatorData?.sg721ContractAddress : sg721ContractAddress
+      minterType === 'openEdition'
+        ? openEditionMinterCreatorData?.sg721ContractAddress
+        : minterType === 'token-merge'
+        ? tokenMergeMinterCreatorData?.sg721ContractAddress
+        : sg721ContractAddress
     if (collectionAddress && SYNC_COLLECTIONS_API_URL) {
       await axios.get(`${SYNC_COLLECTIONS_API_URL}/${collectionAddress}`).catch((error) => {
         console.error('Sync collections: ', error)
       })
     }
-  }, [minterType, openEditionMinterCreatorData?.sg721ContractAddress, sg721ContractAddress])
+  }, [
+    minterType,
+    openEditionMinterCreatorData?.sg721ContractAddress,
+    tokenMergeMinterCreatorData?.sg721ContractAddress,
+    sg721ContractAddress,
+  ])
 
   useEffect(() => {
     if (
       vendingMinterContractAddress !== null ||
       openEditionMinterCreatorData?.openEditionMinterContractAddress ||
+      tokenMergeMinterCreatorData?.tokenMergeMinterContractAddress ||
       isMintingComplete
     ) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -1624,6 +1677,7 @@ const CollectionCreationPage: NextPage = () => {
     if (
       (minterType === 'vending' && vendingMinterContractAddress !== null) ||
       (minterType === 'openEdition' && openEditionMinterCreatorData?.openEditionMinterContractAddress) ||
+      (minterType === 'token-merge' && tokenMergeMinterCreatorData?.tokenMergeMinterContractAddress) ||
       (minterType === 'base' && vendingMinterContractAddress !== null && isMintingComplete)
     ) {
       void syncCollections()
@@ -1637,6 +1691,7 @@ const CollectionCreationPage: NextPage = () => {
   }, [
     vendingMinterContractAddress,
     openEditionMinterCreatorData?.openEditionMinterContractAddress,
+    tokenMergeMinterCreatorData?.tokenMergeMinterContractAddress,
     isMintingComplete,
     minterType,
     syncCollections,
@@ -1769,6 +1824,65 @@ const CollectionCreationPage: NextPage = () => {
                   className="text-white"
                   external
                   href={`${STARGAZE_URL}/launchpad/${openEditionMinterCreatorData?.sg721ContractAddress as string}`}
+                >
+                  View on Launchpad
+                </Anchor>
+              </Button>
+            </div>
+          </Alert>
+        </Conditional>
+        <Conditional
+          test={minterType === 'token-merge' && tokenMergeMinterCreatorData?.tokenMergeMinterContractAddress !== null}
+        >
+          <Alert className="mt-5" type="info">
+            <div>
+              Token Merge Minter Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/tokenMergeMinter/query/?contractAddress=${
+                  tokenMergeMinterCreatorData?.tokenMergeMinterContractAddress as string
+                }`}
+              >
+                {tokenMergeMinterCreatorData?.tokenMergeMinterContractAddress as string}
+              </Anchor>
+              <br />
+              SG721 Contract Address:{'  '}
+              <Anchor
+                className="text-stargaze hover:underline"
+                external
+                href={`/contracts/sg721/query/?contractAddress=${
+                  tokenMergeMinterCreatorData?.sg721ContractAddress as string
+                }`}
+              >
+                {tokenMergeMinterCreatorData?.sg721ContractAddress as string}
+              </Anchor>
+              <br />
+              Transaction Hash: {'  '}
+              <Conditional test={NETWORK === 'testnet'}>
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`${BLOCK_EXPLORER_URL}/tx/${tokenMergeMinterCreatorData?.transactionHash as string}`}
+                >
+                  {tokenMergeMinterCreatorData?.transactionHash}
+                </Anchor>
+              </Conditional>
+              <Conditional test={NETWORK === 'mainnet'}>
+                <Anchor
+                  className="text-stargaze hover:underline"
+                  external
+                  href={`${BLOCK_EXPLORER_URL}/txs/${tokenMergeMinterCreatorData?.transactionHash as string}`}
+                >
+                  {tokenMergeMinterCreatorData?.transactionHash}
+                </Anchor>
+              </Conditional>
+              <br />
+              <Button className="mt-2">
+                <Anchor
+                  className="text-white"
+                  external
+                  href={`${STARGAZE_URL}/launchpad/${tokenMergeMinterCreatorData?.sg721ContractAddress as string}`}
                 >
                   View on Launchpad
                 </Anchor>
@@ -2083,6 +2197,17 @@ const CollectionCreationPage: NextPage = () => {
           onDetailsChange={setOpenEditionMinterDetails}
           openEditionFactoryAddress={openEditionFactoryAddress}
           openEditionMinterCreationFee={openEditionMinterCreationFee}
+        />
+      </Conditional>
+      <Conditional test={minterType === 'token-merge'}>
+        <TokenMergeMinterCreator
+          importedTokenMergeMinterDetails={importedDetails?.tokenMergeMinterDetails}
+          isMatchingFactoryPresent={isMatchingOpenEditionFactoryPresent}
+          minterType={minterType}
+          onChange={setTokenMergeMinterCreatorData}
+          onDetailsChange={setTokenMergeMinterDetails}
+          tokenMergeFactoryAddress={tokenMergeFactoryAddress}
+          tokenMergeMinterCreationFee={tokenMergeMinterCreationFee}
         />
       </Conditional>
       <div className="mx-10">

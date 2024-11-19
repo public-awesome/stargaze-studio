@@ -146,7 +146,7 @@ export const TokenMergeMinterCreator = ({
   }
 
   const checkExistingTokenURI = async () => {
-    await checkTokenUri(uploadDetails?.baseTokenURI as string, true)
+    if (uploadDetails?.uploadMethod === 'existing') await checkTokenUri(uploadDetails.baseTokenURI as string, true)
   }
 
   const checkUploadDetails = () => {
@@ -317,8 +317,7 @@ export const TokenMergeMinterCreator = ({
       } else {
         setBaseTokenUri(uploadDetails?.baseTokenURI as string)
         setCoverImageUrl(uploadDetails?.imageUrl as string)
-
-        await instantiateTokenMergeMinter(baseTokenUri as string, coverImageUrl as string)
+        await instantiateTokenMergeMinter(uploadDetails?.baseTokenURI as string, uploadDetails?.imageUrl as string)
       }
       setCreationInProgress(false)
       setReadyToCreate(false)
@@ -357,7 +356,6 @@ export const TokenMergeMinterCreator = ({
               collectionDetails?.name as string,
             )
           }
-          console.log('Thumbnail URI: ', thumbnailUri)
 
           const fileArray: File[] = []
           let reader: FileReader
@@ -453,11 +451,11 @@ export const TokenMergeMinterCreator = ({
           base_token_uri: `${uploadDetails?.uploadMethod === 'new' ? `ipfs://${baseUri}` : `${baseUri}`}`,
           start_time: mintingDetails?.startTime,
           num_tokens: mintingDetails?.numTokens,
+          mint_tokens: mintingDetails?.selectedCollections?.map((collection) => ({
+            collection: collection.address,
+            amount: collection.amount,
+          })),
           payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress : undefined,
-          mint_tokens: {
-            // amount: mintingDetails?.unitPrice,
-            // denom: (mintTokenFromTokenMergeFactory?.denom as string) || 'ustars',
-          },
           per_address_limit: mintingDetails?.perAddressLimit,
         },
         collection_params: {
@@ -557,14 +555,13 @@ export const TokenMergeMinterCreator = ({
       </div>
       <div className="flex justify-between py-3 px-8 mx-10 rounded border-2 border-white/20 grid-col-2">
         <CollectionDetails
-          coverImageUrl={coverImageUrl as string}
+          coverImageUrl={uploadDetails?.imageUrl as string}
           importedCollectionDetails={importedTokenMergeMinterDetails?.collectionDetails}
           onChange={setCollectionDetails}
           uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
         />
         <MintingDetails
           importedMintingDetails={importedTokenMergeMinterDetails?.mintingDetails}
-          // mintingTokenFromFactory={mintTokenFromVendingFactory}
           numberOfTokens={uploadDetails?.assetFiles.length}
           onChange={setMintingDetails}
           uploadMethod={uploadDetails?.uploadMethod as UploadMethod}
