@@ -2087,7 +2087,7 @@ const CollectionCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Standard Collection</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
+              <span className="text-sm text-white/80 line-clamp-2 hover:line-clamp-3">
                 A non-appendable collection that facilitates primary market vending machine style minting
               </span>
             </button>
@@ -2109,7 +2109,7 @@ const CollectionCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">1/1 Collection</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
+              <span className="text-sm text-white/80 line-clamp-2 hover:line-clamp-3">
                 An appendable collection that only allows for direct secondary market listing of tokens
               </span>
             </button>
@@ -2133,7 +2133,7 @@ const CollectionCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Open Edition Collection</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
+              <span className="text-sm text-white/80 line-clamp-2 hover:line-clamp-3">
                 Allows multiple copies of a single NFT to be minted for a given time interval
               </span>
             </button>
@@ -2157,7 +2157,7 @@ const CollectionCreationPage: NextPage = () => {
               type="button"
             >
               <h4 className="font-bold">Token Merge Collection</h4>
-              <span className="text-sm text-white/80 line-clamp-2">
+              <span className="text-sm text-white/80 line-clamp-2 hover:line-clamp-3">
                 Allows multiple tokens from different collections to be merged into a new NFT
               </span>
             </button>
