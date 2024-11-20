@@ -2156,9 +2156,9 @@ const CollectionCreationPage: NextPage = () => {
               }}
               type="button"
             >
-              <h4 className="font-bold">Token Merge Collection</h4>
+              <h4 className="font-bold">Burn to Mint Collection</h4>
               <span className="text-sm text-white/80 line-clamp-2 hover:line-clamp-3">
-                Allows multiple tokens from different collections to be merged into a new NFT
+                Allows tokens from different collections to be burned to mint a new NFT
               </span>
             </button>
           </div>

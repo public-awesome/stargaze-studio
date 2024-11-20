@@ -144,8 +144,8 @@ export const MintingDetails = ({
             onChange={selectedCollectionsState.update}
             onRemove={selectedCollectionsState.remove}
             selectedCollections={selectedCollectionsState.entries}
-            subtitle="Collections and corresponding token counts to be merged"
-            title="Merge Configuration"
+            subtitle="Collections and number of tokens to be burned"
+            title="Burn Configuration"
           />
         </div>
 
