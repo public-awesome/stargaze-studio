@@ -8,7 +8,7 @@ import { FaChevronDown, FaInfoCircle } from 'react-icons/fa'
 import type { ActionListItem } from './actions'
 import { BASE_ACTION_LIST, OPEN_EDITION_ACTION_LIST, SG721_UPDATABLE_ACTION_LIST, VENDING_ACTION_LIST } from './actions'
 
-export type MinterType = 'base' | 'vending' | 'openEdition'
+export type MinterType = 'base' | 'vending' | 'openEdition' | 'token-merge'
 export type Sg721Type = 'updatable' | 'base'
 
 export interface ActionsComboboxProps {

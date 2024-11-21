@@ -146,9 +146,9 @@ export const AssetsPreview = ({ assetFilesArray, updateMetadataFileIndex }: Asse
 
   return (
     <div className="flex flex-col items-center">
-      <div className="mt-2 w-[400px] h-[300px]">{renderImages()}</div>
+      <div className="mt-2 ml-36 w-[400px] h-[300px]">{renderImages()}</div>
 
-      <div className="mt-5 btn-group">
+      <div className="mt-5 ml-36 btn-group">
         <button className="text-white bg-plumbus-light btn" onClick={multiplePrevPage} type="button">
           ««
         </button>
