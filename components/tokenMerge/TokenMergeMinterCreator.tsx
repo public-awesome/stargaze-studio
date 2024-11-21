@@ -1,4 +1,7 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
@@ -107,33 +110,41 @@ export const TokenMergeMinterCreator = ({
       checkCollectionDetails()
       checkMintingDetails()
       checkUploadDetails()
-      void checkExistingTokenURI()
+      void checkBurnCollectionAddresses()
         .then(() => {
-          void checkRoyaltyDetails()
+          void checkExistingTokenURI()
             .then(() => {
-              void checkwalletBalance()
+              void checkRoyaltyDetails()
                 .then(() => {
-                  setReadyToCreate(true)
+                  void checkwalletBalance()
+                    .then(() => {
+                      setReadyToCreate(true)
+                    })
+                    .catch((error: any) => {
+                      toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
+                      addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                      setReadyToCreate(false)
+                    })
                 })
                 .catch((error: any) => {
-                  toast.error(`Error in Wallet Balance: ${error.message}`, { style: { maxWidth: 'none' } })
-                  addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-                  setReadyToCreate(false)
+                  if (String(error.message).includes('Insufficient wallet balance')) {
+                    toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
+                    addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                  } else {
+                    toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
+                    addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+                    setReadyToCreate(false)
+                  }
                 })
             })
             .catch((error: any) => {
-              if (String(error.message).includes('Insufficient wallet balance')) {
-                toast.error(`${error.message}`, { style: { maxWidth: 'none' } })
-                addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-              } else {
-                toast.error(`Error in Royalty Details: ${error.message}`, { style: { maxWidth: 'none' } })
-                addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
-                setReadyToCreate(false)
-              }
+              toast.error(`Error in Base Token URI: ${error.message}`, { style: { maxWidth: 'none' } })
+              addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
+              setReadyToCreate(false)
             })
         })
         .catch((error: any) => {
-          toast.error(`Error in Base Token URI: ${error.message}`, { style: { maxWidth: 'none' } })
+          toast.error(`Error in Burn Collection Addresses: ${error.message}`, { style: { maxWidth: 'none' } })
           addLogItem({ id: uid(), message: error.message, type: 'Error', timestamp: new Date() })
           setReadyToCreate(false)
         })
@@ -205,6 +216,42 @@ export const TokenMergeMinterCreator = ({
     }
   }
 
+  const checkBurnCollectionAddresses = async () => {
+    const burnCollections = mintingDetails?.selectedCollections
+    if (burnCollections?.some((collection) => collection.amount === 0)) {
+      throw new Error('Token amount to be burned cannot be zero.')
+    }
+
+    const collectionAddresses = burnCollections?.map((collection) => collection.address)
+    if (new Set(collectionAddresses).size !== collectionAddresses?.length) {
+      throw new Error('Duplicate burn collection addresses found.')
+    }
+
+    const queryClient = await wallet.getCosmWasmClient()
+
+    for (const collectionAddress of collectionAddresses || []) {
+      try {
+        const contractInfoResponse = await queryClient.queryContractRaw(collectionAddress, toUtf8('contract_info'))
+
+        if (contractInfoResponse) {
+          const contractInfo = JSON.parse(new TextDecoder().decode(contractInfoResponse as Uint8Array))
+          if (!contractInfo.contract.includes('sg721')) {
+            throw new Error(
+              `The provided burn collection address (${collectionAddress}) does not belong to a compatible sg721 contract.`,
+            )
+          } else {
+            console.log(contractInfo)
+          }
+        }
+      } catch (e: any) {
+        if (e.message.includes('bech32')) {
+          throw new Error(`Invalid burn collection address: ${collectionAddress}`)
+        } else {
+          throw new Error(`${e.message}`)
+        }
+      }
+    }
+  }
   const checkMintingDetails = () => {
     if (!mintingDetails) throw new Error('Please fill out the minting details')
     if (mintingDetails.numTokens < 1 || mintingDetails.numTokens > 10000) throw new Error('Invalid number of tokens')
