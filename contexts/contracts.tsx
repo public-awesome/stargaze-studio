@@ -10,6 +10,8 @@ import type { UseRoyaltyRegistryContractProps } from 'contracts/royaltyRegistry'
 import { useRoyaltyRegistryContract } from 'contracts/royaltyRegistry'
 import type { UseSG721ContractProps } from 'contracts/sg721'
 import { useSG721Contract } from 'contracts/sg721'
+import { type UseTokenMergeFactoryContractProps, useTokenMergeFactoryContract } from 'contracts/tokenMergeFactory'
+import { type UseTokenMergeMinterContractProps, useTokenMergeMinterContract } from 'contracts/tokenMergeMinter'
 import type { UseVendingFactoryContractProps } from 'contracts/vendingFactory'
 import { useVendingFactoryContract } from 'contracts/vendingFactory'
 import type { UseVendingMinterContractProps } from 'contracts/vendingMinter'
@@ -30,11 +32,13 @@ import { useSplitsContract } from '../contracts/splits/useContract'
 export interface ContractsStore {
   sg721: UseSG721ContractProps | null
   vendingMinter: UseVendingMinterContractProps | null
+  tokenMergeMinter: UseTokenMergeMinterContractProps | null
   baseMinter: UseBaseMinterContractProps | null
   openEditionMinter: UseOpenEditionMinterContractProps | null
   whitelist: UseWhiteListContractProps | null
   whitelistMerkleTree: UseWhiteListMerkleTreeContractProps | null
   vendingFactory: UseVendingFactoryContractProps | null
+  tokenMergeFactory: UseTokenMergeFactoryContractProps | null
   baseFactory: UseBaseFactoryContractProps | null
   openEditionFactory: UseOpenEditionFactoryContractProps | null
   badgeHub: UseBadgeHubContractProps | null
@@ -48,11 +52,13 @@ export interface ContractsStore {
 export const defaultValues: ContractsStore = {
   sg721: null,
   vendingMinter: null,
+  tokenMergeMinter: null,
   baseMinter: null,
   openEditionMinter: null,
   whitelist: null,
   whitelistMerkleTree: null,
   vendingFactory: null,
+  tokenMergeFactory: null,
   baseFactory: null,
   openEditionFactory: null,
   badgeHub: null,
@@ -83,11 +89,13 @@ export const ContractsProvider = ({ children }: { children: ReactNode }) => {
 const ContractsSubscription: VFC = () => {
   const sg721 = useSG721Contract()
   const vendingMinter = useVendingMinterContract()
+  const tokenMergeMinter = useTokenMergeMinterContract()
   const baseMinter = useBaseMinterContract()
   const openEditionMinter = useOpenEditionMinterContract()
   const whitelist = useWhiteListContract()
   const whitelistMerkleTree = useWhiteListMerkleTreeContract()
   const vendingFactory = useVendingFactoryContract()
+  const tokenMergeFactory = useTokenMergeFactoryContract()
   const baseFactory = useBaseFactoryContract()
   const openEditionFactory = useOpenEditionFactoryContract()
   const badgeHub = useBadgeHubContract()
@@ -98,11 +106,13 @@ const ContractsSubscription: VFC = () => {
     useContracts.setState({
       sg721,
       vendingMinter,
+      tokenMergeMinter,
       baseMinter,
       openEditionMinter,
       whitelist,
       whitelistMerkleTree,
       vendingFactory,
+      tokenMergeFactory,
       baseFactory,
       openEditionFactory,
       badgeHub,
@@ -112,10 +122,12 @@ const ContractsSubscription: VFC = () => {
   }, [
     sg721,
     vendingMinter,
+    tokenMergeMinter,
     baseMinter,
     whitelist,
     whitelistMerkleTree,
     vendingFactory,
+    tokenMergeFactory,
     baseFactory,
     badgeHub,
     splits,
