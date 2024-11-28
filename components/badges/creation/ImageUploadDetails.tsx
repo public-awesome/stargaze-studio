@@ -41,6 +41,7 @@ export interface ImageUploadDetailsDataProps {
   pinataSecretKey?: string
   web3StorageEmail?: string
   web3StorageLoginSuccessful?: boolean
+  fleekClientId?: string
   uploadMethod: UploadMethod
   imageUrl?: string
 }
@@ -85,6 +86,14 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
     name: 'imageUrl',
     title: 'Image URL',
     placeholder: 'ipfs://',
+    defaultValue: '',
+  })
+
+  const fleekClientIdState = useInputState({
+    id: 'fleek-client-id',
+    name: 'fleekClientId',
+    title: 'Fleek Client ID',
+    placeholder: 'Enter Fleek Client ID',
     defaultValue: '',
   })
 
@@ -196,6 +205,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
         pinataSecretKey: pinataSecretKeyState.value,
         web3StorageEmail: web3StorageEmailState.value,
         web3StorageLoginSuccessful,
+        fleekClientId: fleekClientIdState.value,
         uploadMethod,
         imageUrl: imageUrlState.value
           .replace('IPFS://', 'ipfs://')
@@ -216,6 +226,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
     pinataSecretKeyState.value,
     web3StorageEmailState.value,
     web3StorageLoginSuccessful,
+    fleekClientIdState.value,
     uploadMethod,
     imageUrlState.value,
   ])
@@ -294,9 +305,13 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
               <Anchor className="font-bold text-plumbus hover:underline" href="https://web3.storage/">
                 Web3.Storage
               </Anchor>{' '}
-              or{' '}
+              ,{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
                 Pinata
+              </Anchor>{' '}
+              or{' '}
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://fleek.xyz/">
+                Fleek
               </Anchor>{' '}
               and upload your image manually to get an image URL for your badge.
             </p>
@@ -361,6 +376,26 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
                     Upload using Pinata
                   </label>
                 </div>
+
+                <div className="ml-2 form-check form-check-inline">
+                  <input
+                    checked={uploadService === 'fleek'}
+                    className="peer sr-only"
+                    id="inlineRadio5"
+                    name="inlineRadioOptions5"
+                    onClick={() => {
+                      setUploadService('fleek')
+                    }}
+                    type="radio"
+                    value="fleek"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio5"
+                  >
+                    Upload using Fleek
+                  </label>
+                </div>
               </div>
 
               <div className="flex w-full">
@@ -368,6 +403,9 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
                   <TextInput {...pinataApiKeyState} className="w-full" />
                   <div className="w-[20px]" />
                   <TextInput {...pinataSecretKeyState} className="w-full" />
+                </Conditional>
+                <Conditional test={uploadService === 'fleek'}>
+                  <TextInput {...fleekClientIdState} className="w-3/4" />
                 </Conditional>
                 <Conditional test={uploadService === 'web3-storage'}>
                   <div className="flex flex-row w-full">
