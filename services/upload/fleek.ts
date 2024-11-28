@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { ApplicationAccessTokenService, FleekSdk } from '@fleek-platform/sdk'
+import { ApplicationAccessTokenService, FleekSdk } from '@fleekxyz/sdk'
 
 export const uploadToFleek = async (fileArray: File[], clientId: string, directoryName: string): Promise<string> => {
   const applicationService = new ApplicationAccessTokenService({
