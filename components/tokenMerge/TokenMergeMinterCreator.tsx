@@ -180,6 +180,8 @@ export const TokenMergeMinterCreator = ({
         throw new Error('Please enter Pinata API and secret keys')
       } else if (uploadDetails.uploadService === 'web3-storage' && uploadDetails.web3StorageEmail?.toString() === '') {
         throw new Error('Please enter a valid Web3.Storage email')
+      } else if (uploadDetails.uploadService === 'fleek' && uploadDetails.fleekClientId === '') {
+        throw new Error('Please enter a valid Fleek client ID')
       }
       if (uploadDetails.uploadService === 'web3-storage' && !uploadDetails.web3StorageLoginSuccessful)
         throw new Error('Please complete the login process for Web3.Storage')
@@ -353,6 +355,8 @@ export const TokenMergeMinterCreator = ({
           uploadDetails.pinataSecretKey as string,
           uploadDetails.web3StorageEmail as string,
           collectionDetails?.name as string,
+          uploadDetails.fleekClientId as string,
+          collectionDetails?.name as string,
         )
 
         setUploading(false)
@@ -389,6 +393,8 @@ export const TokenMergeMinterCreator = ({
         uploadDetails.pinataSecretKey as string,
         uploadDetails.web3StorageEmail as string,
         collectionDetails?.name as string,
+        uploadDetails.fleekClientId as string,
+        collectionDetails?.name as string,
       )
         .then(async (assetUri: string) => {
           let thumbnailUri: string | undefined
@@ -400,6 +406,8 @@ export const TokenMergeMinterCreator = ({
               uploadDetails.pinataApiKey as string,
               uploadDetails.pinataSecretKey as string,
               uploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
+              uploadDetails.fleekClientId as string,
               collectionDetails?.name as string,
             )
           }
@@ -466,6 +474,8 @@ export const TokenMergeMinterCreator = ({
                   uploadDetails.pinataApiKey as string,
                   uploadDetails.pinataSecretKey as string,
                   uploadDetails.web3StorageEmail as string,
+                  collectionDetails?.name as string,
+                  uploadDetails.fleekClientId as string,
                   collectionDetails?.name as string,
                 )
                   .then(resolve)

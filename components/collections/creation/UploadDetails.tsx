@@ -54,6 +54,7 @@ export interface UploadDetailsDataProps {
   pinataSecretKey?: string
   web3StorageEmail?: EmailAddress
   web3StorageLoginSuccessful?: boolean
+  fleekClientId?: string
   uploadMethod: UploadMethod
   baseTokenURI?: string
   imageUrl?: string
@@ -122,6 +123,14 @@ export const UploadDetails = ({
     name: 'web3StorageEmail',
     title: 'web3.Storage Email',
     placeholder: 'my@happy.email',
+    defaultValue: '',
+  })
+
+  const fleekClientIdState = useInputState({
+    id: 'fleek-client-id',
+    name: 'fleekClientId',
+    title: 'Fleek Client ID',
+    placeholder: 'Enter Fleek Client ID',
     defaultValue: '',
   })
 
@@ -482,6 +491,7 @@ export const UploadDetails = ({
         pinataSecretKey: pinataSecretKeyState.value,
         web3StorageEmail: web3StorageEmailState.value as EmailAddress,
         web3StorageLoginSuccessful,
+        fleekClientId: fleekClientIdState.value,
         uploadMethod,
         baseTokenURI: baseTokenUriState.value
           .replace('IPFS://', 'ipfs://')
@@ -514,6 +524,7 @@ export const UploadDetails = ({
     pinataSecretKeyState.value,
     web3StorageEmailState.value,
     web3StorageLoginSuccessful,
+    fleekClientIdState.value,
     uploadMethod,
     baseTokenUriState.value,
     coverImageUrlState.value,
@@ -542,6 +553,7 @@ export const UploadDetails = ({
         setUploadService(importedUploadDetails.uploadService)
         pinataApiKeyState.onChange(importedUploadDetails.pinataApiKey || '')
         pinataSecretKeyState.onChange(importedUploadDetails.pinataSecretKey || '')
+        fleekClientIdState.onChange(importedUploadDetails.fleekClientId || '')
         baseTokenUriState.onChange(importedUploadDetails.baseTokenURI || '')
         coverImageUrlState.onChange(importedUploadDetails.imageUrl || '')
       } else if (importedUploadDetails.uploadMethod === 'existing') {
@@ -605,9 +617,13 @@ export const UploadDetails = ({
               <Anchor className="font-bold text-plumbus hover:underline" href="https://web3.storage/">
                 Web3.Storage
               </Anchor>{' '}
-              or{' '}
+              ,{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
                 Pinata
+              </Anchor>{' '}
+              or{' '}
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://fleek.xyz/">
+                Fleek
               </Anchor>{' '}
               and upload your assets & metadata manually to get a base URI for your collection.
             </p>
@@ -636,9 +652,13 @@ export const UploadDetails = ({
               <Anchor className="font-bold text-plumbus hover:underline" href="https://web3.storage/">
                 Web3.Storage
               </Anchor>{' '}
-              or{' '}
+              ,{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
                 Pinata
+              </Anchor>{' '}
+              or{' '}
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://fleek.xyz/">
+                Fleek
               </Anchor>{' '}
               and upload your asset & metadata manually to get a URI for your token before minting.
             </p>
@@ -704,6 +724,26 @@ export const UploadDetails = ({
                     Upload using Pinata
                   </label>
                 </div>
+
+                <div className="ml-2 form-check form-check-inline">
+                  <input
+                    checked={uploadService === 'fleek'}
+                    className="peer sr-only"
+                    id="inlineRadio5"
+                    name="inlineRadioOptions5"
+                    onClick={() => {
+                      setUploadService('fleek')
+                    }}
+                    type="radio"
+                    value="fleek"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio5"
+                  >
+                    Upload using Fleek
+                  </label>
+                </div>
               </div>
 
               <div className="flex w-full">
@@ -711,6 +751,9 @@ export const UploadDetails = ({
                   <TextInput {...pinataApiKeyState} className="w-full" />
                   <div className="w-[20px]" />
                   <TextInput {...pinataSecretKeyState} className="w-full" />
+                </Conditional>
+                <Conditional test={uploadService === 'fleek'}>
+                  <TextInput {...fleekClientIdState} className="w-3/4" />
                 </Conditional>
                 <Conditional test={uploadService === 'web3-storage'}>
                   <div className="flex flex-row w-full">

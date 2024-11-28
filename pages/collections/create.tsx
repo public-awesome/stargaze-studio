@@ -340,6 +340,8 @@ const CollectionCreationPage: NextPage = () => {
           uploadDetails.pinataSecretKey as string,
           uploadDetails.web3StorageEmail as string,
           collectionDetails?.name as string,
+          uploadDetails.fleekClientId as string,
+          collectionDetails?.name as string,
         )
 
         setUploading(false)
@@ -396,6 +398,8 @@ const CollectionCreationPage: NextPage = () => {
           uploadDetails.pinataApiKey as string,
           uploadDetails.pinataSecretKey as string,
           uploadDetails.web3StorageEmail as string,
+          collectionDetails?.name as string,
+          uploadDetails.fleekClientId as string,
           collectionDetails?.name as string,
         )
 
@@ -900,6 +904,8 @@ const CollectionCreationPage: NextPage = () => {
         uploadDetails.pinataSecretKey as string,
         uploadDetails.web3StorageEmail as string,
         collectionDetails?.name as string,
+        uploadDetails.fleekClientId as string,
+        collectionDetails?.name as string,
       )
         .then(async (assetUri: string) => {
           let thumbnailUri: string | undefined
@@ -911,6 +917,8 @@ const CollectionCreationPage: NextPage = () => {
               uploadDetails.pinataApiKey as string,
               uploadDetails.pinataSecretKey as string,
               uploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
+              uploadDetails.fleekClientId as string,
               collectionDetails?.name as string,
             )
           }
@@ -980,6 +988,8 @@ const CollectionCreationPage: NextPage = () => {
                     uploadDetails.pinataSecretKey as string,
                     uploadDetails.web3StorageEmail as string,
                     collectionDetails?.name as string,
+                    uploadDetails.fleekClientId as string,
+                    collectionDetails?.name as string,
                   )
                     .then(resolve)
                     .catch(reject)
@@ -1040,6 +1050,8 @@ const CollectionCreationPage: NextPage = () => {
                 uploadDetails.pinataSecretKey as string,
                 uploadDetails.web3StorageEmail as string,
                 collectionDetails?.name as string,
+                uploadDetails.fleekClientId as string,
+                collectionDetails?.name as string,
               )
                 .then(resolve)
                 .catch(reject)
@@ -1081,6 +1093,8 @@ const CollectionCreationPage: NextPage = () => {
         throw new Error('Please enter Pinata API and secret keys')
       } else if (uploadDetails.uploadService === 'web3-storage' && uploadDetails.web3StorageEmail?.toString() === '') {
         throw new Error('Please enter a valid Web3.Storage email')
+      } else if (uploadDetails.uploadService === 'fleek' && uploadDetails.fleekClientId === '') {
+        throw new Error('Please enter a valid Fleek client ID')
       }
       if (uploadDetails.uploadService === 'web3-storage' && !uploadDetails.web3StorageLoginSuccessful)
         throw new Error('Please complete the login process for Web3.Storage')

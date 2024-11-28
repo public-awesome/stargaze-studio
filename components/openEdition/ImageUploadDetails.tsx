@@ -45,6 +45,7 @@ export interface ImageUploadDetailsDataProps {
   pinataSecretKey?: string
   web3StorageEmail?: string
   web3StorageLoginSuccessful?: boolean
+  fleekClientId?: string
   uploadMethod: UploadMethod
   imageUrl?: string
   coverImageUrl?: string
@@ -101,6 +102,14 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     name: 'coverImageUrl',
     title: 'Cover Image URL',
     placeholder: 'ipfs://',
+    defaultValue: '',
+  })
+
+  const fleekClientIdState = useInputState({
+    id: 'fleek-client-id',
+    name: 'fleekClientId',
+    title: 'Fleek Client ID',
+    placeholder: 'Enter Fleek Client ID',
     defaultValue: '',
   })
 
@@ -240,6 +249,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
         pinataApiKey: pinataApiKeyState.value,
         pinataSecretKey: pinataSecretKeyState.value,
         web3StorageEmail: web3StorageEmailState.value,
+        fleekClientId: fleekClientIdState.value,
         web3StorageLoginSuccessful,
         uploadMethod,
         imageUrl: imageUrlState.value
@@ -264,6 +274,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
     pinataSecretKeyState.value,
     web3StorageEmailState.value,
     web3StorageLoginSuccessful,
+    fleekClientIdState.value,
     uploadMethod,
     imageUrlState.value,
     coverImageUrlState.value,
@@ -284,6 +295,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
       pinataApiKeyState.onChange(importedImageUploadDetails.pinataApiKey || '')
       pinataSecretKeyState.onChange(importedImageUploadDetails.pinataSecretKey || '')
       web3StorageEmailState.onChange(importedImageUploadDetails.web3StorageEmail || '')
+      fleekClientIdState.onChange(importedImageUploadDetails.fleekClientId || '')
       imageUrlState.onChange(importedImageUploadDetails.imageUrl || '')
       coverImageUrlState.onChange(importedImageUploadDetails.coverImageUrl || '')
     }
@@ -371,9 +383,13 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
               <Anchor className="font-bold text-plumbus hover:underline" href="https://web3.storage/">
                 Web3.Storage
               </Anchor>{' '}
-              or{' '}
+              ,{' '}
               <Anchor className="font-bold text-plumbus hover:underline" href="https://www.pinata.cloud/">
                 Pinata
+              </Anchor>{' '}
+              or{' '}
+              <Anchor className="font-bold text-plumbus hover:underline" href="https://fleek.xyz/">
+                Fleek
               </Anchor>{' '}
               and upload your asset manually to get an asset URL for your NFT.
             </p>
@@ -435,6 +451,25 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
                     Upload using Pinata
                   </label>
                 </div>
+                <div className="ml-2 form-check form-check-inline">
+                  <input
+                    checked={uploadService === 'fleek'}
+                    className="peer sr-only"
+                    id="inlineRadio5"
+                    name="inlineRadioOptions5"
+                    onClick={() => {
+                      setUploadService('fleek')
+                    }}
+                    type="radio"
+                    value="fleek"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio5"
+                  >
+                    Upload using Fleek
+                  </label>
+                </div>
               </div>
 
               <div className="flex w-full">
@@ -442,6 +477,9 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
                   <TextInput {...pinataApiKeyState} className="w-full" />
                   <div className="w-[20px]" />
                   <TextInput {...pinataSecretKeyState} className="w-full" />
+                </Conditional>
+                <Conditional test={uploadService === 'fleek'}>
+                  <TextInput {...fleekClientIdState} className="w-3/4" />
                 </Conditional>
                 <Conditional test={uploadService === 'web3-storage'}>
                   <div className="flex flex-row w-full">

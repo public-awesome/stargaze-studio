@@ -240,6 +240,12 @@ export const OpenEditionMinterCreator = ({
       ) {
         throw new Error('Please complete the login process for Web3.Storage')
       }
+      if (
+        offChainMetadataUploadDetails.uploadService === 'fleek' &&
+        offChainMetadataUploadDetails.fleekClientId === ''
+      ) {
+        throw new Error('Please enter valid Fleek client ID')
+      }
     }
     if (metadataStorageMethod === 'on-chain' && imageUploadDetails?.uploadMethod === 'new') {
       if (
@@ -247,6 +253,9 @@ export const OpenEditionMinterCreator = ({
         (imageUploadDetails.pinataApiKey === '' || imageUploadDetails.pinataSecretKey === '')
       ) {
         throw new Error('Please enter valid Pinata API and secret keys')
+      }
+      if (imageUploadDetails.uploadService === 'fleek' && imageUploadDetails.fleekClientId === '') {
+        throw new Error('Please enter valid Fleek client ID')
       }
       if (imageUploadDetails.uploadService === 'web3-storage' && imageUploadDetails.web3StorageEmail === '') {
         throw new Error('Please enter a valid Web3.Storage email')
@@ -567,6 +576,8 @@ export const OpenEditionMinterCreator = ({
             offChainMetadataUploadDetails.pinataSecretKey as string,
             offChainMetadataUploadDetails.web3StorageEmail as string,
             collectionDetails?.name as string,
+            offChainMetadataUploadDetails.fleekClientId as string,
+            collectionDetails?.name as string,
           )
           const metadataUriWithBase = `ipfs://${metadataUri}/${(
             offChainMetadataUploadDetails.openEditionMinterMetadataFile as File
@@ -613,6 +624,8 @@ export const OpenEditionMinterCreator = ({
             imageUploadDetails.pinataSecretKey as string,
             imageUploadDetails.web3StorageEmail as string,
             collectionDetails?.name as string,
+            imageUploadDetails.fleekClientId as string,
+            collectionDetails?.name as string,
           )
           const imageUriWithBase = `ipfs://${imageUri}/${(imageUploadDetails.assetFile as File).name}`
           setTokenImageUri(imageUriWithBase)
@@ -624,6 +637,8 @@ export const OpenEditionMinterCreator = ({
             imageUploadDetails.pinataApiKey as string,
             imageUploadDetails.pinataSecretKey as string,
             imageUploadDetails.web3StorageEmail as string,
+            collectionDetails?.name as string,
+            imageUploadDetails.fleekClientId as string,
             collectionDetails?.name as string,
           )
           const coverImageUriWithBase = `ipfs://${coverImageUri}/${(collectionDetails?.imageFile as File[])[0].name}`
@@ -638,6 +653,8 @@ export const OpenEditionMinterCreator = ({
               imageUploadDetails.pinataApiKey as string,
               imageUploadDetails.pinataSecretKey as string,
               imageUploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
+              imageUploadDetails.fleekClientId as string,
               collectionDetails?.name as string,
             )
           const thumbnailUriWithBase = thumbnailUri
@@ -690,6 +707,8 @@ export const OpenEditionMinterCreator = ({
         offChainMetadataUploadDetails.pinataSecretKey as string,
         offChainMetadataUploadDetails.web3StorageEmail as string,
         collectionDetails?.name as string,
+        offChainMetadataUploadDetails.fleekClientId as string,
+        collectionDetails?.name as string,
       )
         .then(async (assetUri: string) => {
           let thumbnailUri: string | undefined
@@ -701,6 +720,8 @@ export const OpenEditionMinterCreator = ({
               offChainMetadataUploadDetails.pinataApiKey as string,
               offChainMetadataUploadDetails.pinataSecretKey as string,
               offChainMetadataUploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
+              offChainMetadataUploadDetails.fleekClientId as string,
               collectionDetails?.name as string,
             )
           const thumbnailUriWithBase = thumbnailUri
@@ -754,6 +775,8 @@ export const OpenEditionMinterCreator = ({
               offChainMetadataUploadDetails.pinataApiKey as string,
               offChainMetadataUploadDetails.pinataSecretKey as string,
               offChainMetadataUploadDetails.web3StorageEmail as string,
+              collectionDetails?.name as string,
+              offChainMetadataUploadDetails.fleekClientId as string,
               collectionDetails?.name as string,
             )
               .then(resolve)
