@@ -331,13 +331,13 @@ const BadgeCreationPage: NextPage = () => {
     let privKey: Buffer
     do {
       privKey = crypto.randomBytes(32)
-    } while (!secp256k1.privateKeyVerify(privKey))
+    } while (!secp256k1.privateKeyVerify(new Uint8Array(privKey)))
 
     const privateKey = privKey.toString('hex')
     setCreatedBadgeKey(privateKey)
     console.log('Private Key: ', privateKey)
 
-    const publicKey = Buffer.from(secp256k1.publicKeyCreate(privKey)).toString('hex')
+    const publicKey = Buffer.from(secp256k1.publicKeyCreate(new Uint8Array(privKey))).toString('hex')
     setBadgeId(null)
     keyState.onChange(publicKey)
   }
