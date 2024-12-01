@@ -312,11 +312,11 @@ export const WhitelistDetails = ({
           endTime: stageOneEndDate ? (stageOneEndDate.getTime() * 1_000_000).toString() : '',
           perAddressLimit: stageOnePerAddressLimitState.value,
           mintPrice: coin(
-            stageOneUnitPriceState.value
-              ? (Number(stageOneUnitPriceState.value) * 1_000_000).toString()
-              : stageOneUnitPriceState.value === 0
-              ? '0'
-              : '',
+            stageOneUnitPriceState?.value
+              ? isNaN(Number(stageOneUnitPriceState.value))
+                ? '0'
+                : (Number(stageOneUnitPriceState.value) * 1_000_000).toString()
+              : '0',
             mintingTokenFromFactory?.denom || 'ustars',
           ),
         },
@@ -326,11 +326,11 @@ export const WhitelistDetails = ({
           endTime: stageTwoEndDate ? (stageTwoEndDate.getTime() * 1_000_000).toString() : '',
           perAddressLimit: stageTwoPerAddressLimitState.value,
           mintPrice: coin(
-            stageTwoUnitPriceState.value
-              ? (Number(stageTwoUnitPriceState.value) * 1_000_000).toString()
-              : stageTwoUnitPriceState.value === 0
-              ? '0'
-              : '',
+            stageTwoUnitPriceState?.value
+              ? isNaN(Number(stageTwoUnitPriceState.value))
+                ? '0'
+                : (Number(stageTwoUnitPriceState.value) * 1_000_000).toString()
+              : '0',
             mintingTokenFromFactory?.denom || 'ustars',
           ),
         },
@@ -340,11 +340,11 @@ export const WhitelistDetails = ({
           endTime: stageThreeEndDate ? (stageThreeEndDate.getTime() * 1_000_000).toString() : '',
           perAddressLimit: stageThreePerAddressLimitState.value,
           mintPrice: coin(
-            stageThreeUnitPriceState.value
-              ? (Number(stageThreeUnitPriceState.value) * 1_000_000).toString()
-              : stageThreeUnitPriceState.value === 0
-              ? '0'
-              : '',
+            stageThreeUnitPriceState?.value
+              ? isNaN(Number(stageThreeUnitPriceState.value))
+                ? '0'
+                : (Number(stageThreeUnitPriceState.value) * 1_000_000).toString()
+              : '0',
             mintingTokenFromFactory?.denom || 'ustars',
           ),
         },
