@@ -16,7 +16,7 @@ import { useAddressListState } from 'components/forms/AddressList.hooks'
 import { FlexMemberAttributes } from 'components/forms/FlexMemberAttributes'
 import { useFlexMemberAttributesState } from 'components/forms/FlexMemberAttributes.hooks'
 import { AddressInput, NumberInput, TextInput } from 'components/forms/FormInput'
-import { useInputState, useNumberInputState } from 'components/forms/FormInput.hooks'
+import { useInputState, useNumberInputState, useUndefinedNumberInputState } from 'components/forms/FormInput.hooks'
 import { InputDateTime } from 'components/InputDateTime'
 import { JsonPreview } from 'components/JsonPreview'
 import { LinkTabs } from 'components/LinkTabs'
@@ -108,7 +108,7 @@ const WhitelistExecutePage: NextPage = () => {
 
   const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
 
-  const unitPriceState = useNumberInputState({
+  const unitPriceState = useUndefinedNumberInputState({
     id: 'unit-price',
     name: 'unitPrice',
     title: 'Unit Price',
@@ -186,9 +186,10 @@ const WhitelistExecutePage: NextPage = () => {
     stageName: stageNameState.value || undefined,
     endTime: endTime ? (endTime?.getTime() * 1_000_000).toString() : undefined,
     perAddressLimit: perAddressLimitState.value || undefined,
-    mintPrice: unitPriceState.value
-      ? coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars')
-      : undefined,
+    mintPrice:
+      unitPriceState.value !== undefined && !isNaN(Number(unitPriceState.value))
+        ? coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars')
+        : undefined,
   }
   const { isLoading, mutate } = useMutation(
     async (event: FormEvent) => {

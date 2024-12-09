@@ -46,3 +46,17 @@ export const useNumberInputState = (args: UseNumberInputStateProps) => {
     ...args,
   }
 }
+
+export const useUndefinedNumberInputState = (args: UseNumberInputStateProps) => {
+  const [value, setValue] = useState<number | undefined>(() => args.defaultValue ?? undefined)
+  useEffect(() => {
+    if (args.defaultValue) setValue(args.defaultValue)
+  }, [args.defaultValue])
+  return {
+    value,
+    onChange: (obj: number | ChangeEvent<HTMLInputElement>) => {
+      setValue(typeof obj === 'number' ? obj : obj.target.valueAsNumber)
+    },
+    ...args,
+  }
+}
