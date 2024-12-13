@@ -51,7 +51,7 @@ const UpdateAdmin: NextPage = () => {
         link={links.Documentation}
         title="Manage Contract Admin"
       />
-      <LinkTabs activeIndex={0} data={manageContractAdminLinkTabs} />
+      <LinkTabs activeIndex={1} data={manageContractAdminLinkTabs} />
       <AddressInput className="w-1/2" {...contractAddressState} />
       <AddressInput className="w-1/2" {...newAdminAddressState} />
 

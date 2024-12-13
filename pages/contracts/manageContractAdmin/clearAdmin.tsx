@@ -44,7 +44,7 @@ const ClearAdmin: NextPage = () => {
         link={links.Documentation}
         title="Manage Contract Admin"
       />
-      <LinkTabs activeIndex={1} data={manageContractAdminLinkTabs} />
+      <LinkTabs activeIndex={2} data={manageContractAdminLinkTabs} />
       <AddressInput className="w-1/2" {...contractAddressState} />
 
       <Button
