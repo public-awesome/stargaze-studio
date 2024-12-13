@@ -1,1 +1,1 @@
-export { default } from './updateAdmin'
+export { default } from './updateCollectionAdmin'
