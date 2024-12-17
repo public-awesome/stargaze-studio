@@ -148,6 +148,7 @@ export const nativeBrnch: TokenInfo = {
 export const tokensList = [
   stars,
   ibcAtom,
+  ibcOsmo,
   ibcUsdc,
   ibcUsk,
   ibcFrnz,
