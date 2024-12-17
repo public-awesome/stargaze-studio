@@ -38,6 +38,18 @@ export const ibcUsdc: TokenInfo = {
   decimalPlaces: 6,
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/noble/images/USDCoin.svg',
 }
+
+export const ibcOsmo: TokenInfo = {
+  id: 'ibc-osmo',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/ED07A3391A112B175915CD8FAF43A2DA8E4790EDE12566649D0C2F97716B8518'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uosmo',
+  displayName: 'OSMO',
+  decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.svg',
+}
+
 export const ibcUsk: TokenInfo = {
   id: 'ibc-usk',
   denom:

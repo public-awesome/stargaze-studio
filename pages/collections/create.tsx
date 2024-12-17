@@ -737,6 +737,7 @@ const CollectionCreationPage: NextPage = () => {
               mintingDetails?.selectedMintToken?.displayName === 'BRNCH' ||
               mintingDetails?.selectedMintToken?.displayName === 'CRBRUS' ||
               mintingDetails?.selectedMintToken?.displayName === 'ATOM' ||
+              mintingDetails?.selectedMintToken?.displayName === 'OSMO' ||
               isFeaturedCollection
             ? STRDST_SG721_CODE_ID
             : SG721_CODE_ID,
