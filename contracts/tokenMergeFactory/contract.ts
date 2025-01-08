@@ -63,8 +63,8 @@ export const tokenMergeFactory = (client: SigningCosmWasmClient, txSigner: strin
       const result = await client.execute(senderAddress, contractAddress, msg, 'auto', '', funds)
 
       return {
-        tokenMergeMinterAddress: result.logs[0].events.filter((e) => e.type === 'instantiate')[0].attributes[0].value,
-        sg721Address: result.logs[0].events
+        tokenMergeMinterAddress: result.events.filter((e) => e.type === 'instantiate')[0].attributes[0].value,
+        sg721Address: result.events
           .filter((e) => e.type === 'wasm')
           .filter((e) => e.attributes[2]?.key === 'sg721_address')[0].attributes[2].value,
         transactionHash: result.transactionHash,
