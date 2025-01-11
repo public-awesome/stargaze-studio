@@ -179,6 +179,27 @@ export const WhitelistDetails = ({
     placeholder: '5',
   })
 
+  const stageOneMintCountLimitState = useNumberInputState({
+    id: 'stage-one-mint-count-limit',
+    name: 'mintCountLimit',
+    title: 'Mint Count Limit',
+    subtitle: 'Maximum number of mints for this stage (optional)',
+  })
+
+  const stageTwoMintCountLimitState = useNumberInputState({
+    id: 'stage-two-mint-count-limit',
+    name: 'mintCountLimit',
+    title: 'Mint Count Limit',
+    subtitle: 'Maximum number of mints for this stage (optional)',
+  })
+
+  const stageThreeMintCountLimitState = useNumberInputState({
+    id: 'stage-three-mint-count-limit',
+    name: 'mintCountLimit',
+    title: 'Mint Count Limit',
+    subtitle: 'Maximum number of mints for this stage (optional)',
+  })
+
   const addressListState = useAddressListState()
 
   const stageOneWhitelistFileOnChange = (data: string[]) => {
@@ -318,6 +339,7 @@ export const WhitelistDetails = ({
               : '0',
             mintingTokenFromFactory?.denom || 'ustars',
           ),
+          mintCountLimit: stageOneMintCountLimitState.value || undefined,
         },
         {
           name: stageTwoNameState.value || '',
@@ -332,6 +354,7 @@ export const WhitelistDetails = ({
               : '0',
             mintingTokenFromFactory?.denom || 'ustars',
           ),
+          mintCountLimit: stageTwoMintCountLimitState.value || undefined,
         },
         {
           name: stageThreeNameState.value || '',
@@ -346,6 +369,7 @@ export const WhitelistDetails = ({
               : '0',
             mintingTokenFromFactory?.denom || 'ustars',
           ),
+          mintCountLimit: stageThreeMintCountLimitState.value || undefined,
         },
       ],
       memberLimit: memberLimitState.value,
@@ -370,14 +394,17 @@ export const WhitelistDetails = ({
     stageOneEndDate,
     stageOneUnitPriceState.value,
     stageOnePerAddressLimitState.value,
+    stageOneMintCountLimitState.value,
     stageTwoStartDate,
     stageTwoEndDate,
     stageTwoUnitPriceState.value,
     stageTwoPerAddressLimitState.value,
+    stageTwoMintCountLimitState.value,
     stageThreeStartDate,
     stageThreeEndDate,
     stageThreeUnitPriceState.value,
     stageThreePerAddressLimitState.value,
+    stageThreeMintCountLimitState.value,
     whitelistStandardStageOneArray,
     whitelistFlexStageOneArray,
     whitelistMerkleTreeStageOneArray,
@@ -470,6 +497,24 @@ export const WhitelistDetails = ({
       stageThreePerAddressLimitState.onChange(
         importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 2
           ? (importedWhitelistDetails.stages[2].perAddressLimit as number)
+          : 0,
+      )
+
+      stageOneMintCountLimitState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 0
+          ? importedWhitelistDetails.stages[0].mintCountLimit || 0
+          : 0,
+      )
+
+      stageTwoMintCountLimitState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 1
+          ? importedWhitelistDetails.stages[1].mintCountLimit || 0
+          : 0,
+      )
+
+      stageThreeMintCountLimitState.onChange(
+        importedWhitelistDetails.stages && importedWhitelistDetails.stages.length > 2
+          ? importedWhitelistDetails.stages[2].mintCountLimit || 0
           : 0,
       )
 
@@ -795,6 +840,7 @@ export const WhitelistDetails = ({
               <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                 <NumberInput isRequired {...stageOnePerAddressLimitState} />
               </Conditional>
+              <NumberInput {...stageOneMintCountLimitState} />
               <FormControl
                 htmlId="start-date"
                 isRequired
@@ -960,6 +1006,7 @@ export const WhitelistDetails = ({
                 <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                   <NumberInput isRequired {...stageTwoPerAddressLimitState} />
                 </Conditional>
+                <NumberInput {...stageTwoMintCountLimitState} />
                 <FormControl
                   htmlId="start-date-2"
                   isRequired
@@ -1122,6 +1169,7 @@ export const WhitelistDetails = ({
                 <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                   <NumberInput isRequired {...stageThreePerAddressLimitState} />
                 </Conditional>
+                <NumberInput {...stageThreeMintCountLimitState} />
                 <FormControl
                   htmlId="start-date-3"
                   isRequired

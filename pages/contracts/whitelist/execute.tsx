@@ -91,6 +91,13 @@ const WhitelistExecutePage: NextPage = () => {
     placeholder: '5',
   })
 
+  const mintCountLimitState = useNumberInputState({
+    id: 'mint-count-limit',
+    name: 'mint-count-limit',
+    title: 'Mint Count Limit',
+    subtitle: 'Mint count limit for the stage (optional)',
+  })
+
   const stageIdState = useNumberInputState({
     id: 'stage-id',
     name: 'stage-id',
@@ -118,6 +125,7 @@ const WhitelistExecutePage: NextPage = () => {
 
   const showMemberLimitState = isEitherType(type, ['increase_member_limit'])
   const showPerAddressLimitState = isEitherType(type, ['update_stage_config', 'add_stage'])
+  const showMintCountLimitState = isEitherType(type, ['update_stage_config', 'add_stage'])
   const showTimestamp = isEitherType(type, ['update_stage_config', 'add_stage'])
   const showMemberList = isEitherType(type, ['add_members', 'remove_members', 'add_stage'])
   const showFlexMemberList = isEitherType(type, ['add_members', 'add_stage'])
@@ -186,6 +194,7 @@ const WhitelistExecutePage: NextPage = () => {
     stageName: stageNameState.value || undefined,
     endTime: endTime ? (endTime?.getTime() * 1_000_000).toString() : undefined,
     perAddressLimit: perAddressLimitState.value || undefined,
+    mintCountLimit: mintCountLimitState.value || undefined,
     mintPrice:
       unitPriceState.value !== undefined && !isNaN(Number(unitPriceState.value))
         ? coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars')
@@ -393,6 +402,9 @@ const WhitelistExecutePage: NextPage = () => {
               />
             </FormControl>
           </Conditional>
+          <Conditional test={showMintCountLimitState}>
+            <NumberInput className="w-1/2" {...mintCountLimitState} />
+          </Conditional>
           <Conditional test={(whitelistType === 'standard' && showMemberList) || showAdminList || showRemoveMemberList}>
             <AddressList
               entries={addressListState.entries}
@@ -430,6 +442,11 @@ const WhitelistExecutePage: NextPage = () => {
               </Alert>
               <WhitelistFlexUpload onChange={setFlexMemberList} />
             </Conditional>
+          </Conditional>
+          <Conditional test={type === 'update_stage_config'}>
+            <Alert className="mt-2 text-sm" type="info">
+              Please note that you are only required to fill in the fields you want to update.
+            </Alert>
           </Conditional>
         </div>
         <div className="space-y-8">
