@@ -168,6 +168,27 @@ const WhitelistInstantiatePage: NextPage = () => {
     placeholder: '5',
   })
 
+  const stageOneMintCountLimitState = useNumberInputState({
+    id: 'stage-one-mint-count-limit',
+    name: 'mintCountLimit',
+    title: 'Mint Count Limit',
+    subtitle: 'Maximum number of mints for this stage (optional)',
+  })
+
+  const stageTwoMintCountLimitState = useNumberInputState({
+    id: 'stage-two-mint-count-limit',
+    name: 'mintCountLimit',
+    title: 'Mint Count Limit',
+    subtitle: 'Maximum number of mints for this stage (optional)',
+  })
+
+  const stageThreeMintCountLimitState = useNumberInputState({
+    id: 'stage-three-mint-count-limit',
+    name: 'mintCountLimit',
+    title: 'Mint Count Limit',
+    subtitle: 'Maximum number of mints for this stage (optional)',
+  })
+
   const addressListState = useAddressListState()
 
   const { data, isLoading, mutate } = useMutation(
@@ -208,6 +229,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : '',
               selectedStageOneMintToken?.denom || 'ustars',
             ),
+            mint_count_limit:
+              stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
+                ? stageOneMintCountLimitState.value
+                : undefined,
           },
           {
             name: stageTwoNameState.value || 'Stage II',
@@ -222,6 +247,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : '',
               selectedStageTwoMintToken?.denom || 'ustars',
             ),
+            mint_count_limit:
+              stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
+                ? stageTwoMintCountLimitState.value
+                : undefined,
           },
           {
             name: stageThreeNameState.value || 'Stage III',
@@ -236,6 +265,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : '',
               selectedStageThreeMintToken?.denom || 'ustars',
             ),
+            mint_count_limit:
+              stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
+                ? stageThreeMintCountLimitState.value
+                : undefined,
           },
         ].slice(0, stageCount),
         member_limit: memberLimitState.value,
@@ -272,6 +305,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : '',
               selectedStageOneMintToken?.denom || 'ustars',
             ),
+            mint_count_limit:
+              stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
+                ? stageOneMintCountLimitState.value
+                : undefined,
           },
           {
             name: stageTwoNameState.value || 'Stage II',
@@ -285,6 +322,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : '',
               selectedStageTwoMintToken?.denom || 'ustars',
             ),
+            mint_count_limit:
+              stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
+                ? stageTwoMintCountLimitState.value
+                : undefined,
           },
           {
             name: stageThreeNameState.value || 'Stage III',
@@ -298,6 +339,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : '',
               selectedStageThreeMintToken?.denom || 'ustars',
             ),
+            mint_count_limit:
+              stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
+                ? stageThreeMintCountLimitState.value
+                : undefined,
           },
         ].slice(0, stageCount),
         member_limit: memberLimitState.value,
@@ -391,6 +436,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : '',
                 selectedStageOneMintToken?.denom || 'ustars',
               ),
+              mint_count_limit:
+                stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
+                  ? stageOneMintCountLimitState.value
+                  : undefined,
             },
             {
               name: stageTwoNameState.value || 'Stage II',
@@ -405,6 +454,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : '',
                 selectedStageTwoMintToken?.denom || 'ustars',
               ),
+              mint_count_limit:
+                stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
+                  ? stageTwoMintCountLimitState.value
+                  : undefined,
             },
             {
               name: stageThreeNameState.value || 'Stage III',
@@ -419,6 +472,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : '',
                 selectedStageThreeMintToken?.denom || 'ustars',
               ),
+              mint_count_limit:
+                stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
+                  ? stageThreeMintCountLimitState.value
+                  : undefined,
             },
           ].slice(0, stageCount),
           admins:
@@ -509,6 +566,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : '',
                 selectedStageOneMintToken?.denom || 'ustars',
               ),
+              mint_count_limit:
+                stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
+                  ? stageOneMintCountLimitState.value
+                  : undefined,
               per_address_limit: 1,
             },
             {
@@ -523,6 +584,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : '',
                 selectedStageTwoMintToken?.denom || 'ustars',
               ),
+              mint_count_limit:
+                stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
+                  ? stageTwoMintCountLimitState.value
+                  : undefined,
               per_address_limit: 1,
             },
             {
@@ -537,6 +602,10 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : '',
                 selectedStageThreeMintToken?.denom || 'ustars',
               ),
+              mint_count_limit:
+                stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
+                  ? stageThreeMintCountLimitState.value
+                  : undefined,
               per_address_limit: 1,
             },
           ].slice(0, stageCount),
@@ -846,6 +915,7 @@ const WhitelistInstantiatePage: NextPage = () => {
               <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                 <NumberInput isRequired {...stageOnePerAddressLimitState} />
               </Conditional>
+              <NumberInput {...stageOneMintCountLimitState} />
               <FormControl
                 htmlId="start-date"
                 isRequired
@@ -1026,6 +1096,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                   <NumberInput isRequired {...stageTwoPerAddressLimitState} />
                 </Conditional>
+                <NumberInput {...stageTwoMintCountLimitState} />
                 <FormControl
                   htmlId="start-date-2"
                   isRequired
@@ -1203,6 +1274,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 <Conditional test={whitelistType === 'standard' || whitelistType === 'merkletree'}>
                   <NumberInput isRequired {...stageThreePerAddressLimitState} />
                 </Conditional>
+                <NumberInput {...stageThreeMintCountLimitState} />
                 <FormControl
                   htmlId="start-date-3"
                   isRequired

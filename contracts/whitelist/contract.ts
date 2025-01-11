@@ -65,6 +65,7 @@ export interface WhiteListInstance {
     endTime?: string,
     perAddressLimit?: number,
     mintPrice?: Coin,
+    mintCountLimit?: number,
   ) => Promise<string>
   addMembers: (stageId: number, memberList: string[] | WhitelistFlexMember[]) => Promise<string>
   removeMembers: (stageId: number, memberList: string[]) => Promise<string>
@@ -78,6 +79,7 @@ export interface WhiteListInstance {
     perAddressLimit: number,
     mintPrice: Coin,
     members: string[],
+    mintCountLimit?: number,
   ) => Promise<string>
   removeStage: (stageId: number) => Promise<string>
 }
@@ -90,6 +92,7 @@ export interface WhitelistMessages {
     endTime?: string,
     perAddressLimit?: number,
     mintPrice?: Coin,
+    mintCountLimit?: number,
   ) => UpdateStageConfigMessage
   addMembers: (stageId: number, memberList: string[] | WhitelistFlexMember[]) => AddMembersMessage
   removeMembers: (stageId: number, memberList: string[]) => RemoveMembersMessage
@@ -103,6 +106,7 @@ export interface WhitelistMessages {
     perAddressLimit: number,
     mintPrice: Coin,
     members: string[],
+    mintCountLimit?: number,
   ) => AddStageMessage
   removeStage: (stageId: number) => RemoveStageMessage
 }
@@ -118,6 +122,7 @@ export interface UpdateStageConfigMessage {
       end_time?: string
       per_address_limit?: number
       mint_price?: Coin
+      mint_count_limit?: number
     }
   }
   funds: Coin[]
@@ -134,6 +139,7 @@ export interface AddStageMessage {
         end_time: string
         per_address_limit: number
         mint_price: Coin
+        mint_count_limit?: number
       }
       members: string[]
     }
@@ -288,6 +294,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       endTime?: string,
       perAddressLimit?: number,
       mintPrice?: Coin,
+      mintCountLimit?: number,
     ): Promise<string> => {
       const res = await client.execute(
         txSigner,
@@ -300,6 +307,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
             end_time: endTime,
             per_address_limit: perAddressLimit,
             mint_price: mintPrice,
+            mint_count_limit: mintCountLimit && mintCountLimit > 0 ? mintCountLimit : undefined,
           },
         },
         'auto',
@@ -385,6 +393,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       perAddressLimit: number,
       mintPrice: Coin,
       members: string[],
+      mintCountLimit?: number,
     ): Promise<string> => {
       const res = await client.execute(
         txSigner,
@@ -397,6 +406,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
               end_time: endTime,
               per_address_limit: perAddressLimit,
               mint_price: mintPrice,
+              mint_count_limit: mintCountLimit && mintCountLimit > 0 ? mintCountLimit : undefined,
             },
             members,
           },
@@ -471,6 +481,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       endTime?: string,
       perAddressLimit?: number,
       mintPrice?: Coin,
+      mintCountLimit?: number,
     ) => {
       return {
         sender: txSigner,
@@ -483,6 +494,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
             end_time: endTime,
             per_address_limit: perAddressLimit,
             mint_price: mintPrice,
+            mint_count_limit: mintCountLimit && mintCountLimit > 0 ? mintCountLimit : undefined,
           },
         },
         funds: [],
@@ -551,6 +563,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
       perAddressLimit: number,
       mintPrice: Coin,
       members: string[],
+      mintCountLimit?: number,
     ) => {
       return {
         sender: txSigner,
@@ -563,6 +576,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
               end_time: endTime,
               per_address_limit: perAddressLimit,
               mint_price: mintPrice,
+              mint_count_limit: mintCountLimit && mintCountLimit > 0 ? mintCountLimit : undefined,
             },
             members,
           },

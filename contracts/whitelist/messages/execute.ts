@@ -29,6 +29,7 @@ export interface Stage {
   endTime?: string
   perAddressLimit?: number
   mintPrice?: Coin
+  mintCountLimit?: number
 }
 
 export const EXECUTE_LIST: ExecuteListItem[] = [
@@ -89,6 +90,7 @@ export interface DispatchExecuteArgs {
   members: string[] | WhitelistFlexMember[]
   memberLimit: number
   perAddressLimit?: number
+  mintCountLimit?: number
   admins: string[]
   stageId: number
   stageName?: string
@@ -124,6 +126,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
         args.endTime,
         args.perAddressLimit,
         args.mintPrice,
+        args.mintCountLimit,
       )
     }
     case 'add_stage': {
@@ -134,6 +137,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
         args.perAddressLimit as number,
         args.mintPrice as Coin,
         args.members as string[],
+        args.mintCountLimit,
       )
     }
     case 'remove_stage': {
@@ -173,6 +177,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
         args.endTime,
         args.perAddressLimit,
         args.mintPrice,
+        args.mintCountLimit,
       )
     }
     case 'add_stage': {
@@ -183,6 +188,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
         args.perAddressLimit as number,
         args.mintPrice as Coin,
         args.members as string[],
+        args.mintCountLimit,
       )
     }
     case 'remove_stage': {
