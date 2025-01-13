@@ -1027,6 +1027,7 @@ export const OpenEditionMinterCreator = ({
               mintingDetails?.selectedMintToken?.displayName === 'BRNCH' ||
               mintingDetails?.selectedMintToken?.displayName === 'CRBRUS' ||
               mintingDetails?.selectedMintToken?.displayName === 'OSMO' ||
+              mintingDetails?.selectedMintToken?.displayName === 'OM' ||
               mintingDetails?.selectedMintToken?.displayName === 'ATOM'
             ? STRDST_SG721_CODE_ID
             : SG721_OPEN_EDITION_CODE_ID,
