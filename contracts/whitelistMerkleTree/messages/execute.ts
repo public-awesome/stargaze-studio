@@ -52,6 +52,7 @@ export interface DispatchExecuteArgs {
   stageId: number
   stageName?: string
   mintPrice?: Coin
+  mintCountLimit?: number
 }
 
 export const dispatchExecute = async (args: DispatchExecuteArgs) => {
@@ -68,6 +69,7 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
         args.endTime,
         args.perAddressLimit,
         args.mintPrice,
+        args.mintCountLimit,
       )
     }
     case 'update_admins': {
@@ -95,6 +97,7 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
         args.endTime,
         args.perAddressLimit,
         args.mintPrice,
+        args.mintCountLimit,
       )
     }
     case 'update_admins': {

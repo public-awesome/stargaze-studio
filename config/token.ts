@@ -50,6 +50,17 @@ export const ibcOsmo: TokenInfo = {
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/osmosis/images/osmo.svg',
 }
 
+export const ibcOm: TokenInfo = {
+  id: 'ibc-om',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/3BD86E80E000B52DA57C474A6A44E37F73D34E38A1FA79EE678E08D119FC555B'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uom',
+  displayName: 'OM',
+  decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/mantrachain/images/OM-Prim-Col.svg',
+}
+
 export const ibcUsk: TokenInfo = {
   id: 'ibc-usk',
   denom:
@@ -149,6 +160,7 @@ export const tokensList = [
   stars,
   ibcAtom,
   ibcOsmo,
+  ibcOm,
   ibcUsdc,
   ibcUsk,
   ibcFrnz,

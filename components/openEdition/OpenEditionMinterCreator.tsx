@@ -802,6 +802,7 @@ export const OpenEditionMinterCreator = ({
           end_time: stage.endTime,
           mint_price: stage.mintPrice,
           per_address_limit: stage.perAddressLimit,
+          mint_count_limit: stage.mintCountLimit && stage.mintCountLimit > 0 ? stage.mintCountLimit : undefined,
         })),
         member_limit: whitelistDetails.memberLimit,
         admins: whitelistDetails.admins || [wallet.address],
@@ -815,6 +816,7 @@ export const OpenEditionMinterCreator = ({
           start_time: stage.startTime,
           end_time: stage.endTime,
           mint_price: stage.mintPrice,
+          mint_count_limit: stage.mintCountLimit && stage.mintCountLimit > 0 ? stage.mintCountLimit : undefined,
         })),
         member_limit: whitelistDetails.memberLimit,
         admins: whitelistDetails.admins || [wallet.address],
@@ -874,6 +876,7 @@ export const OpenEditionMinterCreator = ({
           end_time: stage.endTime,
           mint_price: stage.mintPrice,
           per_address_limit: stage.perAddressLimit,
+          mint_count_limit: stage.mintCountLimit && stage.mintCountLimit > 0 ? stage.mintCountLimit : undefined,
         })),
         admins: whitelistDetails.admins || [wallet.address],
         admins_mutable: whitelistDetails.adminsMutable,
@@ -1024,6 +1027,7 @@ export const OpenEditionMinterCreator = ({
               mintingDetails?.selectedMintToken?.displayName === 'BRNCH' ||
               mintingDetails?.selectedMintToken?.displayName === 'CRBRUS' ||
               mintingDetails?.selectedMintToken?.displayName === 'OSMO' ||
+              mintingDetails?.selectedMintToken?.displayName === 'OM' ||
               mintingDetails?.selectedMintToken?.displayName === 'ATOM'
             ? STRDST_SG721_CODE_ID
             : SG721_OPEN_EDITION_CODE_ID,

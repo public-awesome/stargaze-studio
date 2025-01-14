@@ -47,6 +47,7 @@ export interface WhiteListMerkleTreeInstance {
     endTime?: string,
     perAddressLimit?: number,
     mintPrice?: Coin,
+    mintCountLimit?: number,
   ) => Promise<string>
   updateAdmins: (admins: string[]) => Promise<string>
   freeze: () => Promise<string>
@@ -60,6 +61,7 @@ export interface WhiteListMerkleTreeMessages {
     endTime?: string,
     perAddressLimit?: number,
     mintPrice?: Coin,
+    mintCountLimit?: number,
   ) => UpdateStageConfigMessage
   updateAdmins: (admins: string[]) => UpdateAdminsMessage
   freeze: () => FreezeMessage
@@ -76,6 +78,7 @@ export interface UpdateStageConfigMessage {
       end_time?: string
       per_address_limit?: number
       mint_price?: Coin
+      mint_count_limit?: number
     }
   }
   funds: Coin[]
@@ -187,6 +190,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
       endTime?: string,
       perAddressLimit?: number,
       mintPrice?: Coin,
+      mintCountLimit?: number,
     ): Promise<string> => {
       const res = await client.execute(
         txSigner,
@@ -199,6 +203,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
             end_time: endTime,
             per_address_limit: perAddressLimit,
             mint_price: mintPrice,
+            mint_count_limit: mintCountLimit && mintCountLimit > 0 ? mintCountLimit : undefined,
           },
         },
         'auto',
@@ -279,6 +284,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
       endTime?: string,
       perAddressLimit?: number,
       mintPrice?: Coin,
+      mintCountLimit?: number,
     ) => {
       return {
         sender: txSigner,
@@ -291,6 +297,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
             end_time: endTime,
             per_address_limit: perAddressLimit,
             mint_price: mintPrice,
+            mint_count_limit: mintCountLimit && mintCountLimit > 0 ? mintCountLimit : undefined,
           },
         },
         funds: [],
