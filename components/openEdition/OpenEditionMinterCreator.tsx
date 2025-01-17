@@ -842,6 +842,7 @@ export const OpenEditionMinterCreator = ({
           const formData = new FormData()
           formData.append('whitelist', membersFile)
           formData.append('stage_id', index.toString())
+          formData.append('force', 'true')
 
           const response = await toast
             .promise(
@@ -902,6 +903,7 @@ export const OpenEditionMinterCreator = ({
           const formData = new FormData()
           formData.append('whitelist', membersFile)
           formData.append('stage_id', index.toString())
+          formData.append('force', 'true')
 
           const response = await toast
             .promise(
