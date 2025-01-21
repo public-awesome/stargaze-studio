@@ -34,7 +34,7 @@ const Holders: NextPage = () => {
   const [exportIndividualTokens, setExportIndividualTokens] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const snapshotEndpoint = `https://metabase.constellations.zone/api/public/card/4cf9550e-5eb7-4fe7-bd3b-dc33229f53dc/query/json?parameters=%5B%7B%22type%22%3A%22category%22%2C%22value%22%3A%22${collectionAddressState.value}%22%2C%22id%22%3A%22cb34b7a8-70cf-ba86-8d9c-360b5b2fedd3%22%2C%22target%22%3A%5B%22variable%22%2C%5B%22template-tag%22%2C%22collection_addr%22%5D%5D%7D%5D`
+  const snapshotEndpoint = `https://metabase.stargaze-apis.com/api/public/card/4cf9550e-5eb7-4fe7-bd3b-dc33229f53dc/query/json?parameters=%5B%7B%22type%22%3A%22category%22%2C%22value%22%3A%22${collectionAddressState.value}%22%2C%22id%22%3A%22cb34b7a8-70cf-ba86-8d9c-360b5b2fedd3%22%2C%22target%22%3A%5B%22variable%22%2C%5B%22template-tag%22%2C%22collection_addr%22%5D%5D%7D%5D`
 
   const download = (content: string, fileName: string, contentType: string) => {
     const a = document.createElement('a')

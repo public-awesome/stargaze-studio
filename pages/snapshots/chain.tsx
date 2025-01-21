@@ -22,7 +22,7 @@ export interface ChainDataType {
 }
 
 const Chain: NextPage = () => {
-  const activeUsersEndpoint = `https://metabase.constellations.zone/public/question/cc17fce5-3cc4-4b03-b100-81bdf982f391.json`
+  const activeUsersEndpoint = `https://metabase.stargaze-apis.com/public/question/cc17fce5-3cc4-4b03-b100-81bdf982f391.json`
   const stargazeCreatorsEndpoint = `https://metabase.stargaze-apis.com/public/question/d27456d7-b6c0-4a65-aa12-518c55ea7c8b.json`
   const [chainDataType, setChainDataType] = useState<ChainDataType>({
     type: 'active-users',
