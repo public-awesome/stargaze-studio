@@ -23,6 +23,7 @@ export interface ChainDataType {
 
 const Chain: NextPage = () => {
   const activeUsersEndpoint = `https://metabase.constellations.zone/public/question/cc17fce5-3cc4-4b03-b100-81bdf982f391.json`
+  const stargazeCreatorsEndpoint = `https://metabase.stargaze-apis.com/public/question/d27456d7-b6c0-4a65-aa12-518c55ea7c8b.json`
   const [chainDataType, setChainDataType] = useState<ChainDataType>({
     type: 'active-users',
     endpoint: activeUsersEndpoint,
@@ -55,6 +56,9 @@ const Chain: NextPage = () => {
           <option value={JSON.stringify({ type: 'active-users', endpoint: activeUsersEndpoint })}>
             Active Stargaze Users
           </option>
+          <option value={JSON.stringify({ type: 'stargaze-creators', endpoint: stargazeCreatorsEndpoint })}>
+            Creators on Stargaze
+          </option>
         </select>
       </div>
 
@@ -67,7 +71,7 @@ const Chain: NextPage = () => {
             .then((response) => response.json())
             .then((data) => {
               if (data.length === 0) {
-                toast.error('Could not fetch snapshot data for the given collection address.', {
+                toast.error('Could not fetch snapshot data for the given criteria.', {
                   style: { maxWidth: 'none' },
                 })
                 setIsLoading(false)
@@ -76,6 +80,9 @@ const Chain: NextPage = () => {
               if (chainDataType.type === 'active-users') {
                 const addresses = data.map((item: any) => item.address)
                 download(addresses.join('\n'), 'active-users.txt', 'text/plain')
+              } else if (chainDataType.type === 'stargaze-creators') {
+                const creators = data.map((item: any) => item.created_by_addr)
+                download(creators.join('\n'), 'stargaze-creators.txt', 'text/plain')
               }
               setIsLoading(false)
             })
