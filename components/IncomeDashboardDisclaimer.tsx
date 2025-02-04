@@ -65,7 +65,7 @@ export const IncomeDashboardDisclaimer = (props: IncomeDashboardDisclaimerProps)
               className="my-4"
               href={
                 isChecked
-                  ? `https://metabase.constellations.zone/public/dashboard/4d751721-51ab-46ff-ad27-075ec8d47a17?creator_address=${props.creatorAddress}&chart_granularity_(day%252Fweek%252Fmonth)=week`
+                  ? `https://metabase.stargaze-apis.com/public/dashboard/4d751721-51ab-46ff-ad27-075ec8d47a17?creator_address=${props.creatorAddress}&chart_granularity_(day%252Fweek%252Fmonth)=week`
                   : undefined
               }
               rel="noopener"
