@@ -1,6 +1,7 @@
 import { useChain as useCosmosKitChain } from '@cosmos-kit/react'
 import { chains } from 'chain-registry'
 import { getConfig } from 'config'
+import { intergazeTestnet } from 'config/intergazeTestnet'
 
 import { NETWORK } from './constants'
 
@@ -9,7 +10,7 @@ import { NETWORK } from './constants'
  */
 export const useWallet = () => {
   const { chainId } = getConfig(NETWORK)
-  const chain = chains.find((c) => c.chain_id === chainId)
+  const chain = chains.concat([intergazeTestnet]).find((c) => c.chain_id === chainId)
   if (!chain) {
     throw new Error('Chain not found')
   }

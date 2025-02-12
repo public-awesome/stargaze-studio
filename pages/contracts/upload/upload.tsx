@@ -140,8 +140,10 @@ const UploadContract: NextPage = () => {
         }
 
         const offlineSigner = wallet.getOfflineSignerDirect()
-        const stargateClient = await SigningStargateClient.connectWithSigner(getConfig(NETWORK).rpcUrl, offlineSigner, {
-          gasPrice: GasPrice.fromString('0.025ustars'),
+        const rpcUrl = getConfig(NETWORK).rpcUrl
+        console.log('rpcUrl', rpcUrl)
+        const stargateClient = await SigningStargateClient.connectWithSigner(rpcUrl, offlineSigner, {
+          gasPrice: GasPrice.fromString('0.025ugaze'),
         })
 
         const result = await stargateClient.signAndBroadcast(

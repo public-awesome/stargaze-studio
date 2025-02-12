@@ -11,8 +11,8 @@ export interface TokenInfo {
 
 export const stars: TokenInfo = {
   id: 'stars',
-  denom: 'ustars',
-  displayName: 'STARS',
+  denom: 'ugaze',
+  displayName: 'GAZE',
   decimalPlaces: 6,
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/stars.svg',
 }
