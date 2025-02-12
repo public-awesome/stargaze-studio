@@ -14,6 +14,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const { gasPrice, feeToken } = getConfig(NETWORK)
   return (
     <ChainProvider
+      allowedIframeParentOrigins={['https://daodao.zone', 'https://dao.daodao.zone', 'https://testnet.daodao.zone']}
       assetLists={assets}
       chains={chains}
       endpointOptions={{
