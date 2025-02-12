@@ -313,8 +313,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         //[coin(1, 'ustars')],
       )
 
-      const events = res.logs
-        .map((log) => log.events)
+      const events = res.events
         .flat()
         .find(
           (event) =>
