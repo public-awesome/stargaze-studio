@@ -97,7 +97,7 @@ export const WhitelistUpload = ({ onChange }: WhitelistUploadProps) => {
       return onChange([
         ...new Set(
           printableData
-            ?.filter((address) => address !== '' && isValidAddress(address) && address.startsWith('stars'))
+            ?.filter((address) => address !== '' && isValidAddress(address) && address.startsWith('init'))
             .concat(resolvedAddresses) || [],
         ),
       ])

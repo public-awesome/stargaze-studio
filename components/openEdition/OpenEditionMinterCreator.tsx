@@ -376,7 +376,7 @@ export const OpenEditionMinterCreator = ({
 
     if (
       mintingDetails.paymentAddress &&
-      (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('stars1'))
+      (!isValidAddress(mintingDetails.paymentAddress) || !mintingDetails.paymentAddress.startsWith('init1'))
     )
       throw new Error('Invalid payment address')
 

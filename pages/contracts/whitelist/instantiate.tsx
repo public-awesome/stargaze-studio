@@ -279,7 +279,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   addressListState.values
                     .map((a) => a.address.trim())
                     .filter(
-                      (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                      (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init'),
                     ),
                 ),
               ]
@@ -353,7 +353,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   addressListState.values
                     .map((a) => a.address.trim())
                     .filter(
-                      (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                      (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init'),
                     ),
                 ),
               ]
@@ -486,7 +486,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                     addressListState.values
                       .map((a) => a.address.trim())
                       .filter(
-                        (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                        (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init'),
                       ),
                   ),
                 ]
@@ -618,7 +618,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                     addressListState.values
                       .map((a) => a.address.trim())
                       .filter(
-                        (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'),
+                        (address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init'),
                       ),
                   ),
                 ]

@@ -148,7 +148,7 @@ const WhitelistExecutePage: NextPage = () => {
             ...new Set(
               addressListState.values
                 .map((a) => a.address.trim())
-                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init'))
                 .concat(memberList),
             ),
           ]
@@ -160,9 +160,7 @@ const WhitelistExecutePage: NextPage = () => {
                 .filter((obj, index, self) => index === self.findIndex((t) => t.address.trim() === obj.address.trim()))
                 .filter(
                   (member) =>
-                    member.address !== '' &&
-                    isValidAddress(member.address.trim()) &&
-                    member.address.startsWith('stars'),
+                    member.address !== '' && isValidAddress(member.address.trim()) && member.address.startsWith('init'),
                 )
                 .map((member) => {
                   return {
@@ -176,7 +174,7 @@ const WhitelistExecutePage: NextPage = () => {
             ...new Set(
               addressListState.values
                 .map((a) => a.address.trim())
-                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars'))
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init'))
                 .concat(memberList),
             ),
           ],
@@ -186,7 +184,7 @@ const WhitelistExecutePage: NextPage = () => {
             ...new Set(
               addressListState.values
                 .map((a) => a.address.trim())
-                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
+                .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init')),
             ),
           ]
         : [wallet.address ?? ''],

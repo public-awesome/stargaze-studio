@@ -99,7 +99,7 @@ const SplitsInstantiatePage: NextPage = () => {
                                   member.address !== '' &&
                                   member.weight > 0 &&
                                   isValidAddress(member.address) &&
-                                  member.address.startsWith('stars'),
+                                  member.address.startsWith('init'),
                               )
                               .map((member) => ({ addr: member.address, weight: member.weight })),
                           ),

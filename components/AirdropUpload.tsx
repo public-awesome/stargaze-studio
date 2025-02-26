@@ -78,7 +78,7 @@ export const AirdropUpload = ({ onChange }: AirdropUploadProps) => {
           () => {
             return onChange(
               accountsData
-                .filter((data) => data.address.startsWith('stars') && !data.address.endsWith('.stars'))
+                .filter((data) => data.address.startsWith('init') && !data.address.endsWith('.stars'))
                 .map((data) => ({
                   address: data.address.trim(),
                   amount: data.amount,

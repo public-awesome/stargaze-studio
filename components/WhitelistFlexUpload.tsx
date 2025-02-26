@@ -81,7 +81,7 @@ export const WhitelistFlexUpload = ({ onChange }: WhitelistFlexUploadProps) => {
         await resolveMemberData(memberData.filter((data) => data.address.trim().endsWith('.stars'))).finally(() => {
           return onChange(
             memberData
-              .filter((data) => data.address.startsWith('stars') && !data.address.endsWith('.stars'))
+              .filter((data) => data.address.startsWith('init') && !data.address.endsWith('.stars'))
               .map((data) => ({
                 address: data.address.trim(),
                 mint_count: Number(data.mint_count),

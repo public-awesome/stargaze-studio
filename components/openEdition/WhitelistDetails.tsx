@@ -377,7 +377,7 @@ export const WhitelistDetails = ({
         ...new Set(
           addressListState.values
             .map((a) => a.address.trim())
-            .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('stars')),
+            .filter((address) => address !== '' && isValidAddress(address.trim()) && address.startsWith('init')),
         ),
       ],
       adminsMutable,
