@@ -2,6 +2,7 @@ import type { AssetList, Chain } from '@chain-registry/types'
 
 export const intergazeTestnet: Chain = {
   $schema: '../../chain.schema.json',
+  chain_type: 'cosmos',
   chain_name: 'virgaze-1',
   status: 'live',
   network_type: 'testnet',
@@ -99,6 +100,7 @@ export const intergazeTestnetAssetList: AssetList = {
   assets: [
     {
       description: 'The native token of Intergaze Testnet',
+      type_asset: 'sdk.coin',
       denom_units: [
         {
           denom: 'ugaze',

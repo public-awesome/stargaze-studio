@@ -2,6 +2,7 @@
 import '@interchain-ui/react/styles'
 
 import { GasPrice } from '@cosmjs/stargate'
+import { wallets as initiaExtensionWallets } from '@cosmos-kit/initia-extension'
 import { wallets as keplrExtensionWallets } from '@cosmos-kit/keplr-extension'
 import { wallets as leapExtensionWallets } from '@cosmos-kit/leap-extension'
 import { ChainProvider } from '@cosmos-kit/react'
@@ -45,7 +46,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           gasPrice: GasPrice.fromString(`${gasPrice}${feeToken}`),
         }),
       }}
-      wallets={[...keplrExtensionWallets, ...leapExtensionWallets]}
+      wallets={[...initiaExtensionWallets, ...keplrExtensionWallets, ...leapExtensionWallets]}
     >
       {children}
     </ChainProvider>
