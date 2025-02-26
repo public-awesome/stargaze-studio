@@ -187,7 +187,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
             base_token_uri: baseTokenUriState.value,
             start_time: (startDate.getTime() * 1_000_000).toString(),
             num_tokens: tokenNumberState.value,
-            mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ustars'),
+            mint_price: coin(String(Number(unitPriceState.value) * 1000000), 'ugaze'),
             per_address_limit: perAddressLimitState.value,
             whitelist: whitelistAddressState.value || null,
           },
@@ -212,7 +212,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
         contract
           .use(VENDING_FACTORY_ADDRESS)
           ?.createVendingMinter(wallet.address || '', msg, [
-            coin('3000000000', 'ustars'),
+            coin('3000000000', 'ugaze'),
           ]) as Promise<CreateVendingMinterResponse>,
         {
           loading: 'Instantiating contract...',

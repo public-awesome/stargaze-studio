@@ -761,7 +761,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         },
         'auto',
         '',
-        [coin('2000000000', 'ustars')],
+        [coin('2000000000', 'ugaze')],
       )
       return res.transactionHash
     }
@@ -808,7 +808,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
     admin?: string,
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto', {
-      funds: [coin('3000000000', 'ustars')],
+      funds: [coin('3000000000', 'ugaze')],
       memo: '',
       admin,
     })
@@ -1074,7 +1074,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
         msg: {
           enable_updatable: {},
         },
-        funds: [coin('2000000000', 'ustars')],
+        funds: [coin('2000000000', 'ugaze')],
       }
     }
 

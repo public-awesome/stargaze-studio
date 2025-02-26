@@ -504,7 +504,7 @@ export const OpenEditionMinterCreator = ({
     if (!wallet.isWalletConnected) throw new Error('Wallet not connected.')
     const queryClient = await wallet.getCosmWasmClient()
     const creationFeeDenom = tokensList.find((token) => token.denom === openEditionMinterCreationFee?.denom)
-    await queryClient.getBalance(wallet.address || '', 'ustars').then(async (starsBalance) => {
+    await queryClient.getBalance(wallet.address || '', 'ugaze').then(async (starsBalance) => {
       await queryClient
         .getBalance(wallet.address || '', openEditionMinterCreationFee?.denom as string)
         .then((creationFeeDenomBalance) => {
@@ -520,7 +520,7 @@ export const OpenEditionMinterCreator = ({
               whitelistDetails.whitelistType === 'merkletree-flex'
             )
               whitelistCreationFee = 100000000
-            if (openEditionMinterCreationFee?.denom === 'ustars') {
+            if (openEditionMinterCreationFee?.denom === 'ugaze') {
               const amountNeeded = whitelistCreationFee + Number(openEditionMinterCreationFee.amount)
               if (amountNeeded >= Number(starsBalance.amount))
                 throw new Error(
@@ -1006,7 +1006,7 @@ export const OpenEditionMinterCreator = ({
               : null,
           mint_price: {
             amount: Number(mintingDetails?.unitPrice).toString(),
-            denom: (mintTokenFromFactory?.denom as string) || 'ustars',
+            denom: (mintTokenFromFactory?.denom as string) || 'ugaze',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           num_tokens:

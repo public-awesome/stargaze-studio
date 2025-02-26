@@ -337,7 +337,7 @@ export const WhitelistDetails = ({
                 ? '0'
                 : (Number(stageOneUnitPriceState.value) * 1_000_000).toString()
               : '0',
-            mintingTokenFromFactory?.denom || 'ustars',
+            mintingTokenFromFactory?.denom || 'ugaze',
           ),
           mintCountLimit: stageOneMintCountLimitState.value || undefined,
         },
@@ -352,7 +352,7 @@ export const WhitelistDetails = ({
                 ? '0'
                 : (Number(stageTwoUnitPriceState.value) * 1_000_000).toString()
               : '0',
-            mintingTokenFromFactory?.denom || 'ustars',
+            mintingTokenFromFactory?.denom || 'ugaze',
           ),
           mintCountLimit: stageTwoMintCountLimitState.value || undefined,
         },
@@ -367,7 +367,7 @@ export const WhitelistDetails = ({
                 ? '0'
                 : (Number(stageThreeUnitPriceState.value) * 1_000_000).toString()
               : '0',
-            mintingTokenFromFactory?.denom || 'ustars',
+            mintingTokenFromFactory?.denom || 'ugaze',
           ),
           mintCountLimit: stageThreeMintCountLimitState.value || undefined,
         },

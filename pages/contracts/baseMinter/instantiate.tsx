@@ -149,7 +149,7 @@ const BaseMinterInstantiatePage: NextPage = () => {
         contract
           .use(BASE_FACTORY_ADDRESS)
           ?.createBaseMinter(wallet.address || '', msg, [
-            coin('250000000', 'ustars'),
+            coin('250000000', 'ugaze'),
           ]) as Promise<CreateBaseMinterResponse>,
         {
           loading: 'Instantiating contract...',

@@ -227,7 +227,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : stageOneUnitPriceState.value === 0
                 ? '0'
                 : '',
-              selectedStageOneMintToken?.denom || 'ustars',
+              selectedStageOneMintToken?.denom || 'ugaze',
             ),
             mint_count_limit:
               stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
@@ -245,7 +245,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : stageTwoUnitPriceState.value === 0
                 ? '0'
                 : '',
-              selectedStageTwoMintToken?.denom || 'ustars',
+              selectedStageTwoMintToken?.denom || 'ugaze',
             ),
             mint_count_limit:
               stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
@@ -263,7 +263,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : stageThreeUnitPriceState.value === 0
                 ? '0'
                 : '',
-              selectedStageThreeMintToken?.denom || 'ustars',
+              selectedStageThreeMintToken?.denom || 'ugaze',
             ),
             mint_count_limit:
               stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
@@ -303,7 +303,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : stageOneUnitPriceState.value === 0
                 ? '0'
                 : '',
-              selectedStageOneMintToken?.denom || 'ustars',
+              selectedStageOneMintToken?.denom || 'ugaze',
             ),
             mint_count_limit:
               stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
@@ -320,7 +320,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : stageTwoUnitPriceState.value === 0
                 ? '0'
                 : '',
-              selectedStageTwoMintToken?.denom || 'ustars',
+              selectedStageTwoMintToken?.denom || 'ugaze',
             ),
             mint_count_limit:
               stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
@@ -337,7 +337,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                 : stageThreeUnitPriceState.value === 0
                 ? '0'
                 : '',
-              selectedStageThreeMintToken?.denom || 'ustars',
+              selectedStageThreeMintToken?.denom || 'ugaze',
             ),
             mint_count_limit:
               stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
@@ -435,7 +435,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : stageOneUnitPriceState.value === 0
                   ? '0'
                   : '',
-                selectedStageOneMintToken?.denom || 'ustars',
+                selectedStageOneMintToken?.denom || 'ugaze',
               ),
               mint_count_limit:
                 stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
@@ -453,7 +453,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : stageTwoUnitPriceState.value === 0
                   ? '0'
                   : '',
-                selectedStageTwoMintToken?.denom || 'ustars',
+                selectedStageTwoMintToken?.denom || 'ugaze',
               ),
               mint_count_limit:
                 stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
@@ -471,7 +471,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : stageThreeUnitPriceState.value === 0
                   ? '0'
                   : '',
-                selectedStageThreeMintToken?.denom || 'ustars',
+                selectedStageThreeMintToken?.denom || 'ugaze',
               ),
               mint_count_limit:
                 stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0
@@ -566,7 +566,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : stageOneUnitPriceState.value === 0
                   ? '0'
                   : '',
-                selectedStageOneMintToken?.denom || 'ustars',
+                selectedStageOneMintToken?.denom || 'ugaze',
               ),
               mint_count_limit:
                 stageOneMintCountLimitState.value && stageOneMintCountLimitState.value > 0
@@ -584,7 +584,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : stageTwoUnitPriceState.value === 0
                   ? '0'
                   : '',
-                selectedStageTwoMintToken?.denom || 'ustars',
+                selectedStageTwoMintToken?.denom || 'ugaze',
               ),
               mint_count_limit:
                 stageTwoMintCountLimitState.value && stageTwoMintCountLimitState.value > 0
@@ -602,7 +602,7 @@ const WhitelistInstantiatePage: NextPage = () => {
                   : stageThreeUnitPriceState.value === 0
                   ? '0'
                   : '',
-                selectedStageThreeMintToken?.denom || 'ustars',
+                selectedStageThreeMintToken?.denom || 'ugaze',
               ),
               mint_count_limit:
                 stageThreeMintCountLimitState.value && stageThreeMintCountLimitState.value > 0

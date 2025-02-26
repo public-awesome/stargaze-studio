@@ -111,7 +111,7 @@ const UpdateCollectionAdmin: NextPage = () => {
             }
             setIsLoading(true)
             const defaultFee: StdFee = {
-              amount: coins(50000000, 'ustars'),
+              amount: coins(50000000, 'ugaze'),
               gas: '5000000',
             }
             const senderAddress = (await wallet.getAccount()).address

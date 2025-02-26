@@ -47,7 +47,7 @@ const RevokeAuthorization: NextPage = () => {
       setIsLoading(true)
       const offlineSigner = wallet.getOfflineSignerDirect()
       const stargateClient = await SigningStargateClient.connectWithSigner(getConfig(NETWORK).rpcUrl, offlineSigner, {
-        gasPrice: GasPrice.fromString('0.25ustars'),
+        gasPrice: GasPrice.fromString('0.25ugaze'),
       })
 
       const response = await stargateClient.signAndBroadcast(
@@ -63,7 +63,7 @@ const RevokeAuthorization: NextPage = () => {
           },
         ],
         {
-          amount: [{ amount: '500000', denom: 'ustars' }],
+          amount: [{ amount: '500000', denom: 'ugaze' }],
           gas: '200000',
         },
       )

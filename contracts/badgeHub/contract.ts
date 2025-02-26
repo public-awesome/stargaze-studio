@@ -304,13 +304,8 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
-        [
-          coin(
-            (Number(sizeof(badge)) + Number(sizeof(badge.metadata.attributes))) * Number(feeRate.metadata),
-            'ustars',
-          ),
-        ],
-        //[coin(1, 'ustars')],
+        [coin((Number(sizeof(badge)) + Number(sizeof(badge.metadata.attributes))) * Number(feeRate.metadata), 'ugaze')],
+        //[coin(1, 'ugaze')],
       )
 
       const events = res.logs
@@ -342,8 +337,8 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
-        [coin(200000000, 'ustars')],
-        // editFee ? [coin(editFee, 'ustars')] : [],
+        [coin(200000000, 'ugaze')],
+        // editFee ? [coin(editFee, 'ugaze')] : [],
       )
 
       return res.transactionHash
@@ -371,7 +366,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
         },
         'auto',
         '',
-        [coin(Math.ceil((Number(sizeof(keys)) * 1.1 * Number(feeRate.key)) / 2), 'ustars')],
+        [coin(Math.ceil((Number(sizeof(keys)) * 1.1 * Number(feeRate.key)) / 2), 'ugaze')],
       )
 
       return res.transactionHash
@@ -592,7 +587,7 @@ export const badgeHub = (client: SigningCosmWasmClient, txSigner: string): Badge
             metadata,
           },
         },
-        funds: editFee ? [coin(editFee, 'ustars')] : [],
+        funds: editFee ? [coin(editFee, 'ugaze')] : [],
       }
     }
 

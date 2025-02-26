@@ -197,7 +197,7 @@ const WhitelistExecutePage: NextPage = () => {
     mintCountLimit: mintCountLimitState.value || undefined,
     mintPrice:
       unitPriceState.value !== undefined && !isNaN(Number(unitPriceState.value))
-        ? coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ustars')
+        ? coin(String(Number(unitPriceState.value) * 1000000), selectedMintToken?.denom || 'ugaze')
         : undefined,
   }
   const { isLoading, mutate } = useMutation(

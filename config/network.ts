@@ -47,7 +47,7 @@ export const intergazeTestnetConfig: AppConfig = {
   feeToken: 'ugaze',
   stakingToken: 'ugaze',
   coinMap: {
-    ustars: { denom: 'GAZE', fractionalDigits: 6 },
+    ugaze: { denom: 'GAZE', fractionalDigits: 6 },
   },
   gasPrice: 0.025,
   fees: {

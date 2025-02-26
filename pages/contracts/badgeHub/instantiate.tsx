@@ -34,7 +34,7 @@ const BadgeHubInstantiatePage: NextPage = () => {
     id: 'metadata-fee-rate',
     name: 'Metadata Fee Rate',
     title: 'Metadata Fee Rate',
-    subtitle: 'The fee rate, in ustars per byte, for storing metadata on-chain',
+    subtitle: 'The fee rate, in ugaze per byte, for storing metadata on-chain',
     placeholder: '500',
   })
 
@@ -42,7 +42,7 @@ const BadgeHubInstantiatePage: NextPage = () => {
     id: 'key-fee-rate',
     name: 'Key Fee Rate',
     title: 'Key Fee Rate',
-    subtitle: 'The fee rate, in ustars per byte, for storing claim keys on-chain',
+    subtitle: 'The fee rate, in ugaze per byte, for storing claim keys on-chain',
     placeholder: '500',
   })
 

@@ -121,7 +121,7 @@ const VendingMinterExecutePage: NextPage = () => {
     type,
     funds:
       mintPriceState.value && mintPriceState.value > 0
-        ? coins((Number(mintPriceState.value) * 1_000_000).toString(), selectedMintToken?.denom || 'ustars')
+        ? coins((Number(mintPriceState.value) * 1_000_000).toString(), selectedMintToken?.denom || 'ugaze')
         : [],
   }
   const { isLoading, mutate } = useMutation(

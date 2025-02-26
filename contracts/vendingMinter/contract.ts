@@ -588,7 +588,7 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
         },
         'auto',
         '',
-        [coin(500000000, 'ustars')],
+        [coin(500000000, 'ugaze')],
       )
 
       return res.transactionHash
@@ -670,7 +670,7 @@ export const vendingMinter = (client: SigningCosmWasmClient, txSigner: string): 
     label: string,
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto', {
-      funds: [coin('3000000000', 'ustars')],
+      funds: [coin('3000000000', 'ugaze')],
     })
 
     return {

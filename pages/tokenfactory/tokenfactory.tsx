@@ -219,7 +219,7 @@ const Tokenfactory: NextPage = () => {
           : 'https://rpc.stargaze-apis.com/',
         offlineSigner,
         {
-          gasPrice: GasPrice.fromString('0.025ustars'),
+          gasPrice: GasPrice.fromString('0.025ugaze'),
           registry,
         },
       )

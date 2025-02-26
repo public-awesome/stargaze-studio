@@ -724,7 +724,7 @@ const CollectionCreationPage: NextPage = () => {
           payment_address: mintingDetails?.paymentAddress ? mintingDetails.paymentAddress : undefined,
           mint_price: {
             amount: mintingDetails?.unitPrice,
-            denom: (mintTokenFromVendingFactory?.denom as string) || 'ustars',
+            denom: (mintTokenFromVendingFactory?.denom as string) || 'ugaze',
           },
           per_address_limit: mintingDetails?.perAddressLimit,
           whitelist,
@@ -1513,7 +1513,7 @@ const CollectionCreationPage: NextPage = () => {
 
     const creationFeeDenom = tokensList.find((token) => token.denom === creationFee?.denom)
 
-    await queryClient.getBalance(wallet.address || '', 'ustars').then(async (starsBalance) => {
+    await queryClient.getBalance(wallet.address || '', 'ugaze').then(async (starsBalance) => {
       await queryClient
         .getBalance(wallet.address || '', creationFee?.denom as string)
         .then((creationFeeDenomBalance) => {
@@ -1524,7 +1524,7 @@ const CollectionCreationPage: NextPage = () => {
               whitelistDetails.memberLimit
             ) {
               const whitelistCreationFee = Math.ceil(Number(whitelistDetails.memberLimit) / 1000) * 100000000
-              if (creationFee?.denom === 'ustars') {
+              if (creationFee?.denom === 'ugaze') {
                 const amountNeeded = whitelistCreationFee + Number(creationFee.amount)
                 if (amountNeeded >= Number(starsBalance.amount))
                   throw new Error(
@@ -1551,7 +1551,7 @@ const CollectionCreationPage: NextPage = () => {
               whitelistDetails.whitelistType === 'merkletree-flex'
             ) {
               const merkleWhitelistCreationFee = 1000000000
-              if (creationFee?.denom === 'ustars') {
+              if (creationFee?.denom === 'ugaze') {
                 const amountNeeded = merkleWhitelistCreationFee + Number(creationFee.amount)
                 if (amountNeeded >= Number(starsBalance.amount))
                   throw new Error(

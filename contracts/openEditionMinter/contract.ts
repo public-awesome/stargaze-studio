@@ -356,7 +356,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         console.log(factoryParameters?.params?.extension?.airdrop_mint_fee_bps)
 
         const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
-        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ustars'
+        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ugaze'
         if (!price) {
           throw new Error(
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to an Open Edition Factory.',
@@ -387,7 +387,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         })
 
         const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
-        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ustars'
+        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ugaze'
         if (!price) {
           throw new Error(
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
@@ -428,7 +428,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
         })
 
         const price = factoryParameters?.params?.extension?.airdrop_mint_price.amount
-        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ustars'
+        const denom = factoryParameters?.params?.extension?.airdrop_mint_price.denom || 'ugaze'
         if (!price) {
           throw new Error(
             'Unable to retrieve a valid airdrop mint price. It may be that the given contract address does not belong to a Open Edition Factory.',
@@ -502,7 +502,7 @@ export const openEditionMinter = (client: SigningCosmWasmClient, txSigner: strin
     label: string,
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(senderAddress, codeId, initMsg, label, 'auto', {
-      funds: [coin('1000000000', 'ustars')],
+      funds: [coin('1000000000', 'ugaze')],
     })
 
     return {

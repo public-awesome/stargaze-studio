@@ -267,7 +267,7 @@ export const WhiteListMerkleTree = (client: SigningCosmWasmClient, txSigner: str
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(txSigner, codeId, initMsg, label, 'auto', {
       admin,
-      funds: [coin(1000000000, 'ustars')],
+      funds: [coin(1000000000, 'ugaze')],
     })
 
     return {

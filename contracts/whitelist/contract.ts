@@ -381,7 +381,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
         { increase_member_limit: limit },
         'auto',
         'Increase Member Limit',
-        upgradeFee === 0 ? undefined : [coin(upgradeFee.toString(), 'ustars')],
+        upgradeFee === 0 ? undefined : [coin(upgradeFee.toString(), 'ugaze')],
       )
       return res.transactionHash
     }
@@ -463,7 +463,7 @@ export const WhiteList = (client: SigningCosmWasmClient, txSigner: string): Whit
     admin?: string,
   ): Promise<InstantiateResponse> => {
     const result = await client.instantiate(txSigner, codeId, initMsg, label, 'auto', {
-      funds: [coin((Math.ceil(Number(initMsg.member_limit) / 1000) * 100000000).toString(), 'ustars')],
+      funds: [coin((Math.ceil(Number(initMsg.member_limit) / 1000) * 100000000).toString(), 'ugaze')],
       admin,
     })
 

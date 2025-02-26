@@ -69,7 +69,7 @@ const Grant: NextPage = () => {
     id: 'spend-limit-denom',
     name: 'spendLimitDenom',
     title: 'Spend Limit Denom',
-    placeholder: `ustars`,
+    placeholder: `ugaze`,
     subtitle: 'The spend limit denom',
   })
 
@@ -85,7 +85,7 @@ const Grant: NextPage = () => {
     id: 'max-funds-limit-denom',
     name: 'maxFundsLimitDenom',
     title: 'Max Funds Limit Denom',
-    placeholder: `ustars`,
+    placeholder: `ugaze`,
     subtitle: 'The denom for max funds limit',
   })
 
@@ -241,7 +241,7 @@ const Grant: NextPage = () => {
       setIsLoading(true)
       const offlineSigner = wallet.getOfflineSignerDirect()
       const stargateClient = await SigningStargateClient.connectWithSigner(getConfig(NETWORK).rpcUrl, offlineSigner, {
-        gasPrice: GasPrice.fromString('0.025ustars'),
+        gasPrice: GasPrice.fromString('0.025ugaze'),
       })
 
       const response = await stargateClient.signAndBroadcast(wallet.address || '', [messageToSign() as Msg], 'auto')
