@@ -41,6 +41,7 @@
     "@types/pako": "^2.0.3",
     "@web3-storage/w3up-client": "15.0.0",
     "axios": "^0",
+    "bech32-converting": "1.0.9",
     "chain-registry": "1.69.129",
     "clsx": "^1",
     "compare-versions": "^4",

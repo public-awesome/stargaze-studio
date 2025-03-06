@@ -732,18 +732,8 @@ const CollectionCreationPage: NextPage = () => {
         collection_params: {
           code_id: collectionDetails?.updatable
             ? SG721_UPDATABLE_CODE_ID
-            : mintingDetails?.selectedMintToken?.displayName === 'STRDST' ||
-              mintingDetails?.selectedMintToken?.displayName === 'USK' ||
-              mintingDetails?.selectedMintToken?.displayName === 'USDC' ||
-              mintingDetails?.selectedMintToken?.displayName === 'TIA' ||
-              mintingDetails?.selectedMintToken?.displayName === 'nBTC' ||
-              mintingDetails?.selectedMintToken?.displayName === 'KUJI' ||
-              mintingDetails?.selectedMintToken?.displayName === 'HUAHUA' ||
-              mintingDetails?.selectedMintToken?.displayName === 'BRNCH' ||
-              mintingDetails?.selectedMintToken?.displayName === 'CRBRUS' ||
-              mintingDetails?.selectedMintToken?.displayName === 'ATOM' ||
-              mintingDetails?.selectedMintToken?.displayName === 'OSMO' ||
-              mintingDetails?.selectedMintToken?.displayName === 'OM' ||
+            : mintingDetails?.selectedMintToken?.displayName === 'INIT' ||
+              mintingDetails?.selectedMintToken?.displayName === 'GAZE' ||
               isFeaturedCollection
             ? STRDST_SG721_CODE_ID
             : SG721_CODE_ID,

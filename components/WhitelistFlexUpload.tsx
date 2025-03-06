@@ -1,4 +1,5 @@
 import { toUtf8 } from '@cosmjs/encoding'
+import converter from 'bech32-converting'
 import clsx from 'clsx'
 import React, { useState } from 'react'
 import { toast } from 'react-hot-toast'
@@ -81,6 +82,15 @@ export const WhitelistFlexUpload = ({ onChange }: WhitelistFlexUploadProps) => {
         await resolveMemberData(memberData.filter((data) => data.address.trim().endsWith('.stars'))).finally(() => {
           return onChange(
             memberData
+              .map((line) => {
+                if (line.address.trim().startsWith('0x')) {
+                  return {
+                    address: converter('init').toBech32(line.address.trim()),
+                    mint_count: Number(line.mint_count),
+                  }
+                }
+                return line
+              })
               .filter((data) => data.address.startsWith('init') && !data.address.endsWith('.stars'))
               .map((data) => ({
                 address: data.address.trim(),
