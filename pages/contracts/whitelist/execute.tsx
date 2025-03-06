@@ -27,7 +27,7 @@ import { WhitelistFlexUpload } from 'components/WhitelistFlexUpload'
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
-import { stars } from 'config/token'
+import { gaze } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { DispatchExecuteArgs } from 'contracts/whitelist/messages/execute'
@@ -113,7 +113,7 @@ const WhitelistExecutePage: NextPage = () => {
     placeholder: 'Stage I',
   })
 
-  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(stars)
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(gaze)
 
   const unitPriceState = useUndefinedNumberInputState({
     id: 'unit-price',

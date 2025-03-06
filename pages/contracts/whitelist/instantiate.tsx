@@ -26,7 +26,7 @@ import { type WhitelistFlexMember, WhitelistFlexUpload } from 'components/Whitel
 import { WhitelistUpload } from 'components/WhitelistUpload'
 import { vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
-import { ibcAtom } from 'config/token'
+import { ibcInit } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { InstantiateResponse } from 'contracts/sg721'
@@ -89,9 +89,9 @@ const WhitelistInstantiatePage: NextPage = () => {
     WhitelistFlexMember[]
   >([])
 
-  const [selectedStageOneMintToken, setSelectedStageOneMintToken] = useState<TokenInfo | undefined>(ibcAtom)
-  const [selectedStageTwoMintToken, setSelectedStageTwoMintToken] = useState<TokenInfo | undefined>(ibcAtom)
-  const [selectedStageThreeMintToken, setSelectedStageThreeMintToken] = useState<TokenInfo | undefined>(ibcAtom)
+  const [selectedStageOneMintToken, setSelectedStageOneMintToken] = useState<TokenInfo | undefined>(ibcInit)
+  const [selectedStageTwoMintToken, setSelectedStageTwoMintToken] = useState<TokenInfo | undefined>(ibcInit)
+  const [selectedStageThreeMintToken, setSelectedStageThreeMintToken] = useState<TokenInfo | undefined>(ibcInit)
 
   const stageOneNameState = useInputState({
     id: 'stage-one-name',

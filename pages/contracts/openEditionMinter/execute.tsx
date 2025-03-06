@@ -17,7 +17,7 @@ import { openEditionMinterLinkTabs } from 'components/LinkTabs.data'
 import { TransactionHash } from 'components/TransactionHash'
 import { vendingMinterList } from 'config/minter'
 import type { TokenInfo } from 'config/token'
-import { ibcAtom } from 'config/token'
+import { ibcInit } from 'config/token'
 import { useContracts } from 'contexts/contracts'
 import { useGlobalSettings } from 'contexts/globalSettings'
 import type { DispatchExecuteArgs } from 'contracts/openEditionMinter/messages/execute'
@@ -91,7 +91,7 @@ const OpenEditionMinterExecutePage: NextPage = () => {
     placeholder: '25',
   })
 
-  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(ibcAtom)
+  const [selectedMintToken, setSelectedMintToken] = useState<TokenInfo | undefined>(ibcInit)
 
   const showDateField = isEitherType(type, ['update_start_time', 'update_start_trading_time'])
   const showEndDateField = type === 'update_end_time'
