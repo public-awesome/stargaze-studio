@@ -365,7 +365,7 @@ export const Sidebar = () => {
 
       {/* footer attribution */}
       <div className="text-xs text-white/50">
-        Stargaze Studio {process.env.APP_VERSION} <br />
+        Intergaze Studio {process.env.APP_VERSION} <br />
         Powered by{' '}
         <Anchor className="text-plumbus hover:underline" href="https://stargaze.zone">
           Stargaze

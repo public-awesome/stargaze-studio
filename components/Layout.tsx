@@ -47,9 +47,9 @@ export const Layout = ({ children, metadata = {} }: LayoutProps) => {
         <FaDesktop size={48} />
         <h1 className="text-2xl font-bold">Unsupported Viewport</h1>
         <p>
-          Stargaze Studio is best viewed on the big screen.
+          Intergaze Studio is best viewed on the big screen.
           <br />
-          Please open Stargaze Studio on your tablet or desktop browser.
+          Please open Intergaze Studio on your tablet or desktop browser.
         </p>
       </div>
     </div>

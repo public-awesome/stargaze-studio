@@ -12,11 +12,11 @@ const HomePage: NextPage = () => {
       </div>
       <h1 className="font-heading text-4xl font-bold">Welcome!</h1>
       <p className="text-xl">
-        Looking for a fast and efficient way to build an NFT collection? Stargaze Studio is the solution.
+        Looking for a fast and efficient way to build an NFT collection? Intergaze Studio is the solution.
         <br />
         <br />
-        Stargaze Studio is built to provide useful smart contract interfaces that help you build and deploy your own NFT
-        collections in no time.
+        Intergaze Studio is built to provide useful smart contract interfaces that help you build and deploy your own
+        NFT collections in no time.
       </p>
 
       <br />
