@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable tailwindcss/classnames-order */
 
+import { Alert } from 'components/Alert'
 import { Button } from 'components/Button'
 import { Conditional } from 'components/Conditional'
 import { ContractPageHeader } from 'components/ContractPageHeader'
@@ -100,6 +101,17 @@ const Holders: NextPage = () => {
               type="checkbox"
             />
           </label>
+          <label className="justify-start cursor-pointer label w-2/5">
+            <span className="mr-2 font-bold">Export by Token ID</span>
+            <input
+              checked={exportIndividualTokens}
+              className={`${exportIndividualTokens ? `bg-stargaze` : `bg-gray-600`} checkbox`}
+              onClick={() => {
+                setExportIndividualTokens(!exportIndividualTokens)
+              }}
+              type="checkbox"
+            />
+          </label>
           <Conditional
             test={
               collectionAddressState.value.trim() === 'stars1v8avajk64z7pppeu45ce6vv8wuxmwacdff484lqvv0vnka0cwgdqdk64sf'
@@ -116,19 +128,13 @@ const Holders: NextPage = () => {
                 type="checkbox"
               />
             </label>
+            <Conditional test={includeOsmosisHolders}>
+              <Alert type="info">
+                Snapshots for Osmosis are provided by Eleiton and updated once a day. Tokens transferred or acquired
+                recently might not appear on the snapshot.
+              </Alert>
+            </Conditional>
           </Conditional>
-
-          <label className="justify-start cursor-pointer label w-2/5">
-            <span className="mr-2 font-bold">Export by Token ID</span>
-            <input
-              checked={exportIndividualTokens}
-              className={`${exportIndividualTokens ? `bg-stargaze` : `bg-gray-600`} checkbox`}
-              onClick={() => {
-                setExportIndividualTokens(!exportIndividualTokens)
-              }}
-              type="checkbox"
-            />
-          </label>
         </div>
       </div>
 
