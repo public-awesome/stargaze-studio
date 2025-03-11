@@ -1,7 +1,5 @@
-import { Conditional } from 'components/Conditional'
 import { HomeCard } from 'components/HomeCard'
 import type { NextPage } from 'next'
-import { BADGE_HUB_ADDRESS } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 
 const HomePage: NextPage = () => {
@@ -32,11 +30,11 @@ const HomePage: NextPage = () => {
         >
           Create a collection, view a list of your collections or execute collection actions and queries.
         </HomeCard>
-        <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
+        {/* <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
           <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/badges" linkText="Badges" title="Badges">
             Create badges, view a list of them or execute badge related actions and queries.
           </HomeCard>
-        </Conditional>
+        </Conditional> */}
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/contracts"

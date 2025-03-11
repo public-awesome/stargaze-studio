@@ -14,7 +14,7 @@ import { FaCog } from 'react-icons/fa'
 import { footerLinks, socialsLinks } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK, OPEN_EDITION_FACTORY_ADDRESS } from '../utils/constants'
+import { NETWORK } from '../utils/constants'
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { LogModal } from './LogModal'
@@ -60,13 +60,13 @@ export const Sidebar = () => {
     <SidebarLayout>
       {/* Stargaze brand as home button */}
       <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="ml-6 w-3/4" src="/studio-logo.png" />
+        <img alt="Brand Text" className="w-full" src="/studio-logo.png" />
       </Anchor>
       {/* wallet button */}
       <WalletLoader />
       {/* main navigation routes */}
 
-      <div className={clsx('absolute left-[5%] mt-2', isTallWindow ? 'top-[20%]' : 'top-[30%]')}>
+      <div className={clsx('absolute left-[5%]', isTallWindow ? 'top-[18%]' : 'top-[25%]')}>
         <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <div
@@ -92,12 +92,12 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded disabled',
                   router.asPath.includes('/collections/myCollections/') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
               >
-                <Link href="/collections/myCollections/">My Collections</Link>
+                <Link href="/">My Collections</Link>
               </li>
               <li
                 className={clsx(
@@ -110,12 +110,12 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded disabled',
                   router.asPath.includes('/snapshots') ? 'text-white' : 'text-gray',
                 )}
                 tabIndex={-1}
               >
-                <Link href="/snapshots">Snapshots</Link>
+                <Link href="/">Snapshots</Link>
               </li>
               <Conditional test={NETWORK === 'mainnet'}>
                 <li className={clsx('text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded')} tabIndex={-1}>
@@ -130,7 +130,7 @@ export const Sidebar = () => {
             </ul>
           </li>
         </ul>
-        <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
+        {/* <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
           <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
             <li tabIndex={0}>
               <span
@@ -173,8 +173,8 @@ export const Sidebar = () => {
               </ul>
             </li>
           </ul>
-        </Conditional>
-        <ul className="group p-2 w-full bg-transparent menu rounded-box">
+        </Conditional> */}
+        {/* <ul className="group p-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
               className={clsx(
@@ -207,7 +207,7 @@ export const Sidebar = () => {
               </li>
             </ul>
           </li>
-        </ul>
+        </ul> */}
         <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
@@ -220,7 +220,7 @@ export const Sidebar = () => {
               <Link href="/contracts/"> Contract Dashboards </Link>
             </span>
             <ul className="z-50 p-2 bg-base-200">
-              <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
+              {/* <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
                 <li
                   className={clsx(
                     'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
@@ -230,7 +230,7 @@ export const Sidebar = () => {
                 >
                   <Link href="/contracts/baseMinter/">Base Minter Contract</Link>
                 </li>
-              </Conditional>
+              </Conditional> */}
               <li
                 className={clsx(
                   'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
@@ -240,7 +240,7 @@ export const Sidebar = () => {
               >
                 <Link href="/contracts/vendingMinter/">Vending Minter Contract</Link>
               </li>
-              <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
+              {/* <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
                 <li
                   className={clsx(
                     'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
@@ -250,7 +250,7 @@ export const Sidebar = () => {
                 >
                   <Link href="/contracts/openEditionMinter/">Open Edition Minter Contract</Link>
                 </li>
-              </Conditional>
+              </Conditional> */}
               <li
                 className={clsx(
                   'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
@@ -269,7 +269,7 @@ export const Sidebar = () => {
               >
                 <Link href="/contracts/whitelist/">Whitelist Contract</Link>
               </li>
-              <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
+              {/* <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
                 <li
                   className={clsx(
                     'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
@@ -297,9 +297,9 @@ export const Sidebar = () => {
                 tabIndex={-1}
               >
                 <Link href="/contracts/royaltyRegistry/">Royalty Registry</Link>
-              </li>
+              </li> */}
 
-              <li
+              {/* <li
                 className={clsx(
                   'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
                   router.asPath.includes('/contracts/upload/') ? 'text-white' : 'text-gray',
@@ -307,11 +307,11 @@ export const Sidebar = () => {
                 tabIndex={-1}
               >
                 <Link href="/contracts/upload/">Upload Contract</Link>
-              </li>
+              </li> */}
             </ul>
           </li>
         </ul>
-        <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
+        {/* <ul className="group py-1 px-2 w-full bg-transparent menu rounded-box">
           <li tabIndex={0}>
             <span
               className={clsx(
@@ -323,7 +323,7 @@ export const Sidebar = () => {
               <Link href="/authz/"> Authz </Link>
             </span>
           </li>
-        </ul>
+        </ul> */}
       </div>
 
       <IncomeDashboardDisclaimer creatorAddress={wallet.address ? wallet.address : ''} />

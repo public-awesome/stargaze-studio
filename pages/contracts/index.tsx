@@ -1,10 +1,7 @@
-import { Conditional } from 'components/Conditional'
 import { HomeCard } from 'components/HomeCard'
 import type { NextPage } from 'next'
 // import Brand from 'public/brand/brand.svg'
 import { withMetadata } from 'utils/layout'
-
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, OPEN_EDITION_FACTORY_ADDRESS } from '../../utils/constants'
 
 const HomePage: NextPage = () => {
   return (
@@ -23,7 +20,7 @@ const HomePage: NextPage = () => {
       <br />
 
       <div className="grid gap-8 md:grid-cols-2">
-        <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
+        {/* <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
           <HomeCard
             className="p-4 -m-4 hover:bg-gray-500/10 rounded"
             link="/contracts/baseMinter"
@@ -31,7 +28,7 @@ const HomePage: NextPage = () => {
           >
             Execute messages and run queries on Stargaze&apos;s Base Minter contract.
           </HomeCard>
-        </Conditional>
+        </Conditional> */}
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/contracts/vendingMinter"
@@ -42,7 +39,7 @@ const HomePage: NextPage = () => {
         <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/sg721" title="Sg721 Contract">
           Execute messages and run queries on Stargaze&apos;s SG721 contract.
         </HomeCard>
-        <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
+        {/* <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
           <HomeCard
             className="p-4 -m-4 hover:bg-gray-500/10 rounded"
             link="/contracts/openEditionMinter"
@@ -50,7 +47,7 @@ const HomePage: NextPage = () => {
           >
             Execute messages and run queries on Stargaze&apos;s Open Edition Minter contract.
           </HomeCard>
-        </Conditional>
+        </Conditional> */}
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/contracts/whitelist"
@@ -58,7 +55,7 @@ const HomePage: NextPage = () => {
         >
           Execute messages and run queries on Stargaze&apos;s Whitelist contract.
         </HomeCard>
-        <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
+        {/* <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
           <HomeCard
             className="p-4 -m-4 hover:bg-gray-500/10 rounded"
             link="/contracts/badgeHub"
@@ -66,10 +63,10 @@ const HomePage: NextPage = () => {
           >
             Execute messages and run queries on the Badge Hub contract designed for event organizers.
           </HomeCard>
-        </Conditional>
-        <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/splits" title="Splits Contract">
+        </Conditional> */}
+        {/* <HomeCard className="p-4 -m-4 hover:bg-gray-500/10 rounded" link="/contracts/splits" title="Splits Contract">
           Execute messages and run queries on the Splits contract designed for revenue distribution.
-        </HomeCard>
+        </HomeCard> */}
       </div>
     </section>
   )

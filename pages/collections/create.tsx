@@ -2072,7 +2072,7 @@ const CollectionCreationPage: NextPage = () => {
         </Conditional>
       </div>
 
-      <div>
+      {/* <div>
         <div
           className={clsx(
             'mx-10 mt-5',
@@ -2174,7 +2174,7 @@ const CollectionCreationPage: NextPage = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <Conditional test={minterType !== 'base'}>
         <FormControl className={clsx('py-4 px-10 w-full')} title="Import Creation Configuration">

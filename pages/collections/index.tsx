@@ -27,13 +27,13 @@ const HomePage: NextPage = () => {
         >
           Upload your assets, enter collection metadata and deploy your collection.
         </HomeCard>
-        <HomeCard
-          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
+        {/* <HomeCard
+          className="p-4 -m-4 hover:bg-gray-500/10 rounded disabled"
           link="/collections/myCollections"
           title="My Collections"
         >
           View a list of your collections.
-        </HomeCard>
+        </HomeCard> */}
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/collections/actions"
