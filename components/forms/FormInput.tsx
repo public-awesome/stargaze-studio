@@ -32,7 +32,7 @@ export const AddressInput = forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <FormInput
         {...props}
-        placeholder={props.placeholder || 'stars1234567890abcdefghijklmnopqrstuvwxyz...'}
+        placeholder={props.placeholder || 'init1234567890abcdefghijklmnopqrstuvwxyz...'}
         ref={ref}
         type="text"
       />

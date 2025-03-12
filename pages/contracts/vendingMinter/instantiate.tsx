@@ -68,7 +68,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
     id: 'creator-address',
     name: 'creatorAddress',
     title: 'Creator Address',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
     subtitle: 'Address of the collection creator',
   })
 
@@ -99,7 +99,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
     name: 'royaltyPaymentAddress',
     title: 'Payment Address',
     subtitle: 'Address to receive royalties',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const royaltyShareState = useInputState({
@@ -147,7 +147,7 @@ const VendingMinterInstantiatePage: NextPage = () => {
     name: 'whitelistAddress',
     title: 'Whitelist Address',
     subtitle: 'Address to whitelist contract',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const { data, isLoading, mutate } = useMutation(

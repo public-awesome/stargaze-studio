@@ -29,7 +29,7 @@ export const RoyaltyDetails = ({ onChange, importedRoyaltyDetails }: RoyaltyDeta
     name: 'royaltyPaymentAddress',
     title: 'Payment Address',
     subtitle: 'Address to receive royalties',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const royaltyShareState = useInputState({

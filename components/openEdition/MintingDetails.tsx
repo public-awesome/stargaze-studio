@@ -88,7 +88,7 @@ export const MintingDetails = ({
     name: 'paymentAddress',
     title: 'Payment Address (optional)',
     subtitle: 'Address to receive minting revenues (defaults to current wallet address)',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const resolvePaymentAddress = async () => {

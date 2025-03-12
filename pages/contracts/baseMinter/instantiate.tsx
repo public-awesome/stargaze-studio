@@ -68,7 +68,7 @@ const BaseMinterInstantiatePage: NextPage = () => {
     id: 'creator-address',
     name: 'creatorAddress',
     title: 'Creator Address',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
     subtitle: 'Address of the collection creator',
     defaultValue: wallet.address,
   })
@@ -100,7 +100,7 @@ const BaseMinterInstantiatePage: NextPage = () => {
     name: 'royaltyPaymentAddress',
     title: 'Payment Address',
     subtitle: 'Address to receive royalties',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const royaltyShareState = useInputState({

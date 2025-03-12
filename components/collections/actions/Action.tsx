@@ -178,7 +178,7 @@ export const CollectionActions = ({
     name: 'royaltyPaymentAddress',
     title: 'Royalty Payment Address',
     subtitle: 'Address to receive royalties.',
-    placeholder: 'stars1234567890abcdefghijklmnopqrstuvwxyz...',
+    placeholder: 'init1234567890abcdefghijklmnopqrstuvwxyz...',
   })
 
   const royaltyShareState = useInputState({
