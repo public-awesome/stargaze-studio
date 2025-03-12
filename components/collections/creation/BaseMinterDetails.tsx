@@ -51,7 +51,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
     name: 'existingMinter',
     title: 'Existing Base Minter Contract Address',
     subtitle: '',
-    placeholder: 'stars1...',
+    placeholder: 'init1...',
   })
 
   const fetchMinterContracts = async (): Promise<MinterInfo[]> => {
@@ -262,7 +262,7 @@ export const BaseMinterDetails = ({ onChange, minterType, importedBaseMinterDeta
               <select
                 className="mt-4 w-full max-w-3xl text-base bg-white/10 select select-bordered"
                 onChange={(e) => {
-                  existingBaseMinterState.onChange(e.target.value.slice(e.target.value.indexOf('stars1')))
+                  existingBaseMinterState.onChange(e.target.value.slice(e.target.value.indexOf('init1')))
                   e.preventDefault()
                 }}
               >

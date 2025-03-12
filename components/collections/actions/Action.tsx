@@ -502,7 +502,7 @@ export const CollectionActions = ({
 
   const downloadSampleAirdropTokensFile = () => {
     const csvData =
-      'address,amount\nstars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,3\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,1\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,2'
+      'address,amount\ninit153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,3\ninit1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,1\ninit1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,2'
     const blob = new Blob([csvData], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -513,7 +513,7 @@ export const CollectionActions = ({
 
   const downloadSampleAirdropSpecificTokensFile = () => {
     const csvData =
-      'address,tokenId\nstars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,214\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,683\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,102'
+      'address,tokenId\ninit153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,214\ninit1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,683\ninit1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,102'
     const blob = new Blob([csvData], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')

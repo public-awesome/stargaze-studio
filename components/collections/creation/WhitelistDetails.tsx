@@ -234,7 +234,7 @@ export const WhitelistDetails = ({
 
   const downloadSampleWhitelistFlexFile = () => {
     const csvData =
-      'address,mint_count\nstars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,3\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,1\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,2'
+      'address,mint_count\ninit153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e,3\ninit1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz,1\ninit1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3,2'
     const blob = new Blob([csvData], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -245,7 +245,7 @@ export const WhitelistDetails = ({
 
   const downloadSampleWhitelistFile = () => {
     const txtData =
-      'stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e\nstars1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz\nstars1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3'
+      'init153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e\ninit1xkes5r2k8u3m3ayfpverlkcrq3k4jhdk8ws0uz\ninit1s8qx0zvz8yd6e4x0mqmqf7fr9vvfn622wtp3g3'
     const blob = new Blob([txtData], { type: 'text/txt' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')

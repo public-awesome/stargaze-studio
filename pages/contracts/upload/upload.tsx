@@ -48,7 +48,7 @@ const UploadContract: NextPage = () => {
     title: 'Granter Address',
     subtitle: 'The address that granted the authorization for contract upload',
     defaultValue: '',
-    placeholder: 'stars1...',
+    placeholder: 'init1...',
   })
 
   const memoState = useInputState({

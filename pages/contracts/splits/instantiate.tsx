@@ -40,7 +40,7 @@ const SplitsInstantiatePage: NextPage = () => {
     name: 'cw4-group-address',
     title: 'CW4 Group Address',
     subtitle: 'Address of the CW4 Group contract',
-    placeholder: 'stars1...',
+    placeholder: 'init1...',
   })
 
   const splitsAdminState = useInputState({
