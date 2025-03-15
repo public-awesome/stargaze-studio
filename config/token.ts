@@ -21,8 +21,8 @@ export const ibcInit: TokenInfo = {
   id: 'ibc-init',
   denom:
     NETWORK === 'mainnet'
-      ? 'l2/384e4bf58c05381f9d1892b1795a71a77b47fdc90e5578de2c7203e3cd2cca70'
-      : 'l2/384e4bf58c05381f9d1892b1795a71a77b47fdc90e5578de2c7203e3cd2cca70',
+      ? 'ibc/37A3FB4FED4CA04ED6D9E5DA36C6D27248645F0E22F585576A1488B8A89C5A50'
+      : 'ibc/37A3FB4FED4CA04ED6D9E5DA36C6D27248645F0E22F585576A1488B8A89C5A50',
   displayName: 'INIT',
   decimalPlaces: 6,
   imageURL: 'https://raw.githubusercontent.com/initia-labs/initia-registry/main/testnets/miniwasm/images/INIT.svg',
