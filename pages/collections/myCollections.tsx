@@ -220,7 +220,7 @@ const CollectionList: NextPage = () => {
                               <Anchor
                                 className="text-xl text-plumbus"
                                 external
-                                href={`${STARGAZE_URL}/launchpad/${collection.minter}`}
+                                href={`${STARGAZE_URL}/l/${collection.minter}`}
                               >
                                 <FaRocket />
                               </Anchor>
@@ -472,7 +472,7 @@ const CollectionList: NextPage = () => {
                               <Anchor
                                 className="text-xl text-plumbus"
                                 external
-                                href={`${STARGAZE_URL}/launchpad/${collection.minter}`}
+                                href={`${STARGAZE_URL}/l/${collection.minter}`}
                               >
                                 <FaRocket />
                               </Anchor>

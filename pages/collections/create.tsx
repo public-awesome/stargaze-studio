@@ -1834,7 +1834,7 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-white"
                   external
-                  href={`${STARGAZE_URL}/launchpad/${openEditionMinterCreatorData?.sg721ContractAddress as string}`}
+                  href={`${STARGAZE_URL}/l/${openEditionMinterCreatorData?.sg721ContractAddress as string}`}
                 >
                   View on Launchpad
                 </Anchor>
@@ -1893,7 +1893,7 @@ const CollectionCreationPage: NextPage = () => {
                 <Anchor
                   className="text-white"
                   external
-                  href={`${STARGAZE_URL}/launchpad/${tokenMergeMinterCreatorData?.sg721ContractAddress as string}`}
+                  href={`${STARGAZE_URL}/l/${tokenMergeMinterCreatorData?.sg721ContractAddress as string}`}
                 >
                   View on Launchpad
                 </Anchor>
@@ -2044,7 +2044,7 @@ const CollectionCreationPage: NextPage = () => {
                     <Anchor
                       className="text-white"
                       external
-                      href={`${STARGAZE_URL}/launchpad/${sg721ContractAddress as string}`}
+                      href={`${STARGAZE_URL}/l/${sg721ContractAddress as string}`}
                     >
                       View on Launchpad
                     </Anchor>
