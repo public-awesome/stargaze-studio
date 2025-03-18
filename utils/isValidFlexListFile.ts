@@ -21,7 +21,11 @@ export const isValidFlexListFile = (file: WhitelistFlexMember[]) => {
       }
     }
     // Check if address start with stars
-    if (!account.address.trim().startsWith('init') && !account.address.trim().endsWith('.stars')) {
+    if (
+      !account.address.trim().startsWith('init') &&
+      !account.address.trim().startsWith('0x') &&
+      !account.address.trim().endsWith('.stars')
+    ) {
       return { address: false }
     }
     // Check if amount is valid
@@ -32,7 +36,10 @@ export const isValidFlexListFile = (file: WhitelistFlexMember[]) => {
   })
 
   const isStargazeAddresses = file.every(
-    (account) => account.address.trim().startsWith('init') || account.address.trim().endsWith('.stars'),
+    (account) =>
+      account.address.trim().startsWith('init') ||
+      account.address.trim().startsWith('0x') ||
+      account.address.trim().endsWith('.stars'),
   )
   if (!isStargazeAddresses) {
     toast.error('All accounts must be on the Initia network')
