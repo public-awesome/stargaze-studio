@@ -59,7 +59,7 @@ export const UploadDetails = ({ onChange, importedUploadDetails }: UploadDetails
   const [thumbnailCompatibleAssetFileNames, setThumbnailCompatibleAssetFileNames] = useState<string[]>([])
   const [thumbnailFilesArray, setThumbnailFilesArray] = useState<File[]>([])
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('new')
-  const [uploadService, setUploadService] = useState<UploadServiceType>('web3-storage')
+  const [uploadService, setUploadService] = useState<UploadServiceType>('pinata')
   const [metadataFileArrayIndex, setMetadataFileArrayIndex] = useState(0)
   const [refreshMetadata, setRefreshMetadata] = useState(false)
 
@@ -546,26 +546,6 @@ export const UploadDetails = ({ onChange, importedUploadDetails }: UploadDetails
           <div>
             <div className="flex flex-col items-center px-8 w-full">
               <div className="flex justify-items-start mb-5 w-full font-bold">
-                <div className="form-check form-check-inline">
-                  <input
-                    checked={uploadService === 'web3-storage'}
-                    className="peer sr-only"
-                    id="inlineRadio-web3-storage"
-                    name="inlineRadioOptions-web3-storage"
-                    onClick={() => {
-                      setUploadService('web3-storage')
-                    }}
-                    type="radio"
-                    value="web3-storage"
-                  />
-                  <label
-                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
-                    htmlFor="inlineRadio-web3-storage"
-                  >
-                    Upload using Web3.Storage
-                  </label>
-                </div>
-
                 <div className="ml-2 form-check form-check-inline">
                   <input
                     checked={uploadService === 'pinata'}
@@ -605,6 +585,25 @@ export const UploadDetails = ({ onChange, importedUploadDetails }: UploadDetails
                     Upload using Fleek
                   </label>
                 </div>
+                <div className="form-check form-check-inline">
+                  <input
+                    checked={uploadService === 'web3-storage'}
+                    className="peer sr-only"
+                    id="inlineRadio-web3-storage"
+                    name="inlineRadioOptions-web3-storage"
+                    onClick={() => {
+                      setUploadService('web3-storage')
+                    }}
+                    type="radio"
+                    value="web3-storage"
+                  />
+                  <label
+                    className="inline-block py-1 px-2 text-gray peer-checked:text-white hover:text-white peer-checked:bg-black hover:rounded-sm peer-checked:border-b-2 hover:border-b-2 peer-checked:border-plumbus hover:border-plumbus cursor-pointer form-check-label"
+                    htmlFor="inlineRadio-web3-storage"
+                  >
+                    Upload using web3.storage
+                  </label>
+                </div>
               </div>
 
               <div className="flex w-full">
@@ -617,27 +616,32 @@ export const UploadDetails = ({ onChange, importedUploadDetails }: UploadDetails
                   <TextInput {...fleekClientIdState} className="w-3/4" />
                 </Conditional>
                 <Conditional test={uploadService === 'web3-storage'}>
-                  <div className="flex flex-row w-full">
-                    <TextInput {...web3StorageEmailState} className="w-[53%]" disabled={web3StorageLoginSuccessful} />
-                    <Button
-                      className={`mt-8 ml-2 h-[55%] ${
-                        web3StorageLoginSuccessful ? 'bg-blue-500 opacity-80 hover:bg-blue-600 ' : 'bg-stargaze'
-                      }`}
-                      disabled={web3StorageLoginSuccessful}
-                      isLoading={web3StorageLoginInProgress}
-                      onClick={attemptWeb3StorageLogin}
-                    >
-                      {web3StorageLoginSuccessful
-                        ? web3StorageLoginInProgress
-                          ? 'Logging in...'
-                          : 'Logged In'
-                        : 'Log In'}
-                    </Button>
-                    <Conditional test={web3StorageLoginInProgress || web3StorageLoginSuccessful}>
-                      <Button className="mt-8 ml-2 h-[55%]" onClick={cancelWeb3StorageLogin}>
-                        {web3StorageLoginInProgress ? 'Cancel' : 'Log Out'}
+                  <div className="flex flex-col w-full">
+                    <Alert className="flex mb-4" type="warning">
+                      Warning: web3.storage uploads usually take longer to be accessible on IPFS.
+                    </Alert>
+                    <div className="flex flex-row w-full">
+                      <TextInput {...web3StorageEmailState} className="w-[53%]" disabled={web3StorageLoginSuccessful} />
+                      <Button
+                        className={`mt-8 ml-2 h-[55%] ${
+                          web3StorageLoginSuccessful ? 'bg-blue-500 opacity-80 hover:bg-blue-600 ' : 'bg-stargaze'
+                        }`}
+                        disabled={web3StorageLoginSuccessful}
+                        isLoading={web3StorageLoginInProgress}
+                        onClick={attemptWeb3StorageLogin}
+                      >
+                        {web3StorageLoginSuccessful
+                          ? web3StorageLoginInProgress
+                            ? 'Logging in...'
+                            : 'Logged In'
+                          : 'Log In'}
                       </Button>
-                    </Conditional>
+                      <Conditional test={web3StorageLoginInProgress || web3StorageLoginSuccessful}>
+                        <Button className="mt-8 ml-2 h-[55%]" onClick={cancelWeb3StorageLogin}>
+                          {web3StorageLoginInProgress ? 'Cancel' : 'Log Out'}
+                        </Button>
+                      </Conditional>
+                    </div>
                   </div>
                 </Conditional>
               </div>
