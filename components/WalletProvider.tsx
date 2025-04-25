@@ -24,8 +24,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
             rest: ['https://rest.stargaze-apis.com/'],
           },
           stargazetestnet: {
-            rpc: ['https://rpc.elgafar-1.stargaze-apis.com/'],
-            rest: ['https://rest.elgafar-1.stargaze-apis.com/'],
+            rpc: ['https://stargaze-testnet-rpc.polkachu.com/'],
+            rest: ['https://stargaze-testnet-api.polkachu.com/'],
           },
         },
         isLazy: true,
