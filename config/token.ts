@@ -61,6 +61,17 @@ export const ibcOm: TokenInfo = {
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/mantrachain/images/OM-Prim-Col.svg',
 }
 
+export const ibcAkt: TokenInfo = {
+  id: 'ibc-akt',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/84CF82F31F46BFBE392F50D7062BC95142F182A904BCAD3E3180C15B525444D8'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uakt',
+  displayName: 'AKT',
+  decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/images/akt.svg',
+}
+
 export const ibcUsk: TokenInfo = {
   id: 'ibc-usk',
   denom:
@@ -161,6 +172,7 @@ export const tokensList = [
   ibcAtom,
   ibcOsmo,
   ibcOm,
+  ibcAkt,
   ibcUsdc,
   ibcUsk,
   ibcFrnz,
