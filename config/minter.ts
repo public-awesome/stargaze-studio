@@ -13,6 +13,10 @@ import {
   FEATURED_VENDING_IBC_ATOM_FACTORY_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
   FEATURED_VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_ATONE_FACTORY_ADDRESS,
+  FEATURED_VENDING_IBC_ATONE_FACTORY_FLEX_ADDRESS,
+  FEATURED_VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_ADDRESS,
+  FEATURED_VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_OM_FACTORY_ADDRESS,
   FEATURED_VENDING_IBC_OM_FACTORY_FLEX_ADDRESS,
   FEATURED_VENDING_IBC_OM_FACTORY_MERKLE_TREE_ADDRESS,
@@ -36,6 +40,10 @@ import {
   OPEN_EDITION_IBC_ATOM_FACTORY_FLEX_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_ADDRESS,
   OPEN_EDITION_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  OPEN_EDITION_IBC_ATONE_FACTORY_ADDRESS,
+  OPEN_EDITION_IBC_ATONE_FACTORY_FLEX_ADDRESS,
+  OPEN_EDITION_IBC_ATONE_FACTORY_MERKLE_TREE_ADDRESS,
+  OPEN_EDITION_IBC_ATONE_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   OPEN_EDITION_IBC_CRBRUS_FACTORY_ADDRESS,
   OPEN_EDITION_IBC_FRNZ_FACTORY_ADDRESS,
   // OPEN_EDITION_IBC_KUJI_FACTORY_ADDRESS,
@@ -62,6 +70,7 @@ import {
   OPEN_EDITION_UPDATABLE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_AKT_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_ATOM_FACTORY_ADDRESS,
+  OPEN_EDITION_UPDATABLE_IBC_ATONE_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_FRNZ_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_NBTC_FACTORY_ADDRESS,
   OPEN_EDITION_UPDATABLE_IBC_OM_FACTORY_ADDRESS,
@@ -87,6 +96,12 @@ import {
   VENDING_IBC_ATOM_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_ADDRESS,
   VENDING_IBC_ATOM_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_ATONE_FACTORY_ADDRESS,
+  VENDING_IBC_ATONE_FACTORY_FLEX_ADDRESS,
+  VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_ADDRESS,
+  VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  VENDING_IBC_ATONE_UPDATABLE_FACTORY_ADDRESS,
+  VENDING_IBC_ATONE_UPDATABLE_FACTORY_FLEX_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_ADDRESS,
   VENDING_IBC_CRBRUS_FACTORY_FLEX_ADDRESS,
   // VENDING_IBC_KUJI_FACTORY_ADDRESS,
@@ -134,6 +149,7 @@ import type { TokenInfo } from './token'
 import {
   ibcAkt,
   ibcAtom,
+  ibcAtone,
   ibcCrbrus,
   ibcFrnz,
   // ibcHuahua,
@@ -309,6 +325,36 @@ export const openEditionUpdatableIbcAktMinter: MinterInfo = {
   merkleTree: false,
 }
 
+export const openEditionIbcAtoneMinter: MinterInfo = {
+  id: 'open-edition-ibc-atone-minter',
+  factoryAddress: OPEN_EDITION_IBC_ATONE_FACTORY_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  featured: false,
+  flexible: false,
+  merkleTree: false,
+}
+
+export const openEditionIbcAtoneMerkleTreeMinter: MinterInfo = {
+  id: 'open-edition-ibc-atone-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_IBC_ATONE_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  featured: false,
+  flexible: false,
+  merkleTree: true,
+}
+
+export const openEditionUpdatableIbcAtoneMinter: MinterInfo = {
+  id: 'open-edition-updatable-ibc-atone-minter',
+  factoryAddress: OPEN_EDITION_UPDATABLE_IBC_ATONE_FACTORY_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: true,
+  featured: false,
+  flexible: false,
+  merkleTree: false,
+}
+
 export const openEditionIbcUsdcMinter: MinterInfo = {
   id: 'open-edition-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_IBC_USDC_FACTORY_ADDRESS,
@@ -473,6 +519,9 @@ export const openEditionMinterList = [
   openEditionIbcAktMinter,
   openEditionIbcAktMerkleTreeMinter,
   openEditionUpdatableIbcAktMinter,
+  openEditionIbcAtoneMinter,
+  openEditionIbcAtoneMerkleTreeMinter,
+  openEditionUpdatableIbcAtoneMinter,
   openEditionIbcFrnzMinter,
   openEditionUpdatableIbcFrnzMinter,
   openEditionIbcUsdcMinter,
@@ -610,6 +659,26 @@ export const flexibleOpenEditionIbcAktMerkleTreeMinter: MinterInfo = {
   merkleTree: true,
 }
 
+export const flexibleOpenEditionIbcAtoneMinter: MinterInfo = {
+  id: 'flexible-open-edition-ibc-atone-minter',
+  factoryAddress: OPEN_EDITION_IBC_ATONE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  featured: false,
+  flexible: true,
+  merkleTree: false,
+}
+
+export const flexibleOpenEditionIbcAtoneMerkleTreeMinter: MinterInfo = {
+  id: 'flexible-open-edition-ibc-atone-merkle-tree-minter',
+  factoryAddress: OPEN_EDITION_IBC_ATONE_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  featured: false,
+  flexible: true,
+  merkleTree: true,
+}
+
 export const flexibleOpenEditionIbcUsdcMinter: MinterInfo = {
   id: 'flexible-open-edition-ibc-usdc-minter',
   factoryAddress: OPEN_EDITION_IBC_USDC_FACTORY_FLEX_ADDRESS,
@@ -643,6 +712,8 @@ export const flexibleOpenEditionMinterList = [
   flexibleOpenEditionIbcOmMerkleTreeMinter,
   flexibleOpenEditionIbcAktMinter,
   flexibleOpenEditionIbcAktMerkleTreeMinter,
+  flexibleOpenEditionIbcAtoneMinter,
+  flexibleOpenEditionIbcAtoneMerkleTreeMinter,
   flexibleOpenEditionIbcUsdcMinter,
   flexibleOpenEditionIbcTiaMinter,
 ]
@@ -791,6 +862,36 @@ export const vendingUpdatableIbcAktMinter: MinterInfo = {
   id: 'vending-updatable-ibc-akt-minter',
   factoryAddress: VENDING_IBC_AKT_UPDATABLE_FACTORY_ADDRESS,
   supportedToken: ibcAkt,
+  updatable: true,
+  flexible: false,
+  merkleTree: false,
+  featured: false,
+}
+
+export const vendingIbcAtoneMinter: MinterInfo = {
+  id: 'vending-ibc-atone-minter',
+  factoryAddress: VENDING_IBC_ATONE_FACTORY_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: false,
+  merkleTree: false,
+  featured: false,
+}
+
+export const vendingFeaturedIbcAtoneMinter: MinterInfo = {
+  id: 'vending-featured-ibc-atone-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATONE_FACTORY_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: false,
+  merkleTree: false,
+  featured: true,
+}
+
+export const vendingUpdatableIbcAtoneMinter: MinterInfo = {
+  id: 'vending-updatable-ibc-atone-minter',
+  factoryAddress: VENDING_IBC_ATONE_UPDATABLE_FACTORY_ADDRESS,
+  supportedToken: ibcAtone,
   updatable: true,
   flexible: false,
   merkleTree: false,
@@ -983,6 +1084,9 @@ export const vendingMinterList = [
   vendingIbcAktMinter,
   vendingFeaturedIbcAktMinter,
   vendingUpdatableIbcAktMinter,
+  vendingIbcAtoneMinter,
+  vendingFeaturedIbcAtoneMinter,
+  vendingUpdatableIbcAtoneMinter,
   vendingIbcUsdcMinter,
   vendingFeaturedIbcUsdcMinter,
   vendingUpdatableIbcUsdcMinter,
@@ -1146,6 +1250,36 @@ export const flexibleVendingUpdatableIbcAktMinter: MinterInfo = {
   id: 'flexible-vending-updatable-ibc-akt-minter',
   factoryAddress: VENDING_IBC_AKT_UPDATABLE_FACTORY_FLEX_ADDRESS,
   supportedToken: ibcAkt,
+  updatable: true,
+  flexible: true,
+  merkleTree: false,
+  featured: false,
+}
+
+export const flexibleVendingIbcAtoneMinter: MinterInfo = {
+  id: 'flexible-vending-ibc-atone-minter',
+  factoryAddress: VENDING_IBC_ATONE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: true,
+  merkleTree: false,
+  featured: false,
+}
+
+export const flexibleFeaturedVendingIbcAtoneMinter: MinterInfo = {
+  id: 'flexible-featured-vending-ibc-atone-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATONE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: true,
+  merkleTree: false,
+  featured: true,
+}
+
+export const flexibleVendingUpdatableIbcAtoneMinter: MinterInfo = {
+  id: 'flexible-vending-updatable-ibc-atone-minter',
+  factoryAddress: VENDING_IBC_ATONE_UPDATABLE_FACTORY_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
   updatable: true,
   flexible: true,
   merkleTree: false,
@@ -1318,6 +1452,9 @@ export const flexibleVendingMinterList = [
   flexibleVendingIbcAktMinter,
   flexibleFeaturedVendingIbcAktMinter,
   flexibleVendingUpdatableIbcAktMinter,
+  flexibleVendingIbcAtoneMinter,
+  flexibleFeaturedVendingIbcAtoneMinter,
+  flexibleVendingUpdatableIbcAtoneMinter,
   flexibleVendingIbcUsdcMinter,
   flexibleFeaturedVendingIbcUsdcMinter,
   flexibleVendingUpdatableIbcUsdcMinter,
@@ -1429,6 +1566,26 @@ export const merkleTreeVendingFeaturedIbcAktMinter: MinterInfo = {
   id: 'merkletree-vending-featured-ibc-akt-minter',
   factoryAddress: FEATURED_VENDING_IBC_AKT_FACTORY_MERKLE_TREE_ADDRESS,
   supportedToken: ibcAkt,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: true,
+}
+
+export const merkleTreeVendingIbcAtoneMinter: MinterInfo = {
+  id: 'merkletree-vending-ibc-atone-minter',
+  factoryAddress: VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: false,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeVendingFeaturedIbcAtoneMinter: MinterInfo = {
+  id: 'merkletree-vending-featured-ibc-atone-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_ADDRESS,
+  supportedToken: ibcAtone,
   updatable: false,
   flexible: false,
   merkleTree: true,
@@ -1595,6 +1752,26 @@ export const merkleTreeFlexVendingFeaturedIbcAktMinter: MinterInfo = {
   featured: true,
 }
 
+export const merkleTreeFlexVendingIbcAtoneMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-ibc-atone-minter',
+  factoryAddress: VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: false,
+}
+
+export const merkleTreeFlexVendingFeaturedIbcAtoneMinter: MinterInfo = {
+  id: 'merkletree-flex-vending-featured-ibc-atone-minter',
+  factoryAddress: FEATURED_VENDING_IBC_ATONE_FACTORY_MERKLE_TREE_FLEX_ADDRESS,
+  supportedToken: ibcAtone,
+  updatable: false,
+  flexible: true,
+  merkleTree: true,
+  featured: true,
+}
+
 export const merkleTreeVendingMinterList = [
   merkleTreeVendingStarsMinter,
   merkleTreeVendingIbcTiaMinter,
@@ -1622,4 +1799,8 @@ export const merkleTreeVendingMinterList = [
   merkleTreeFlexVendingFeaturedIbcAktMinter,
   merkleTreeVendingIbcAktMinter,
   merkleTreeVendingFeaturedIbcAktMinter,
+  merkleTreeFlexVendingIbcAtoneMinter,
+  merkleTreeFlexVendingFeaturedIbcAtoneMinter,
+  merkleTreeVendingIbcAtoneMinter,
+  merkleTreeVendingFeaturedIbcAtoneMinter,
 ]
