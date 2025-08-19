@@ -72,6 +72,17 @@ export const ibcAkt: TokenInfo = {
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/akash/images/akt.svg',
 }
 
+export const ibcAtone: TokenInfo = {
+  id: 'ibc-atone',
+  denom:
+    NETWORK === 'mainnet'
+      ? 'ibc/1CB8A5D27AD8BEBAFF6C810E637157E07703662AA084E68330E388F77E27244D'
+      : 'factory/stars153w5xhuqu3et29lgqk4dsynj6gjn96lr33wx4e/uatone',
+  displayName: 'ATONE',
+  decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/atomone/images/atomone.svg',
+}
+
 export const ibcUsk: TokenInfo = {
   id: 'ibc-usk',
   denom:
@@ -173,6 +184,7 @@ export const tokensList = [
   ibcOsmo,
   ibcOm,
   ibcAkt,
+  ibcAtone,
   ibcUsdc,
   ibcUsk,
   ibcFrnz,
