@@ -302,7 +302,7 @@ export const ImageUploadDetails = ({ onChange, importedImageUploadDetails }: Ima
   }, [importedImageUploadDetails])
 
   const previewUrl = imageUrlState.value.toLowerCase().trim().startsWith('ipfs://')
-    ? `https://ipfs-gw.stargaze-apis.com/ipfs/${imageUrlState.value.substring(7)}`
+    ? `https://ipfs.io/ipfs/${imageUrlState.value.substring(7)}`
     : imageUrlState.value
 
   const audioPreview = useMemo(

@@ -57,7 +57,7 @@ const BadgeList: NextPage = () => {
                               alt="badge-preview"
                               src={
                                 (badge?.image as string).startsWith('ipfs')
-                                  ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(badge?.image as string).substring(7)}`
+                                  ? `https://ipfs.io/ipfs/${(badge?.image as string).substring(7)}`
                                   : badge?.image
                               }
                             />

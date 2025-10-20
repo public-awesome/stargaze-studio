@@ -94,7 +94,7 @@ const CollectionQueriesPage: NextPage = () => {
         break
       }
       case 3: {
-        alternate = url.replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/')
+        alternate = url.replace('ipfs://', 'https://ipfs.io/ipfs/')
         break
       }
       default: {

@@ -124,9 +124,7 @@ const CollectionList: NextPage = () => {
                                     alt="Cover"
                                     src={
                                       (collection?.image as string).startsWith('ipfs')
-                                        ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(
-                                            collection?.image as string
-                                          ).substring(7)}`
+                                        ? `https://ipfs.io/ipfs/${(collection?.image as string).substring(7)}`
                                         : collection?.image
                                     }
                                   />
@@ -266,9 +264,7 @@ const CollectionList: NextPage = () => {
                                     alt="Cover"
                                     src={
                                       (collection?.image as string).startsWith('ipfs')
-                                        ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(
-                                            collection?.image as string
-                                          ).substring(7)}`
+                                        ? `https://ipfs.io/ipfs/${(collection?.image as string).substring(7)}`
                                         : collection?.image
                                     }
                                   />
@@ -376,9 +372,7 @@ const CollectionList: NextPage = () => {
                                     alt="Cover"
                                     src={
                                       (collection?.image as string).startsWith('ipfs')
-                                        ? `https://ipfs-gw.stargaze-apis.com/ipfs/${(
-                                            collection?.image as string
-                                          ).substring(7)}`
+                                        ? `https://ipfs.io/ipfs/${(collection?.image as string).substring(7)}`
                                         : collection?.image
                                     }
                                   />
