@@ -320,9 +320,7 @@ export const CollectionDetails = ({
             <div className="max-w-[200px] max-h-[200px] rounded border-2">
               <img
                 alt="no-preview-available"
-                src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
-                  coverImageUrl.lastIndexOf('ipfs://') + 7,
-                )}`}
+                src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
               />
             </div>
           )}

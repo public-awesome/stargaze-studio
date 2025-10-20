@@ -1922,7 +1922,7 @@ const CollectionCreationPage: NextPage = () => {
                   <Anchor
                     className="text-stargaze hover:underline"
                     external
-                    href={`https://ipfs-gw.stargaze-apis.com/ipfs/${baseTokenUri as string}`}
+                    href={`https://ipfs.io/ipfs/${baseTokenUri as string}`}
                   >
                     ipfs://{baseTokenUri as string}
                   </Anchor>
@@ -1931,9 +1931,7 @@ const CollectionCreationPage: NextPage = () => {
                   <Anchor
                     className="text-stargaze hover:underline"
                     external
-                    href={`https://ipfs-gw.stargaze-apis.com/ipfs/${baseTokenUri?.substring(
-                      baseTokenUri.lastIndexOf('ipfs://') + 7,
-                    )}/`}
+                    href={`https://ipfs.io/ipfs/${baseTokenUri?.substring(baseTokenUri.lastIndexOf('ipfs://') + 7)}/`}
                   >
                     ipfs://{baseTokenUri?.substring(baseTokenUri.lastIndexOf('ipfs://') + 7)}
                   </Anchor>

@@ -246,9 +246,7 @@ export const ImageUploadDetails = ({ onChange, mintRule }: ImageUploadDetailsPro
         id="video"
         onMouseEnter={(e) => e.currentTarget.play()}
         onMouseLeave={(e) => e.currentTarget.pause()}
-        src={
-          imageUrlState.value ? imageUrlState.value.replace('ipfs://', 'https://ipfs-gw.stargaze-apis.com/ipfs/') : ''
-        }
+        src={imageUrlState.value ? imageUrlState.value.replace('ipfs://', 'https://ipfs.io/ipfs/') : ''}
       />
     ),
     [imageUrlState.value],

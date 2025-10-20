@@ -194,9 +194,7 @@ export const CollectionDetails = ({
           id="video"
           onMouseEnter={(e) => e.currentTarget.play()}
           onMouseLeave={(e) => e.currentTarget.pause()}
-          src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
-            coverImageUrl.lastIndexOf('ipfs://') + 7,
-          )}`}
+          src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
         />
       )
     } else if (uploadMethod === 'existing' && coverImageUrl && !coverImageUrl.includes('ipfs://')) {
@@ -293,9 +291,7 @@ export const CollectionDetails = ({
               <Conditional test={getAssetType(coverImageUrl) !== 'video'}>
                 <img
                   alt="no-preview-available"
-                  src={`https://ipfs-gw.stargaze-apis.com/ipfs/${coverImageUrl.substring(
-                    coverImageUrl.lastIndexOf('ipfs://') + 7,
-                  )}`}
+                  src={`https://ipfs.io/ipfs/${coverImageUrl.substring(coverImageUrl.lastIndexOf('ipfs://') + 7)}`}
                 />
               </Conditional>
               <Conditional test={getAssetType(coverImageUrl) === 'video'}>{videoPreview}</Conditional>
