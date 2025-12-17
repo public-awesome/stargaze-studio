@@ -46,6 +46,20 @@ module.exports = {
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+      },
+      keyframes: {
+        'glow-pulse': {
+          '0%, 100%': { boxShadow: '0 0 10px rgba(219, 38, 118, 0.2)' },
+          '50%': { boxShadow: '0 0 20px rgba(219, 38, 118, 0.4)' },
+        },
+      },
+      boxShadow: {
+        glass: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'glass-lg': '0 20px 40px rgba(0, 0, 0, 0.5)',
+        'glass-inset': 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
+        'glow-plumbus': '0 0 20px rgba(219, 38, 118, 0.3)',
+        'glow-plumbus-lg': '0 0 30px rgba(219, 38, 118, 0.4)',
       },
     },
   },
@@ -58,7 +72,7 @@ module.exports = {
     require('@tailwindcss/line-clamp'),
     require('tailwindcss-opentype'),
 
-    // custom gradient background
+    // custom gradient background and glass utilities
     plugin(({ addUtilities }) => {
       addUtilities({
         '.stargaze-gradient-bg': {
@@ -66,6 +80,25 @@ module.exports = {
         },
         '.stargaze-gradient-brand': {
           background: `linear-gradient(102.33deg, #FFC27D 10.96%, #7F97D2 93.51%)`,
+        },
+        // Glass morphism utilities
+        '.glass-panel': {
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(12px)',
+          '-webkit-backdrop-filter': 'blur(12px)',
+          borderRadius: '16px',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        },
+        '.glass-panel-dark': {
+          background: 'rgba(0, 0, 0, 0.4)',
+          backdropFilter: 'blur(16px)',
+          '-webkit-backdrop-filter': 'blur(16px)',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+        },
+        '.glass-border': {
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.05)',
         },
       })
     }),
