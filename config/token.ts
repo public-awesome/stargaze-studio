@@ -177,6 +177,13 @@ export const nativeBrnch: TokenInfo = {
   decimalPlaces: 6,
   imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/brnch.png',
 }
+export const nativeClw: TokenInfo = {
+  id: 'native-clw',
+  denom: 'factory/stargaze1khzuhuhv02vaturh9x9lz4jach824x9umcgghl/uCLW',
+  displayName: 'CLW',
+  decimalPlaces: 6,
+  imageURL: 'https://raw.githubusercontent.com/cosmos/chain-registry/master/stargaze/images/clw.png',
+}
 
 export const tokensList = [
   stars,
@@ -195,4 +202,5 @@ export const tokensList = [
   ibcTia,
   nativeStardust,
   nativeBrnch,
+  nativeClw,
 ]
