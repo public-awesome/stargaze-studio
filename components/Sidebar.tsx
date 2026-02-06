@@ -14,7 +14,13 @@ import { FaCog } from 'react-icons/fa'
 import { footerLinks, socialsLinks } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK, OPEN_EDITION_FACTORY_ADDRESS } from '../utils/constants'
+import {
+  BADGE_HUB_ADDRESS,
+  BASE_FACTORY_ADDRESS,
+  COLLECTION_CREATION_DISABLED,
+  NETWORK,
+  OPEN_EDITION_FACTORY_ADDRESS,
+} from '../utils/constants'
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { LogModal } from './LogModal'
@@ -81,15 +87,17 @@ export const Sidebar = () => {
               </Link>
             </div>
             <ul className="z-50 p-2 bg-base-200">
-              <li
-                className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/collections/create') ? 'text-white' : 'text-gray',
-                )}
-                tabIndex={-1}
-              >
-                <Link href="/collections/create/">Create a Collection</Link>
-              </li>
+              <Conditional test={!COLLECTION_CREATION_DISABLED}>
+                <li
+                  className={clsx(
+                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
+                    router.asPath.includes('/collections/create') ? 'text-white' : 'text-gray',
+                  )}
+                  tabIndex={-1}
+                >
+                  <Link href="/collections/create/">Create a Collection</Link>
+                </li>
+              </Conditional>
               <li
                 className={clsx(
                   'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
