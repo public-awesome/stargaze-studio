@@ -67,6 +67,7 @@ import {
   BASE_FACTORY_SG721_CODE_ID,
   BASE_FACTORY_UPDATABLE_ADDRESS,
   BLOCK_EXPLORER_URL,
+  COLLECTION_CREATION_DISABLED,
   NETWORK,
   OPEN_EDITION_FACTORY_ADDRESS,
   SG721_CODE_ID,
@@ -1745,6 +1746,20 @@ const CollectionCreationPage: NextPage = () => {
   useEffect(() => {
     void fetchVendingFactoryParameters()
   }, [fetchVendingFactoryParameters])
+
+  if (COLLECTION_CREATION_DISABLED) {
+    return (
+      <div className="flex flex-col justify-center items-center mx-auto mt-32 max-w-lg text-center">
+        <h1 className="mb-4 text-3xl font-bold">Collection Creation Disabled</h1>
+        <p className="mb-8 text-lg text-white/75">
+          Collection creation is currently disabled. Please check back later.
+        </p>
+        <Anchor className="text-stargaze hover:underline" href="/collections/">
+          Back to Collections
+        </Anchor>
+      </div>
+    )
+  }
 
   return (
     <div>
