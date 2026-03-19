@@ -1,11 +1,14 @@
 import clsx from 'clsx'
 import Head from 'next/head'
 import type { ReactNode } from 'react'
-import { FaDesktop } from 'react-icons/fa'
+import { useState } from 'react'
 import type { PageMetadata } from 'utils/layout'
 
 import { DefaultAppSeo } from './DefaultAppSeo'
-// import { Issuebar } from './Issuebar'
+import { LogModal } from './LogModal'
+import { MobileHeader } from './MobileHeader'
+import { MobileSidebar } from './MobileSidebar'
+import { SettingsModal } from './SettingsModal'
 import { Sidebar } from './Sidebar'
 
 export interface LayoutProps {
@@ -14,25 +17,35 @@ export interface LayoutProps {
 }
 
 export const Layout = ({ children, metadata = {} }: LayoutProps) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
   return (
-    <div className="overflow-hidden relative">
+    <div className="overflow-hidden relative min-h-screen bg-black">
       <Head>
         <meta content="minimum-scale=1, initial-scale=1, width=device-width" name="viewport" />
       </Head>
 
       <DefaultAppSeo />
 
-      {/* plumbus confetti */}
-      {/* <div className="fixed inset-0 -z-10 pointer-events-none stargaze-gradient-bg opacity-50">
-        <img alt="plumbus carina-nebula" className="fixed top-0 right-0 w-full h-[calc(100vh+180px)]" src="/carina-nebula.png" />
-      </div> */}
+      {/* Subtle animated background gradient */}
+      <div
+        className={clsx(
+          'fixed inset-0 -z-10 opacity-30 pointer-events-none',
+          'bg-gradient-to-br from-plumbus/10 via-transparent to-purple/10',
+        )}
+      />
 
-      {/* actual layout container */}
-      <div className="hidden bg-black sm:flex">
+      {/* Desktop layout with glass sidebar */}
+      <div className="hidden bg-transparent sm:flex">
         <Sidebar />
-        <div className="overflow-auto relative flex-grow h-screen no-scrollbar">
+        <div
+          className={clsx(
+            'overflow-auto relative flex-grow h-screen no-scrollbar',
+            'shadow-[inset_4px_0_24px_rgba(0,0,0,0.3)]',
+          )}
+        >
           <main
-            className={clsx('mx-auto max-w-7xl', {
+            className={clsx('py-8 mx-auto max-w-7xl', {
               'flex flex-col justify-center items-center':
                 typeof metadata.center === 'boolean' ? metadata.center : true,
             })}
@@ -40,18 +53,24 @@ export const Layout = ({ children, metadata = {} }: LayoutProps) => {
             {children}
           </main>
         </div>
-        {/* <Issuebar /> */}
       </div>
 
-      <div className="flex flex-col justify-center items-center p-8 space-y-4 h-screen text-center bg-black/50 sm:hidden">
-        <FaDesktop size={48} />
-        <h1 className="text-2xl font-bold">Unsupported Viewport</h1>
-        <p>
-          Stargaze Studio is best viewed on the big screen.
-          <br />
-          Please open Stargaze Studio on your tablet or desktop browser.
-        </p>
+      {/* Mobile layout */}
+      <div className="sm:hidden">
+        <MobileHeader isMenuOpen={isMobileMenuOpen} onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+        <MobileSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+        <main
+          className={clsx('overflow-auto px-4 pt-20 pb-8 min-h-screen', {
+            'flex flex-col justify-center items-center': typeof metadata.center === 'boolean' ? metadata.center : true,
+          })}
+        >
+          {children}
+        </main>
       </div>
+
+      {/* Modals - rendered outside sidebar to avoid backdrop-filter containment */}
+      <LogModal />
+      <SettingsModal />
     </div>
   )
 }

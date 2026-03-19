@@ -9,7 +9,7 @@ import { setLogItemList, useLogStore } from 'contexts/log'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { FaCog } from 'react-icons/fa'
+import { FaCog, FaCoins, FaFileContract, FaLayerGroup, FaList, FaMedal, FaShieldAlt } from 'react-icons/fa'
 // import BrandText from 'public/brand/brand-text.svg'
 import { footerLinks, socialsLinks } from 'utils/links'
 import { useWallet } from 'utils/wallet'
@@ -23,8 +23,6 @@ import {
 } from '../utils/constants'
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
-import { LogModal } from './LogModal'
-import { SettingsModal } from './SettingsModal'
 import { SidebarLayout } from './SidebarLayout'
 import { WalletLoader } from './WalletLoader'
 
@@ -65,8 +63,12 @@ export const Sidebar = () => {
   return (
     <SidebarLayout>
       {/* Stargaze brand as home button */}
-      <Anchor href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
-        <img alt="Brand Text" className="ml-6 w-3/4" src="/studio-logo.png" />
+      <Anchor className="group" href="/" onContextMenu={(e) => [e.preventDefault(), router.push('/brand')]}>
+        <img
+          alt="Brand Text"
+          className="ml-6 w-3/4 group-hover:drop-shadow-[0_0_12px_rgba(219,38,118,0.4)] transition-all duration-300"
+          src="/studio-logo.png"
+        />
       </Anchor>
       {/* wallet button */}
       <WalletLoader />
@@ -77,31 +79,45 @@ export const Sidebar = () => {
           <li tabIndex={0}>
             <div
               className={clsx(
-                'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
-                'hover:bg-white/5 transition-colors',
-                router.asPath.includes('/collections/') ? 'text-white' : 'text-gray',
+                'flex z-40 gap-3 items-center py-2 px-3 text-xl font-bold rounded-xl small-caps',
+                'transition-all duration-300',
+                'hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]',
+                router.asPath.includes('/collections/')
+                  ? 'text-white bg-plumbus/10 border-l-2 border-plumbus shadow-[0_0_15px_rgba(219,38,118,0.15)]'
+                  : 'text-gray-400 group-hover:text-white',
               )}
             >
+              <FaLayerGroup
+                className={clsx(
+                  'transition-all duration-300',
+                  router.asPath.includes('/collections/')
+                    ? 'text-plumbus'
+                    : 'text-gray-500 group-hover:text-plumbus group-hover:scale-110',
+                )}
+                size={18}
+              />
               <Link href="/collections/" passHref>
                 Collections
               </Link>
             </div>
-            <ul className="z-50 p-2 bg-base-200">
-              <Conditional test={!COLLECTION_CREATION_DISABLED}>
-                <li
-                  className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/collections/create') ? 'text-white' : 'text-gray',
-                  )}
-                  tabIndex={-1}
-                >
-                  <Link href="/collections/create/">Create a Collection</Link>
-                </li>
-              </Conditional>
+
+            <ul className="z-50 p-3 mt-1 dropdown-glass">
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/collections/myCollections/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/collections/create') ? 'text-white bg-plumbus/10' : 'text-gray-400',
+                )}
+                tabIndex={-1}
+              >
+                <Link href="/collections/create/">Create a Collection</Link>
+              </li>
+
+              <li
+                className={clsx(
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/collections/myCollections/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -109,8 +125,9 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/collections/actions/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/collections/actions/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -118,17 +135,21 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/snapshots') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/snapshots') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
                 <Link href="/snapshots">Snapshots</Link>
               </li>
               <Conditional test={NETWORK === 'mainnet'}>
-                <li className={clsx('text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded')} tabIndex={-1}>
+                <li
+                  className={clsx('text-lg font-bold hover:bg-white/[0.05] rounded-lg transition-all duration-200')}
+                  tabIndex={-1}
+                >
                   <label
-                    className="w-full h-full text-lg font-bold text-gray hover:text-white normal-case bg-clip-text bg-transparent border-none animate-none btn modal-button"
+                    className="w-full h-full text-lg font-bold text-gray-400 hover:text-white normal-case bg-transparent border-none animate-none btn modal-button"
                     htmlFor="my-modal-1"
                   >
                     Revenue Dashboard
@@ -143,18 +164,31 @@ export const Sidebar = () => {
             <li tabIndex={0}>
               <span
                 className={clsx(
-                  'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
-                  'hover:bg-white/5 transition-colors',
-                  router.asPath.includes('/badges/') ? 'text-white' : 'text-gray',
+                  'flex z-40 gap-3 items-center py-2 px-3 text-xl font-bold rounded-xl small-caps',
+                  'transition-all duration-300',
+                  'hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]',
+                  router.asPath.includes('/badges/')
+                    ? 'text-white bg-plumbus/10 border-l-2 border-plumbus shadow-[0_0_15px_rgba(219,38,118,0.15)]'
+                    : 'text-gray-400 group-hover:text-white',
                 )}
               >
-                <Link href="/badges/"> Badges </Link>
+                <FaMedal
+                  className={clsx(
+                    'transition-all duration-300',
+                    router.asPath.includes('/badges/')
+                      ? 'text-plumbus'
+                      : 'text-gray-500 group-hover:text-plumbus group-hover:scale-110',
+                  )}
+                  size={18}
+                />
+                <Link href="/badges/">Badges</Link>
               </span>
-              <ul className="z-50 p-2 rounded-box bg-base-200">
+              <ul className="z-50 p-3 mt-1 dropdown-glass">
                 <li
                   className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/badges/create/') ? 'text-white' : 'text-gray',
+                    'text-lg font-bold rounded-lg transition-all duration-200',
+                    'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                    router.asPath.includes('/badges/create/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                   )}
                   tabIndex={-1}
                 >
@@ -162,8 +196,9 @@ export const Sidebar = () => {
                 </li>
                 <li
                   className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/badges/myBadges/') ? 'text-white' : 'text-gray',
+                    'text-lg font-bold rounded-lg transition-all duration-200',
+                    'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                    router.asPath.includes('/badges/myBadges/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                   )}
                   tabIndex={-1}
                 >
@@ -171,8 +206,9 @@ export const Sidebar = () => {
                 </li>
                 <li
                   className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/badges/actions/') ? 'text-white' : 'text-gray',
+                    'text-lg font-bold rounded-lg transition-all duration-200',
+                    'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                    router.asPath.includes('/badges/actions/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                   )}
                   tabIndex={-1}
                 >
@@ -186,29 +222,38 @@ export const Sidebar = () => {
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
-                'hover:bg-white/5 transition-colors',
-                router.asPath.includes('/tokenfactory') ? 'text-white' : 'text-gray',
+                'flex z-40 gap-3 items-center py-2 px-3 text-xl font-bold rounded-xl small-caps',
+                'transition-all duration-300',
+                'hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]',
+                router.asPath.includes('/tokenfactory')
+                  ? 'text-white bg-plumbus/10 border-l-2 border-plumbus shadow-[0_0_15px_rgba(219,38,118,0.15)]'
+                  : 'text-gray-400 group-hover:text-white',
               )}
             >
+              <FaCoins
+                className={clsx(
+                  'transition-all duration-300',
+                  router.asPath.includes('/tokenfactory')
+                    ? 'text-plumbus'
+                    : 'text-gray-500 group-hover:text-plumbus group-hover:scale-110',
+                )}
+                size={18}
+              />
               <Link href="/tokenfactory/">Tokens</Link>
             </span>
-            <ul className="z-50 p-2 rounded-box bg-base-200">
+            <ul className="z-50 p-3 mt-1 dropdown-glass">
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/tokenfactory/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/tokenfactory/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
                 <Link href="/tokenfactory/">Token Factory</Link>
               </li>
               <li
-                className={clsx(
-                  'disabled',
-                  'text-lg font-bold hover:text-white',
-                  router.asPath.includes('/airdrop-tokens/') ? 'text-white' : 'text-gray',
-                )}
+                className={clsx('opacity-50 disabled', 'text-lg font-bold rounded-lg', 'text-gray-500')}
                 tabIndex={-1}
               >
                 <Link href="/">Airdrop Tokens</Link>
@@ -220,19 +265,32 @@ export const Sidebar = () => {
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
-                'hover:bg-white/5 transition-colors',
-                router.asPath.includes('/contracts/') ? 'text-white' : 'text-gray',
+                'flex z-40 gap-3 items-center py-2 px-3 text-xl font-bold rounded-xl small-caps',
+                'transition-all duration-300',
+                'hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]',
+                router.asPath.includes('/contracts/')
+                  ? 'text-white bg-plumbus/10 border-l-2 border-plumbus shadow-[0_0_15px_rgba(219,38,118,0.15)]'
+                  : 'text-gray-400 group-hover:text-white',
               )}
             >
-              <Link href="/contracts/"> Contract Dashboards </Link>
+              <FaFileContract
+                className={clsx(
+                  'transition-all duration-300',
+                  router.asPath.includes('/contracts/')
+                    ? 'text-plumbus'
+                    : 'text-gray-500 group-hover:text-plumbus group-hover:scale-110',
+                )}
+                size={18}
+              />
+              <Link href="/contracts/">Contract Dashboards</Link>
             </span>
-            <ul className="z-50 p-2 bg-base-200">
+            <ul className="z-50 p-3 mt-1 dropdown-glass">
               <Conditional test={BASE_FACTORY_ADDRESS !== undefined}>
                 <li
                   className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/contracts/baseMinter/') ? 'text-white' : 'text-gray',
+                    'text-lg font-bold rounded-lg transition-all duration-200',
+                    'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                    router.asPath.includes('/contracts/baseMinter/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                   )}
                   tabIndex={-1}
                 >
@@ -241,8 +299,9 @@ export const Sidebar = () => {
               </Conditional>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/contracts/vendingMinter/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/contracts/vendingMinter/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -251,8 +310,11 @@ export const Sidebar = () => {
               <Conditional test={OPEN_EDITION_FACTORY_ADDRESS !== undefined}>
                 <li
                   className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/contracts/openEditionMinter/') ? 'text-white' : 'text-gray',
+                    'text-lg font-bold rounded-lg transition-all duration-200',
+                    'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                    router.asPath.includes('/contracts/openEditionMinter/')
+                      ? 'text-white bg-plumbus/10'
+                      : 'text-gray-400',
                   )}
                   tabIndex={-1}
                 >
@@ -261,8 +323,9 @@ export const Sidebar = () => {
               </Conditional>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/contracts/sg721/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/contracts/sg721/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -270,8 +333,9 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/contracts/whitelist/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/contracts/whitelist/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -280,8 +344,9 @@ export const Sidebar = () => {
               <Conditional test={BADGE_HUB_ADDRESS !== undefined}>
                 <li
                   className={clsx(
-                    'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                    router.asPath.includes('/contracts/badgeHub/') ? 'text-white' : 'text-gray',
+                    'text-lg font-bold rounded-lg transition-all duration-200',
+                    'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                    router.asPath.includes('/contracts/badgeHub/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                   )}
                   tabIndex={-1}
                 >
@@ -290,8 +355,9 @@ export const Sidebar = () => {
               </Conditional>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/contracts/splits/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/contracts/splits/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -299,18 +365,19 @@ export const Sidebar = () => {
               </li>
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/contracts/royaltyRegistry/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/contracts/royaltyRegistry/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
                 <Link href="/contracts/royaltyRegistry/">Royalty Registry</Link>
               </li>
-
               <li
                 className={clsx(
-                  'text-lg font-bold hover:text-white hover:bg-stargaze-80 rounded',
-                  router.asPath.includes('/contracts/upload/') ? 'text-white' : 'text-gray',
+                  'text-lg font-bold rounded-lg transition-all duration-200',
+                  'hover:pl-1 hover:text-white hover:bg-white/[0.05]',
+                  router.asPath.includes('/contracts/upload/') ? 'text-white bg-plumbus/10' : 'text-gray-400',
                 )}
                 tabIndex={-1}
               >
@@ -323,48 +390,81 @@ export const Sidebar = () => {
           <li tabIndex={0}>
             <span
               className={clsx(
-                'z-40 text-xl font-bold group-hover:text-white bg-transparent rounded-lg small-caps',
-                'hover:bg-white/5 transition-colors',
-                router.asPath.includes('/authz/') ? 'text-white' : 'text-gray',
+                'flex z-40 gap-3 items-center py-2 px-3 text-xl font-bold rounded-xl small-caps',
+                'transition-all duration-300',
+                'hover:bg-white/[0.05] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]',
+                router.asPath.includes('/authz/')
+                  ? 'text-white bg-plumbus/10 border-l-2 border-plumbus shadow-[0_0_15px_rgba(219,38,118,0.15)]'
+                  : 'text-gray-400 group-hover:text-white',
               )}
             >
-              <Link href="/authz/"> Authz </Link>
+              <FaShieldAlt
+                className={clsx(
+                  'transition-all duration-300',
+                  router.asPath.includes('/authz/')
+                    ? 'text-plumbus'
+                    : 'text-gray-500 group-hover:text-plumbus group-hover:scale-110',
+                )}
+                size={18}
+              />
+              <Link href="/authz/">Authz</Link>
             </span>
           </li>
         </ul>
       </div>
 
       <IncomeDashboardDisclaimer creatorAddress={wallet.address ? wallet.address : ''} />
-      <LogModal />
-      <SettingsModal />
 
       <div className="flex-grow" />
       {isTallWindow && (
-        <div className="flex-row w-full h-full">
+        <div className="flex gap-3 w-full">
           <label
-            className="absolute mb-8 w-[25%] text-lg font-bold text-white normal-case bg-zinc-500 hover:bg-zinc-600 border-none animate-none btn modal-button"
+            className={clsx(
+              'flex justify-center items-center w-12 h-12 rounded-xl cursor-pointer',
+              'glass-button',
+              'group/settings',
+            )}
             htmlFor="my-modal-9"
           >
-            <FaCog className="justify-center align-bottom" size={20} />
+            <FaCog
+              className="text-gray-400 group-hover/settings:text-white transition-all duration-300 group-hover/settings:rotate-90"
+              size={20}
+            />
           </label>
 
           <label
-            className="ml-16 w-[65%] text-lg font-bold text-white normal-case bg-blue-500 hover:bg-blue-600 border-none animate-none btn modal-button"
+            className={clsx(
+              'flex flex-1 gap-2 justify-center items-center h-12 rounded-xl cursor-pointer',
+              'bg-blue-500/20 backdrop-blur-sm',
+              'border border-blue-400/30',
+              'hover:bg-blue-500/30 hover:border-blue-400/50',
+              'hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]',
+              'transition-all duration-300',
+              'font-bold text-blue-300',
+            )}
             htmlFor="my-modal-8"
           >
+            <FaList size={14} />
             View Logs
           </label>
         </div>
       )}
       {/* Stargaze network status */}
-      {isTallWindow && <div className="text-sm capitalize">Network: {wallet.chain.pretty_name}</div>}
+      {isTallWindow && (
+        <div className="py-1 px-2 text-sm text-gray-400 capitalize bg-white/[0.03] rounded-lg">
+          Network: <span className="text-white">{wallet.chain.pretty_name}</span>
+        </div>
+      )}
 
       {/* footer reference links */}
-      <ul className="text-sm list-disc list-inside">
+      <ul className="space-y-1 text-sm">
         {isTallWindow &&
           footerLinks.map(({ href, text }) => (
             <li key={href}>
-              <Anchor className="hover:text-plumbus hover:underline" href={href}>
+              <Anchor
+                className="block py-1 px-2 text-gray-400 hover:text-plumbus hover:bg-white/[0.03] rounded-md transition-all duration-200"
+                href={href}
+              >
                 {text}
               </Anchor>
             </li>
@@ -381,11 +481,19 @@ export const Sidebar = () => {
       </div>
 
       {/* footer social links */}
-
-      <div className="flex gap-x-6 items-center text-white/75">
+      <div className="flex gap-x-4 items-center">
         {socialsLinks.map(({ Icon, href, text }) => (
-          <Anchor key={href} className="hover:text-plumbus" href={href}>
-            <Icon aria-label={text} size={20} />
+          <Anchor
+            key={href}
+            className={clsx(
+              'p-2 text-gray-400 rounded-lg',
+              'hover:text-plumbus hover:bg-white/[0.05]',
+              'hover:drop-shadow-[0_0_8px_rgba(219,38,118,0.5)] hover:scale-110',
+              'transition-all duration-300',
+            )}
+            href={href}
+          >
+            <Icon aria-label={text} size={18} />
           </Anchor>
         ))}
       </div>
