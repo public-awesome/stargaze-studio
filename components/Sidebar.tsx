@@ -14,7 +14,13 @@ import { FaCog, FaCoins, FaFileContract, FaLayerGroup, FaList, FaMedal, FaShield
 import { footerLinks, socialsLinks } from 'utils/links'
 import { useWallet } from 'utils/wallet'
 
-import { BADGE_HUB_ADDRESS, BASE_FACTORY_ADDRESS, NETWORK, OPEN_EDITION_FACTORY_ADDRESS } from '../utils/constants'
+import {
+  BADGE_HUB_ADDRESS,
+  BASE_FACTORY_ADDRESS,
+  COLLECTION_CREATION_DISABLED,
+  NETWORK,
+  OPEN_EDITION_FACTORY_ADDRESS,
+} from '../utils/constants'
 import { Conditional } from './Conditional'
 import { IncomeDashboardDisclaimer } from './IncomeDashboardDisclaimer'
 import { SidebarLayout } from './SidebarLayout'
@@ -94,6 +100,7 @@ export const Sidebar = () => {
                 Collections
               </Link>
             </div>
+
             <ul className="z-50 p-3 mt-1 dropdown-glass">
               <li
                 className={clsx(
@@ -105,6 +112,7 @@ export const Sidebar = () => {
               >
                 <Link href="/collections/create/">Create a Collection</Link>
               </li>
+
               <li
                 className={clsx(
                   'text-lg font-bold rounded-lg transition-all duration-200',

@@ -381,6 +381,7 @@ export interface DispatchExecuteArgs {
   collectionInfo: CollectionInfo | undefined
   baseUri: string
   jsonExtensions: boolean
+  openEditionCollection: boolean
   decrement: boolean
 }
 
@@ -455,7 +456,12 @@ export const dispatchExecute = async (args: DispatchExecuteArgs) => {
       return sg721Messages.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
     }
     case 'batch_update_token_metadata': {
-      return sg721Messages.batchUpdateTokenMetadata(args.tokenIds, args.baseUri, args.jsonExtensions)
+      return sg721Messages.batchUpdateTokenMetadata(
+        args.tokenIds,
+        args.baseUri,
+        args.jsonExtensions,
+        args.openEditionCollection,
+      )
     }
     case 'freeze_token_metadata': {
       return sg721Messages.freezeTokenMetadata()
@@ -585,7 +591,12 @@ export const previewExecutePayload = (args: DispatchExecuteArgs) => {
       return sg721Messages(sg721Contract)?.updateTokenMetadata(args.tokenId.toString(), args.tokenUri)
     }
     case 'batch_update_token_metadata': {
-      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(args.tokenIds, args.baseUri, args.jsonExtensions)
+      return sg721Messages(sg721Contract)?.batchUpdateTokenMetadata(
+        args.tokenIds,
+        args.baseUri,
+        args.jsonExtensions,
+        args.openEditionCollection,
+      )
     }
     case 'freeze_token_metadata': {
       return sg721Messages(sg721Contract)?.freezeTokenMetadata()

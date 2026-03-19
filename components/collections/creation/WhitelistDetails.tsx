@@ -763,6 +763,7 @@ export const WhitelistDetails = ({
               Whitelist Flex
             </label>
           </div>
+          {/* Merkle tree whitelist options commented out
           <div className="form-check form-check-inline">
             <input
               checked={whitelistType === 'merkletree'}
@@ -801,6 +802,7 @@ export const WhitelistDetails = ({
               Whitelist Merkle Tree Flex
             </label>
           </div>
+          */}
         </div>
         <div className="flex flex-col">
           <div className="grid grid-cols-2">
@@ -947,6 +949,7 @@ export const WhitelistDetails = ({
                 </Conditional>
               </div>
             </Conditional>
+            {/* Merkle tree Stage I file uploads commented out
             <Conditional test={whitelistType === 'merkletree'}>
               <div className="flex flex-col">
                 <FormGroup
@@ -989,6 +992,7 @@ export const WhitelistDetails = ({
                 </Conditional>
               </div>
             </Conditional>
+            */}
           </div>
           <Conditional test={stageCount === 1}>
             <div className="flex justify-end">
@@ -1108,6 +1112,7 @@ export const WhitelistDetails = ({
                     </Conditional>
                   </div>
                 </Conditional>
+                {/* Merkle tree Stage II file uploads commented out
                 <Conditional test={whitelistType === 'merkletree'}>
                   <div className="flex flex-col">
                     <FormGroup
@@ -1144,6 +1149,7 @@ export const WhitelistDetails = ({
                     </Conditional>
                   </div>
                 </Conditional>
+                */}
               </div>
             </div>
             <Conditional test={stageCount === 2}>
@@ -1269,6 +1275,7 @@ export const WhitelistDetails = ({
                     </Conditional>
                   </div>
                 </Conditional>
+                {/* Merkle tree Stage III file uploads commented out
                 <Conditional test={whitelistType === 'merkletree'}>
                   <div className="flex flex-col">
                     <FormGroup
@@ -1309,6 +1316,7 @@ export const WhitelistDetails = ({
                     </Conditional>
                   </div>
                 </Conditional>
+                */}
               </div>
             </div>
             <Conditional test={stageCount === 3}>

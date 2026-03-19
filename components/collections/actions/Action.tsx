@@ -75,6 +75,7 @@ export const CollectionActions = ({
   const [explicitContent, setExplicitContent] = useState<ExplicitContentType>(undefined)
   const [resolvedRecipientAddress, setResolvedRecipientAddress] = useState<string>('')
   const [jsonExtensions, setJsonExtensions] = useState<boolean>(false)
+  const [openEditionCollection, setOpenEditionCollection] = useState<boolean>(false)
   const [decrement, setDecrement] = useState<boolean>(false)
 
   const actionComboboxState = useActionsComboboxState()
@@ -265,6 +266,7 @@ export const CollectionActions = ({
       : baseURIState.value.trim(),
     collectionInfo,
     jsonExtensions,
+    openEditionCollection,
     decrement,
   }
   const resolveRecipientAddress = async () => {
@@ -691,6 +693,24 @@ export const CollectionActions = ({
             <Tooltip
               backgroundColor="bg-blue-500"
               className="ml-7"
+              label="Please toggle this on if the collection is an Open/Limited Edition one."
+              placement="bottom"
+            >
+              <div className="mt-2 w-3/4 form-control">
+                <label className="justify-start cursor-pointer label">
+                  <span className="mr-4 font-bold">Is this an Open Edition collection?</span>
+                  <input
+                    checked={openEditionCollection}
+                    className={`toggle ${openEditionCollection ? `bg-stargaze` : `bg-gray-600`}`}
+                    onClick={() => setOpenEditionCollection(!openEditionCollection)}
+                    type="checkbox"
+                  />
+                </label>
+              </div>
+            </Tooltip>
+            <Tooltip
+              backgroundColor="bg-blue-500"
+              className="ml-7"
               label="Please toggle this on if the IPFS folder contains files with .json extensions."
               placement="bottom"
             >
@@ -700,6 +720,7 @@ export const CollectionActions = ({
                   <input
                     checked={jsonExtensions}
                     className={`toggle ${jsonExtensions ? `bg-stargaze` : `bg-gray-600`}`}
+                    disabled={openEditionCollection}
                     onClick={() => setJsonExtensions(!jsonExtensions)}
                     type="checkbox"
                   />

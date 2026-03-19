@@ -265,6 +265,8 @@ export const BADGE_NFT_ADDRESS = process.env.NEXT_PUBLIC_BADGE_NFT_ADDRESS
 export const SPLITS_CODE_ID = parseInt(process.env.NEXT_PUBLIC_SPLITS_CODE_ID, 10)
 export const CW4_GROUP_CODE_ID = parseInt(process.env.NEXT_PUBLIC_CW4_GROUP_CODE_ID, 10)
 
+export const COLLECTION_CREATION_DISABLED = true
+
 export const PINATA_ENDPOINT_URL = process.env.NEXT_PUBLIC_PINATA_ENDPOINT_URL
 export const NETWORK = process.env.NEXT_PUBLIC_NETWORK
 export const API_URL = process.env.NEXT_PUBLIC_API_URL

@@ -1,6 +1,8 @@
+import { Conditional } from 'components/Conditional'
 import { HomeCard } from 'components/HomeCard'
 import type { NextPage } from 'next'
 // import Brand from 'public/brand/brand.svg'
+import { COLLECTION_CREATION_DISABLED } from 'utils/constants'
 import { withMetadata } from 'utils/layout'
 
 const HomePage: NextPage = () => {
@@ -20,13 +22,15 @@ const HomePage: NextPage = () => {
       <br />
 
       <div className="grid gap-8 md:grid-cols-2">
-        <HomeCard
-          className="p-4 -m-4 hover:bg-gray-500/10 rounded"
-          link="/collections/create"
-          title="Create a Collection"
-        >
-          Upload your assets, enter collection metadata and deploy your collection.
-        </HomeCard>
+        <Conditional test={!COLLECTION_CREATION_DISABLED}>
+          <HomeCard
+            className="p-4 -m-4 hover:bg-gray-500/10 rounded"
+            link="/collections/create"
+            title="Create a Collection"
+          >
+            Upload your assets, enter collection metadata and deploy your collection.
+          </HomeCard>
+        </Conditional>
         <HomeCard
           className="p-4 -m-4 hover:bg-gray-500/10 rounded"
           link="/collections/myCollections"

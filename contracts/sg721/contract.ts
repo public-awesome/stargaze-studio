@@ -90,7 +90,12 @@ export interface SG721Instance {
   batchTransfer: (recipient: string, tokenIds: string) => Promise<string>
   batchTransferMultiAddress: (senderAddress: string, tokenRecipients: AirdropAllocation[]) => Promise<string>
   updateTokenMetadata: (tokenId: string, tokenURI: string) => Promise<string>
-  batchUpdateTokenMetadata: (tokenIds: string, tokenURI: string, jsonExtensions: boolean) => Promise<string>
+  batchUpdateTokenMetadata: (
+    tokenIds: string,
+    tokenURI: string,
+    jsonExtensions: boolean,
+    openEditionCollection: boolean,
+  ) => Promise<string>
   freezeTokenMetadata: () => Promise<string>
   enableUpdatable: () => Promise<string>
 }
@@ -114,6 +119,7 @@ export interface Sg721Messages {
     tokenIds: string,
     tokenURI: string,
     jsonExtensions: boolean,
+    openEditionCollection: boolean,
   ) => BatchUpdateTokenMetadataMessage
   freezeTokenMetadata: () => FreezeTokenMetadataMessage
   enableUpdatable: () => EnableUpdatableMessage
@@ -661,6 +667,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       tokenIds: string,
       baseURI: string,
       jsonExtensions: boolean,
+      openEditionCollection: boolean,
     ): Promise<string> => {
       const executeContractMsgs: MsgExecuteContractEncodeObject[] = []
       if (tokenIds.includes(':')) {
@@ -669,7 +676,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
           const msg = {
             update_token_metadata: {
               token_id: i.toString(),
-              token_uri: `${baseURI}/${i}${jsonExtensions ? '.json' : ''}`,
+              token_uri: `${baseURI}${openEditionCollection ? '' : `/${i}${jsonExtensions ? '.json' : ''}`}`,
             },
           }
           const executeContractMsg: MsgExecuteContractEncodeObject = {
@@ -689,7 +696,9 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
           const msg = {
             update_token_metadata: {
               token_id: tokenNumbers[i].toString(),
-              token_uri: `${baseURI}/${tokenNumbers[i]}${jsonExtensions ? '.json' : ''}`,
+              token_uri: `${baseURI}${
+                openEditionCollection ? '' : `/${tokenNumbers[i]}${jsonExtensions ? '.json' : ''}`
+              }`,
             },
           }
           const executeContractMsg: MsgExecuteContractEncodeObject = {
@@ -1010,6 +1019,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
       tokenIds: string,
       baseURI: string,
       jsonExtensions: boolean,
+      openEditionCollection: boolean,
     ): BatchUpdateTokenMetadataMessage => {
       const msg: Record<string, unknown>[] = []
       if (tokenIds.includes(':')) {
@@ -1018,7 +1028,7 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
           msg.push({
             update_token_metadata: {
               token_id: i.toString(),
-              token_uri: `${baseURI}/${i}${jsonExtensions ? '.json' : ''}`,
+              token_uri: `${baseURI}${openEditionCollection ? '' : `/${i}${jsonExtensions ? '.json' : ''}`}`,
             },
           })
         }
@@ -1028,7 +1038,9 @@ export const SG721 = (client: SigningCosmWasmClient, txSigner: string): SG721Con
           msg.push({
             update_token_metadata: {
               token_id: tokenNumbers[i].toString(),
-              token_uri: `${baseURI}/${tokenNumbers[i]}${jsonExtensions ? '.json' : ''}`,
+              token_uri: `${baseURI}${
+                openEditionCollection ? '' : `/${tokenNumbers[i]}${jsonExtensions ? '.json' : ''}`
+              }`,
             },
           })
         }
